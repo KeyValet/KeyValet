@@ -36,6 +36,18 @@ jobs:
           }
           $stage = Join-Path $env:RUNNER_TEMP 'keyvalet-wsl-interop'
           New-Item $stage -ItemType Directory -Force | Out-Null
+          # The ARM64 image has the optional component but only the wsl.exe install stub.
+          # Install Microsoft's signed runtime before importing a distro on that image.
+          if ($env:ROOTFS_ARCH -eq 'arm64') {
+            $runtime = Invoke-RestMethod 'https://api.github.com/repos/microsoft/WSL/releases/latest'
+            $assets = @($runtime.assets | Where-Object { $_.name -match '^wsl\..*\.arm64\.msi$' -and $_.browser_download_url.StartsWith('https://github.com/microsoft/WSL/releases/download/') })
+            if ($assets.Count -ne 1) { throw 'Cannot identify the official ARM64 WSL runtime.' }
+            Invoke-WebRequest $assets[0].browser_download_url -OutFile "$stage/wsl.msi"
+            $signature = Get-AuthenticodeSignature "$stage/wsl.msi"
+            if ($signature.Status -ne 'Valid' -or $signature.SignerCertificate.GetNameInfo([Security.Cryptography.X509Certificates.X509NameType]::SimpleName, $false) -notin 'Microsoft Corporation', 'Microsoft Windows') { throw 'The WSL runtime must have a valid Microsoft signature.' }
+            $installed = Start-Process msiexec.exe -ArgumentList ('/i "' + "$stage\wsl.msi" + '" /qn /norestart') -Wait -PassThru
+            if ($installed.ExitCode -ne 0) { throw "WSL runtime installation failed or requires a reboot ($($installed.ExitCode))." }
+          }
           $file = "ubuntu-noble-wsl-$env:ROOTFS_ARCH-wsl.rootfs.tar.gz"
           $base = 'https://cloud-images.ubuntu.com/wsl/releases/24.04/current'
           Invoke-WebRequest "$base/$file" -OutFile "$stage/rootfs.tar.gz"
@@ -44,14 +56,14 @@ jobs:
           $entries = @(Get-Content -LiteralPath "$stage/SHA256SUMS" -Encoding ascii | Where-Object { $_ -match ('^[a-fA-F0-9]{64}\s+\*?' + [regex]::Escape($file) + '$') })
           if ($entries.Count -ne 1 -or (Get-FileHash "$stage/rootfs.tar.gz" -Algorithm SHA256).Hash -ine $entries[0].Substring(0, 64)) { throw 'Canonical WSL rootfs checksum mismatch.' }
           $distro = 'KeyValetInterop-' + [guid]::NewGuid().ToString('N')
-          "KEYVALET_TEST_WSL_DISTRO=$distro" >> $env:GITHUB_ENV
           & wsl.exe --import $distro "$stage/distro" "$stage/rootfs.tar.gz" --version 1
           if ($LASTEXITCODE -ne 0) { throw 'Cannot import the disposable WSL 1 distribution.' }
-          & wsl.exe --distribution $distro --exec useradd --create-home --uid 1001 kvwsltest
+          "KEYVALET_TEST_WSL_DISTRO=$distro" >> $env:GITHUB_ENV
+          & wsl.exe --distribution $distro --exec /usr/sbin/useradd --create-home --uid 1001 kvwsltest
           if ($LASTEXITCODE -ne 0) { throw 'Cannot create the disposable standard WSL user.' }
-          & wsl.exe --distribution $distro --exec apt-get update
+          & wsl.exe --distribution $distro --exec /usr/bin/apt-get update
           if ($LASTEXITCODE -ne 0) { throw 'WSL package index update failed.' }
-          & wsl.exe --distribution $distro --exec apt-get install -y python3 python3-tomlkit
+          & wsl.exe --distribution $distro --exec /usr/bin/apt-get install -y python3 python3-tomlkit
           if ($LASTEXITCODE -ne 0) { throw 'WSL adapter prerequisites failed.' }
       - uses: dtolnay/rust-toolchain@stable
         with:
