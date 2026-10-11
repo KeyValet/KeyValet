@@ -382,9 +382,17 @@ try {
     if (!$service) {
         New-Service -Name KeyValetHelper -DisplayName 'KeyValet Helper' -BinaryPathName ('"' + "$installDir\bin\kv-helper.exe" + '" --service') -StartupType Automatic | Out-Null
     } else {
-        & 'C:\Windows\System32\sc.exe' config KeyValetHelper binPath= ('"' + "$installDir\bin\kv-helper.exe" + '" --service') start= auto obj= LocalSystem | Out-Null
-        if ($LASTEXITCODE -ne 0) { throw 'Cannot configure KeyValetHelper.' }
+        # Pass the quoted executable path as CIM data, without native command-line parsing.
+        $change = Invoke-CimMethod -InputObject $configuration -MethodName Change -Arguments @{
+            PathName = ('"' + "$installDir\bin\kv-helper.exe" + '" --service')
+            StartMode = 'Automatic'
+            StartName = 'LocalSystem'
+        }
+        if ($change.ReturnValue -ne 0) { throw "Cannot configure KeyValetHelper (Win32_Service.Change error $($change.ReturnValue))." }
     }
+    $configuration = Get-CimInstance Win32_Service -Filter "Name='KeyValetHelper'"
+    Assert-ServiceConfiguration $configuration.PathName $configuration.StartName
+    if ($configuration.StartMode -ne 'Auto') { throw 'KeyValetHelper must start automatically.' }
     $action = New-ScheduledTaskAction -Execute "$installDir\bin\kv-agent.exe"
     $trigger = New-ScheduledTaskTrigger -AtLogOn -User $OwnerSid
     $principal = New-ScheduledTaskPrincipal -UserId $OwnerSid -LogonType Interactive -RunLevel Limited

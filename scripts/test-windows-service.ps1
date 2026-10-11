@@ -47,6 +47,8 @@ public static class KeyValetSmokePipe {
 function Test-ServicePipe {
     $configuration = Get-CimInstance Win32_Service -Filter "Name='KeyValetHelper'"
     Assert ($configuration.State -eq 'Running' -and $configuration.StartName -eq 'LocalSystem') 'Helper must run under SCM as SYSTEM.'
+    Assert ($configuration.PathName -ieq ('"' + "$install\bin\kv-helper.exe" + '" --service')) 'Service command line must preserve the quoted executable path and --service argument.'
+    Assert ($configuration.StartMode -eq 'Auto') 'Helper must be configured for automatic startup.'
     $process = Get-CimInstance Win32_Process -Filter "ProcessId=$($configuration.ProcessId)"
     Assert ($process.ExecutablePath -ieq "$install\bin\kv-helper.exe") 'Service executable path differs.'
     Assert ((Invoke-CimMethod $process -MethodName GetOwnerSid).Sid -eq 'S-1-5-18') 'Service process token must belong to SYSTEM.'
@@ -164,6 +166,8 @@ try {
     $checks.Add('uninstall retains the vault by default')
 } catch {
     $failure = $_.Exception.Message
+    Write-Host $_.InvocationInfo.PositionMessage
+    Write-Host $_.ScriptStackTrace
 } finally {
     # The precondition established these paths belong solely to this test. Explicitly remove
     # that test-created vault after verifying the production default preserves it.
