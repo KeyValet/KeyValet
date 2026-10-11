@@ -365,11 +365,15 @@ try {
     }
     Copy-Item "$package/templates/catalog.json" "$installDir/templates/" -Force
     Write-Utf8 "$vaultDir/owner.sid" ($OwnerSid + "`n")
-    & 'C:\Windows\System32\icacls.exe' "$vaultDir\owner.sid" /reset /setowner '*S-1-5-32-544' | Out-Null
+    & 'C:\Windows\System32\icacls.exe' "$vaultDir\owner.sid" /reset | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw 'Cannot reset owner.sid permissions.' }
+    & 'C:\Windows\System32\icacls.exe' "$vaultDir\owner.sid" /setowner '*S-1-5-32-544' | Out-Null
     if ($LASTEXITCODE -ne 0) { throw 'Cannot protect owner.sid.' }
     if ($AllowUnsignedAgent) {
         Write-Utf8 "$installDir/allow-unsigned-agent" 'Explicit unsigned development installation.'
-        & 'C:\Windows\System32\icacls.exe' "$installDir\allow-unsigned-agent" /reset /setowner '*S-1-5-32-544' | Out-Null
+        & 'C:\Windows\System32\icacls.exe' "$installDir\allow-unsigned-agent" /reset | Out-Null
+        if ($LASTEXITCODE -ne 0) { throw 'Cannot reset the development marker permissions.' }
+        & 'C:\Windows\System32\icacls.exe' "$installDir\allow-unsigned-agent" /setowner '*S-1-5-32-544' | Out-Null
         if ($LASTEXITCODE -ne 0) { throw 'Cannot protect the development marker.' }
     }
     elseif (Test-Path "$installDir/allow-unsigned-agent") { Remove-Item "$installDir/allow-unsigned-agent" -Force }
@@ -398,7 +402,9 @@ $quoted = @($Arguments | ForEach-Object { '"' + [regex]::Replace([regex]::Replac
 $process = Start-Process $binary -Verb RunAs -ArgumentList $quoted -Wait -PassThru
 exit $process.ExitCode
 '@
-    & 'C:\Windows\System32\icacls.exe' "$installDir\bin\keyvalet.ps1" /reset /setowner '*S-1-5-32-544' | Out-Null
+    & 'C:\Windows\System32\icacls.exe' "$installDir\bin\keyvalet.ps1" /reset | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw 'Cannot reset the CLI wrapper permissions.' }
+    & 'C:\Windows\System32\icacls.exe' "$installDir\bin\keyvalet.ps1" /setowner '*S-1-5-32-544' | Out-Null
     if ($LASTEXITCODE -ne 0) { throw 'Cannot protect the CLI wrapper.' }
 } finally {
     if ($service) { $service.Dispose() }
