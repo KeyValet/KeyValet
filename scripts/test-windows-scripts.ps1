@@ -156,6 +156,9 @@ exit ([int]$env:KEYVALET_TEST_STATUS_EXIT)
     }
     Assert (@(Get-ChildItem $temp -Recurse -Force | Where-Object Name -like '.keyvalet-write-*').Count -eq 0) 'Atomic writes must not leave temporary files.'
 
+    # Windows PowerShell 5.1 loads .NET Framework assemblies lazily. The archive
+    # mode enum lives in System.IO.Compression, separate from ZipFile's assembly.
+    Add-Type -AssemblyName System.IO.Compression
     Add-Type -AssemblyName System.IO.Compression.FileSystem
     $root = 'keyvalet-v0.2.1-windows-x64'
     $required = @('bin/kv-helper.exe', 'bin/kv-agent.exe', 'bin/kv-cli.exe', 'bin/kv-mcp.exe', 'bin/kv-hook.exe', 'templates/catalog.json')
