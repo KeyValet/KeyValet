@@ -173,6 +173,35 @@ class ConfigurationTests(unittest.TestCase):
         self.assertFalse((self.home / ".claude.json").exists())
         self.assertFalse((self.home / ".cursor").exists())
 
+    def test_migration_preserves_tool_restrictions_and_explicit_session_settings(self):
+        path = self.write(".codex/config.toml", '''[mcp_servers.keyvalet]
+url = "https://example.invalid/old"
+enabled = false
+disabled_tools = ["credential_get"] # Keep the user's restriction.
+tool_timeout_sec = 180
+[mcp_servers.keyvalet.env]
+KEYVALET_SESSION_TTL_MINUTES = "15"
+KEYVALET_GRANT_MODE = "per_use"
+OLD_REMOTE_TOKEN = "synthetic-unused-token"
+''')
+        cursor = self.write(".cursor/mcp.json", json.dumps({"mcpServers": {"keyvalet": {
+            "url": "https://example.invalid/old", "disabled": True, "alwaysAllow": [],
+            "env": {"KEYVALET_SESSION_TTL_MINUTES": "15", "UNRELATED_SECRET": "synthetic-unused"}}}}))
+        self.install(clients=("codex", "cursor"))
+        server = tomlkit.parse(path.read_text())["mcp_servers"]["keyvalet"]
+        self.assertFalse(server["enabled"])
+        self.assertEqual(server["disabled_tools"], ["credential_get"])
+        self.assertEqual(server["tool_timeout_sec"], 180)
+        self.assertEqual(server["env"], {"KEYVALET_SESSION_TTL_MINUTES": "15", "KEYVALET_GRANT_MODE": "per_use"})
+        self.assertIn("# Keep the user's restriction.", path.read_text())
+        cursor_server = json.loads(cursor.read_text())["mcpServers"]["keyvalet"]
+        self.assertTrue(cursor_server["disabled"])
+        self.assertEqual(cursor_server["alwaysAllow"], [])
+        self.assertEqual(cursor_server["env"], {"KEYVALET_SESSION_TTL_MINUTES": "15"})
+        self.assertNotIn("url", cursor_server)
+        _, changed = self.install(clients=("codex", "cursor"))
+        self.assertEqual(changed, 0)
+
     def test_symlink_config_and_backup_are_rejected_before_writes(self):
         real = self.write("real.json", "{}")
         for relative in (".claude.json", ".claude.json.bak-keyvalet-wsl"):

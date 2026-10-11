@@ -50,6 +50,37 @@ def hook_command(root, mode):
     return f"{shlex.quote(str(root / 'bin' / 'kv-hook'))} {mode}"
 
 
+def bridge_server(existing, root, path, codex=False):
+    server = {} if existing is None else existing
+    if not isinstance(server, dict):
+        raise ValueError(f"Expected an object for the keyvalet MCP server: {path}")
+    environment = server.get("env", {})
+    if not isinstance(environment, dict):
+        raise ValueError(f"Expected an object for keyvalet.env: {path}")
+    for name, value in environment.items():
+        if name in VARIABLES and not isinstance(value, str):
+            raise ValueError(f"Expected a string for keyvalet.env.{name}: {path}")
+    # Change transport while preserving the user's tool restrictions/approval policies.
+    # Keep explicit KeyValet expiry/grant settings; a migration must not reset them to defaults.
+    for key in ("url", "type", "transport", "args", "cwd", "experimental_environment",
+                "bearer_token_env_var", "http_headers", "env_http_headers", "headers", "oauth"):
+        server.pop(key, None)
+    for name in list(environment):
+        if name not in VARIABLES:
+            del environment[name]
+    if environment:
+        server["env"] = environment
+    else:
+        server.pop("env", None)
+    server["command"] = str(root / "bin" / "kv-mcp")
+    if codex:
+        server["env_vars"] = VARIABLES
+    else:
+        server.pop("env_vars", None)
+        server["args"] = []
+    return server
+
+
 def merge_hooks(value, additions, path, remove=False):
     hooks = object_at(value, "hooks", path)
     for event, addition in additions.items():
@@ -94,7 +125,7 @@ def json_plan(path, root, kind, remove):
             if isinstance(servers.get("keyvalet"), dict) and servers["keyvalet"].get("command") == mcp:
                 del servers["keyvalet"]
         else:
-            servers["keyvalet"] = {"command": mcp, "args": []}
+            servers["keyvalet"] = bridge_server(servers.get("keyvalet"), root, path)
     elif kind in ("claude", "codex"):
         additions = {
             "PreToolUse": {"matcher": "Bash|apply_patch|mcp__.*" if kind == "codex" else ".*",
@@ -152,11 +183,9 @@ def codex_plan(path, root, remove):
         else:
             return None
     else:
-        replacement = {"command": command, "env_vars": VARIABLES}
-        if existing == replacement:
-            return None
-        servers["keyvalet"] = replacement
-    return path, tomlkit.dumps(value)
+        servers["keyvalet"] = bridge_server(existing, root, path, codex=True)
+    rendered = tomlkit.dumps(value)
+    return None if rendered == original else (path, rendered)
 
 
 def plans(home, root, clients, remove=False):

@@ -246,6 +246,15 @@ workspace and PS 5.1/7 export execution tests also passed on each architecture. 
 the `windows-service-test` and `windows-service-test-arm64` artifacts. This is native VM execution,
 not a physical TPM/Hello attestation result.
 
+At `1bdc42b`, the [full cross-platform CI](https://github.com/KeyValet/KeyValet/actions/runs/38115685082)
+and [actual x64/ARM64 WSL 1 interop run](https://github.com/KeyValet/KeyValet/actions/runs/38115740726)
+both passed. The latter adds packaged WSL asset hashes/ACL rejection and actual native CLI/hooks,
+Unicode input, environment forwarding, invalid-TTL refusal and Linux client adapter installation,
+reinstall and uninstall. Both downloaded JSON reports contain all ten checks, `passed: true`,
+`wsl_interop_tested: true`, `hello_tested: false`, and no error. This validates headless interop
+using the CI runner's Windows identity; the owner's protected desktop MCP/Hello session is a
+separate check. See [WSL verification](wsl.md#verification) for the installed desktop probe.
+
 After its cleanup, install a development package normally as the intended unelevated owner to
 exercise the interactive Hello and MCP paths. Hosted CI does not replace Windows 11
 desktop/Hello testing.
@@ -257,7 +266,7 @@ desktop/Hello testing.
 | Claude Code, native Windows and WSL | Config/hook fixtures; WSL relay fixtures | Live setup → approval → proxy call → disconnect pending |
 | Codex CLI / WSL extension | Config/hook fixtures including explicit deny; user hook trust documented | Live `/mcp`, `/hooks`, approval and cancellation pending |
 | Cursor, native Windows and WSL environment | Native schema/config/hook fixtures | Live shell/MCP/file hooks and approval pending |
-| WSL stdio → Windows vault | Bridge implemented; offline byte/EOF/config checks; package ACL rejection tested by CI | Live interop, Linux-filesystem cwd and Windows Hello pending |
+| WSL stdio → Windows vault | Native x64/ARM64 WSL 1 CLI/hooks/env/config lifecycle passed; offline byte/EOF/config and package ACL checks pass | Owner desktop MCP, Linux-filesystem cwd in approvals, Windows Hello and WSL 2 session pending |
 | Signed Windows x64 / ARM64 | Signing workflow required by default | Company certificate, revocation and SmartScreen observations pending |
 
 On each real target record the Windows build, CPU architecture, Hello method, signing status and
@@ -289,4 +298,8 @@ cargo test -p kv-agent hardware_roundtrip -- --ignored --nocapture
 ```
 
 The protected SCM-launched worker needs a separate installed end-to-end test; the opt-in key
-test alone does not exercise service process isolation. No hardware result is recorded yet.
+test alone does not exercise service process isolation. The WSL desktop probe
+`python3 ~/.local/share/keyvalet/wsl/verify.py --unlock` exercises that installed worker and an
+actual Hello approval without reading credential values. Run it as the logged-in owner after
+setup; record its report alongside the physical/desktop matrix. No hardware Hello result is
+recorded yet.

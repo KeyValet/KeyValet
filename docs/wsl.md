@@ -31,6 +31,9 @@ the bridge to `~/.local/share/keyvalet/wsl`, then configures the Linux user's cl
 Use `--clients codex` or `--clients claude codex` to select clients. Existing unrelated servers,
 settings and hook handlers are preserved; only the `keyvalet` MCP entry is redirected to the Windows
 bridge. Original config backups use the suffix `.bak-keyvalet-wsl` and are retained across reinstalls.
+Existing KeyValet tool restrictions, disabled flags, approval policies and explicit
+`KEYVALET_SESSION_TTL_MINUTES` / grant-mode environment settings are retained when changing
+transport. Unrelated remote-server credentials are not forwarded into Windows.
 All selected configs are parsed before writing; malformed configs or unsafe file links stop the
 installation without rewriting them. TOML comments and unrelated tables are preserved with
 [TOML Kit](https://tomlkit.readthedocs.io/en/latest/quickstart/).
@@ -101,6 +104,17 @@ SYSTEM service is installed, then removes both the service test data and the dis
 `wsl_interop_tested` in its service report is true only when those checks run. A runner that needs
 a reboot to enable WSL fails its setup; this workflow does not silently substitute mock results.
 It covers headless interop, not the owner desktop MCP/Hello path or WSL 2's separate SDK networking.
+
+On 2026-10-11, this workflow passed on both native x64 and ARM64 at `1bdc42b`:
+[live WSL run 38115740726](https://github.com/KeyValet/KeyValet/actions/runs/38115740726).
+Both downloaded reports were checked: `passed: true`, `wsl_interop_tested: true`,
+`hello_tested: false`, no error and all ten service/interop checks. The builds were Windows
+`10.0.26100.0` (x64) and `10.0.26200.0` (ARM64); the ARM64 image needed the official signed
+Microsoft WSL runtime installed first. The test used a standard Linux account and the runner's
+Windows identity. It did not exercise the vault owner's protected desktop MCP/Hello session.
+The [full cross-platform run 38115685082](https://github.com/KeyValet/KeyValet/actions/runs/38115685082)
+also passed, including the then-15 offline tests on Ubuntu 22.04 and Debian 12. A subsequent
+migration test additionally requires preservation of existing tool restrictions and expiry settings.
 
 Windows x64 and native ARM64 CI also install the packaged bridge assets, compare their hashes and
 reject writable bridge files before stopping a running service during an upgrade. Actual WSL

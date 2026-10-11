@@ -11,7 +11,7 @@ user-facing docs.
 | macOS 14+ | Released, Secure Enclave required | Existing native CI and local tests |
 | Windows 11 24H2+ | Development preview: SYSTEM service, protected Hello agent, native dialogs, CLI recovery and PowerShell installer/package workflow implemented | Native x64 and ARM64 build, clippy, tests, SYSTEM service, standard-owner status, upgrade/restart/uninstall and PS 5.1/7 checks pass; real Hello, installed GUI process isolation, signed distribution and live client tests pending |
 | GNU/Linux + systemd | v0.3.0 release packaging: x64/ARM64 archives, service user, polkit, TPM 2.0, explicit software protection, CLI/MCP/hooks | Native Ubuntu 24.04 x86_64 checks and TPM integration on `ndu`; Ubuntu 22.04 / Debian 12 CI and native ARM64 packaging; ARM64 hardware and desktop fingerprint matrix pending |
-| WSL → Windows vault | Current-main development packages include stdio MCP, native hook and public-status bridges; Linux client configurations are merged per user | Offline relay/configuration tests and Windows package/ACL checks; live WSL/Hello/client sessions still need a Windows desktop. See [WSL setup](wsl.md) |
+| WSL → Windows vault | Current-main development packages include stdio MCP, native hook and public-status bridges; Linux client configurations are merged per user | Actual native x64/ARM64 WSL 1 CLI/hooks/env/config lifecycle passed, plus offline tests and package/ACL checks; owner desktop MCP/Hello, WSL 2 and live clients pending. See [WSL setup and CI records](wsl.md) |
 
 See [Windows support and acceptance checks](windows.md) for the preview's exact scope. The runtime
 contracts below do not establish that a Windows installation has been exercised end-to-end.
