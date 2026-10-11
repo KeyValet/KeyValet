@@ -5,3 +5,4 @@ templates/n8n-catalog.json
 marketing/
 site/public/
 __pycache__/
+rust/target-w0/
