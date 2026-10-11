@@ -129,18 +129,52 @@ jobs:
         run: for script in scripts/*.sh site/static/install.sh; do sh -n "$script"; done
 
   rust-windows-arm64:
-    runs-on: windows-latest
+    runs-on: windows-11-arm
     defaults:
       run:
         working-directory: rust
     steps:
       - uses: actions/checkout@v4
+      - name: Windows scripts parse and preserve runtime configuration
+        shell: pwsh
+        working-directory: .
+        run: ./scripts/test-windows-scripts.ps1
+      - name: Windows PowerShell 5.1 compatibility
+        shell: powershell
+        working-directory: .
+        run: ./scripts/test-windows-scripts.ps1
       - uses: dtolnay/rust-toolchain@stable
         with:
-          targets: aarch64-pc-windows-msvc
+          toolchain: stable-aarch64-pc-windows-msvc
           components: clippy
+      - name: Verify the native ARM64 Rust host
+        run: |
+          if ((rustc -vV) -notcontains 'host: aarch64-pc-windows-msvc') {
+            throw 'ARM64 acceptance requires the native aarch64-pc-windows-msvc toolchain.'
+          }
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: rust
-      - run: cargo clippy --workspace --all-targets --target aarch64-pc-windows-msvc --locked -- -D warnings
-      - run: cargo build --workspace --target aarch64-pc-windows-msvc --locked
+      - run: cargo clippy --workspace --all-targets --locked -- -D warnings
+      - run: cargo build --workspace --locked
+      - name: Clean Windows ARM64 SYSTEM service integration (no Hello)
+        shell: powershell
+        working-directory: .
+        run: ./scripts/test-windows-service.ps1 -AllowSystemChanges
+      - run: cargo test --workspace --locked --no-fail-fast
+      - name: Exported environment scripts execute safely in PowerShell 7
+        shell: pwsh
+        env:
+          KEYVALET_TEST_POWERSHELL: pwsh
+        run: cargo test -p kv-mcp windows_script::tests::powershell_executes_export_fixture --locked -- --ignored --exact
+      - name: Exported environment scripts execute safely in Windows PowerShell 5.1
+        shell: powershell
+        env:
+          KEYVALET_TEST_POWERSHELL: powershell.exe
+        run: cargo test -p kv-mcp windows_script::tests::powershell_executes_export_fixture --locked -- --ignored --exact
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: windows-service-test-arm64
+          path: dist/windows-service-test.json
+          if-no-files-found: ignore
