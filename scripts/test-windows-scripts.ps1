@@ -190,6 +190,13 @@ exit ([int]$env:KEYVALET_TEST_STATUS_EXIT)
     Assert ((Assert-PackageArchive $valid 'x64' '') -ceq $root) 'Local packages can infer their version from the root.'
     Assert-Throws { Assert-PackageArchive $valid 'arm64' 'v0.2.1' } 'Wrong archive architecture must be refused.'
     Assert-Throws { Assert-PackageArchive $valid 'x64' 'v0.2.2' } 'Wrong archive version must be refused.'
+    $wslNames = @(@('bridge.sh', 'install.sh', 'uninstall.sh', 'configure.py', 'verify.py') | ForEach-Object { "$root/wsl/$_" })
+    $wslArchive = New-TestArchive ($names + $wslNames)
+    Assert ((Assert-PackageArchive $wslArchive 'x64' 'v0.2.1') -ceq $root) 'A complete WSL bridge package must be accepted.'
+    foreach ($missingWsl in $wslNames) {
+        $partialWsl = New-TestArchive ($names + @($wslNames | Where-Object { $_ -ne $missingWsl }))
+        Assert-Throws { Assert-PackageArchive $partialWsl 'x64' 'v0.2.1' } 'A partial WSL bridge package must be rejected.'
+    }
     $validBackslashes = New-TestArchive @($names | ForEach-Object { $_.Replace('/', '\') })
     Assert ((Assert-PackageArchive $validBackslashes 'x64' 'v0.2.1') -ceq $root) 'Windows ZIP separators must be handled consistently.'
     $unsafe = @('../escape', '/absolute', '\\server\share\file', 'C:\escape',

@@ -4,3 +4,4 @@ dist/
 templates/n8n-catalog.json
 marketing/
 site/public/
+__pycache__/

@@ -1,21 +1,22 @@
 # Windows development status
 
 Windows is a development preview. The service, Hello provider, UI agent and local installer are
-implemented in this branch; a public Windows release still requires native Windows verification
-and the Windows signing certificate. Do not infer a successful Windows runtime or hardware test
-from a cross-target Rust check on macOS.
+implemented in this branch. Native x64 and ARM64 service/build/test validation has passed; a public
+Windows release still requires interactive Hello/client validation and the Windows signing
+certificate. Cross-target checks alone do not establish successful Windows hardware behavior.
 
 The target is Windows 11 24H2 or later (build 26100+), with Windows Hello configured for the
 installing account. Current paths assume Windows is installed on `C:`. One Windows account owns
-each installation. Native x64 and ARM64 builds are defined; ARM64 runtime testing is pending.
-WSL is not supported yet: the Windows stdio bridge remains unimplemented.
+each installation. CI executes the service and tests on native x64 and ARM64 Windows runners.
+Current-main development packages include the [WSL stdio bridge](wsl.md), using the same Windows
+vault and authorization. The original v0.3.0 tag predates these follow-up changes.
 
 | Area | Implementation | Verification still needed |
 | --- | --- | --- |
-| W1: portability and CI | Shared Rust code, Windows paths, x64 native CI and ARM64 MSVC build job | Run the changed CI on Windows; ARM64 execution |
-| W2: privileged service | SCM LocalSystem service, protected vault ACL, owner SID, local named pipes, service-created agent and MCP workers, authenticated server and client process identities | Second account rejection, SCM stop/restart, ACL and process isolation checks on a clean Windows installation |
+| W1: portability and CI | Shared Rust code, Windows paths, native x64 and ARM64 build/clippy/workspace tests | Physical ARM64 Hello and desktop behavior |
+| W2: privileged service | SCM LocalSystem service, protected vault ACL, owner SID, local named pipes, service-created agent and MCP workers, authenticated process identities; native no-Hello installation/upgrade/restart tests pass | Installed GUI worker isolation, second-account credential/gateway rejection and interactive lifecycle checks |
 | W3: Hello and UI | `kv-agent.exe`, fixed challenge signature + HKDF, shared device binding/recovery/rotation, TaskDialog and hidden secret input | Real Hello round trip, cancelled/expired prompts, no-Hello rejection, protected process/thread access |
-| W4: installation and packages | UAC installer, login launcher, client config merge, PowerShell exports, signed or explicit development x64/ARM64 ZIPs | Fresh install/upgrade/uninstall and live Claude Code/Codex/Cursor sessions; WSL bridge remains open |
+| W4: installation and packages | UAC installer, login launcher, client config merge, PowerShell exports, signed or explicit development x64/ARM64 ZIPs; no-Hello fresh install/upgrade/uninstall pass; WSL bridge implemented | Interactive owner/UAC installation, live Claude Code/Codex/Cursor and WSL sessions |
 | W5: distribution | Manual artifact workflow with signing required by default | Certificate provisioning, hardware matrix, SmartScreen observation, maintainer publication |
 
 ## Build and try a local development package
@@ -236,9 +237,28 @@ cd ..
 .\scripts\test-windows-service.ps1 -AllowSystemChanges
 ```
 
+Native validation on 2026-10-11 at `6a013c6` passed in
+[CI run 38113625136](https://github.com/KeyValet/KeyValet/actions/runs/38113625136): x64 on
+Windows build `10.0.26100.0`, ARM64 on `10.0.26200.0` with the explicitly checked
+`aarch64-pc-windows-msvc` host. Both reports recorded `passed: true`, `hello_tested: false`,
+unsigned development packages and all eight service lifecycle/owner/ACL checks. The complete
+workspace and PS 5.1/7 export execution tests also passed on each architecture. Reports are
+the `windows-service-test` and `windows-service-test-arm64` artifacts. This is native VM execution,
+not a physical TPM/Hello attestation result.
+
 After its cleanup, install a development package normally as the intended unelevated owner to
-exercise the interactive Hello and MCP paths. A hosted Windows Server CI result does not replace
-Windows 11 desktop/Hello testing. Native integration results are pending until these checks run.
+exercise the interactive Hello and MCP paths. Hosted CI does not replace Windows 11
+desktop/Hello testing.
+
+| Target / path | Automation result | Desktop acceptance |
+| --- | --- | --- |
+| Windows x64, SYSTEM service, standard owner, PS 5.1/7 | Passed in the linked native run | Hello + TPM / unknown attestation, UAC, protected WinRT/UI pending |
+| Windows ARM64, same service/CLI/export paths | Passed on native ARM64; no emulation-only claim | Physical ARM64 Hello + protected WinRT/UI pending |
+| Claude Code, native Windows and WSL | Config/hook fixtures; WSL relay fixtures | Live setup → approval → proxy call → disconnect pending |
+| Codex CLI / WSL extension | Config/hook fixtures including explicit deny; user hook trust documented | Live `/mcp`, `/hooks`, approval and cancellation pending |
+| Cursor, native Windows and WSL environment | Native schema/config/hook fixtures | Live shell/MCP/file hooks and approval pending |
+| WSL stdio → Windows vault | Bridge implemented; offline byte/EOF/config checks; package ACL rejection tested by CI | Live interop, Linux-filesystem cwd and Windows Hello pending |
+| Signed Windows x64 / ARM64 | Signing workflow required by default | Company certificate, revocation and SmartScreen observations pending |
 
 On each real target record the Windows build, CPU architecture, Hello method, signing status and
 TPM/attestation result, then check:
@@ -258,7 +278,8 @@ TPM/attestation result, then check:
   same-owner upgrade, wrong-owner refusal, Unicode paths/configuration, hooks in
   live Claude Code/Codex/Cursor, PowerShell gateway/secret files, lock cleanup and uninstall.
 - Signed x64 + ARM64 packages, signature revocation behavior and actual SmartScreen behavior.
-  WSL waits for the stdio bridge.
+  WSL clients use the stdio bridge and the same Windows approvals; test it separately from an
+  independent Linux vault and from the Windows-only loopback SDK gateway.
 
 The interactive key test is opt-in, from an unelevated Windows 11 terminal with Hello enabled:
 

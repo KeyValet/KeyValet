@@ -1,7 +1,8 @@
 # Installed integration test for a disposable Windows machine. No Hello, GUI or secrets.
 # Ordinary unit tests do not invoke this script. It refuses an existing installation/vault.
 [CmdletBinding()]
-param([switch]$AllowSystemChanges, [string]$BinaryDirectory, [string]$ResultPath)
+param([switch]$AllowSystemChanges, [string]$BinaryDirectory, [string]$ResultPath,
+      [string]$WslDistribution, [string]$WslUser = 'kvwsltest')
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 if (!$AllowSystemChanges) { throw 'This test installs/removes a SYSTEM service. Use -AllowSystemChanges on a disposable clean Windows machine.' }
@@ -110,6 +111,10 @@ try {
     foreach ($binary in 'kv-helper', 'kv-agent', 'kv-cli', 'kv-mcp', 'kv-hook') {
         Assert ((Get-FileHash "$BinaryDirectory/$binary.exe").Hash -eq (Get-FileHash "$install/bin/$binary.exe").Hash) 'Installed executable differs from package input.'
     }
+    foreach ($file in 'bridge.sh', 'install.sh', 'uninstall.sh', 'configure.py', 'verify.py') {
+        Assert ((Get-FileHash "$repo/scripts/wsl/$file").Hash -eq (Get-FileHash "$install/wsl/$file").Hash) 'Installed WSL bridge differs from package input.'
+    }
+    $checks.Add('complete WSL bridge assets installed from the tested package')
     $task = Get-ScheduledTask -TaskName KeyValetAgent
     $taskSid = if ($task.Principal.UserId -match '^S-1-') { $task.Principal.UserId }
         else { [Security.Principal.NTAccount]::new($task.Principal.UserId).Translate([Security.Principal.SecurityIdentifier]).Value }
@@ -138,9 +143,19 @@ try {
     Assert-NoKeys
     $checks.Add('real standard-owner authenticated public status without Hello; no fallback or binding keys')
 
+    if ($WslDistribution) {
+        $wslRepo = (& 'C:\Windows\System32\wsl.exe' --distribution $WslDistribution --user $WslUser --exec wslpath -u $repo | Out-String).Trim()
+        Assert ($LASTEXITCODE -eq 0 -and $wslRepo.StartsWith('/')) 'Cannot access the repository from the disposable WSL distribution.'
+        & 'C:\Windows\System32\wsl.exe' --distribution $WslDistribution --user $WslUser --cd '~' --exec python3 "$wslRepo/scripts/test-wsl-live.py"
+        Assert ($LASTEXITCODE -eq 0) 'Live WSL interop/client adapter test failed.'
+        Assert-NoKeys
+        $checks.Add('live WSL native CLI/hooks/WSLENV/TTL and per-user client installation; no Hello or desktop MCP')
+    }
+
     Test-BadPermissions "$vault/owner.sid" ([Security.AccessControl.FileSystemRights]::Read)
     Test-BadPermissions "$install/bin/kv-agent.exe" ([Security.AccessControl.FileSystemRights]::WriteData)
-    $checks.Add('untrusted owner record and binary DACL rejection before service stop')
+    Test-BadPermissions "$install/wsl/bridge.sh" ([Security.AccessControl.FileSystemRights]::WriteData)
+    $checks.Add('untrusted owner record, binary and WSL bridge DACL rejection before service stop')
     $pidBefore = (Get-CimInstance Win32_Service -Filter "Name='KeyValetHelper'").ProcessId
     $wrongOwner = @{} + $options; $wrongOwner.OwnerSid = ($owner -replace '-\d+$', '-999999')
     Assert-Throws { & "$repo/scripts/install.ps1" @wrongOwner } 'Upgrade must not retarget a vault to another owner.'
@@ -185,6 +200,7 @@ try {
     if ($testPassword) { $testPassword.Dispose() }
     $report = @{ windows_build = [Environment]::OSVersion.Version.ToString(); architecture = $architecture;
         hello_tested = $false; signing = 'unsigned development'; checks = @($checks.ToArray());
+        wsl_interop_tested = ($checks -contains 'live WSL native CLI/hooks/WSLENV/TTL and per-user client installation; no Hello or desktop MCP');
         passed = !$failure; error = $failure; timestamp_utc = [DateTime]::UtcNow.ToString('o') }
     New-Item (Split-Path $ResultPath -Parent) -ItemType Directory -Force | Out-Null
     [IO.File]::WriteAllText($ResultPath, ($report | ConvertTo-Json -Depth 8), [Text.UTF8Encoding]::new($false))

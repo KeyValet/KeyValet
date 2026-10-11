@@ -15,8 +15,9 @@ curl -fsSL https://keyvalet.dev/install.sh | sh
 An Apple Silicon Mac on macOS 14 or later (the installer uses the release's prebuilt arm64 binaries; Intel Macs build from source instead, which needs a Rust toolchain (`cargo` from [rustup.rs](https://rustup.rs)) and Xcode Command Line Tools). You'll be asked for your password once. Claude Code is configured automatically; the installer also installs the Cursor plugin (`~/.cursor/plugins/local/keyvalet`, restart Cursor) when Cursor is present; for Devin CLI, install the plugin with `devin plugins install KeyValet/KeyValet#devin-plugin`; for other MCP clients see the [guide](site/guide.md#install).
 
 Windows 11 support is a **development preview**: Hello, the service, UI agent and local package
-installer are implemented; signed public packages and real Windows validation are pending.
-See [Windows build, installation and verification](docs/windows.md). WSL support is still open.
+installer are implemented; native x64 and ARM64 service/upgrade tests pass. Signed public packages
+and interactive Hello/client validation are pending. See [Windows verification](docs/windows.md).
+Current-main development packages also include the [WSL stdio bridge](docs/wsl.md).
 
 Linux local support is implemented with a systemd service, polkit approval and TPM 2.0 keys.
 Without TPM, software protection requires explicit opt-in; hardware failures never trigger
@@ -26,7 +27,8 @@ The v0.3.0 release workflow builds Linux x64 and ARM64 archives, with checksums,
 notarized macOS archive. The command above installs the matching Linux package. Linux requires
 systemd, polkit, sudo and `tpm2-tools` for TPM protection; use `sh -s -- --software` with the online
 installer when explicitly choosing software protection on a host without TPM.
-The WSL-to-Windows vault bridge remains pending.
+WSL clients can use the Windows vault through the current-main bridge, or use an independent
+Linux vault when the Linux service requirements are met.
 
 The macOS and Linux source installers use `CARGO_TARGET_DIR` when set; relative paths are resolved
 from `rust/`. Otherwise they build into `rust/target`. This explicit directory overrides Cargo's

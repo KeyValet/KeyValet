@@ -1,0 +1,80 @@
+name: Windows WSL interop
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  interop:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: windows-latest
+            toolchain: stable-x86_64-pc-windows-msvc
+            rootfs: amd64
+            name: x64
+          - runner: windows-11-arm
+            toolchain: stable-aarch64-pc-windows-msvc
+            rootfs: arm64
+            name: arm64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare disposable WSL 1 distro
+        shell: pwsh
+        env:
+          ROOTFS_ARCH: ${{ matrix.rootfs }}
+        run: |
+          $feature = Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
+          if ($feature.State -ne 'Enabled') {
+            $enabled = Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux -NoRestart -All
+            if ($enabled.RestartNeeded) { throw 'This hosted image needs a reboot to enable WSL 1; use a runner with WSL already enabled.' }
+          }
+          $stage = Join-Path $env:RUNNER_TEMP 'keyvalet-wsl-interop'
+          New-Item $stage -ItemType Directory -Force | Out-Null
+          $file = "ubuntu-noble-wsl-$env:ROOTFS_ARCH-wsl.rootfs.tar.gz"
+          $base = 'https://cloud-images.ubuntu.com/wsl/releases/24.04/current'
+          Invoke-WebRequest "$base/$file" -OutFile "$stage/rootfs.tar.gz"
+          $checksums = (Invoke-WebRequest "$base/SHA256SUMS").Content
+          $entries = @($checksums -split '\r?\n' | Where-Object { $_ -match ('^[a-fA-F0-9]{64}\s+\*?' + [regex]::Escape($file) + '$') })
+          if ($entries.Count -ne 1 -or (Get-FileHash "$stage/rootfs.tar.gz" -Algorithm SHA256).Hash -ine $entries[0].Substring(0, 64)) { throw 'Canonical WSL rootfs checksum mismatch.' }
+          $distro = 'KeyValetInterop-' + [guid]::NewGuid().ToString('N')
+          "KEYVALET_TEST_WSL_DISTRO=$distro" >> $env:GITHUB_ENV
+          & wsl.exe --import $distro "$stage/distro" "$stage/rootfs.tar.gz" --version 1
+          if ($LASTEXITCODE -ne 0) { throw 'Cannot import the disposable WSL 1 distribution.' }
+          & wsl.exe --distribution $distro --exec useradd --create-home --uid 1001 kvwsltest
+          if ($LASTEXITCODE -ne 0) { throw 'Cannot create the disposable standard WSL user.' }
+          & wsl.exe --distribution $distro --exec apt-get update
+          if ($LASTEXITCODE -ne 0) { throw 'WSL package index update failed.' }
+          & wsl.exe --distribution $distro --exec apt-get install -y python3 python3-tomlkit
+          if ($LASTEXITCODE -ne 0) { throw 'WSL adapter prerequisites failed.' }
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ matrix.toolchain }}
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rust
+      - name: Build native Windows executables
+        working-directory: rust
+        run: cargo build --workspace --locked
+      - name: Service acceptance with actual WSL interop (no Hello)
+        shell: pwsh
+        run: ./scripts/test-windows-service.ps1 -AllowSystemChanges -WslDistribution $env:KEYVALET_TEST_WSL_DISTRO
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: windows-wsl-${{ matrix.name }}
+          path: dist/windows-service-test.json
+          if-no-files-found: ignore
+      - name: Remove disposable WSL distribution
+        if: always()
+        shell: pwsh
+        run: |
+          if ($env:KEYVALET_TEST_WSL_DISTRO) {
+            & wsl.exe --unregister $env:KEYVALET_TEST_WSL_DISTRO
+            if ($LASTEXITCODE -ne 0) { throw 'Disposable WSL distribution cleanup failed.' }
+          }

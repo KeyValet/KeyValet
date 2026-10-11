@@ -28,7 +28,7 @@ $BinaryDirectory = (Resolve-Path -LiteralPath $BinaryDirectory).Path
 $name = "keyvalet-$Tag-windows-$Architecture"
 $stage = Join-Path "$repo/dist" $name
 if (Test-Path $stage) { Remove-Item $stage -Recurse -Force }
-New-Item "$stage/bin", "$stage/templates", "$stage/scripts", "$stage/docs" -ItemType Directory -Force | Out-Null
+New-Item "$stage/bin", "$stage/templates", "$stage/scripts", "$stage/docs", "$stage/wsl" -ItemType Directory -Force | Out-Null
 foreach ($binary in 'kv-helper', 'kv-agent', 'kv-cli', 'kv-mcp', 'kv-hook') {
     Copy-Item -LiteralPath "$BinaryDirectory/$binary.exe" "$stage/bin/"
 }
@@ -57,8 +57,11 @@ if ($SigningCertificateThumbprint) {
 }
 Copy-Item "$repo/templates/catalog.json" "$stage/templates/"
 Copy-Item "$repo/scripts/install.ps1", "$repo/scripts/uninstall.ps1" "$stage/scripts/"
+foreach ($file in 'bridge.sh', 'install.sh', 'uninstall.sh', 'configure.py', 'verify.py') {
+    Copy-Item -LiteralPath "$repo/scripts/wsl/$file" "$stage/wsl/"
+}
 Copy-Item "$repo/LICENSE", "$repo/README.md", "$repo/SECURITY.md" $stage
-Copy-Item "$repo/docs/windows.md" "$stage/docs/"
+Copy-Item "$repo/docs/windows.md", "$repo/docs/wsl.md" "$stage/docs/"
 $archive = "$repo/dist/$name.zip"
 if (Test-Path $archive) { Remove-Item $archive -Force }
 Compress-Archive -Path $stage -DestinationPath $archive -CompressionLevel Optimal

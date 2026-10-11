@@ -35,12 +35,17 @@ pub async fn start() -> anyhow::Result<Option<NamedPipeClient>> {
 }
 
 async fn launch() -> io::Result<()> {
+    // Use the worker's strict parser before requesting a launch. A typo must not silently
+    // become an unlimited session in the Windows client relay.
+    let ttl = crate::session::parse_ttl_minutes(
+        std::env::var("KEYVALET_SESSION_TTL_MINUTES")
+            .ok()
+            .as_deref(),
+    )
+    .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error.to_string()))?;
     let context = Context {
         cwd: std::env::current_dir()?.to_string_lossy().into_owned(),
-        ttl_minutes: std::env::var("KEYVALET_SESSION_TTL_MINUTES")
-            .ok()
-            .and_then(|v| v.parse().ok())
-            .unwrap_or(0),
+        ttl_minutes: ttl.as_secs() / 60,
         grant_mode: std::env::var("KEYVALET_GRANT_MODE").ok(),
         lang: kv_i18n::lang().as_str().to_owned(),
     };

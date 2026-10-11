@@ -1,0 +1,5 @@
+# WSL executes these scripts even when the Windows checkout uses core.autocrlf.
+scripts/wsl/*.sh text eol=lf
+scripts/wsl/*.py text eol=lf
+scripts/test-wsl.py text eol=lf
+scripts/test-wsl-live.py text eol=lf

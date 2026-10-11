@@ -94,7 +94,7 @@ jobs:
       run:
         working-directory: rust
     steps:
-      - run: apt-get update && apt-get install -y build-essential curl git ca-certificates python3 && useradd -m -u 1001 builder
+      - run: apt-get update && apt-get install -y build-essential curl git ca-certificates python3 python3-tomlkit && useradd -m -u 1001 builder
         working-directory: /
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
@@ -106,6 +106,8 @@ jobs:
           key: linux-${{ matrix.container }}
       - name: Prepare unprivileged checks
         run: chown -R builder:builder "$GITHUB_WORKSPACE" "$CARGO_HOME" "$RUSTUP_HOME"
+      - name: WSL stdio bridge and client configuration (offline)
+        run: su -s /bin/sh builder -c 'python3 ../scripts/test-wsl.py'
       # su resets PATH; restore the Rust toolchain inside the unprivileged child shell.
       - run: su -s /bin/sh builder -c "export PATH=\"$CARGO_HOME/bin:\$PATH\"; cargo fmt --all -- --check"
       - run: su -s /bin/sh builder -c "export PATH=\"$CARGO_HOME/bin:\$PATH\"; cargo clippy --workspace --all-targets --locked -- -D warnings"
@@ -126,7 +128,7 @@ jobs:
           if-no-files-found: ignore
       - name: Unix scripts parse
         working-directory: .
-        run: for script in scripts/*.sh site/static/install.sh; do sh -n "$script"; done
+        run: for script in scripts/*.sh scripts/wsl/*.sh site/static/install.sh; do sh -n "$script"; done
 
   rust-windows-arm64:
     runs-on: windows-11-arm

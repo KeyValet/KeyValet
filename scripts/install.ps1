@@ -83,6 +83,13 @@ function Assert-PackageArchive([string]$Path, [string]$Architecture, [string]$Ex
         foreach ($file in 'bin/kv-helper.exe', 'bin/kv-agent.exe', 'bin/kv-cli.exe', 'bin/kv-mcp.exe', 'bin/kv-hook.exe', 'templates/catalog.json') {
             if (!$seen.ContainsKey("$root/$file") -or $seen["$root/$file"]) { throw "Required package file is missing: $file" }
         }
+        # Older preview packages did not contain a WSL bridge. If present, require the
+        # complete bridge so a partial package fails before any service is stopped.
+        if ($seen.ContainsKey("$root/wsl") -or $parents.ContainsKey("$root/wsl")) {
+            foreach ($file in 'bridge.sh', 'install.sh', 'uninstall.sh', 'configure.py', 'verify.py') {
+                if (!$seen.ContainsKey("$root/wsl/$file") -or $seen["$root/wsl/$file"]) { throw "Required WSL package file is missing: $file" }
+            }
+        }
         return $root
     } finally { $archive.Dispose() }
 }
@@ -348,6 +355,11 @@ try {
     foreach ($binary in 'kv-helper', 'kv-agent', 'kv-cli', 'kv-mcp', 'kv-hook') { Assert-PrivilegedFile "$installDir/bin/$binary.exe" $true }
     Assert-PrivilegedFile "$installDir/bin/keyvalet.ps1" $true
     Assert-PrivilegedFile "$installDir/templates/catalog.json" $true
+    $wslFiles = @('bridge.sh', 'install.sh', 'uninstall.sh', 'configure.py', 'verify.py')
+    if ((Test-Path "$package/wsl") -or (Test-Path "$installDir/wsl")) {
+        Set-ProtectedDirectory "$installDir/wsl" $true
+        foreach ($file in $wslFiles) { Assert-PrivilegedFile "$installDir/wsl/$file" $true }
+    }
     if ($service) {
         Stop-Service KeyValetHelper -Force
         $service.WaitForStatus('Stopped', [TimeSpan]::FromSeconds(20))
@@ -364,6 +376,16 @@ try {
         if ($LASTEXITCODE -ne 0) { throw 'Cannot set binary owner.' }
     }
     Copy-Item "$package/templates/catalog.json" "$installDir/templates/" -Force
+    if (Test-Path "$package/wsl") {
+        foreach ($file in $wslFiles) {
+            Copy-Item -LiteralPath "$package/wsl/$file" "$installDir/wsl/" -Force
+            & 'C:\Windows\System32\icacls.exe' "$installDir\wsl\$file" /reset | Out-Null
+            if ($LASTEXITCODE -ne 0) { throw 'Cannot reset WSL bridge permissions.' }
+            & 'C:\Windows\System32\icacls.exe' "$installDir\wsl\$file" /setowner '*S-1-5-32-544' | Out-Null
+            if ($LASTEXITCODE -ne 0) { throw 'Cannot protect WSL bridge files.' }
+            Assert-PrivilegedFile "$installDir/wsl/$file" $true
+        }
+    }
     Write-Utf8 "$vaultDir/owner.sid" ($OwnerSid + "`n")
     & 'C:\Windows\System32\icacls.exe' "$vaultDir\owner.sid" /reset | Out-Null
     if ($LASTEXITCODE -ne 0) { throw 'Cannot reset owner.sid permissions.' }
