@@ -121,7 +121,8 @@ function Assert-PrivilegedDescriptor([Security.AccessControl.RawSecurityDescript
     if (!$Descriptor.Owner -or $Descriptor.Owner.Value -notin $trusted) { throw "Untrusted owner: $Path" }
     if ($null -eq $Descriptor.DiscretionaryAcl) { throw "Null DACL grants everyone access: $Path" }
     foreach ($ace in $Descriptor.DiscretionaryAcl) {
-        if ($ace.AceFlags -band [Security.AccessControl.AceFlags]::InheritOnly) { continue }
+        # AceFlags uses bytes; PowerShell 5.1 needs integer operands for -band.
+        if ([int]$ace.AceFlags -band [int][Security.AccessControl.AceFlags]::InheritOnly) { continue }
         if ($ace -is [Security.AccessControl.QualifiedAce] -and $ace.AceQualifier -eq 'AccessDenied') { continue }
         if ($ace -isnot [Security.AccessControl.CommonAce] -or $ace.IsCallback -or $ace.AceQualifier -ne 'AccessAllowed') { throw "Unsupported DACL entry: $Path" }
         # AccessMask is signed Int32. Reinterpret its bits so GENERIC_READ remains read-only.

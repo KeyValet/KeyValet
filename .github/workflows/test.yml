@@ -43,6 +43,14 @@ jobs:
         working-directory: rust
     steps:
       - uses: actions/checkout@v4
+      - name: Windows scripts parse and preserve runtime configuration
+        shell: pwsh
+        working-directory: .
+        run: ./scripts/test-windows-scripts.ps1
+      - name: Windows PowerShell 5.1 compatibility
+        shell: powershell
+        working-directory: .
+        run: ./scripts/test-windows-scripts.ps1
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy
@@ -52,14 +60,6 @@ jobs:
       - run: cargo clippy --workspace --all-targets -- -D warnings
       - run: cargo build --workspace --locked
       - run: cargo test --workspace --locked --no-fail-fast
-      - name: Windows scripts parse and preserve runtime configuration
-        shell: pwsh
-        working-directory: .
-        run: ./scripts/test-windows-scripts.ps1
-      - name: Windows PowerShell 5.1 compatibility
-        shell: powershell
-        working-directory: .
-        run: ./scripts/test-windows-scripts.ps1
       - name: Exported environment scripts execute safely in PowerShell 7
         shell: pwsh
         env:
