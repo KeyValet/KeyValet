@@ -131,11 +131,12 @@ def codex_plan(path, root, remove):
     # Ubuntu 22.04's Python 3.10 is supported; this is packaged as python3-tomlkit by apt.
     try:
         import tomlkit
+        from tomlkit.exceptions import TOMLKitError
     except ImportError:
         raise ValueError("Existing Codex config needs tomlkit. Install python3-tomlkit (e.g. sudo apt install python3-tomlkit), then rerun; no files were changed.") from None
     try:
         value = tomlkit.parse(original)
-    except ValueError:
+    except (ValueError, TOMLKitError):
         raise ValueError(f"Invalid TOML; configuration left unchanged: {path}") from None
     if "mcp_servers" not in value:
         if remove:

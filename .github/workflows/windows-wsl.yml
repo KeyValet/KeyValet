@@ -39,8 +39,9 @@ jobs:
           $file = "ubuntu-noble-wsl-$env:ROOTFS_ARCH-wsl.rootfs.tar.gz"
           $base = 'https://cloud-images.ubuntu.com/wsl/releases/24.04/current'
           Invoke-WebRequest "$base/$file" -OutFile "$stage/rootfs.tar.gz"
-          $checksums = (Invoke-WebRequest "$base/SHA256SUMS").Content
-          $entries = @($checksums -split '\r?\n' | Where-Object { $_ -match ('^[a-fA-F0-9]{64}\s+\*?' + [regex]::Escape($file) + '$') })
+          # Without a text Content-Type, PowerShell can expose Content as a byte array.
+          Invoke-WebRequest "$base/SHA256SUMS" -OutFile "$stage/SHA256SUMS"
+          $entries = @(Get-Content -LiteralPath "$stage/SHA256SUMS" -Encoding ascii | Where-Object { $_ -match ('^[a-fA-F0-9]{64}\s+\*?' + [regex]::Escape($file) + '$') })
           if ($entries.Count -ne 1 -or (Get-FileHash "$stage/rootfs.tar.gz" -Algorithm SHA256).Hash -ine $entries[0].Substring(0, 64)) { throw 'Canonical WSL rootfs checksum mismatch.' }
           $distro = 'KeyValetInterop-' + [guid]::NewGuid().ToString('N')
           "KEYVALET_TEST_WSL_DISTRO=$distro" >> $env:GITHUB_ENV
