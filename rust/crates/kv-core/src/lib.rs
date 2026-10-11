@@ -4,6 +4,7 @@
 pub mod auth_gate;
 pub mod dispatch;
 pub mod prompt;
+pub mod remote;
 pub mod settings;
 pub mod summarize;
 

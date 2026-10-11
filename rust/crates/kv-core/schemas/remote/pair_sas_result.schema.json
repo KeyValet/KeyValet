@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PairSasResult",
+  "type": "object",
+  "properties": {
+    "sas": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "sas"
+  ],
+  "additionalProperties": true
+}

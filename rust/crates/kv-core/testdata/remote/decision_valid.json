@@ -1,0 +1,229 @@
+{
+  "keys": {
+    "sender": {
+      "private_scalar": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAE",
+      "public_jwk": {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "axfR8uEsQkf4vOblY6RA8ncDfYEt6zOg9KE5RdiYwpY",
+        "y": "T-NC4v4af5uO5-tKfA-eFivOM1drMV7Oy7ZAaDe_UfU"
+      }
+    },
+    "recipient": {
+      "private_scalar": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAI",
+      "public_jwk": {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "fPJ7GI0DT36KUjgDBLUaw8CJaeJ38hs1pgtI_EdmmXg",
+        "y": "B3dVENuO0EApPZrGn3Qw27p9reY86YIpngS3nSJ4c9E"
+      }
+    },
+    "quick": {
+      "private_scalar": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM",
+      "public_jwk": {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "Xsvk0aYzCkTI9--VHUvxZebGtyHvramF-0FmG8bn_Ww",
+        "y": "hzRkDEmY_343SwbOGmSi7NgqsDY4T7g9mnmxJ6J9UDI"
+      }
+    },
+    "strong": {
+      "private_scalar": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQ",
+      "public_jwk": {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "4lNKNTLQj7ugLd5lnuYr0AMf4tt4VZbvUJMCRGsDCFI",
+        "y": "4PFXWkxjPMcZ3-5f2oYtdk78lsPzDuAFXELCPxhO2MY"
+      }
+    },
+    "wrong": {
+      "private_scalar": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAU",
+      "public_jwk": {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "UVkLelFRQNLXhMhWCGaP3--Mgv0fW-UkIVVKDcPQM-0",
+        "y": "4MF9qJBKcn2K4b82v4p5Jg0BLwDU2AiI0dC7RP2hbaQ"
+      }
+    },
+    "ephemeral": {
+      "private_scalar": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY",
+      "public_jwk": {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "sBoXKnakYCyS0yQsuJfd4wJMdA3rshW0xrCq6Twikak",
+        "y": "6FwQdDI32tVv7A4t-6cDeRwA93Acfha9_XxIU4_Hf-I"
+      }
+    },
+    "rsa_pkcs8_der": "MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCxJYqTmSPwS-kDxCkDwX8ibb9L9lX6Def32jAKMVEGxlPZD4dc6URhg7SxOmITTUvJTWeFi6aLLJtEL1_Gz_A1tSk9v_Ko2edLqnWxy9UdXnxyl6PTkn9oFsJpRw9LFXe40oTXenOnt3F4wis3IPLyJs0wAjf_7sbEEmsQkXi3pRFDG9U-e9IvKecaHpHjqXk72ANIaqp4Q4D5mQUTe0PjUNrehsIGai_9PqP6V1HIjrB-Z2dZMLViG8CCyS8CVjaiM7KxJkk4AuhisdjAH30T6WZgW5WKj3hsN-kV9rL9XPs4c66bZkOl1derwDqTqJBiYnaH02fIs8V45KAi-h0vAgMBAAECggEAAZLAloGHLBD4hbF2t6IDpRNc1DibznuFhNcIkzBx76kLLYPUIx-HE4TwbOtJjQDfUBaijROnPR0b9Pq4ute12LJqnJ5II2M4poi6hWYPdJcMbL1-32a7e1KFCeA-B9_fDKxaRIVVYk-WkjUZaAAz8zuaSyPR55PJ4PgjhYNXE1BJzuSb0yJWjkM3HkpnbJWTIOPv6p8aOtMW447qJSlxVw2OhyttCdX1PLBlfrA6AwrpiSkroRfyXmYNxsraIkZhK40u0q1n7wR7dfQlTSXyV7JQdjIPaRicfpmXijRWHCG1dgZDD7Djdeo3J2GdR3x3loPUQSnII0WLtI7HA2xnlQKBgQD4U7sNiFxFksRlwrt9vc3xduz4NvBXEw22MhzaehsTXNBKx1N9He_wzI99f46tBY-NnGRIOwT2YoQpeFtm-sgj_uSdH1H22jTMGU_VtPoRtUp-9cHqYAsGXnYh-gjVH6cRK5TlGXxvXR6aeu3Iaqee5XjIAAC-ts57P1-ScUUbNQKBgQC2nsXYlsXOsaSfe_fM2WleHmmL5ZIbvN4E5AZ448DmvJz_fSS7F19EO_5S8ze3CB4gf9JbyIoBZYyVtEzcMGce93diXXkb5QGdSZtQnM7cYK7nu8YUN6-TtaaU-Rn3K6hkEbHnQDKBFviTJwtvbRp0cqFP5u3qh-Sw6gTcjCd_UwKBgQDeOU_zVEv-ltDan-FZLTnXFC4MEl4SDiL_IOlhOlRwh2Z_BNFZ7iiCvQzLqhLsE0Xb3FCBsw9FzfOniOWCynnAfKHpWdXnqm4FF8Gx5TrEDhCUfSkDrN8w2-erkC3HS4QegXnFa4FHx3VTmR6hc5B9Sa1EjXwdL0qoUJYeXu8Q4QKBgEl8cpjJcyfNjDUxKXIhOqlJC6fj5XuL8Lt_Fqum2oT--R5GOXWf3hITIjA29wCMH7NsPDX66K3PM1c6ioNAZv6rDjti6c0zxgaJDBrQPt2nejp98SNJlTmXK0VfR_eSddxu0mwABVK076onWA6qlK6vQgJpJuvtazVVtkcZjvtJAoGBAL6edRlytZ96ub9_jeozmnotXFZOPxFr6t3n9Y5YcdxvAptvMdYifOwqkXmPTKos-ernQzHDDwx7cNfXPTQkF1dlRFo67sRmfxWIIrw-F2HCEvaka6zBxMaPhfmjR8Kd54sc7LZchZMRcJbON5jL6I15ipQWP5TJRHJsWTMO4jC-",
+    "rsa_public_jwk": {
+      "kty": "RSA",
+      "n": "sSWKk5kj8EvpA8QpA8F_Im2_S_ZV-g3n99owCjFRBsZT2Q-HXOlEYYO0sTpiE01LyU1nhYumiyybRC9fxs_wNbUpPb_yqNnnS6p1scvVHV58cpej05J_aBbCaUcPSxV3uNKE13pzp7dxeMIrNyDy8ibNMAI3_-7GxBJrEJF4t6URQxvVPnvSLynnGh6R46l5O9gDSGqqeEOA-ZkFE3tD41Da3obCBmov_T6j-ldRyI6wfmdnWTC1YhvAgskvAlY2ojOysSZJOALoYrHYwB99E-lmYFuVio94bDfpFfay_Vz7OHOum2ZDpdXXq8A6k6iQYmJ2h9NnyLPFeOSgIvodLw",
+      "e": "AQAB"
+    },
+    "notice": "Fixed test keys only. Never install or use these keys in production.",
+    "expect": {
+      "p256_roundtrips": {
+        "sender": true,
+        "recipient": true,
+        "quick": true,
+        "strong": true,
+        "wrong": true,
+        "ephemeral": true
+      },
+      "rsa_roundtrip": true,
+      "rsa_ecdh_error": "unsupported_algorithm",
+      "p256_wrong_algorithm": "unsupported_algorithm",
+      "presence": "none",
+      "key_kind": "software"
+    }
+  },
+  "request": {
+    "approval_id": "01J9W000000000000000000001",
+    "kind": "use",
+    "digest": "fe65066bb8da72c795ec85f0d2c2b3ced9e7b8f961cb8c02400fe2af65acd93b",
+    "nonce": "AAECAwQFBgcICQoLDA0ODw",
+    "exp": 1760200600,
+    "requester": {
+      "device_id": "dev_srv",
+      "label": "srv",
+      "os": "linux",
+      "protection": {
+        "kind": "tpm2",
+        "attestation": null,
+        "future_status": "unverified"
+      }
+    },
+    "agent": {
+      "runtime": "claude-code",
+      "cwd": "/home/u/proj",
+      "user": "u",
+      "pid": 4242
+    },
+    "credential": {
+      "ref": "github/default",
+      "kind": "oauth2",
+      "display": "GitHub (test)",
+      "proxy_only": true
+    },
+    "operation": {
+      "summary": "POST issues · 15 B",
+      "method": "POST",
+      "host": "api.github.com",
+      "path": "/repos/guang/demo/issues",
+      "query_keys": [
+        "a",
+        "a",
+        "z"
+      ],
+      "body_bytes": 15
+    },
+    "purpose": "Create an issue",
+    "tier": "T1",
+    "min_level": "quick",
+    "scope_options": [
+      "per_use",
+      "per_credential",
+      "per_session",
+      "remember:1h",
+      "remember:8h",
+      "remember:24h",
+      "standing:credential",
+      "standing:device"
+    ],
+    "requested_scope": "per_credential",
+    "merged_count": 1,
+    "delivery": {
+      "mode": "silent",
+      "escalate_after_s": 30
+    }
+  },
+  "canonical": {
+    "v": 1,
+    "kind": "use",
+    "requester": "dev_srv",
+    "credential": "github/default",
+    "action": {
+      "kind": "http"
+    },
+    "method": "POST",
+    "host": "API.GITHUB.COM",
+    "path": "/repos/guang/./demo/../demo/issues",
+    "query_keys": [
+      "z",
+      "a",
+      "a"
+    ],
+    "body_sha256": "3485eb80d32214d0c2af5413a487205410b73c6bcdb0fce0965e3b06f4a594b5",
+    "headers_digest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "agent": {
+      "runtime": "claude-code",
+      "repo_or_cwd": "/home/u/proj",
+      "uid": 501,
+      "pid": 4242,
+      "exe_sha256": "4914ab477652fe9bd0f1f0e3204887b4c585d2d47634f2687af6050c264022bb"
+    },
+    "purpose": "Create an issue",
+    "nonce": "AAECAwQFBgcICQoLDA0ODw",
+    "exp": 1760200600
+  },
+  "device": {
+    "device_id": "dev_mac",
+    "label": "MacBook",
+    "os": "macos",
+    "key_kind": "software",
+    "dk_pub": {
+      "kty": "EC",
+      "crv": "P-256",
+      "x": "fPJ7GI0DT36KUjgDBLUaw8CJaeJ38hs1pgtI_EdmmXg",
+      "y": "B3dVENuO0EApPZrGn3Qw27p9reY86YIpngS3nSJ4c9E"
+    },
+    "ak_q": {
+      "pub": {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "Xsvk0aYzCkTI9--VHUvxZebGtyHvramF-0FmG8bn_Ww",
+        "y": "hzRkDEmY_343SwbOGmSi7NgqsDY4T7g9mnmxJ6J9UDI"
+      },
+      "alg": "ES256"
+    },
+    "ak_s": {
+      "pub": {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "4lNKNTLQj7ugLd5lnuYr0AMf4tt4VZbvUJMCRGsDCFI",
+        "y": "4PFXWkxjPMcZ3-5f2oYtdk78lsPzDuAFXELCPxhO2MY"
+      },
+      "alg": "ES256"
+    },
+    "caps": [
+      "approve_quick",
+      "approve_strong"
+    ],
+    "attestation": null
+  },
+  "now": 1760200012,
+  "decision": {
+    "approval_id": "01J9W000000000000000000001",
+    "digest": "fe65066bb8da72c795ec85f0d2c2b3ced9e7b8f961cb8c02400fe2af65acd93b",
+    "nonce": "AAECAwQFBgcICQoLDA0ODw",
+    "decision": "allow",
+    "level": "quick",
+    "scope": {
+      "mode": "per_use",
+      "level": "credential",
+      "until": 0
+    },
+    "approver": "dev_mac",
+    "approver_kind": "device",
+    "quorum": null,
+    "issued_at": 1760200012,
+    "future_binding": {
+      "flag": true,
+      "nullable": null
+    },
+    "sig": "AUFENkNWHny40WxJM4iJ6M9vnmzIdGxYypo4iQNV_ryUyyrhTvagFMPO68DVyldwWRL4pHEJo9KtH23mbmZWAw"
+  },
+  "expect": {
+    "ok": true
+  }
+}

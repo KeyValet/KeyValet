@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PairConfirm",
+  "type": "object",
+  "properties": {
+    "sas": {
+      "type": "string",
+      "pattern": "^[0-9]{6}$"
+    },
+    "sig": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]*$"
+    }
+  },
+  "required": [
+    "sas",
+    "sig"
+  ],
+  "additionalProperties": true
+}

@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RelayStatusParams",
+  "type": "object",
+  "properties": {
+    "connected": {
+      "type": "boolean"
+    },
+    "last_error": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "since": {
+      "type": "integer",
+      "minimum": -9007199254740991,
+      "maximum": 9007199254740991
+    }
+  },
+  "required": [
+    "connected",
+    "last_error",
+    "since"
+  ],
+  "additionalProperties": true
+}

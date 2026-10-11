@@ -1,0 +1,54 @@
+{
+  "cases": [
+    {
+      "path": "/a/b/../c/./"
+    },
+    {
+      "path": "/%2e%2e/a//b/%7e/%2f"
+    },
+    {
+      "path": "/a/../../../b"
+    },
+    {
+      "path": "/a/.."
+    },
+    {
+      "path": "/a//b"
+    },
+    {
+      "path": "/a/%zz"
+    },
+    {
+      "path": "relative"
+    },
+    {
+      "path": "/a?x=1"
+    }
+  ],
+  "expect": [
+    {
+      "path": "/a/c/"
+    },
+    {
+      "path": "/a//b/~/%2F"
+    },
+    {
+      "path": "/b"
+    },
+    {
+      "path": "/"
+    },
+    {
+      "path": "/a//b"
+    },
+    {
+      "error": "invalid_json"
+    },
+    {
+      "error": "invalid_json"
+    },
+    {
+      "error": "invalid_json"
+    }
+  ]
+}

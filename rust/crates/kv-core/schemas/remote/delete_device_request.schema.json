@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DeleteDeviceRequest",
+  "type": "object",
+  "properties": {
+    "by": {
+      "enum": [
+        "device",
+        "recovery"
+      ]
+    },
+    "recovery_code": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "by"
+  ],
+  "additionalProperties": true
+}

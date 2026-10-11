@@ -1,0 +1,109 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ToolResult",
+  "type": "object",
+  "properties": {
+    "status": {
+      "enum": [
+        "ok",
+        "approval_pending",
+        "approval_denied",
+        "approval_expired",
+        "no_approver",
+        "approved_retry_required",
+        "still_pending",
+        "already_consumed"
+      ]
+    },
+    "approval_id": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "expires_at": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "approver": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ToolApprover"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "wait_tool": {
+      "anyOf": [
+        {
+          "const": "credential_wait_approval"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "next_steps": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "result": {}
+  },
+  "required": [
+    "status"
+  ],
+  "additionalProperties": true,
+  "if": {
+    "properties": {
+      "status": {
+        "const": "ok"
+      }
+    }
+  },
+  "else": {
+    "not": {
+      "required": [
+        "result"
+      ]
+    }
+  },
+  "$defs": {
+    "ToolApprover": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "online": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "label",
+        "online"
+      ],
+      "additionalProperties": true
+    }
+  }
+}

@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 
 pub mod agent;
 pub mod mcp_worker;
+pub mod remote;
 mod request;
 pub use request::{operation_digest, request_digest};
 

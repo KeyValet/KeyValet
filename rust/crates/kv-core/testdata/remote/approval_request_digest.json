@@ -1,0 +1,35 @@
+{
+  "input": {
+    "v": 1,
+    "kind": "use",
+    "requester": "dev_srv",
+    "credential": "github/default",
+    "action": {
+      "kind": "http"
+    },
+    "method": "POST",
+    "host": "API.GITHUB.COM",
+    "path": "/repos/guang/./demo/../demo/issues",
+    "query_keys": [
+      "z",
+      "a",
+      "a"
+    ],
+    "body_sha256": "3485eb80d32214d0c2af5413a487205410b73c6bcdb0fce0965e3b06f4a594b5",
+    "headers_digest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "agent": {
+      "runtime": "claude-code",
+      "repo_or_cwd": "/home/u/proj",
+      "uid": 501,
+      "pid": 4242,
+      "exe_sha256": "4914ab477652fe9bd0f1f0e3204887b4c585d2d47634f2687af6050c264022bb"
+    },
+    "purpose": "Create an issue",
+    "nonce": "AAECAwQFBgcICQoLDA0ODw",
+    "exp": 1760200600
+  },
+  "expect": {
+    "canonical": "{\"action\":{\"kind\":\"http\"},\"agent\":{\"exe_sha256\":\"4914ab477652fe9bd0f1f0e3204887b4c585d2d47634f2687af6050c264022bb\",\"pid\":4242,\"repo_or_cwd\":\"/home/u/proj\",\"runtime\":\"claude-code\",\"uid\":501},\"body_sha256\":\"3485eb80d32214d0c2af5413a487205410b73c6bcdb0fce0965e3b06f4a594b5\",\"credential\":\"github/default\",\"exp\":1760200600,\"headers_digest\":\"44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a\",\"host\":\"api.github.com\",\"kind\":\"use\",\"method\":\"POST\",\"nonce\":\"AAECAwQFBgcICQoLDA0ODw\",\"path\":\"/repos/guang/demo/issues\",\"purpose\":\"Create an issue\",\"query_keys\":[\"a\",\"a\",\"z\"],\"requester\":\"dev_srv\",\"v\":1}",
+    "digest": "fe65066bb8da72c795ec85f0d2c2b3ced9e7b8f961cb8c02400fe2af65acd93b"
+  }
+}

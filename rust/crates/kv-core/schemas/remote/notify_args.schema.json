@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "NotifyArgs",
+  "type": "object",
+  "properties": {
+    "policy": {
+      "enum": [
+        "prefer-local",
+        "always-phone",
+        "both"
+      ]
+    }
+  },
+  "required": [
+    "policy"
+  ],
+  "additionalProperties": true
+}

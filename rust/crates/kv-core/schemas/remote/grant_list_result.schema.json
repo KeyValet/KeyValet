@@ -1,0 +1,304 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GrantListResult",
+  "type": "object",
+  "properties": {
+    "grants": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Grant"
+      }
+    }
+  },
+  "required": [
+    "grants"
+  ],
+  "additionalProperties": true,
+  "$defs": {
+    "Grant": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "grant"
+        },
+        "jti": {
+          "type": "string",
+          "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+        },
+        "iss": {
+          "type": "string"
+        },
+        "iss_alg": {
+          "enum": [
+            "ES256",
+            "RS256"
+          ]
+        },
+        "iss_kind": {
+          "type": "string"
+        },
+        "aud": {
+          "type": "string"
+        },
+        "scope": {
+          "$ref": "#/$defs/GrantScope"
+        },
+        "budget": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Budget"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "nbf": {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        "exp": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "origin": {
+          "type": "string"
+        },
+        "confirm": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sig": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]*$"
+        }
+      },
+      "required": [
+        "kind",
+        "jti",
+        "iss",
+        "iss_alg",
+        "iss_kind",
+        "aud",
+        "scope",
+        "nbf",
+        "exp",
+        "origin",
+        "sig"
+      ],
+      "additionalProperties": true,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "scope": {
+                "properties": {
+                  "level": {
+                    "const": "global"
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "aud": {
+                "const": "*"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "scope": {
+                "properties": {
+                  "max_tier": {
+                    "const": "T2"
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "origin": {
+                "const": "settings"
+              }
+            },
+            "anyOf": [
+              {
+                "properties": {
+                  "exp": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                }
+              },
+              {
+                "required": [
+                  "confirm"
+                ],
+                "properties": {
+                  "confirm": {
+                    "type": "string"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "Budget": {
+      "type": "object",
+      "properties": {
+        "calls": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "per": {
+          "enum": [
+            "1h",
+            "24h",
+            "7d"
+          ]
+        },
+        "bytes": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "calls",
+        "per"
+      ],
+      "additionalProperties": true
+    },
+    "GrantScope": {
+      "type": "object",
+      "properties": {
+        "level": {
+          "enum": [
+            "credential",
+            "device",
+            "global"
+          ]
+        },
+        "credential": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "hosts": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "methods": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "paths": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "agent": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "max_tier": {
+          "enum": [
+            "T0",
+            "T1",
+            "T2"
+          ]
+        }
+      },
+      "required": [
+        "level",
+        "max_tier"
+      ],
+      "additionalProperties": true,
+      "if": {
+        "properties": {
+          "level": {
+            "const": "credential"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "credential"
+        ],
+        "properties": {
+          "credential": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

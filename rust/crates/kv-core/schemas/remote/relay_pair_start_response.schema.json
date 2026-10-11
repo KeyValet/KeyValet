@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RelayPairStartResponse",
+  "type": "object",
+  "properties": {
+    "pairing_id": {
+      "type": "string",
+      "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+    }
+  },
+  "required": [
+    "pairing_id"
+  ],
+  "additionalProperties": true
+}

@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DecisionScope",
+  "type": "object",
+  "properties": {
+    "mode": {
+      "enum": [
+        "per_use",
+        "per_credential",
+        "per_session",
+        "remember",
+        "standing"
+      ]
+    },
+    "level": {
+      "enum": [
+        "credential",
+        "device"
+      ]
+    },
+    "until": {
+      "type": "integer",
+      "minimum": -9007199254740991,
+      "maximum": 9007199254740991
+    }
+  },
+  "required": [
+    "mode",
+    "level",
+    "until"
+  ],
+  "additionalProperties": true
+}

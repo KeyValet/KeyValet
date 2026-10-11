@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RelayErrorResponse",
+  "type": "object",
+  "properties": {
+    "error": {
+      "$ref": "#/$defs/RelayError"
+    }
+  },
+  "required": [
+    "error"
+  ],
+  "additionalProperties": true,
+  "$defs": {
+    "RelayError": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "enum": [
+            "unauthorized",
+            "forbidden",
+            "not_found",
+            "rate_limited",
+            "payload_too_large",
+            "bad_envelope",
+            "expired",
+            "conflict"
+          ]
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "additionalProperties": true
+    }
+  }
+}

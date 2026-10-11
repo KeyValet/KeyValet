@@ -1,0 +1,66 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DecideParams",
+  "type": "object",
+  "properties": {
+    "approval_id": {
+      "type": "string",
+      "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+    },
+    "decision": {
+      "enum": [
+        "allow",
+        "deny"
+      ]
+    },
+    "scope": {
+      "$ref": "#/$defs/DecisionScope"
+    },
+    "level": {
+      "enum": [
+        "quick",
+        "strong"
+      ]
+    }
+  },
+  "required": [
+    "approval_id",
+    "decision",
+    "scope",
+    "level"
+  ],
+  "additionalProperties": true,
+  "$defs": {
+    "DecisionScope": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "enum": [
+            "per_use",
+            "per_credential",
+            "per_session",
+            "remember",
+            "standing"
+          ]
+        },
+        "level": {
+          "enum": [
+            "credential",
+            "device"
+          ]
+        },
+        "until": {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "mode",
+        "level",
+        "until"
+      ],
+      "additionalProperties": true
+    }
+  }
+}

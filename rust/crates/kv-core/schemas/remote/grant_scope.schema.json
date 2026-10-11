@@ -1,0 +1,102 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GrantScope",
+  "type": "object",
+  "properties": {
+    "level": {
+      "enum": [
+        "credential",
+        "device",
+        "global"
+      ]
+    },
+    "credential": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "hosts": {
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "methods": {
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "paths": {
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "agent": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "max_tier": {
+      "enum": [
+        "T0",
+        "T1",
+        "T2"
+      ]
+    }
+  },
+  "required": [
+    "level",
+    "max_tier"
+  ],
+  "additionalProperties": true,
+  "if": {
+    "properties": {
+      "level": {
+        "const": "credential"
+      }
+    }
+  },
+  "then": {
+    "required": [
+      "credential"
+    ],
+    "properties": {
+      "credential": {
+        "type": "string"
+      }
+    }
+  }
+}

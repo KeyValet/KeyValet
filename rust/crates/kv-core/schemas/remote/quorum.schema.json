@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Quorum",
+  "type": "object",
+  "properties": {
+    "m": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4294967295
+    },
+    "n": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4294967295
+    },
+    "sigs": {
+      "type": "array",
+      "items": {}
+    }
+  },
+  "required": [
+    "m",
+    "n",
+    "sigs"
+  ],
+  "additionalProperties": true
+}

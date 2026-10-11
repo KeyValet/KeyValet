@@ -14,7 +14,16 @@ members = [
   "crates/kv-mcp",
   "crates/kv-cli",
   "crates/kv-hook",
+  "crates/kv-server",
+  "crates/kv-relay-client",
+  "crates/kv-mobile-core",
+  "crates/kv-push",
 ]
+
+[workspace.dependencies]
+serde_jcs = "=0.2.0"
+jsonschema = { version = "=0.17.1", default-features = false }
+hpke = { version = "=0.12.0", default-features = false, features = ["alloc", "std", "p256"] }
 
 [workspace.package]
 edition = "2021"

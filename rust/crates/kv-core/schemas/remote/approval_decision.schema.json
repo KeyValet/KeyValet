@@ -1,0 +1,140 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ApprovalDecision",
+  "type": "object",
+  "properties": {
+    "approval_id": {
+      "type": "string",
+      "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "nonce": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]*$"
+    },
+    "decision": {
+      "enum": [
+        "allow",
+        "deny"
+      ]
+    },
+    "level": {
+      "enum": [
+        "quick",
+        "strong"
+      ]
+    },
+    "scope": {
+      "$ref": "#/$defs/DecisionScope"
+    },
+    "approver": {
+      "type": "string"
+    },
+    "approver_kind": {
+      "type": "string"
+    },
+    "quorum": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Quorum"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "issued_at": {
+      "type": "integer",
+      "minimum": -9007199254740991,
+      "maximum": 9007199254740991
+    },
+    "reason": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "sig": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]*$"
+    }
+  },
+  "required": [
+    "approval_id",
+    "digest",
+    "nonce",
+    "decision",
+    "level",
+    "scope",
+    "approver",
+    "approver_kind",
+    "issued_at",
+    "sig"
+  ],
+  "additionalProperties": true,
+  "$defs": {
+    "Quorum": {
+      "type": "object",
+      "properties": {
+        "m": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "n": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "sigs": {
+          "type": "array",
+          "items": {}
+        }
+      },
+      "required": [
+        "m",
+        "n",
+        "sigs"
+      ],
+      "additionalProperties": true
+    },
+    "DecisionScope": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "enum": [
+            "per_use",
+            "per_credential",
+            "per_session",
+            "remember",
+            "standing"
+          ]
+        },
+        "level": {
+          "enum": [
+            "credential",
+            "device"
+          ]
+        },
+        "until": {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "mode",
+        "level",
+        "until"
+      ],
+      "additionalProperties": true
+    }
+  }
+}

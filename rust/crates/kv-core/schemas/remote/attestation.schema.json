@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Attestation",
+  "type": "object",
+  "properties": {
+    "kind": {
+      "type": "string"
+    },
+    "doc": {}
+  },
+  "required": [
+    "kind",
+    "doc"
+  ],
+  "additionalProperties": true
+}

@@ -1,0 +1,171 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CanonicalRequest",
+  "type": "object",
+  "properties": {
+    "v": {
+      "const": 1
+    },
+    "kind": {
+      "enum": [
+        "unlock",
+        "use",
+        "admin"
+      ]
+    },
+    "requester": {
+      "type": "string"
+    },
+    "credential": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "action": {
+      "$ref": "#/$defs/CanonicalAction"
+    },
+    "method": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "host": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "path": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "query_keys": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "body_sha256": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "headers_digest": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "agent": {
+      "$ref": "#/$defs/CanonicalAgent"
+    },
+    "purpose": {
+      "type": "string"
+    },
+    "nonce": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{22}$"
+    },
+    "exp": {
+      "type": "integer",
+      "minimum": -9007199254740991,
+      "maximum": 9007199254740991
+    }
+  },
+  "required": [
+    "v",
+    "kind",
+    "requester",
+    "credential",
+    "action",
+    "method",
+    "host",
+    "path",
+    "query_keys",
+    "body_sha256",
+    "headers_digest",
+    "agent",
+    "purpose",
+    "nonce",
+    "exp"
+  ],
+  "additionalProperties": true,
+  "$defs": {
+    "CanonicalAgent": {
+      "type": "object",
+      "properties": {
+        "runtime": {
+          "type": "string"
+        },
+        "repo_or_cwd": {
+          "type": "string"
+        },
+        "uid": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "pid": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "exe_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "runtime",
+        "repo_or_cwd",
+        "uid",
+        "pid",
+        "exe_sha256"
+      ],
+      "additionalProperties": true
+    },
+    "CanonicalAction": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": true
+    }
+  }
+}

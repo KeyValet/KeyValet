@@ -1,0 +1,92 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SubmitApprovalsRequest",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+    },
+    "exp": {
+      "type": "integer",
+      "minimum": -9007199254740991,
+      "maximum": 9007199254740991
+    },
+    "envelopes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Envelope"
+      }
+    }
+  },
+  "required": [
+    "id",
+    "exp",
+    "envelopes"
+  ],
+  "additionalProperties": true,
+  "$defs": {
+    "Envelope": {
+      "type": "object",
+      "properties": {
+        "v": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "type": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+        },
+        "account": {
+          "type": "string"
+        },
+        "from": {
+          "type": "string"
+        },
+        "to": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        "exp": {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        "enc": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]*$"
+        },
+        "ct": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]*$"
+        },
+        "sig": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]*$"
+        }
+      },
+      "required": [
+        "v",
+        "type",
+        "id",
+        "account",
+        "from",
+        "to",
+        "created_at",
+        "exp",
+        "enc",
+        "ct",
+        "sig"
+      ],
+      "additionalProperties": true
+    }
+  }
+}

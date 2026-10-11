@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Agent",
+  "type": "object",
+  "properties": {
+    "runtime": {
+      "type": "string"
+    },
+    "cwd": {
+      "type": "string"
+    },
+    "user": {
+      "type": "string"
+    },
+    "pid": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4294967295
+    }
+  },
+  "required": [
+    "runtime",
+    "cwd",
+    "user",
+    "pid"
+  ],
+  "additionalProperties": true
+}

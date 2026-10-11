@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RevokeGrantArgs",
+  "type": "object",
+  "properties": {
+    "jti": {
+      "type": "string",
+      "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+    }
+  },
+  "required": [
+    "jti"
+  ],
+  "additionalProperties": true
+}

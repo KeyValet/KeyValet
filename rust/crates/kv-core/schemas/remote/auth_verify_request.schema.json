@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AuthVerifyRequest",
+  "type": "object",
+  "properties": {
+    "device_id": {
+      "type": "string"
+    },
+    "challenge": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]*$"
+    },
+    "sig": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]*$"
+    }
+  },
+  "required": [
+    "device_id",
+    "challenge",
+    "sig"
+  ],
+  "additionalProperties": true
+}

@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DirectiveIssueResult",
+  "type": "object",
+  "properties": {
+    "result": {
+      "$ref": "#/$defs/DirectiveResult"
+    }
+  },
+  "required": [
+    "result"
+  ],
+  "additionalProperties": true,
+  "$defs": {
+    "DirectiveResult": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+        },
+        "ok": {
+          "type": "boolean"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "state": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "ok",
+        "error",
+        "state"
+      ],
+      "additionalProperties": true
+    }
+  }
+}

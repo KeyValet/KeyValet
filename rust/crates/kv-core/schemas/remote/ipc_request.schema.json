@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "IpcRequest",
+  "type": "object",
+  "properties": {
+    "op": {
+      "enum": [
+        "remote.relay.inbound",
+        "remote.relay.outbound.poll",
+        "remote.relay.status",
+        "remote.sign_identity",
+        "remote.presence.update",
+        "remote.pending.list",
+        "remote.pending.for_agent",
+        "remote.pending.stop_block",
+        "remote.wait",
+        "remote.decide",
+        "remote.grant.issue",
+        "remote.grant.list",
+        "remote.grant.revoke",
+        "remote.directive.issue",
+        "remote.pair.start",
+        "remote.pair.complete",
+        "remote.pair.confirm",
+        "remote.devices.list",
+        "remote.devices.revoke",
+        "remote.devices.rename",
+        "remote.status"
+      ]
+    },
+    "params": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "op",
+    "params"
+  ],
+  "additionalProperties": true
+}

@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SignIdentityResult",
+  "type": "object",
+  "properties": {
+    "sig_b64": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]*$"
+    }
+  },
+  "required": [
+    "sig_b64"
+  ],
+  "additionalProperties": true
+}

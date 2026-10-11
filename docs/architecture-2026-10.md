@@ -438,6 +438,8 @@ Local SQLite table `nonces(nonce, digest, used_at, exp)`; `INSERT OR FAIL` befor
 
 Selection order: local GUI present and the credential doesn't require the phone → `touchid`; no GUI → paired phone → `remote-phone`; otherwise `tty` (Quick only); Strong required with no Strong-capable approver → deny with an explanation.
 
+> Detailed design for remote approval, pairing and the self-hosted relay (Ubuntu vault + MacBook approver): [remote-approval-architecture-2026-10.zh-CN.md](remote-approval-architecture-2026-10.zh-CN.md) (zh-CN). Where it conflicts with this section, the detailed design wins.
+
 ### 7.5 Pre-authorization capability tokens
 
 For unattended use (CI, overnight jobs):
@@ -584,6 +586,8 @@ Mac/Linux                                  iPhone
  Mac HPKE-encrypts wrap(UMK) to DK_iphone, delivered via relay
 ```
 
+> Detailed design for remote approval, pairing and the self-hosted relay (Ubuntu vault + MacBook approver): [remote-approval-architecture-2026-10.zh-CN.md](remote-approval-architecture-2026-10.zh-CN.md) (zh-CN). Where it conflicts with this section, the detailed design wins.
+
 App Attest lets the relay reject registrations from non-official apps; self-built-app users can disable that check (self-hosted relay config).
 
 ### 8.4 Vault file format v2
@@ -665,6 +669,8 @@ The relay's client is the user-space `kv-relay-client` process — the helper ne
 | Wake (Phase 3) | relay sends `{device_push_token, approval_id}` to `kv-push`; `kv-push` sends APNs (`mutable-content:1`); the NSE pulls the blob from the relay and decrypts it for display (within 30 s) |
 | Ciphertext storage | `PUT /v1/blobs/{id}`: vault ciphertext (with encrypted metadata), UMK wraps, shared-CEK wraps; the server doesn't know what the keys mean |
 | Rate limiting | approval requests per device per minute; blob capacity per user; fair-use quota for Free |
+
+> Detailed design for remote approval, pairing and the self-hosted relay (Ubuntu vault + MacBook approver): [remote-approval-architecture-2026-10.zh-CN.md](remote-approval-architecture-2026-10.zh-CN.md) (zh-CN). Where it conflicts with this section, the detailed design wins.
 
 E2E message envelope: `{ v, from_device, to_device, hpke_enc, ciphertext, sig }` — the signature covers the ciphertext; the relay only checks that the `from_device` signature is valid and belongs to the same user or org.
 

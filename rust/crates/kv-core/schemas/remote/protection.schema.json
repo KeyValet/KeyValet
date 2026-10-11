@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Protection",
+  "type": "object",
+  "properties": {
+    "kind": {
+      "type": "string"
+    },
+    "attestation": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Attestation"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "kind"
+  ],
+  "additionalProperties": true,
+  "$defs": {
+    "Attestation": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "doc": {}
+      },
+      "required": [
+        "kind",
+        "doc"
+      ],
+      "additionalProperties": true
+    }
+  }
+}

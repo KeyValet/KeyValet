@@ -16,8 +16,23 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 chrono = { version = "0.4", default-features = false, features = ["clock"] }
 tempfile = "3"
+serde_jcs.workspace = true
+base64 = "0.22"
+sha2 = { version = "=0.10.9", features = ["oid"] }
+hkdf = "=0.12.4"
+aes-gcm = { version = "0.10", features = ["zeroize"] }
+p256 = { version = "=0.13.2", features = ["ecdsa", "ecdh", "pkcs8"] }
+rsa = "=0.9.10"
+rand_core = { version = "0.6", features = ["std"] }
+zeroize = "=1.9.0"
+tokio = { version = "1", features = ["macros"] }
 
 [dev-dependencies]
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync", "time"] }
 wiremock = "0.6"
 reqwest = { version = "0.12", default-features = false, features = ["rustls-tls"] }
+jsonschema.workspace = true
+hpke.workspace = true
+# Keep the schema validator's transitive dependencies within the workspace MSRV and release age policy.
+time = "=0.3.44"
+powerfmt = "=0.2.0"

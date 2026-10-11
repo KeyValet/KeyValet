@@ -1,0 +1,111 @@
+{
+  "ops": [
+    "remote.relay.inbound",
+    "remote.relay.outbound.poll",
+    "remote.relay.status",
+    "remote.sign_identity",
+    "remote.presence.update",
+    "remote.pending.list",
+    "remote.pending.for_agent",
+    "remote.pending.stop_block",
+    "remote.wait",
+    "remote.decide",
+    "remote.grant.issue",
+    "remote.grant.list",
+    "remote.grant.revoke",
+    "remote.directive.issue",
+    "remote.pair.start",
+    "remote.pair.complete",
+    "remote.pair.confirm",
+    "remote.devices.list",
+    "remote.devices.revoke",
+    "remote.devices.rename",
+    "remote.status"
+  ],
+  "request": {
+    "op": "remote.status",
+    "params": {},
+    "future": {
+      "flag": true
+    }
+  },
+  "response": {
+    "ok": false,
+    "error": {
+      "code": "forbidden",
+      "message": "Access denied",
+      "future": null
+    },
+    "future": true
+  },
+  "expect": {
+    "ops": [
+      "remote.relay.inbound",
+      "remote.relay.outbound.poll",
+      "remote.relay.status",
+      "remote.sign_identity",
+      "remote.presence.update",
+      "remote.pending.list",
+      "remote.pending.for_agent",
+      "remote.pending.stop_block",
+      "remote.wait",
+      "remote.decide",
+      "remote.grant.issue",
+      "remote.grant.list",
+      "remote.grant.revoke",
+      "remote.directive.issue",
+      "remote.pair.start",
+      "remote.pair.complete",
+      "remote.pair.confirm",
+      "remote.devices.list",
+      "remote.devices.revoke",
+      "remote.devices.rename",
+      "remote.status"
+    ],
+    "allowed": {
+      "relay_client": [
+        "remote.relay.inbound",
+        "remote.relay.outbound.poll",
+        "remote.relay.status",
+        "remote.sign_identity"
+      ],
+      "hook": [
+        "remote.pending.for_agent",
+        "remote.pending.stop_block"
+      ],
+      "mcp": [
+        "remote.wait",
+        "remote.pending.list",
+        "remote.status"
+      ],
+      "cli_owner": [
+        "remote.pending.list",
+        "remote.decide",
+        "remote.grant.issue",
+        "remote.grant.list",
+        "remote.grant.revoke",
+        "remote.directive.issue",
+        "remote.pair.start",
+        "remote.pair.complete",
+        "remote.pair.confirm",
+        "remote.devices.list",
+        "remote.devices.revoke",
+        "remote.devices.rename",
+        "remote.status"
+      ],
+      "approval_agent": [
+        "remote.presence.update",
+        "remote.decide",
+        "remote.grant.issue",
+        "remote.directive.issue",
+        "remote.pair.start",
+        "remote.pair.complete",
+        "remote.pair.confirm"
+      ]
+    },
+    "request_roundtrip": true,
+    "response_roundtrip": true,
+    "unknown_op_rejected": true,
+    "false_success_rejected": true
+  }
+}

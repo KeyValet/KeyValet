@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PendingForAgentParams",
+  "type": "object",
+  "properties": {
+    "agent_pid": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4294967295
+    }
+  },
+  "required": [
+    "agent_pid"
+  ],
+  "additionalProperties": true
+}

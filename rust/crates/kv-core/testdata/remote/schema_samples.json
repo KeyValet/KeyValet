@@ -1,0 +1,2013 @@
+{
+  "samples": [
+    {
+      "type": "PublicJwk",
+      "schema": "public_jwk.schema.json",
+      "value": {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "axfR8uEsQkf4vOblY6RA8ncDfYEt6zOg9KE5RdiYwpY",
+        "y": "T-NC4v4af5uO5-tKfA-eFivOM1drMV7Oy7ZAaDe_UfU"
+      }
+    },
+    {
+      "type": "ApprovalKey",
+      "schema": "approval_key.schema.json",
+      "value": {
+        "pub": {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "Xsvk0aYzCkTI9--VHUvxZebGtyHvramF-0FmG8bn_Ww",
+          "y": "hzRkDEmY_343SwbOGmSi7NgqsDY4T7g9mnmxJ6J9UDI"
+        },
+        "alg": "ES256"
+      }
+    },
+    {
+      "type": "Attestation",
+      "schema": "attestation.schema.json",
+      "value": {
+        "kind": "future-attestation",
+        "doc": {
+          "opaque": "test"
+        },
+        "future": 1
+      }
+    },
+    {
+      "type": "DeviceRecord",
+      "schema": "device_record.schema.json",
+      "value": {
+        "device_id": "dev_mac",
+        "label": "MacBook",
+        "os": "macos",
+        "key_kind": "software",
+        "dk_pub": {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "fPJ7GI0DT36KUjgDBLUaw8CJaeJ38hs1pgtI_EdmmXg",
+          "y": "B3dVENuO0EApPZrGn3Qw27p9reY86YIpngS3nSJ4c9E"
+        },
+        "ak_q": {
+          "pub": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "Xsvk0aYzCkTI9--VHUvxZebGtyHvramF-0FmG8bn_Ww",
+            "y": "hzRkDEmY_343SwbOGmSi7NgqsDY4T7g9mnmxJ6J9UDI"
+          },
+          "alg": "ES256"
+        },
+        "ak_s": {
+          "pub": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "4lNKNTLQj7ugLd5lnuYr0AMf4tt4VZbvUJMCRGsDCFI",
+            "y": "4PFXWkxjPMcZ3-5f2oYtdk78lsPzDuAFXELCPxhO2MY"
+          },
+          "alg": "ES256"
+        },
+        "caps": [
+          "approve_quick",
+          "approve_strong"
+        ],
+        "attestation": null
+      }
+    },
+    {
+      "type": "Protection",
+      "schema": "protection.schema.json",
+      "value": {
+        "kind": "tpm2",
+        "attestation": null,
+        "future_status": "unverified"
+      }
+    },
+    {
+      "type": "Requester",
+      "schema": "requester.schema.json",
+      "value": {
+        "device_id": "dev_srv",
+        "label": "srv",
+        "os": "linux",
+        "protection": {
+          "kind": "tpm2",
+          "attestation": null,
+          "future_status": "unverified"
+        }
+      }
+    },
+    {
+      "type": "Agent",
+      "schema": "agent.schema.json",
+      "value": {
+        "runtime": "claude-code",
+        "cwd": "/home/u/proj",
+        "user": "u",
+        "pid": 4242
+      }
+    },
+    {
+      "type": "Credential",
+      "schema": "credential.schema.json",
+      "value": {
+        "ref": "github/default",
+        "kind": "oauth2",
+        "display": "GitHub (test)",
+        "proxy_only": true
+      }
+    },
+    {
+      "type": "Operation",
+      "schema": "operation.schema.json",
+      "value": {
+        "summary": "POST issues · 15 B",
+        "method": "POST",
+        "host": "api.github.com",
+        "path": "/repos/guang/demo/issues",
+        "query_keys": [
+          "a",
+          "a",
+          "z"
+        ],
+        "body_bytes": 15
+      }
+    },
+    {
+      "type": "Delivery",
+      "schema": "delivery.schema.json",
+      "value": {
+        "mode": "silent",
+        "escalate_after_s": 30
+      }
+    },
+    {
+      "type": "EnvelopeHeader",
+      "schema": "envelope_header.schema.json",
+      "value": {
+        "v": 1,
+        "type": "approval_request",
+        "id": "01J9W000000000000000000001",
+        "account": "acct_test",
+        "from": "dev_srv",
+        "to": "dev_mac",
+        "created_at": 1760200000,
+        "exp": 1760200600
+      }
+    },
+    {
+      "type": "Envelope",
+      "schema": "envelope.schema.json",
+      "value": {
+        "v": 1,
+        "type": "approval_request",
+        "id": "01J9W000000000000000000001",
+        "account": "acct_test",
+        "from": "dev_srv",
+        "to": "dev_mac",
+        "created_at": 1760200000,
+        "exp": 1760200600,
+        "enc": "BLAaFyp2pGAsktMkLLiX3eMCTHQN67IVtMawquk8IpGp6FwQdDI32tVv7A4t-6cDeRwA93Acfha9_XxIU4_Hf-I",
+        "ct": "49ClagWJbqJw-b7eZxQUIQV08xqcKelRBC-X8Jn15gV5m7mXfkzr9dAaumkapzBtLgoFXwAX7LzUnKdAzCOdMgdus8Lv-T0NV3ECD_zKgqzgGL6xOFp7YqytYzLq0-wBeC9K9E3dDoWJg8MyF7WPa9WiYSigeIJAAh2WcNwksqvwkDtLNyPzLnLEE5xVuVpxATMRrwdsS1QfDN48BNV1JvYDiT6WOFQt8i4m-2t6dMNgJdao1kyyJN3MsunzndcLtF9BINVUkC5EmQc55O30VSAje5bSFYuPn1dmGfrgsDpIuX9At1YKwKXGO_o0OuQASkOZK-PPHK_ABHmEoP7dL7CyPF_dbRJkXSU2D5ZWv2xzczhTsga6o3wHWBXiI-Zl4-y7oOUHh0fU6kJrNzoWDux_rk5yJmvX1_uLtOXUjBOTfB6Pr0ZOD8vFYtR8QIqfMgcUQ5K8A3USBJkT8jGgo-erfgvc-X4TZHc4CxM56RlfijScpF_8507EcxQoIWGwIqc2VoaW4A00oXbm_Rrxci8HH_FJ3SFm7k6Uk4atFz5iPafxhU9ETPER-xYOvFx_X6jDNCwiJ-RIL_2aHPSRdgDBuwVVO8ybmjcYRcssySvIsL-m-Xm-qtkt10pfM4d-yZ9SHLjIlu4ObiD8f45pwxGd93VYYMf7DfeYZwViDLIcqVo8RlQbRmv64_FkCa1gZRFuA9jXkzDq096lx2AxjwcEGIFDU88PScI1X8mo7dGFZ9X19kPh70EFo0iTey-OR5MJpY24lMdZoEoya5IUquCnGB_rVgZzO3DsLTGgCTlEiQWOXdPs34AebWY6z-QkndymfdiQRGP5EZ-v0wEZaXQUnasiEMp8lXRdHAtdPknOpsCXh4oh3BWv9MJWybw2q5iYpoyTD0qkctcAsMf42g_8MgXa6MhGu9ciKn6LmYV5Z7lAvWvWGeH-YuPcoQJmItlpR3wy2fibJhI4l6I2vUMROdSxvj6d9pm4UnjMs1qXW1oevBn-GFalOuEyK7OqHWECIjD_Pj4-EOgMz39KERqIqoB1DyE4vEImEQqiu3J-VnOXkZ1GpisXv5QWt-0wmBHJ_jxbKShyvoQ1SxKsYjKouEPGtw0fNt--qGMzRDdFwF4kIqLIYji4RcV02500nDQ4eBVOeyhjgJSbCNEU4n1OMYpcKZI14rz894OQXjY6xL5ZxvFS8HGan4YvgGXsYpSoE70CpRnOF0S69Tk8H_SI8oKnaxC1ai8-rkk5SUNXcReYn0bYLBw07TN6aDMumfSB7HXTZu3aKwJnej3gwmnYdDmNdQ",
+        "sig": "fuxFo17pHIEQUEIXklSE_XrFC51mgsJTWZiGUGw3WKnOj4xqZ5Bls88zyp3pqQ5jEVE8H77cT8MA9UmiLhHrVQ"
+      }
+    },
+    {
+      "type": "ApprovalRequest",
+      "schema": "approval_request.schema.json",
+      "value": {
+        "approval_id": "01J9W000000000000000000001",
+        "kind": "use",
+        "digest": "fe65066bb8da72c795ec85f0d2c2b3ced9e7b8f961cb8c02400fe2af65acd93b",
+        "nonce": "AAECAwQFBgcICQoLDA0ODw",
+        "exp": 1760200600,
+        "requester": {
+          "device_id": "dev_srv",
+          "label": "srv",
+          "os": "linux",
+          "protection": {
+            "kind": "tpm2",
+            "attestation": null,
+            "future_status": "unverified"
+          }
+        },
+        "agent": {
+          "runtime": "claude-code",
+          "cwd": "/home/u/proj",
+          "user": "u",
+          "pid": 4242
+        },
+        "credential": {
+          "ref": "github/default",
+          "kind": "oauth2",
+          "display": "GitHub (test)",
+          "proxy_only": true
+        },
+        "operation": {
+          "summary": "POST issues · 15 B",
+          "method": "POST",
+          "host": "api.github.com",
+          "path": "/repos/guang/demo/issues",
+          "query_keys": [
+            "a",
+            "a",
+            "z"
+          ],
+          "body_bytes": 15
+        },
+        "purpose": "Create an issue",
+        "tier": "T1",
+        "min_level": "quick",
+        "scope_options": [
+          "per_use",
+          "per_credential",
+          "per_session",
+          "remember:1h",
+          "remember:8h",
+          "remember:24h",
+          "standing:credential",
+          "standing:device"
+        ],
+        "requested_scope": "per_credential",
+        "merged_count": 1,
+        "delivery": {
+          "mode": "silent",
+          "escalate_after_s": 30
+        }
+      }
+    },
+    {
+      "type": "DecisionScope",
+      "schema": "decision_scope.schema.json",
+      "value": {
+        "mode": "per_use",
+        "level": "credential",
+        "until": 0
+      }
+    },
+    {
+      "type": "Quorum",
+      "schema": "quorum.schema.json",
+      "value": {
+        "m": 2,
+        "n": 3,
+        "sigs": [
+          {
+            "future": "opaque"
+          }
+        ]
+      }
+    },
+    {
+      "type": "ApprovalDecision",
+      "schema": "approval_decision.schema.json",
+      "value": {
+        "approval_id": "01J9W000000000000000000001",
+        "digest": "fe65066bb8da72c795ec85f0d2c2b3ced9e7b8f961cb8c02400fe2af65acd93b",
+        "nonce": "AAECAwQFBgcICQoLDA0ODw",
+        "decision": "allow",
+        "level": "quick",
+        "scope": {
+          "mode": "per_use",
+          "level": "credential",
+          "until": 0
+        },
+        "approver": "dev_mac",
+        "approver_kind": "device",
+        "quorum": null,
+        "issued_at": 1760200012,
+        "future_binding": {
+          "flag": true,
+          "nullable": null
+        },
+        "sig": "AUFENkNWHny40WxJM4iJ6M9vnmzIdGxYypo4iQNV_ryUyyrhTvagFMPO68DVyldwWRL4pHEJo9KtH23mbmZWAw"
+      }
+    },
+    {
+      "type": "GrantScope",
+      "schema": "grant_scope.schema.json",
+      "value": {
+        "level": "credential",
+        "credential": "github/default",
+        "hosts": [
+          "api.github.com"
+        ],
+        "methods": [
+          "GET",
+          "HEAD"
+        ],
+        "max_tier": "T1"
+      }
+    },
+    {
+      "type": "Budget",
+      "schema": "budget.schema.json",
+      "value": {
+        "calls": 500,
+        "per": "24h"
+      }
+    },
+    {
+      "type": "Grant",
+      "schema": "grant.schema.json",
+      "value": {
+        "kind": "grant",
+        "jti": "01J9W000000000000000000001",
+        "iss": "dev_mac",
+        "iss_alg": "ES256",
+        "iss_kind": "device",
+        "aud": "dev_srv",
+        "scope": {
+          "level": "credential",
+          "credential": "github/default",
+          "hosts": [
+            "api.github.com"
+          ],
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "max_tier": "T1"
+        },
+        "nbf": 1760200000,
+        "exp": null,
+        "origin": "settings",
+        "future_policy": {
+          "version": 2
+        },
+        "sig": "kiHtGjpbOQx-VoJ7n1bw4u1cy9VIjoGf8hyUVyC8Uy5_bgd6An3LYVe_wJZ_cojxlEtF4_UbouNujLh4FZdglQ"
+      }
+    },
+    {
+      "type": "UnsignedGrant",
+      "schema": "unsigned_grant.schema.json",
+      "value": {
+        "kind": "grant",
+        "jti": "01J9W000000000000000000001",
+        "iss": "dev_mac",
+        "iss_alg": "ES256",
+        "iss_kind": "device",
+        "aud": "dev_srv",
+        "scope": {
+          "level": "credential",
+          "credential": "github/default",
+          "hosts": [
+            "api.github.com"
+          ],
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "max_tier": "T1"
+        },
+        "nbf": 1760200000,
+        "exp": null,
+        "origin": "settings",
+        "future_policy": {
+          "version": 2
+        }
+      }
+    },
+    {
+      "type": "EmptyArgs",
+      "schema": "empty_args.schema.json",
+      "value": {}
+    },
+    {
+      "type": "SetModeArgs",
+      "schema": "set_mode_args.schema.json",
+      "value": {
+        "mode": "per_use"
+      }
+    },
+    {
+      "type": "RevokeGrantArgs",
+      "schema": "revoke_grant_args.schema.json",
+      "value": {
+        "jti": "01J9W000000000000000000001"
+      }
+    },
+    {
+      "type": "SetUnlockTtlArgs",
+      "schema": "set_unlock_ttl_args.schema.json",
+      "value": {
+        "seconds": 43200
+      }
+    },
+    {
+      "type": "SetClassArgs",
+      "schema": "set_class_args.schema.json",
+      "value": {
+        "name": "batch",
+        "match": {
+          "host": "api.openai.com"
+        },
+        "exp_s": 86400
+      }
+    },
+    {
+      "type": "SetDeviceLabelArgs",
+      "schema": "set_device_label_args.schema.json",
+      "value": {
+        "label": "srv"
+      }
+    },
+    {
+      "type": "RevokeDeviceArgs",
+      "schema": "revoke_device_args.schema.json",
+      "value": {
+        "device_id": "dev_mac"
+      }
+    },
+    {
+      "type": "NotifyArgs",
+      "schema": "notify_args.schema.json",
+      "value": {
+        "policy": "always-phone"
+      }
+    },
+    {
+      "type": "QueryAuditArgs",
+      "schema": "query_audit_args.schema.json",
+      "value": {
+        "since": 1760200012,
+        "limit": 200
+      }
+    },
+    {
+      "type": "CancelApprovalArgs",
+      "schema": "cancel_approval_args.schema.json",
+      "value": {
+        "approval_id": "01J9W000000000000000000001"
+      }
+    },
+    {
+      "type": "Directive",
+      "schema": "directive.schema.json",
+      "value": {
+        "kind": "directive",
+        "id": "01J9W000000000000000000001",
+        "iss": "dev_mac",
+        "iss_alg": "ES256",
+        "iss_kind": "device",
+        "aud": "dev_srv",
+        "op": "set_mode",
+        "args": {
+          "mode": "per_use",
+          "future_option": null
+        },
+        "nonce": "AAECAwQFBgcICQoLDA0ODw",
+        "exp": 1760200312,
+        "sig": "HAXsBhadNvh4TccLcyxT12W6mrQqRDH5r4nFvOtmQsD6IhiT_aaVDYxev7ylhjgw9kDZSwqn5Yv-J2ejEhRPnA"
+      }
+    },
+    {
+      "type": "UnsignedDirective",
+      "schema": "unsigned_directive.schema.json",
+      "value": {
+        "kind": "directive",
+        "id": "01J9W000000000000000000001",
+        "iss": "dev_mac",
+        "iss_alg": "ES256",
+        "iss_kind": "device",
+        "aud": "dev_srv",
+        "op": "set_mode",
+        "args": {
+          "mode": "per_use",
+          "future_option": null
+        },
+        "nonce": "AAECAwQFBgcICQoLDA0ODw",
+        "exp": 1760200312
+      }
+    },
+    {
+      "type": "DirectiveResult",
+      "schema": "directive_result.schema.json",
+      "value": {
+        "id": "01J9W000000000000000000001",
+        "ok": true,
+        "error": null,
+        "state": {
+          "mode": "per_use"
+        }
+      }
+    },
+    {
+      "type": "PresenceHint",
+      "schema": "presence_hint.schema.json",
+      "value": {
+        "device_id": "dev_mac",
+        "state": "present",
+        "since": 1760200012,
+        "sent_at": 1760200012
+      }
+    },
+    {
+      "type": "PairOffer",
+      "schema": "pair_offer.schema.json",
+      "value": {
+        "token_hash": "be45cb2605bf36bebde684841a28f0fd43c69850a3dce5fedba69928ee3a8991",
+        "initiator": {
+          "device_id": "dev_srv",
+          "label": "srv",
+          "os": "linux",
+          "key_kind": "software",
+          "dk_pub": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "axfR8uEsQkf4vOblY6RA8ncDfYEt6zOg9KE5RdiYwpY",
+            "y": "T-NC4v4af5uO5-tKfA-eFivOM1drMV7Oy7ZAaDe_UfU"
+          },
+          "ak_q": null,
+          "ak_s": null,
+          "caps": [
+            "execute"
+          ],
+          "attestation": null
+        }
+      }
+    },
+    {
+      "type": "PairAccept",
+      "schema": "pair_accept.schema.json",
+      "value": {
+        "token": "AAECAwQFBgcICQoLDA0ODw",
+        "joiner": {
+          "device_id": "dev_mac",
+          "label": "MacBook",
+          "os": "macos",
+          "key_kind": "software",
+          "dk_pub": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "fPJ7GI0DT36KUjgDBLUaw8CJaeJ38hs1pgtI_EdmmXg",
+            "y": "B3dVENuO0EApPZrGn3Qw27p9reY86YIpngS3nSJ4c9E"
+          },
+          "ak_q": {
+            "pub": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "Xsvk0aYzCkTI9--VHUvxZebGtyHvramF-0FmG8bn_Ww",
+              "y": "hzRkDEmY_343SwbOGmSi7NgqsDY4T7g9mnmxJ6J9UDI"
+            },
+            "alg": "ES256"
+          },
+          "ak_s": {
+            "pub": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "4lNKNTLQj7ugLd5lnuYr0AMf4tt4VZbvUJMCRGsDCFI",
+              "y": "4PFXWkxjPMcZ3-5f2oYtdk78lsPzDuAFXELCPxhO2MY"
+            },
+            "alg": "ES256"
+          },
+          "caps": [
+            "approve_quick",
+            "approve_strong"
+          ],
+          "attestation": null
+        }
+      }
+    },
+    {
+      "type": "PairConfirm",
+      "schema": "pair_confirm.schema.json",
+      "value": {
+        "sas": "957664",
+        "sig": "kedCD8HVhESkcYo8DpvQAHI4SBfZH26QbVpcyjAdQD8J2ILUhMETJJqoeJKVFQRJM3DUsB53UAo1wARn_IxvPw"
+      }
+    },
+    {
+      "type": "ApprovalEscalate",
+      "schema": "approval_escalate.schema.json",
+      "value": {
+        "approval_id": "01J9W000000000000000000001"
+      }
+    },
+    {
+      "type": "ApprovalCancel",
+      "schema": "approval_cancel.schema.json",
+      "value": {
+        "approval_id": "01J9W000000000000000000001"
+      }
+    },
+    {
+      "type": "DeviceRevoke",
+      "schema": "device_revoke.schema.json",
+      "value": {
+        "device_id": "dev_mac"
+      }
+    },
+    {
+      "type": "ToolApprover",
+      "schema": "tool_approver.schema.json",
+      "value": {
+        "label": "MacBook",
+        "online": false
+      }
+    },
+    {
+      "type": "ToolResult",
+      "schema": "tool_result.schema.json",
+      "value": {
+        "status": "approval_pending",
+        "approval_id": "01J9W000000000000000000001",
+        "expires_at": 1760200312,
+        "approver": {
+          "label": "MacBook",
+          "online": false
+        },
+        "wait_tool": "credential_wait_approval",
+        "next_steps": "Wait for this approval without sending a duplicate request."
+      }
+    },
+    {
+      "type": "CanonicalAction",
+      "schema": "canonical_action.schema.json",
+      "value": {
+        "kind": "http"
+      }
+    },
+    {
+      "type": "CanonicalAgent",
+      "schema": "canonical_agent.schema.json",
+      "value": {
+        "runtime": "claude-code",
+        "repo_or_cwd": "/home/u/proj",
+        "uid": 501,
+        "pid": 4242,
+        "exe_sha256": "4914ab477652fe9bd0f1f0e3204887b4c585d2d47634f2687af6050c264022bb"
+      }
+    },
+    {
+      "type": "CanonicalRequest",
+      "schema": "canonical_request.schema.json",
+      "value": {
+        "v": 1,
+        "kind": "use",
+        "requester": "dev_srv",
+        "credential": "github/default",
+        "action": {
+          "kind": "http"
+        },
+        "method": "POST",
+        "host": "API.GITHUB.COM",
+        "path": "/repos/guang/./demo/../demo/issues",
+        "query_keys": [
+          "z",
+          "a",
+          "a"
+        ],
+        "body_sha256": "3485eb80d32214d0c2af5413a487205410b73c6bcdb0fce0965e3b06f4a594b5",
+        "headers_digest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+        "agent": {
+          "runtime": "claude-code",
+          "repo_or_cwd": "/home/u/proj",
+          "uid": 501,
+          "pid": 4242,
+          "exe_sha256": "4914ab477652fe9bd0f1f0e3204887b4c585d2d47634f2687af6050c264022bb"
+        },
+        "purpose": "Create an issue",
+        "nonce": "AAECAwQFBgcICQoLDA0ODw",
+        "exp": 1760200600
+      }
+    },
+    {
+      "type": "PresenceSignals",
+      "schema": "presence_signals.schema.json",
+      "value": {
+        "graphical_session": true,
+        "session_active": true,
+        "screen_locked": false,
+        "screensaver_active": false,
+        "idle_seconds": 1,
+        "display_connected": true,
+        "display_awake": true,
+        "remote_session_active": false,
+        "approval_channel_available": true
+      }
+    },
+    {
+      "type": "PresenceState",
+      "schema": "presence_state.schema.json",
+      "value": {
+        "state": "present",
+        "since": 1760200012,
+        "signals": {
+          "graphical_session": true,
+          "session_active": true,
+          "screen_locked": false,
+          "screensaver_active": false,
+          "idle_seconds": 1,
+          "display_connected": true,
+          "display_awake": true,
+          "remote_session_active": false,
+          "approval_channel_available": true
+        }
+      }
+    },
+    {
+      "type": "RegisterDeviceRequest",
+      "schema": "register_device_request.schema.json",
+      "value": {
+        "device_id": "dev_mac",
+        "label": "MacBook",
+        "os": "macos",
+        "key_kind": "software",
+        "dk_pub": {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "fPJ7GI0DT36KUjgDBLUaw8CJaeJ38hs1pgtI_EdmmXg",
+          "y": "B3dVENuO0EApPZrGn3Qw27p9reY86YIpngS3nSJ4c9E"
+        },
+        "ak_q": {
+          "pub": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "Xsvk0aYzCkTI9--VHUvxZebGtyHvramF-0FmG8bn_Ww",
+            "y": "hzRkDEmY_343SwbOGmSi7NgqsDY4T7g9mnmxJ6J9UDI"
+          },
+          "alg": "ES256"
+        },
+        "ak_s": {
+          "pub": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "4lNKNTLQj7ugLd5lnuYr0AMf4tt4VZbvUJMCRGsDCFI",
+            "y": "4PFXWkxjPMcZ3-5f2oYtdk78lsPzDuAFXELCPxhO2MY"
+          },
+          "alg": "ES256"
+        },
+        "caps": [
+          "approve_quick",
+          "approve_strong"
+        ],
+        "attestation": null,
+        "push_token": {
+          "provider": "apns",
+          "token": "test-token"
+        }
+      }
+    },
+    {
+      "type": "RegisterDeviceResponse",
+      "schema": "register_device_response.schema.json",
+      "value": {
+        "account_id": "acct_test",
+        "device_id": "dev_mac"
+      }
+    },
+    {
+      "type": "ChallengeRequest",
+      "schema": "challenge_request.schema.json",
+      "value": {
+        "device_id": "dev_srv"
+      }
+    },
+    {
+      "type": "ChallengeResponse",
+      "schema": "challenge_response.schema.json",
+      "value": {
+        "challenge": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "exp": 1760200072
+      }
+    },
+    {
+      "type": "AuthVerifyRequest",
+      "schema": "auth_verify_request.schema.json",
+      "value": {
+        "device_id": "dev_srv",
+        "challenge": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "sig": "fuxFo17pHIEQUEIXklSE_XrFC51mgsJTWZiGUGw3WKnOj4xqZ5Bls88zyp3pqQ5jEVE8H77cT8MA9UmiLhHrVQ"
+      }
+    },
+    {
+      "type": "AuthVerifyResponse",
+      "schema": "auth_verify_response.schema.json",
+      "value": {
+        "session_token": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "exp": 1760286412
+      }
+    },
+    {
+      "type": "RelayPairStartRequest",
+      "schema": "relay_pair_start_request.schema.json",
+      "value": {
+        "token_hash": "be45cb2605bf36bebde684841a28f0fd43c69850a3dce5fedba69928ee3a8991",
+        "initiator": {
+          "device_id": "dev_srv",
+          "label": "srv",
+          "os": "linux",
+          "key_kind": "software",
+          "dk_pub": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "axfR8uEsQkf4vOblY6RA8ncDfYEt6zOg9KE5RdiYwpY",
+            "y": "T-NC4v4af5uO5-tKfA-eFivOM1drMV7Oy7ZAaDe_UfU"
+          },
+          "ak_q": null,
+          "ak_s": null,
+          "caps": [
+            "execute"
+          ],
+          "attestation": null
+        },
+        "exp": 1760200612
+      }
+    },
+    {
+      "type": "RelayPairStartResponse",
+      "schema": "relay_pair_start_response.schema.json",
+      "value": {
+        "pairing_id": "01J9W000000000000000000001"
+      }
+    },
+    {
+      "type": "RelayPairCompleteRequest",
+      "schema": "relay_pair_complete_request.schema.json",
+      "value": {
+        "token": "AAECAwQFBgcICQoLDA0ODw",
+        "joiner": {
+          "device_id": "dev_mac",
+          "label": "MacBook",
+          "os": "macos",
+          "key_kind": "software",
+          "dk_pub": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "fPJ7GI0DT36KUjgDBLUaw8CJaeJ38hs1pgtI_EdmmXg",
+            "y": "B3dVENuO0EApPZrGn3Qw27p9reY86YIpngS3nSJ4c9E"
+          },
+          "ak_q": {
+            "pub": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "Xsvk0aYzCkTI9--VHUvxZebGtyHvramF-0FmG8bn_Ww",
+              "y": "hzRkDEmY_343SwbOGmSi7NgqsDY4T7g9mnmxJ6J9UDI"
+            },
+            "alg": "ES256"
+          },
+          "ak_s": {
+            "pub": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "4lNKNTLQj7ugLd5lnuYr0AMf4tt4VZbvUJMCRGsDCFI",
+              "y": "4PFXWkxjPMcZ3-5f2oYtdk78lsPzDuAFXELCPxhO2MY"
+            },
+            "alg": "ES256"
+          },
+          "caps": [
+            "approve_quick",
+            "approve_strong"
+          ],
+          "attestation": null
+        }
+      }
+    },
+    {
+      "type": "RelayPairCompleteResponse",
+      "schema": "relay_pair_complete_response.schema.json",
+      "value": {
+        "pairing_id": "01J9W000000000000000000001",
+        "initiator": {
+          "device_id": "dev_srv",
+          "label": "srv",
+          "os": "linux",
+          "key_kind": "software",
+          "dk_pub": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "axfR8uEsQkf4vOblY6RA8ncDfYEt6zOg9KE5RdiYwpY",
+            "y": "T-NC4v4af5uO5-tKfA-eFivOM1drMV7Oy7ZAaDe_UfU"
+          },
+          "ak_q": null,
+          "ak_s": null,
+          "caps": [
+            "execute"
+          ],
+          "attestation": null
+        }
+      }
+    },
+    {
+      "type": "PairFinishRequest",
+      "schema": "pair_finish_request.schema.json",
+      "value": {
+        "pairing_id": "01J9W000000000000000000001",
+        "confirm": {
+          "sas": "957664",
+          "sig": "kedCD8HVhESkcYo8DpvQAHI4SBfZH26QbVpcyjAdQD8J2ILUhMETJJqoeJKVFQRJM3DUsB53UAo1wARn_IxvPw"
+        }
+      }
+    },
+    {
+      "type": "SubmitApprovalsRequest",
+      "schema": "submit_approvals_request.schema.json",
+      "value": {
+        "id": "01J9W000000000000000000001",
+        "exp": 1760200312,
+        "envelopes": [
+          {
+            "v": 1,
+            "type": "approval_request",
+            "id": "01J9W000000000000000000001",
+            "account": "acct_test",
+            "from": "dev_srv",
+            "to": "dev_mac",
+            "created_at": 1760200000,
+            "exp": 1760200600,
+            "enc": "BLAaFyp2pGAsktMkLLiX3eMCTHQN67IVtMawquk8IpGp6FwQdDI32tVv7A4t-6cDeRwA93Acfha9_XxIU4_Hf-I",
+            "ct": "49ClagWJbqJw-b7eZxQUIQV08xqcKelRBC-X8Jn15gV5m7mXfkzr9dAaumkapzBtLgoFXwAX7LzUnKdAzCOdMgdus8Lv-T0NV3ECD_zKgqzgGL6xOFp7YqytYzLq0-wBeC9K9E3dDoWJg8MyF7WPa9WiYSigeIJAAh2WcNwksqvwkDtLNyPzLnLEE5xVuVpxATMRrwdsS1QfDN48BNV1JvYDiT6WOFQt8i4m-2t6dMNgJdao1kyyJN3MsunzndcLtF9BINVUkC5EmQc55O30VSAje5bSFYuPn1dmGfrgsDpIuX9At1YKwKXGO_o0OuQASkOZK-PPHK_ABHmEoP7dL7CyPF_dbRJkXSU2D5ZWv2xzczhTsga6o3wHWBXiI-Zl4-y7oOUHh0fU6kJrNzoWDux_rk5yJmvX1_uLtOXUjBOTfB6Pr0ZOD8vFYtR8QIqfMgcUQ5K8A3USBJkT8jGgo-erfgvc-X4TZHc4CxM56RlfijScpF_8507EcxQoIWGwIqc2VoaW4A00oXbm_Rrxci8HH_FJ3SFm7k6Uk4atFz5iPafxhU9ETPER-xYOvFx_X6jDNCwiJ-RIL_2aHPSRdgDBuwVVO8ybmjcYRcssySvIsL-m-Xm-qtkt10pfM4d-yZ9SHLjIlu4ObiD8f45pwxGd93VYYMf7DfeYZwViDLIcqVo8RlQbRmv64_FkCa1gZRFuA9jXkzDq096lx2AxjwcEGIFDU88PScI1X8mo7dGFZ9X19kPh70EFo0iTey-OR5MJpY24lMdZoEoya5IUquCnGB_rVgZzO3DsLTGgCTlEiQWOXdPs34AebWY6z-QkndymfdiQRGP5EZ-v0wEZaXQUnasiEMp8lXRdHAtdPknOpsCXh4oh3BWv9MJWybw2q5iYpoyTD0qkctcAsMf42g_8MgXa6MhGu9ciKn6LmYV5Z7lAvWvWGeH-YuPcoQJmItlpR3wy2fibJhI4l6I2vUMROdSxvj6d9pm4UnjMs1qXW1oevBn-GFalOuEyK7OqHWECIjD_Pj4-EOgMz39KERqIqoB1DyE4vEImEQqiu3J-VnOXkZ1GpisXv5QWt-0wmBHJ_jxbKShyvoQ1SxKsYjKouEPGtw0fNt--qGMzRDdFwF4kIqLIYji4RcV02500nDQ4eBVOeyhjgJSbCNEU4n1OMYpcKZI14rz894OQXjY6xL5ZxvFS8HGan4YvgGXsYpSoE70CpRnOF0S69Tk8H_SI8oKnaxC1ai8-rkk5SUNXcReYn0bYLBw07TN6aDMumfSB7HXTZu3aKwJnej3gwmnYdDmNdQ",
+            "sig": "fuxFo17pHIEQUEIXklSE_XrFC51mgsJTWZiGUGw3WKnOj4xqZ5Bls88zyp3pqQ5jEVE8H77cT8MA9UmiLhHrVQ"
+          }
+        ]
+      }
+    },
+    {
+      "type": "ReplyApprovalRequest",
+      "schema": "reply_approval_request.schema.json",
+      "value": {
+        "envelope": {
+          "v": 1,
+          "type": "approval_request",
+          "id": "01J9W000000000000000000001",
+          "account": "acct_test",
+          "from": "dev_srv",
+          "to": "dev_mac",
+          "created_at": 1760200000,
+          "exp": 1760200600,
+          "enc": "BLAaFyp2pGAsktMkLLiX3eMCTHQN67IVtMawquk8IpGp6FwQdDI32tVv7A4t-6cDeRwA93Acfha9_XxIU4_Hf-I",
+          "ct": "49ClagWJbqJw-b7eZxQUIQV08xqcKelRBC-X8Jn15gV5m7mXfkzr9dAaumkapzBtLgoFXwAX7LzUnKdAzCOdMgdus8Lv-T0NV3ECD_zKgqzgGL6xOFp7YqytYzLq0-wBeC9K9E3dDoWJg8MyF7WPa9WiYSigeIJAAh2WcNwksqvwkDtLNyPzLnLEE5xVuVpxATMRrwdsS1QfDN48BNV1JvYDiT6WOFQt8i4m-2t6dMNgJdao1kyyJN3MsunzndcLtF9BINVUkC5EmQc55O30VSAje5bSFYuPn1dmGfrgsDpIuX9At1YKwKXGO_o0OuQASkOZK-PPHK_ABHmEoP7dL7CyPF_dbRJkXSU2D5ZWv2xzczhTsga6o3wHWBXiI-Zl4-y7oOUHh0fU6kJrNzoWDux_rk5yJmvX1_uLtOXUjBOTfB6Pr0ZOD8vFYtR8QIqfMgcUQ5K8A3USBJkT8jGgo-erfgvc-X4TZHc4CxM56RlfijScpF_8507EcxQoIWGwIqc2VoaW4A00oXbm_Rrxci8HH_FJ3SFm7k6Uk4atFz5iPafxhU9ETPER-xYOvFx_X6jDNCwiJ-RIL_2aHPSRdgDBuwVVO8ybmjcYRcssySvIsL-m-Xm-qtkt10pfM4d-yZ9SHLjIlu4ObiD8f45pwxGd93VYYMf7DfeYZwViDLIcqVo8RlQbRmv64_FkCa1gZRFuA9jXkzDq096lx2AxjwcEGIFDU88PScI1X8mo7dGFZ9X19kPh70EFo0iTey-OR5MJpY24lMdZoEoya5IUquCnGB_rVgZzO3DsLTGgCTlEiQWOXdPs34AebWY6z-QkndymfdiQRGP5EZ-v0wEZaXQUnasiEMp8lXRdHAtdPknOpsCXh4oh3BWv9MJWybw2q5iYpoyTD0qkctcAsMf42g_8MgXa6MhGu9ciKn6LmYV5Z7lAvWvWGeH-YuPcoQJmItlpR3wy2fibJhI4l6I2vUMROdSxvj6d9pm4UnjMs1qXW1oevBn-GFalOuEyK7OqHWECIjD_Pj4-EOgMz39KERqIqoB1DyE4vEImEQqiu3J-VnOXkZ1GpisXv5QWt-0wmBHJ_jxbKShyvoQ1SxKsYjKouEPGtw0fNt--qGMzRDdFwF4kIqLIYji4RcV02500nDQ4eBVOeyhjgJSbCNEU4n1OMYpcKZI14rz894OQXjY6xL5ZxvFS8HGan4YvgGXsYpSoE70CpRnOF0S69Tk8H_SI8oKnaxC1ai8-rkk5SUNXcReYn0bYLBw07TN6aDMumfSB7HXTZu3aKwJnej3gwmnYdDmNdQ",
+          "sig": "fuxFo17pHIEQUEIXklSE_XrFC51mgsJTWZiGUGw3WKnOj4xqZ5Bls88zyp3pqQ5jEVE8H77cT8MA9UmiLhHrVQ"
+        }
+      }
+    },
+    {
+      "type": "EnvelopesResponse",
+      "schema": "envelopes_response.schema.json",
+      "value": {
+        "envelopes": [
+          {
+            "v": 1,
+            "type": "approval_request",
+            "id": "01J9W000000000000000000001",
+            "account": "acct_test",
+            "from": "dev_srv",
+            "to": "dev_mac",
+            "created_at": 1760200000,
+            "exp": 1760200600,
+            "enc": "BLAaFyp2pGAsktMkLLiX3eMCTHQN67IVtMawquk8IpGp6FwQdDI32tVv7A4t-6cDeRwA93Acfha9_XxIU4_Hf-I",
+            "ct": "49ClagWJbqJw-b7eZxQUIQV08xqcKelRBC-X8Jn15gV5m7mXfkzr9dAaumkapzBtLgoFXwAX7LzUnKdAzCOdMgdus8Lv-T0NV3ECD_zKgqzgGL6xOFp7YqytYzLq0-wBeC9K9E3dDoWJg8MyF7WPa9WiYSigeIJAAh2WcNwksqvwkDtLNyPzLnLEE5xVuVpxATMRrwdsS1QfDN48BNV1JvYDiT6WOFQt8i4m-2t6dMNgJdao1kyyJN3MsunzndcLtF9BINVUkC5EmQc55O30VSAje5bSFYuPn1dmGfrgsDpIuX9At1YKwKXGO_o0OuQASkOZK-PPHK_ABHmEoP7dL7CyPF_dbRJkXSU2D5ZWv2xzczhTsga6o3wHWBXiI-Zl4-y7oOUHh0fU6kJrNzoWDux_rk5yJmvX1_uLtOXUjBOTfB6Pr0ZOD8vFYtR8QIqfMgcUQ5K8A3USBJkT8jGgo-erfgvc-X4TZHc4CxM56RlfijScpF_8507EcxQoIWGwIqc2VoaW4A00oXbm_Rrxci8HH_FJ3SFm7k6Uk4atFz5iPafxhU9ETPER-xYOvFx_X6jDNCwiJ-RIL_2aHPSRdgDBuwVVO8ybmjcYRcssySvIsL-m-Xm-qtkt10pfM4d-yZ9SHLjIlu4ObiD8f45pwxGd93VYYMf7DfeYZwViDLIcqVo8RlQbRmv64_FkCa1gZRFuA9jXkzDq096lx2AxjwcEGIFDU88PScI1X8mo7dGFZ9X19kPh70EFo0iTey-OR5MJpY24lMdZoEoya5IUquCnGB_rVgZzO3DsLTGgCTlEiQWOXdPs34AebWY6z-QkndymfdiQRGP5EZ-v0wEZaXQUnasiEMp8lXRdHAtdPknOpsCXh4oh3BWv9MJWybw2q5iYpoyTD0qkctcAsMf42g_8MgXa6MhGu9ciKn6LmYV5Z7lAvWvWGeH-YuPcoQJmItlpR3wy2fibJhI4l6I2vUMROdSxvj6d9pm4UnjMs1qXW1oevBn-GFalOuEyK7OqHWECIjD_Pj4-EOgMz39KERqIqoB1DyE4vEImEQqiu3J-VnOXkZ1GpisXv5QWt-0wmBHJ_jxbKShyvoQ1SxKsYjKouEPGtw0fNt--qGMzRDdFwF4kIqLIYji4RcV02500nDQ4eBVOeyhjgJSbCNEU4n1OMYpcKZI14rz894OQXjY6xL5ZxvFS8HGan4YvgGXsYpSoE70CpRnOF0S69Tk8H_SI8oKnaxC1ai8-rkk5SUNXcReYn0bYLBw07TN6aDMumfSB7HXTZu3aKwJnej3gwmnYdDmNdQ",
+            "sig": "fuxFo17pHIEQUEIXklSE_XrFC51mgsJTWZiGUGw3WKnOj4xqZ5Bls88zyp3pqQ5jEVE8H77cT8MA9UmiLhHrVQ"
+          }
+        ]
+      }
+    },
+    {
+      "type": "SendMessagesRequest",
+      "schema": "send_messages_request.schema.json",
+      "value": {
+        "envelopes": [
+          {
+            "v": 1,
+            "type": "approval_request",
+            "id": "01J9W000000000000000000001",
+            "account": "acct_test",
+            "from": "dev_srv",
+            "to": "dev_mac",
+            "created_at": 1760200000,
+            "exp": 1760200600,
+            "enc": "BLAaFyp2pGAsktMkLLiX3eMCTHQN67IVtMawquk8IpGp6FwQdDI32tVv7A4t-6cDeRwA93Acfha9_XxIU4_Hf-I",
+            "ct": "49ClagWJbqJw-b7eZxQUIQV08xqcKelRBC-X8Jn15gV5m7mXfkzr9dAaumkapzBtLgoFXwAX7LzUnKdAzCOdMgdus8Lv-T0NV3ECD_zKgqzgGL6xOFp7YqytYzLq0-wBeC9K9E3dDoWJg8MyF7WPa9WiYSigeIJAAh2WcNwksqvwkDtLNyPzLnLEE5xVuVpxATMRrwdsS1QfDN48BNV1JvYDiT6WOFQt8i4m-2t6dMNgJdao1kyyJN3MsunzndcLtF9BINVUkC5EmQc55O30VSAje5bSFYuPn1dmGfrgsDpIuX9At1YKwKXGO_o0OuQASkOZK-PPHK_ABHmEoP7dL7CyPF_dbRJkXSU2D5ZWv2xzczhTsga6o3wHWBXiI-Zl4-y7oOUHh0fU6kJrNzoWDux_rk5yJmvX1_uLtOXUjBOTfB6Pr0ZOD8vFYtR8QIqfMgcUQ5K8A3USBJkT8jGgo-erfgvc-X4TZHc4CxM56RlfijScpF_8507EcxQoIWGwIqc2VoaW4A00oXbm_Rrxci8HH_FJ3SFm7k6Uk4atFz5iPafxhU9ETPER-xYOvFx_X6jDNCwiJ-RIL_2aHPSRdgDBuwVVO8ybmjcYRcssySvIsL-m-Xm-qtkt10pfM4d-yZ9SHLjIlu4ObiD8f45pwxGd93VYYMf7DfeYZwViDLIcqVo8RlQbRmv64_FkCa1gZRFuA9jXkzDq096lx2AxjwcEGIFDU88PScI1X8mo7dGFZ9X19kPh70EFo0iTey-OR5MJpY24lMdZoEoya5IUquCnGB_rVgZzO3DsLTGgCTlEiQWOXdPs34AebWY6z-QkndymfdiQRGP5EZ-v0wEZaXQUnasiEMp8lXRdHAtdPknOpsCXh4oh3BWv9MJWybw2q5iYpoyTD0qkctcAsMf42g_8MgXa6MhGu9ciKn6LmYV5Z7lAvWvWGeH-YuPcoQJmItlpR3wy2fibJhI4l6I2vUMROdSxvj6d9pm4UnjMs1qXW1oevBn-GFalOuEyK7OqHWECIjD_Pj4-EOgMz39KERqIqoB1DyE4vEImEQqiu3J-VnOXkZ1GpisXv5QWt-0wmBHJ_jxbKShyvoQ1SxKsYjKouEPGtw0fNt--qGMzRDdFwF4kIqLIYji4RcV02500nDQ4eBVOeyhjgJSbCNEU4n1OMYpcKZI14rz894OQXjY6xL5ZxvFS8HGan4YvgGXsYpSoE70CpRnOF0S69Tk8H_SI8oKnaxC1ai8-rkk5SUNXcReYn0bYLBw07TN6aDMumfSB7HXTZu3aKwJnej3gwmnYdDmNdQ",
+            "sig": "fuxFo17pHIEQUEIXklSE_XrFC51mgsJTWZiGUGw3WKnOj4xqZ5Bls88zyp3pqQ5jEVE8H77cT8MA9UmiLhHrVQ"
+          }
+        ]
+      }
+    },
+    {
+      "type": "AckMessagesRequest",
+      "schema": "ack_messages_request.schema.json",
+      "value": {
+        "ids": [
+          "01J9W000000000000000000001"
+        ]
+      }
+    },
+    {
+      "type": "AcceptedResponse",
+      "schema": "accepted_response.schema.json",
+      "value": {
+        "accepted": 1
+      }
+    },
+    {
+      "type": "OkResponse",
+      "schema": "ok_response.schema.json",
+      "value": {
+        "ok": true
+      }
+    },
+    {
+      "type": "HealthResponse",
+      "schema": "health_response.schema.json",
+      "value": {
+        "ok": true,
+        "version": "0.3.0"
+      }
+    },
+    {
+      "type": "RelayError",
+      "schema": "relay_error.schema.json",
+      "value": {
+        "code": "forbidden",
+        "message": "Access denied"
+      }
+    },
+    {
+      "type": "RelayErrorResponse",
+      "schema": "relay_error_response.schema.json",
+      "value": {
+        "error": {
+          "code": "forbidden",
+          "message": "Access denied"
+        }
+      }
+    },
+    {
+      "type": "DeleteDeviceRequest",
+      "schema": "delete_device_request.schema.json",
+      "value": {
+        "by": "device"
+      }
+    },
+    {
+      "type": "WsFrame",
+      "schema": "ws_frame.schema.json",
+      "value": {
+        "t": "envelope",
+        "envelope": {
+          "v": 1,
+          "type": "approval_request",
+          "id": "01J9W000000000000000000001",
+          "account": "acct_test",
+          "from": "dev_srv",
+          "to": "dev_mac",
+          "created_at": 1760200000,
+          "exp": 1760200600,
+          "enc": "BLAaFyp2pGAsktMkLLiX3eMCTHQN67IVtMawquk8IpGp6FwQdDI32tVv7A4t-6cDeRwA93Acfha9_XxIU4_Hf-I",
+          "ct": "49ClagWJbqJw-b7eZxQUIQV08xqcKelRBC-X8Jn15gV5m7mXfkzr9dAaumkapzBtLgoFXwAX7LzUnKdAzCOdMgdus8Lv-T0NV3ECD_zKgqzgGL6xOFp7YqytYzLq0-wBeC9K9E3dDoWJg8MyF7WPa9WiYSigeIJAAh2WcNwksqvwkDtLNyPzLnLEE5xVuVpxATMRrwdsS1QfDN48BNV1JvYDiT6WOFQt8i4m-2t6dMNgJdao1kyyJN3MsunzndcLtF9BINVUkC5EmQc55O30VSAje5bSFYuPn1dmGfrgsDpIuX9At1YKwKXGO_o0OuQASkOZK-PPHK_ABHmEoP7dL7CyPF_dbRJkXSU2D5ZWv2xzczhTsga6o3wHWBXiI-Zl4-y7oOUHh0fU6kJrNzoWDux_rk5yJmvX1_uLtOXUjBOTfB6Pr0ZOD8vFYtR8QIqfMgcUQ5K8A3USBJkT8jGgo-erfgvc-X4TZHc4CxM56RlfijScpF_8507EcxQoIWGwIqc2VoaW4A00oXbm_Rrxci8HH_FJ3SFm7k6Uk4atFz5iPafxhU9ETPER-xYOvFx_X6jDNCwiJ-RIL_2aHPSRdgDBuwVVO8ybmjcYRcssySvIsL-m-Xm-qtkt10pfM4d-yZ9SHLjIlu4ObiD8f45pwxGd93VYYMf7DfeYZwViDLIcqVo8RlQbRmv64_FkCa1gZRFuA9jXkzDq096lx2AxjwcEGIFDU88PScI1X8mo7dGFZ9X19kPh70EFo0iTey-OR5MJpY24lMdZoEoya5IUquCnGB_rVgZzO3DsLTGgCTlEiQWOXdPs34AebWY6z-QkndymfdiQRGP5EZ-v0wEZaXQUnasiEMp8lXRdHAtdPknOpsCXh4oh3BWv9MJWybw2q5iYpoyTD0qkctcAsMf42g_8MgXa6MhGu9ciKn6LmYV5Z7lAvWvWGeH-YuPcoQJmItlpR3wy2fibJhI4l6I2vUMROdSxvj6d9pm4UnjMs1qXW1oevBn-GFalOuEyK7OqHWECIjD_Pj4-EOgMz39KERqIqoB1DyE4vEImEQqiu3J-VnOXkZ1GpisXv5QWt-0wmBHJ_jxbKShyvoQ1SxKsYjKouEPGtw0fNt--qGMzRDdFwF4kIqLIYji4RcV02500nDQ4eBVOeyhjgJSbCNEU4n1OMYpcKZI14rz894OQXjY6xL5ZxvFS8HGan4YvgGXsYpSoE70CpRnOF0S69Tk8H_SI8oKnaxC1ai8-rkk5SUNXcReYn0bYLBw07TN6aDMumfSB7HXTZu3aKwJnej3gwmnYdDmNdQ",
+          "sig": "fuxFo17pHIEQUEIXklSE_XrFC51mgsJTWZiGUGw3WKnOj4xqZ5Bls88zyp3pqQ5jEVE8H77cT8MA9UmiLhHrVQ"
+        }
+      }
+    },
+    {
+      "type": "IpcEmpty",
+      "schema": "ipc_empty.schema.json",
+      "value": {}
+    },
+    {
+      "type": "IpcError",
+      "schema": "ipc_error.schema.json",
+      "value": {
+        "code": "forbidden",
+        "message": "Access denied"
+      }
+    },
+    {
+      "type": "RelayInboundParams",
+      "schema": "relay_inbound_params.schema.json",
+      "value": {
+        "envelope": {
+          "v": 1,
+          "type": "approval_request",
+          "id": "01J9W000000000000000000001",
+          "account": "acct_test",
+          "from": "dev_srv",
+          "to": "dev_mac",
+          "created_at": 1760200000,
+          "exp": 1760200600,
+          "enc": "BLAaFyp2pGAsktMkLLiX3eMCTHQN67IVtMawquk8IpGp6FwQdDI32tVv7A4t-6cDeRwA93Acfha9_XxIU4_Hf-I",
+          "ct": "49ClagWJbqJw-b7eZxQUIQV08xqcKelRBC-X8Jn15gV5m7mXfkzr9dAaumkapzBtLgoFXwAX7LzUnKdAzCOdMgdus8Lv-T0NV3ECD_zKgqzgGL6xOFp7YqytYzLq0-wBeC9K9E3dDoWJg8MyF7WPa9WiYSigeIJAAh2WcNwksqvwkDtLNyPzLnLEE5xVuVpxATMRrwdsS1QfDN48BNV1JvYDiT6WOFQt8i4m-2t6dMNgJdao1kyyJN3MsunzndcLtF9BINVUkC5EmQc55O30VSAje5bSFYuPn1dmGfrgsDpIuX9At1YKwKXGO_o0OuQASkOZK-PPHK_ABHmEoP7dL7CyPF_dbRJkXSU2D5ZWv2xzczhTsga6o3wHWBXiI-Zl4-y7oOUHh0fU6kJrNzoWDux_rk5yJmvX1_uLtOXUjBOTfB6Pr0ZOD8vFYtR8QIqfMgcUQ5K8A3USBJkT8jGgo-erfgvc-X4TZHc4CxM56RlfijScpF_8507EcxQoIWGwIqc2VoaW4A00oXbm_Rrxci8HH_FJ3SFm7k6Uk4atFz5iPafxhU9ETPER-xYOvFx_X6jDNCwiJ-RIL_2aHPSRdgDBuwVVO8ybmjcYRcssySvIsL-m-Xm-qtkt10pfM4d-yZ9SHLjIlu4ObiD8f45pwxGd93VYYMf7DfeYZwViDLIcqVo8RlQbRmv64_FkCa1gZRFuA9jXkzDq096lx2AxjwcEGIFDU88PScI1X8mo7dGFZ9X19kPh70EFo0iTey-OR5MJpY24lMdZoEoya5IUquCnGB_rVgZzO3DsLTGgCTlEiQWOXdPs34AebWY6z-QkndymfdiQRGP5EZ-v0wEZaXQUnasiEMp8lXRdHAtdPknOpsCXh4oh3BWv9MJWybw2q5iYpoyTD0qkctcAsMf42g_8MgXa6MhGu9ciKn6LmYV5Z7lAvWvWGeH-YuPcoQJmItlpR3wy2fibJhI4l6I2vUMROdSxvj6d9pm4UnjMs1qXW1oevBn-GFalOuEyK7OqHWECIjD_Pj4-EOgMz39KERqIqoB1DyE4vEImEQqiu3J-VnOXkZ1GpisXv5QWt-0wmBHJ_jxbKShyvoQ1SxKsYjKouEPGtw0fNt--qGMzRDdFwF4kIqLIYji4RcV02500nDQ4eBVOeyhjgJSbCNEU4n1OMYpcKZI14rz894OQXjY6xL5ZxvFS8HGan4YvgGXsYpSoE70CpRnOF0S69Tk8H_SI8oKnaxC1ai8-rkk5SUNXcReYn0bYLBw07TN6aDMumfSB7HXTZu3aKwJnej3gwmnYdDmNdQ",
+          "sig": "fuxFo17pHIEQUEIXklSE_XrFC51mgsJTWZiGUGw3WKnOj4xqZ5Bls88zyp3pqQ5jEVE8H77cT8MA9UmiLhHrVQ"
+        }
+      }
+    },
+    {
+      "type": "RelayInboundResult",
+      "schema": "relay_inbound_result.schema.json",
+      "value": {
+        "ack": true
+      }
+    },
+    {
+      "type": "RelayOutboundPollParams",
+      "schema": "relay_outbound_poll_params.schema.json",
+      "value": {
+        "max_wait_ms": 1000
+      }
+    },
+    {
+      "type": "RelayOutboundPollResult",
+      "schema": "relay_outbound_poll_result.schema.json",
+      "value": {
+        "envelopes": [
+          {
+            "v": 1,
+            "type": "approval_request",
+            "id": "01J9W000000000000000000001",
+            "account": "acct_test",
+            "from": "dev_srv",
+            "to": "dev_mac",
+            "created_at": 1760200000,
+            "exp": 1760200600,
+            "enc": "BLAaFyp2pGAsktMkLLiX3eMCTHQN67IVtMawquk8IpGp6FwQdDI32tVv7A4t-6cDeRwA93Acfha9_XxIU4_Hf-I",
+            "ct": "49ClagWJbqJw-b7eZxQUIQV08xqcKelRBC-X8Jn15gV5m7mXfkzr9dAaumkapzBtLgoFXwAX7LzUnKdAzCOdMgdus8Lv-T0NV3ECD_zKgqzgGL6xOFp7YqytYzLq0-wBeC9K9E3dDoWJg8MyF7WPa9WiYSigeIJAAh2WcNwksqvwkDtLNyPzLnLEE5xVuVpxATMRrwdsS1QfDN48BNV1JvYDiT6WOFQt8i4m-2t6dMNgJdao1kyyJN3MsunzndcLtF9BINVUkC5EmQc55O30VSAje5bSFYuPn1dmGfrgsDpIuX9At1YKwKXGO_o0OuQASkOZK-PPHK_ABHmEoP7dL7CyPF_dbRJkXSU2D5ZWv2xzczhTsga6o3wHWBXiI-Zl4-y7oOUHh0fU6kJrNzoWDux_rk5yJmvX1_uLtOXUjBOTfB6Pr0ZOD8vFYtR8QIqfMgcUQ5K8A3USBJkT8jGgo-erfgvc-X4TZHc4CxM56RlfijScpF_8507EcxQoIWGwIqc2VoaW4A00oXbm_Rrxci8HH_FJ3SFm7k6Uk4atFz5iPafxhU9ETPER-xYOvFx_X6jDNCwiJ-RIL_2aHPSRdgDBuwVVO8ybmjcYRcssySvIsL-m-Xm-qtkt10pfM4d-yZ9SHLjIlu4ObiD8f45pwxGd93VYYMf7DfeYZwViDLIcqVo8RlQbRmv64_FkCa1gZRFuA9jXkzDq096lx2AxjwcEGIFDU88PScI1X8mo7dGFZ9X19kPh70EFo0iTey-OR5MJpY24lMdZoEoya5IUquCnGB_rVgZzO3DsLTGgCTlEiQWOXdPs34AebWY6z-QkndymfdiQRGP5EZ-v0wEZaXQUnasiEMp8lXRdHAtdPknOpsCXh4oh3BWv9MJWybw2q5iYpoyTD0qkctcAsMf42g_8MgXa6MhGu9ciKn6LmYV5Z7lAvWvWGeH-YuPcoQJmItlpR3wy2fibJhI4l6I2vUMROdSxvj6d9pm4UnjMs1qXW1oevBn-GFalOuEyK7OqHWECIjD_Pj4-EOgMz39KERqIqoB1DyE4vEImEQqiu3J-VnOXkZ1GpisXv5QWt-0wmBHJ_jxbKShyvoQ1SxKsYjKouEPGtw0fNt--qGMzRDdFwF4kIqLIYji4RcV02500nDQ4eBVOeyhjgJSbCNEU4n1OMYpcKZI14rz894OQXjY6xL5ZxvFS8HGan4YvgGXsYpSoE70CpRnOF0S69Tk8H_SI8oKnaxC1ai8-rkk5SUNXcReYn0bYLBw07TN6aDMumfSB7HXTZu3aKwJnej3gwmnYdDmNdQ",
+            "sig": "fuxFo17pHIEQUEIXklSE_XrFC51mgsJTWZiGUGw3WKnOj4xqZ5Bls88zyp3pqQ5jEVE8H77cT8MA9UmiLhHrVQ"
+          }
+        ]
+      }
+    },
+    {
+      "type": "RelayStatusParams",
+      "schema": "relay_status_params.schema.json",
+      "value": {
+        "connected": true,
+        "last_error": null,
+        "since": 1760200012
+      }
+    },
+    {
+      "type": "SignIdentityParams",
+      "schema": "sign_identity_params.schema.json",
+      "value": {
+        "payload_b64": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+      }
+    },
+    {
+      "type": "SignIdentityResult",
+      "schema": "sign_identity_result.schema.json",
+      "value": {
+        "sig_b64": "fuxFo17pHIEQUEIXklSE_XrFC51mgsJTWZiGUGw3WKnOj4xqZ5Bls88zyp3pqQ5jEVE8H77cT8MA9UmiLhHrVQ"
+      }
+    },
+    {
+      "type": "PendingForAgentParams",
+      "schema": "pending_for_agent_params.schema.json",
+      "value": {
+        "agent_pid": 4242
+      }
+    },
+    {
+      "type": "ApprovalIdParams",
+      "schema": "approval_id_params.schema.json",
+      "value": {
+        "approval_id": "01J9W000000000000000000001"
+      }
+    },
+    {
+      "type": "PendingStopBlockResult",
+      "schema": "pending_stop_block_result.schema.json",
+      "value": {
+        "allowed": true,
+        "blocks_left": 2
+      }
+    },
+    {
+      "type": "WaitParams",
+      "schema": "wait_params.schema.json",
+      "value": {
+        "approval_id": "01J9W000000000000000000001",
+        "max_wait_ms": 5000
+      }
+    },
+    {
+      "type": "GrantRevokeParams",
+      "schema": "grant_revoke_params.schema.json",
+      "value": {
+        "jti": "01J9W000000000000000000001"
+      }
+    },
+    {
+      "type": "DeviceIdParams",
+      "schema": "device_id_params.schema.json",
+      "value": {
+        "device_id": "dev_mac"
+      }
+    },
+    {
+      "type": "DeviceRenameParams",
+      "schema": "device_rename_params.schema.json",
+      "value": {
+        "device_id": "dev_mac",
+        "label": "Laptop"
+      }
+    },
+    {
+      "type": "PairSasResult",
+      "schema": "pair_sas_result.schema.json",
+      "value": {
+        "sas": "957664"
+      }
+    },
+    {
+      "type": "PendingForAgentEntry",
+      "schema": "pending_for_agent_entry.schema.json",
+      "value": {
+        "approval_id": "01J9W000000000000000000001",
+        "expires_at": 1760200312,
+        "stop_hook_blocks": 0
+      }
+    },
+    {
+      "type": "PendingForAgentResult",
+      "schema": "pending_for_agent_result.schema.json",
+      "value": {
+        "pending": [
+          {
+            "approval_id": "01J9W000000000000000000001",
+            "expires_at": 1760200312,
+            "stop_hook_blocks": 0
+          }
+        ]
+      }
+    },
+    {
+      "type": "StatusApprover",
+      "schema": "status_approver.schema.json",
+      "value": {
+        "label": "MacBook",
+        "online": true
+      }
+    },
+    {
+      "type": "StatusResult",
+      "schema": "status_result.schema.json",
+      "value": {
+        "relay": "connected",
+        "approvers": [],
+        "pending_n": 1,
+        "grants_n": 0,
+        "unattended": false,
+        "runtime_budget_s": 60
+      }
+    },
+    {
+      "type": "PendingListResult",
+      "schema": "pending_list_result.schema.json",
+      "value": {
+        "pending": [
+          {
+            "approval_id": "01J9W000000000000000000001",
+            "kind": "use",
+            "digest": "fe65066bb8da72c795ec85f0d2c2b3ced9e7b8f961cb8c02400fe2af65acd93b",
+            "nonce": "AAECAwQFBgcICQoLDA0ODw",
+            "exp": 1760200600,
+            "requester": {
+              "device_id": "dev_srv",
+              "label": "srv",
+              "os": "linux",
+              "protection": {
+                "kind": "tpm2",
+                "attestation": null,
+                "future_status": "unverified"
+              }
+            },
+            "agent": {
+              "runtime": "claude-code",
+              "cwd": "/home/u/proj",
+              "user": "u",
+              "pid": 4242
+            },
+            "credential": {
+              "ref": "github/default",
+              "kind": "oauth2",
+              "display": "GitHub (test)",
+              "proxy_only": true
+            },
+            "operation": {
+              "summary": "POST issues · 15 B",
+              "method": "POST",
+              "host": "api.github.com",
+              "path": "/repos/guang/demo/issues",
+              "query_keys": [
+                "a",
+                "a",
+                "z"
+              ],
+              "body_bytes": 15
+            },
+            "purpose": "Create an issue",
+            "tier": "T1",
+            "min_level": "quick",
+            "scope_options": [
+              "per_use",
+              "per_credential",
+              "per_session",
+              "remember:1h",
+              "remember:8h",
+              "remember:24h",
+              "standing:credential",
+              "standing:device"
+            ],
+            "requested_scope": "per_credential",
+            "merged_count": 1,
+            "delivery": {
+              "mode": "silent",
+              "escalate_after_s": 30
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "DecideParams",
+      "schema": "decide_params.schema.json",
+      "value": {
+        "approval_id": "01J9W000000000000000000001",
+        "decision": "allow",
+        "scope": {
+          "mode": "per_use",
+          "level": "credential",
+          "until": 0
+        },
+        "level": "quick"
+      }
+    },
+    {
+      "type": "DecideResult",
+      "schema": "decide_result.schema.json",
+      "value": {
+        "sent": true
+      }
+    },
+    {
+      "type": "GrantIssueResult",
+      "schema": "grant_issue_result.schema.json",
+      "value": {
+        "grant": {
+          "kind": "grant",
+          "jti": "01J9W000000000000000000001",
+          "iss": "dev_mac",
+          "iss_alg": "ES256",
+          "iss_kind": "device",
+          "aud": "dev_srv",
+          "scope": {
+            "level": "credential",
+            "credential": "github/default",
+            "hosts": [
+              "api.github.com"
+            ],
+            "methods": [
+              "GET",
+              "HEAD"
+            ],
+            "max_tier": "T1"
+          },
+          "nbf": 1760200000,
+          "exp": null,
+          "origin": "settings",
+          "future_policy": {
+            "version": 2
+          },
+          "sig": "kiHtGjpbOQx-VoJ7n1bw4u1cy9VIjoGf8hyUVyC8Uy5_bgd6An3LYVe_wJZ_cojxlEtF4_UbouNujLh4FZdglQ"
+        }
+      }
+    },
+    {
+      "type": "GrantListResult",
+      "schema": "grant_list_result.schema.json",
+      "value": {
+        "grants": [
+          {
+            "kind": "grant",
+            "jti": "01J9W000000000000000000001",
+            "iss": "dev_mac",
+            "iss_alg": "ES256",
+            "iss_kind": "device",
+            "aud": "dev_srv",
+            "scope": {
+              "level": "credential",
+              "credential": "github/default",
+              "hosts": [
+                "api.github.com"
+              ],
+              "methods": [
+                "GET",
+                "HEAD"
+              ],
+              "max_tier": "T1"
+            },
+            "nbf": 1760200000,
+            "exp": null,
+            "origin": "settings",
+            "future_policy": {
+              "version": 2
+            },
+            "sig": "kiHtGjpbOQx-VoJ7n1bw4u1cy9VIjoGf8hyUVyC8Uy5_bgd6An3LYVe_wJZ_cojxlEtF4_UbouNujLh4FZdglQ"
+          }
+        ]
+      }
+    },
+    {
+      "type": "DirectiveIssueResult",
+      "schema": "directive_issue_result.schema.json",
+      "value": {
+        "result": {
+          "id": "01J9W000000000000000000001",
+          "ok": true,
+          "error": null,
+          "state": {
+            "mode": "per_use"
+          }
+        }
+      }
+    },
+    {
+      "type": "DevicesListResult",
+      "schema": "devices_list_result.schema.json",
+      "value": {
+        "devices": [
+          {
+            "device_id": "dev_mac",
+            "label": "MacBook",
+            "os": "macos",
+            "key_kind": "software",
+            "dk_pub": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "fPJ7GI0DT36KUjgDBLUaw8CJaeJ38hs1pgtI_EdmmXg",
+              "y": "B3dVENuO0EApPZrGn3Qw27p9reY86YIpngS3nSJ4c9E"
+            },
+            "ak_q": {
+              "pub": {
+                "kty": "EC",
+                "crv": "P-256",
+                "x": "Xsvk0aYzCkTI9--VHUvxZebGtyHvramF-0FmG8bn_Ww",
+                "y": "hzRkDEmY_343SwbOGmSi7NgqsDY4T7g9mnmxJ6J9UDI"
+              },
+              "alg": "ES256"
+            },
+            "ak_s": {
+              "pub": {
+                "kty": "EC",
+                "crv": "P-256",
+                "x": "4lNKNTLQj7ugLd5lnuYr0AMf4tt4VZbvUJMCRGsDCFI",
+                "y": "4PFXWkxjPMcZ3-5f2oYtdk78lsPzDuAFXELCPxhO2MY"
+              },
+              "alg": "ES256"
+            },
+            "caps": [
+              "approve_quick",
+              "approve_strong"
+            ],
+            "attestation": null
+          }
+        ]
+      }
+    },
+    {
+      "type": "PendingListParams",
+      "schema": "pending_list_params.schema.json",
+      "value": {}
+    },
+    {
+      "type": "IpcRequest",
+      "schema": "ipc_request.schema.json",
+      "value": {
+        "op": "remote.relay.inbound",
+        "params": {
+          "envelope": {
+            "v": 1,
+            "type": "approval_request",
+            "id": "01J9W000000000000000000001",
+            "account": "acct_test",
+            "from": "dev_srv",
+            "to": "dev_mac",
+            "created_at": 1760200000,
+            "exp": 1760200600,
+            "enc": "BLAaFyp2pGAsktMkLLiX3eMCTHQN67IVtMawquk8IpGp6FwQdDI32tVv7A4t-6cDeRwA93Acfha9_XxIU4_Hf-I",
+            "ct": "49ClagWJbqJw-b7eZxQUIQV08xqcKelRBC-X8Jn15gV5m7mXfkzr9dAaumkapzBtLgoFXwAX7LzUnKdAzCOdMgdus8Lv-T0NV3ECD_zKgqzgGL6xOFp7YqytYzLq0-wBeC9K9E3dDoWJg8MyF7WPa9WiYSigeIJAAh2WcNwksqvwkDtLNyPzLnLEE5xVuVpxATMRrwdsS1QfDN48BNV1JvYDiT6WOFQt8i4m-2t6dMNgJdao1kyyJN3MsunzndcLtF9BINVUkC5EmQc55O30VSAje5bSFYuPn1dmGfrgsDpIuX9At1YKwKXGO_o0OuQASkOZK-PPHK_ABHmEoP7dL7CyPF_dbRJkXSU2D5ZWv2xzczhTsga6o3wHWBXiI-Zl4-y7oOUHh0fU6kJrNzoWDux_rk5yJmvX1_uLtOXUjBOTfB6Pr0ZOD8vFYtR8QIqfMgcUQ5K8A3USBJkT8jGgo-erfgvc-X4TZHc4CxM56RlfijScpF_8507EcxQoIWGwIqc2VoaW4A00oXbm_Rrxci8HH_FJ3SFm7k6Uk4atFz5iPafxhU9ETPER-xYOvFx_X6jDNCwiJ-RIL_2aHPSRdgDBuwVVO8ybmjcYRcssySvIsL-m-Xm-qtkt10pfM4d-yZ9SHLjIlu4ObiD8f45pwxGd93VYYMf7DfeYZwViDLIcqVo8RlQbRmv64_FkCa1gZRFuA9jXkzDq096lx2AxjwcEGIFDU88PScI1X8mo7dGFZ9X19kPh70EFo0iTey-OR5MJpY24lMdZoEoya5IUquCnGB_rVgZzO3DsLTGgCTlEiQWOXdPs34AebWY6z-QkndymfdiQRGP5EZ-v0wEZaXQUnasiEMp8lXRdHAtdPknOpsCXh4oh3BWv9MJWybw2q5iYpoyTD0qkctcAsMf42g_8MgXa6MhGu9ciKn6LmYV5Z7lAvWvWGeH-YuPcoQJmItlpR3wy2fibJhI4l6I2vUMROdSxvj6d9pm4UnjMs1qXW1oevBn-GFalOuEyK7OqHWECIjD_Pj4-EOgMz39KERqIqoB1DyE4vEImEQqiu3J-VnOXkZ1GpisXv5QWt-0wmBHJ_jxbKShyvoQ1SxKsYjKouEPGtw0fNt--qGMzRDdFwF4kIqLIYji4RcV02500nDQ4eBVOeyhjgJSbCNEU4n1OMYpcKZI14rz894OQXjY6xL5ZxvFS8HGan4YvgGXsYpSoE70CpRnOF0S69Tk8H_SI8oKnaxC1ai8-rkk5SUNXcReYn0bYLBw07TN6aDMumfSB7HXTZu3aKwJnej3gwmnYdDmNdQ",
+            "sig": "fuxFo17pHIEQUEIXklSE_XrFC51mgsJTWZiGUGw3WKnOj4xqZ5Bls88zyp3pqQ5jEVE8H77cT8MA9UmiLhHrVQ"
+          }
+        }
+      }
+    },
+    {
+      "type": "IpcResponse",
+      "schema": "ipc_response.schema.json",
+      "value": {
+        "ok": true,
+        "result": {}
+      }
+    }
+  ],
+  "expect": {
+    "schemas": 101,
+    "samples": {
+      "PublicJwk": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "ApprovalKey": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "Attestation": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "DeviceRecord": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "Protection": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "Requester": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "Agent": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "Credential": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "Operation": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "Delivery": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "EnvelopeHeader": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "Envelope": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "ApprovalRequest": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "DecisionScope": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "Quorum": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "ApprovalDecision": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "GrantScope": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "Budget": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "Grant": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "UnsignedGrant": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "EmptyArgs": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "SetModeArgs": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "RevokeGrantArgs": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "SetUnlockTtlArgs": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "SetClassArgs": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "SetDeviceLabelArgs": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "RevokeDeviceArgs": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "NotifyArgs": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "QueryAuditArgs": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "CancelApprovalArgs": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "Directive": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "UnsignedDirective": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "DirectiveResult": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "PresenceHint": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "PairOffer": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "PairAccept": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "PairConfirm": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "ApprovalEscalate": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "ApprovalCancel": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "DeviceRevoke": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "ToolApprover": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "ToolResult": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "CanonicalAction": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "CanonicalAgent": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "CanonicalRequest": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "PresenceSignals": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "PresenceState": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "RegisterDeviceRequest": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "RegisterDeviceResponse": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "ChallengeRequest": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "ChallengeResponse": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "AuthVerifyRequest": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "AuthVerifyResponse": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "RelayPairStartRequest": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "RelayPairStartResponse": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "RelayPairCompleteRequest": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "RelayPairCompleteResponse": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "PairFinishRequest": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "SubmitApprovalsRequest": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "ReplyApprovalRequest": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "EnvelopesResponse": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "SendMessagesRequest": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "AckMessagesRequest": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "AcceptedResponse": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "OkResponse": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "HealthResponse": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "RelayError": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "RelayErrorResponse": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "DeleteDeviceRequest": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "WsFrame": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "IpcEmpty": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "IpcError": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "RelayInboundParams": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "RelayInboundResult": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "RelayOutboundPollParams": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "RelayOutboundPollResult": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "RelayStatusParams": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "SignIdentityParams": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "SignIdentityResult": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "PendingForAgentParams": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "ApprovalIdParams": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "PendingStopBlockResult": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "WaitParams": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "GrantRevokeParams": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "DeviceIdParams": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "DeviceRenameParams": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "PairSasResult": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "PendingForAgentEntry": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "PendingForAgentResult": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "StatusApprover": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "StatusResult": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "PendingListResult": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "DecideParams": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "DecideResult": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "GrantIssueResult": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "GrantListResult": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "DirectiveIssueResult": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "DevicesListResult": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "PendingListParams": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "IpcRequest": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      },
+      "IpcResponse": {
+        "valid": true,
+        "roundtrip": true,
+        "extra_roundtrip": true
+      }
+    }
+  }
+}

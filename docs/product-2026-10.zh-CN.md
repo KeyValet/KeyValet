@@ -175,6 +175,8 @@ Dev 是产品的第一用户，Lead 是第一付费者；所有阶段 0–2 的�
 - 阶段 3 起配对手机后，Linux 上的敏感操作走手机 Face ID。
 - CI：GitHub Actions 用 OIDC 换一张限定范围的能力令牌，没有任何静态 secret 进入仓库设置。
 
+> 远程审批与多设备配对的详细产品设计见 [remote-approval-product-2026-10.zh-CN.md](remote-approval-product-2026-10.zh-CN.md)；第一版拓扑为 Ubuntu 服务器（vault）+ MacBook（审批端）。
+
 ### J6 团队（阶段 2）
 
 1. Lead 在控制台用邮箱创建组织，邀请成员；成员安装 KeyValet 并注册设备。
@@ -190,6 +192,8 @@ Dev 是产品的第一用户，Lead 是第一付费者；所有阶段 0–2 的�
 1. `keyvalet pair` 显示二维码；iPhone App 扫码；两端核对 6 位安全码。
 2. 之后 Linux 或远程会话上的请求推送到手机：锁屏长按批准只读 / 普通写入；敏感操作要打开 App 用 Face ID。
 3. 手机丢失：用恢复码或另一台设备吊销。
+
+> 远程审批与多设备配对的详细产品设计见 [remote-approval-product-2026-10.zh-CN.md](remote-approval-product-2026-10.zh-CN.md)；第一版拓扑为 Ubuntu 服务器（vault）+ MacBook（审批端）。
 
 ### J8 应急：泄露、失效、轮换
 
@@ -211,7 +215,7 @@ Dev 是产品的第一用户，Lead 是第一付费者；所有阶段 0–2 的�
 | CLI `keyvalet` | 用户 / 脚本 | scan、run、proxy、hooks install、policy、audit、grant、pair | 阶段 0–2 |
 | 透明代理与 SDK 网关 | 不走 MCP 的程序 | 让任意 SDK 和 CLI 受保护 | 网关现有；代理阶段 2 |
 | Web 控制台 | Lead | 组织、成员、共享、策略、账单、审计 | 阶段 2 |
-| iPhone App | 用户 | 远程审批与配对 | 阶段 3 |
+| iPhone App | 用户 | 远程审批与配对 | 阶段 3（Mac 作为审批端的第一版见远程审批产品文档，R1） |
 | 官网与文档 | 所有人 | 转化与自助 | 阶段 0 改版 |
 
 ---

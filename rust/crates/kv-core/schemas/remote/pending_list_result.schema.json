@@ -1,0 +1,398 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PendingListResult",
+  "type": "object",
+  "properties": {
+    "pending": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ApprovalRequest"
+      }
+    }
+  },
+  "required": [
+    "pending"
+  ],
+  "additionalProperties": true,
+  "$defs": {
+    "ApprovalRequest": {
+      "type": "object",
+      "properties": {
+        "approval_id": {
+          "type": "string",
+          "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+        },
+        "kind": {
+          "enum": [
+            "unlock",
+            "use",
+            "admin"
+          ]
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "nonce": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{22}$"
+        },
+        "exp": {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        "requester": {
+          "$ref": "#/$defs/Requester"
+        },
+        "agent": {
+          "$ref": "#/$defs/Agent"
+        },
+        "credential": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Credential"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "operation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Operation"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "purpose": {
+          "type": "string"
+        },
+        "tier": {
+          "enum": [
+            "T0",
+            "T1",
+            "T2"
+          ]
+        },
+        "min_level": {
+          "enum": [
+            "quick",
+            "strong"
+          ]
+        },
+        "scope_options": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "per_use",
+              "per_credential",
+              "per_session",
+              "remember:1h",
+              "remember:8h",
+              "remember:24h",
+              "standing:credential",
+              "standing:device"
+            ]
+          }
+        },
+        "requested_scope": {
+          "enum": [
+            "per_use",
+            "per_credential",
+            "per_session",
+            "remember:1h",
+            "remember:8h",
+            "remember:24h",
+            "standing:credential",
+            "standing:device"
+          ]
+        },
+        "merged_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4294967295
+        },
+        "delivery": {
+          "$ref": "#/$defs/Delivery"
+        }
+      },
+      "required": [
+        "approval_id",
+        "kind",
+        "digest",
+        "nonce",
+        "exp",
+        "requester",
+        "agent",
+        "credential",
+        "operation",
+        "purpose",
+        "tier",
+        "min_level",
+        "scope_options",
+        "requested_scope",
+        "merged_count",
+        "delivery"
+      ],
+      "additionalProperties": true,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "unlock"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "credential": {
+                "type": "null"
+              },
+              "operation": {
+                "type": "null"
+              },
+              "min_level": {
+                "const": "strong"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "use"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "credential": {
+                "$ref": "#/$defs/Credential"
+              },
+              "operation": {
+                "$ref": "#/$defs/Operation"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "admin"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "min_level": {
+                "const": "strong"
+              },
+              "operation": {
+                "$ref": "#/$defs/Operation"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "tier": {
+                "const": "T2"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "scope_options": {
+                "const": [
+                  "per_use"
+                ]
+              },
+              "requested_scope": {
+                "const": "per_use"
+              },
+              "min_level": {
+                "const": "strong"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "Operation": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string"
+        },
+        "method": {
+          "type": "string"
+        },
+        "host": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "query_keys": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "body_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "summary",
+        "method",
+        "host",
+        "path",
+        "query_keys",
+        "body_bytes"
+      ],
+      "additionalProperties": true
+    },
+    "Credential": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "display": {
+          "type": "string"
+        },
+        "proxy_only": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "ref",
+        "kind",
+        "display",
+        "proxy_only"
+      ],
+      "additionalProperties": true
+    },
+    "Delivery": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "enum": [
+            "banner",
+            "silent"
+          ]
+        },
+        "escalate_after_s": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        }
+      },
+      "required": [
+        "mode",
+        "escalate_after_s"
+      ],
+      "additionalProperties": true
+    },
+    "Agent": {
+      "type": "object",
+      "properties": {
+        "runtime": {
+          "type": "string"
+        },
+        "cwd": {
+          "type": "string"
+        },
+        "user": {
+          "type": "string"
+        },
+        "pid": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        }
+      },
+      "required": [
+        "runtime",
+        "cwd",
+        "user",
+        "pid"
+      ],
+      "additionalProperties": true
+    },
+    "Requester": {
+      "type": "object",
+      "properties": {
+        "device_id": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "os": {
+          "type": "string"
+        },
+        "protection": {
+          "$ref": "#/$defs/Protection"
+        }
+      },
+      "required": [
+        "device_id",
+        "label",
+        "os",
+        "protection"
+      ],
+      "additionalProperties": true
+    },
+    "Protection": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "attestation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Attestation"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": true
+    },
+    "Attestation": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "doc": {}
+      },
+      "required": [
+        "kind",
+        "doc"
+      ],
+      "additionalProperties": true
+    }
+  }
+}

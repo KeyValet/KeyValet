@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PairFinishRequest",
+  "type": "object",
+  "properties": {
+    "pairing_id": {
+      "type": "string",
+      "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+    },
+    "confirm": {
+      "$ref": "#/$defs/PairConfirm"
+    }
+  },
+  "required": [
+    "pairing_id",
+    "confirm"
+  ],
+  "additionalProperties": true,
+  "$defs": {
+    "PairConfirm": {
+      "type": "object",
+      "properties": {
+        "sas": {
+          "type": "string",
+          "pattern": "^[0-9]{6}$"
+        },
+        "sig": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]*$"
+        }
+      },
+      "required": [
+        "sas",
+        "sig"
+      ],
+      "additionalProperties": true
+    }
+  }
+}

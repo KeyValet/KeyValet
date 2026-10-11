@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CanonicalAgent",
+  "type": "object",
+  "properties": {
+    "runtime": {
+      "type": "string"
+    },
+    "repo_or_cwd": {
+      "type": "string"
+    },
+    "uid": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4294967295
+    },
+    "pid": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4294967295
+    },
+    "exe_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  },
+  "required": [
+    "runtime",
+    "repo_or_cwd",
+    "uid",
+    "pid",
+    "exe_sha256"
+  ],
+  "additionalProperties": true
+}
