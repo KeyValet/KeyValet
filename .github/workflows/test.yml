@@ -59,6 +59,10 @@ jobs:
           workspaces: rust
       - run: cargo clippy --workspace --all-targets -- -D warnings
       - run: cargo build --workspace --locked
+      - name: Clean Windows SYSTEM service integration (no Hello)
+        shell: powershell
+        working-directory: .
+        run: ./scripts/test-windows-service.ps1 -AllowSystemChanges
       - run: cargo test --workspace --locked --no-fail-fast
       - name: Exported environment scripts execute safely in PowerShell 7
         shell: pwsh
@@ -70,10 +74,6 @@ jobs:
         env:
           KEYVALET_TEST_POWERSHELL: powershell.exe
         run: cargo test -p kv-mcp windows_script::tests::powershell_executes_export_fixture --locked -- --ignored --exact
-      - name: Clean Windows SYSTEM service integration (no Hello)
-        shell: powershell
-        working-directory: .
-        run: ./scripts/test-windows-service.ps1 -AllowSystemChanges
       - uses: actions/upload-artifact@v4
         if: always()
         with:

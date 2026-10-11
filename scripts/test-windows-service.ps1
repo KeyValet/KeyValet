@@ -96,7 +96,7 @@ try {
     $testPassword = ConvertTo-SecureString ('Kv9!' + [Convert]::ToBase64String($random)) -AsPlainText -Force
     $testUser = New-LocalUser -Name $testName -Password $testPassword -Description 'Disposable KeyValet integration test owner' -PasswordNeverExpires
     $users = Get-LocalGroup -SID 'S-1-5-32-545'
-    Add-LocalGroupMember -Group $users.Name -Member $testUser.SID
+    Add-LocalGroupMember -Group $users.Name -Member $testUser
     $owner = $testUser.SID.Value
     & "$repo/scripts/package-windows.ps1" -Tag "v$version" -Architecture $architecture -AllowUnsigned -BinaryDirectory $BinaryDirectory
     $options = @{ InstallSystem = $true; OwnerSid = $owner; OwnerProfile = "C:\Users\$testName";
