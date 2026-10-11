@@ -29,14 +29,36 @@ function New-TestArchive([string[]]$Names, [int]$LastAttributes = 0) {
     $archive = [IO.Compression.ZipFile]::Open($path, [IO.Compression.ZipArchiveMode]::Create)
     try {
         foreach ($name in $Names) {
-            $entry = $archive.CreateEntry($name)
-            if (!$name.EndsWith('/') -and !$name.EndsWith('\')) {
+            # .NET Framework rejects some malicious paths while creating entries.
+            # Patch the ZIP names below so both shells inspect the same fixtures.
+            $directory = $name.EndsWith('/') -or $name.EndsWith('\')
+            $safeName = 'x' * [Text.Encoding]::UTF8.GetByteCount($name)
+            if ($directory) { $safeName = $safeName.Substring(0, $safeName.Length - 1) + '/' }
+            $entry = $archive.CreateEntry($safeName)
+            if (!$directory) {
                 $stream = $entry.Open()
                 try { $stream.WriteByte(42) } finally { $stream.Dispose() }
             }
         }
         if ($LastAttributes) { $entry.ExternalAttributes = $LastAttributes }
     } finally { $archive.Dispose() }
+    $bytes = [IO.File]::ReadAllBytes($path)
+    $localIndex = 0; $centralIndex = 0
+    for ($i = 0; $i -le $bytes.Length - 30; $i++) {
+        $signature = [BitConverter]::ToUInt32($bytes, $i)
+        if ($signature -eq 0x04034b50) {
+            $name = $Names[$localIndex++]; $headerSize = 30; $lengthOffset = 26; $flagOffset = 6
+        } elseif ($signature -eq 0x02014b50) {
+            $name = $Names[$centralIndex++]; $headerSize = 46; $lengthOffset = 28; $flagOffset = 8
+        } else { continue }
+        $encoded = [Text.Encoding]::UTF8.GetBytes($name)
+        Assert ($encoded.Length -eq [BitConverter]::ToUInt16($bytes, $i + $lengthOffset)) 'Fixture ZIP name length changed.'
+        [Array]::Copy($encoded, 0, $bytes, $i + $headerSize, $encoded.Length)
+        $flags = [uint16]([BitConverter]::ToUInt16($bytes, $i + $flagOffset) -bor 0x800)
+        [Array]::Copy([BitConverter]::GetBytes($flags), 0, $bytes, $i + $flagOffset, 2)
+    }
+    Assert ($localIndex -eq $Names.Count -and $centralIndex -eq $Names.Count) 'Fixture ZIP headers are incomplete.'
+    [IO.File]::WriteAllBytes($path, $bytes)
     return $path
 }
 function Set-DeclaredZipLengths([string]$Path, [uint32]$Length, [switch]$FirstOnly) {
