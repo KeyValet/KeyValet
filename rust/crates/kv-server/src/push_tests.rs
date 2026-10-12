@@ -69,6 +69,8 @@ impl Harness {
             os: Os::Linux,
             key_kind: kv_core::remote::KeyKind::Software,
             dk_pub: key.public_jwk().unwrap(),
+            dk_sig: None,
+            dk_sig: kv_core::remote::Optional::Missing,
             ak_q: None,
             ak_s: None,
             caps: vec![kv_core::remote::Capability::Execute],
@@ -92,7 +94,7 @@ impl Harness {
                     "acct_r2c",
                     device,
                     None,
-                    crate::state::ulid(0).len() as i64,
+                    relay.state.now(),
                 )
                 .unwrap();
             }

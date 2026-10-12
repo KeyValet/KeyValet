@@ -78,7 +78,16 @@ public final class KeyStore {
             guard data.count == 65 && data.first == 4 else { throw NativeFailure.invalidKey }
             return data
         }
-        let key = try SecureEnclave.P256.Signing.PrivateKey(dataRepresentation: approvalBlob(slot))
+        // Cold background launches can occur while locked. The main App, like
+        // NSE, needs only cached approval public points to boot Rust's store.
+        let blob: Data
+        do { blob = try approvalBlob(slot) }
+        catch NativeFailure.locked {
+            let data = try Data(contentsOf: cache)
+            guard data.count == 65 && data.first == 4 else { throw NativeFailure.invalidKey }
+            return data
+        }
+        let key = try SecureEnclave.P256.Signing.PrivateKey(dataRepresentation: blob)
         let publicPoint = key.publicKey.x963Representation
         try publicPoint.write(to: cache, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
         return publicPoint

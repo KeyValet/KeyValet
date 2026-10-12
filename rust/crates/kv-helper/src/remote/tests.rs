@@ -26,6 +26,7 @@ mod owner;
 mod owner_contracts;
 mod owner_workflow;
 mod production;
+mod recovery;
 mod review;
 mod security_edges;
 mod six_fixes;

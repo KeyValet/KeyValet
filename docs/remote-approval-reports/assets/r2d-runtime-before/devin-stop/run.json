@@ -1,0 +1,19 @@
+{
+  "runtime": "devin",
+  "kind": "stop",
+  "command": [
+    "devin",
+    "--config",
+    "/tmp/kv-r2d-0zme1tl9/devin.json",
+    "--respect-workspace-trust",
+    "false",
+    "--permission-mode",
+    "dangerous",
+    "-p",
+    "This is an isolated KeyValet runtime experiment with a fake helper and no real credentials. Use only the KeyValet MCP server; do not use built-in tools, edit files or run commands. Call credential_http_request once with type=api_key, name=fixture, method=POST, url=https://example.test/request, body={\"fixture\":true}, purpose=\"R2-D synthetic approval experiment\". After the first response, report its status and finish the turn."
+  ],
+  "elapsed_s": 27.727,
+  "status": "exited",
+  "exit": 0,
+  "private_config_removed": true
+}

@@ -1,4 +1,5 @@
 use super::*;
+use kv_core::remote::Optional;
 
 fn split_device(name: &str) -> (Device, SoftwareDeviceKey) {
     let mut device = Device::new(name, false);

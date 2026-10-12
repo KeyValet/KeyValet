@@ -1,0 +1,7 @@
+{"type":"thread.started","thread_id":"01a1308e-eba8-75a1-9ee0-811e060b64e9"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’ll call the KeyValet tool once with empty arguments, then report its response."}}
+{"type":"item.started","item":{"id":"item_1","type":"mcp_tool_call","server":"keyvalet","tool":"r2d_block_progress","arguments":{},"result":null,"error":null,"status":"in_progress"}}
+{"type":"item.completed","item":{"id":"item_1","type":"mcp_tool_call","server":"keyvalet","tool":"r2d_block_progress","arguments":{},"result":null,"error":{"message":"tool call error: tool call failed for `keyvalet/r2d_block_progress`\n\nCaused by:\n    timed out awaiting tools/call after 5s"},"status":"failed"}}
+{"type":"item.completed","item":{"id":"item_2","type":"agent_message","text":"Called `r2d_block_progress` once with `{}`. It timed out after 5 seconds. I did not retry."}}
+{"type":"turn.completed","usage":{"input_tokens":29255,"cached_input_tokens":24576,"cache_write_input_tokens":0,"output_tokens":145,"reasoning_output_tokens":0}}

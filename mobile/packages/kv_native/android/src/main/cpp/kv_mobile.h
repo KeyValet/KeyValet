@@ -11,7 +11,7 @@ extern "C" {
 // Strong MUST enforce native biometry ACL / authenticated Signature CryptoObject.
 typedef intptr_t (*KvKeyCallback)(uint32_t, uint32_t, const uint8_t*, size_t, uint8_t*, size_t);
 char* kv_mobile_open(const char* config_json, KvKeyCallback callback);
-// Commands: account_status, snapshot, sync, quick_decision, push_token, diagnostics.
+// Commands: account_status, snapshot, notifications, sync, quick_decision, push_token, diagnostics.
 // Account status contains public metadata only. Private commands require a verified session.
 // Response: {ok,result|error}; result is the same Rust view type used by FRB.
 char* kv_mobile_call(const char* command_json);

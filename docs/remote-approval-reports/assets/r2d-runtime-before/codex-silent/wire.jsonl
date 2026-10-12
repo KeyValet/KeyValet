@@ -1,2 +1,16 @@
 {"event": "initialize", "elapsed_s": 0.005, "client_info": {"name": "codex-mcp-client", "title": "Codex", "version": "0.162.1"}}
 {"event": "tool_started", "elapsed_s": 16.227, "tool": "r2d_block_silent", "request_id": 2, "progress_token": 1}
+{"event": "progress_suppressed", "elapsed_s": 31.231, "params": {"message": "Waiting for KeyValet approval (15 s elapsed)", "progress": 15.001468583, "progressToken": 1}}
+{"event": "progress_suppressed", "elapsed_s": 46.231, "params": {"message": "Waiting for KeyValet approval (30 s elapsed)", "progress": 30.001186541, "progressToken": 1}}
+{"event": "progress_suppressed", "elapsed_s": 61.231, "params": {"message": "Waiting for KeyValet approval (45 s elapsed)", "progress": 45.000935458, "progressToken": 1}}
+{"event": "progress_suppressed", "elapsed_s": 76.235, "params": {"message": "Waiting for KeyValet approval (60 s elapsed)", "progress": 60.004477125, "progressToken": 1}}
+{"event": "progress_suppressed", "elapsed_s": 91.233, "params": {"message": "Waiting for KeyValet approval (75 s elapsed)", "progress": 75.002777041, "progressToken": 1}}
+{"event": "progress_suppressed", "elapsed_s": 106.232, "params": {"message": "Waiting for KeyValet approval (90 s elapsed)", "progress": 90.002041708, "progressToken": 1}}
+{"event": "progress_suppressed", "elapsed_s": 121.232, "params": {"message": "Waiting for KeyValet approval (105 s elapsed)", "progress": 105.001932958, "progressToken": 1}}
+{"event": "progress_suppressed", "elapsed_s": 136.231, "params": {"message": "Waiting for KeyValet approval (120 s elapsed)", "progress": 120.001479458, "progressToken": 1}}
+{"event": "progress_suppressed", "elapsed_s": 151.232, "params": {"message": "Waiting for KeyValet approval (135 s elapsed)", "progress": 135.001906916, "progressToken": 1}}
+{"event": "progress_suppressed", "elapsed_s": 166.232, "params": {"message": "Waiting for KeyValet approval (150 s elapsed)", "progress": 150.002114166, "progressToken": 1}}
+{"event": "progress_suppressed", "elapsed_s": 181.232, "params": {"message": "Waiting for KeyValet approval (165 s elapsed)", "progress": 165.002371458, "progressToken": 1}}
+{"event": "progress_suppressed", "elapsed_s": 196.232, "params": {"message": "Waiting for KeyValet approval (180 s elapsed)", "progress": 180.002475541, "progressToken": 1}}
+{"event": "progress_suppressed", "elapsed_s": 211.232, "params": {"message": "Waiting for KeyValet approval (195 s elapsed)", "progress": 195.001940875, "progressToken": 1}}
+{"event": "progress_suppressed", "elapsed_s": 226.232, "params": {"message": "Waiting for KeyValet approval (210 s elapsed)", "progress": 210.002258291, "progressToken": 1}}

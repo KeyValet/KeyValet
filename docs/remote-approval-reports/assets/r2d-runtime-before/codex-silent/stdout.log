@@ -2,3 +2,5 @@
 {"type":"turn.started"}
 {"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’ll call KeyValet’s `r2d_block_silent` once with empty arguments, wait for its response, and report the result."}}
 {"type":"item.started","item":{"id":"item_1","type":"mcp_tool_call","server":"keyvalet","tool":"r2d_block_silent","arguments":{},"result":null,"error":null,"status":"in_progress"}}
+{"type":"item.completed","item":{"id":"item_2","type":"agent_message","text":"The single call is still waiting for a response. I haven’t repeated it."}}
+{"type":"item.completed","item":{"id":"item_3","type":"agent_message","text":"The call remains pending; no response or timeout has been returned."}}

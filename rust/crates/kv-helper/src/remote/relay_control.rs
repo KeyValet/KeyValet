@@ -172,9 +172,8 @@ impl ControlHub {
         let RelayControlCommand::Authenticate(local) = &entry.job.command else {
             return Err(Error("forbidden"));
         };
-        kv_core::remote::keys::verify_signature(
-            SignatureAlgorithm::ES256,
-            &local.dk_pub,
+        kv_core::remote::verify_identity_signature(
+            local,
             &bytes,
             &raw,
         )?;

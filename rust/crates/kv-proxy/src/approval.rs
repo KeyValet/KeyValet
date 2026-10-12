@@ -56,15 +56,26 @@ impl ApprovalLayer {
         request: ApprovalRequest,
         hint: Option<u64>,
     ) -> Result<Value, String> {
+        self.authorize_observed(request, hint, |_| {}).await
+    }
+
+    pub(crate) async fn authorize_observed(
+        &self,
+        request: ApprovalRequest,
+        hint: Option<u64>,
+        observe: impl Fn(&Value),
+    ) -> Result<Value, String> {
         let deadline = tokio::time::Instant::now() + http_wait_limit(self.http_wait, hint);
         // Receiving an ID is a control-plane exchange, not a blocking authentication prompt.
-        let mut value = tokio::time::timeout(
+        let value = tokio::time::timeout(
             Duration::from_secs(5)
                 .min(deadline.saturating_duration_since(tokio::time::Instant::now())),
             self.provider.authorize(request),
         )
         .await
-        .map_err(|_| "The helper did not return an approval ID".to_string())??;
+        .map_err(|_| "The helper did not return an approval ID".to_string())?;
+        let mut value = normalize_local_result(value)?;
+        observe(&value);
         if !is_pending(&value) {
             return Ok(value);
         }
@@ -98,8 +109,8 @@ impl ApprovalLayer {
                 {
                     return Ok(value)
                 }
-                Ok(Err(error)) => return Err(error),
-                Ok(Ok(result)) => {
+                Ok(result) => {
+                    let result = normalize_local_result(result)?;
                     if !is_pending(&result) {
                         return Ok(result);
                     }
@@ -119,6 +130,25 @@ impl ApprovalLayer {
     }
 }
 
+/// Interpret only explicit terminal codes. A dialog/transport timeout with an unexpired
+/// approval is still pending; a free-form error never means the user said no.
+pub(crate) fn normalize_local_result(result: Result<Value, String>) -> Result<Value, String> {
+    result.or_else(|error| {
+        let value = serde_json::from_str::<Value>(&error).unwrap_or(Value::Null);
+        let status = match value["code"].as_str().or_else(|| value["error"]["code"].as_str()) {
+            Some("local_approval_denied") => "approval_denied",
+            Some("local_approval_cancelled") => "approval_cancelled",
+            Some("local_approval_expired") => "approval_expired",
+            _ => return Err(error),
+        };
+        let mut result = json!({"status": status});
+        for name in ["approval_id", "expires_at"] {
+            if let Some(field) = value.get(name) { result[name] = field.clone(); }
+        }
+        Ok(result)
+    })
+}
+
 pub fn is_pending(value: &Value) -> bool {
     matches!(
         value["status"].as_str(),
@@ -126,7 +156,7 @@ pub fn is_pending(value: &Value) -> bool {
     )
 }
 
-fn valid_id(id: &str) -> bool {
+pub(crate) fn valid_id(id: &str) -> bool {
     id.len() == 26
         && (b'0'..=b'7').contains(&id.as_bytes()[0])
         && id
@@ -177,7 +207,7 @@ pub fn http_response(
             .map(Some)
             .map_err(bad_result);
     }
-    let (status, message) = match decision["status"].as_str() {
+    let (status, error_type, message) = match decision["status"].as_str() {
         Some("ok") => {
             return decision
                 .get("result")
@@ -186,24 +216,32 @@ pub fn http_response(
                 .transpose()
                 .map_err(bad_result)
         }
-        Some("approval_denied") => (hyper::StatusCode::FORBIDDEN, "The user denied this request"),
+        Some("approval_denied") => (hyper::StatusCode::FORBIDDEN, "keyvalet_approval_denied", "The user denied this request. Do not bypass approval or ask for a key."),
+        Some("approval_cancelled") => (hyper::StatusCode::CONFLICT, "keyvalet_approval_cancelled", "The local approval was cancelled. A new request requires a new approval."),
         Some("approval_expired") => (
             hyper::StatusCode::GONE,
+            "keyvalet_approval_expired",
             "The approval expired without a decision",
         ),
         Some("no_approver") => (
             hyper::StatusCode::SERVICE_UNAVAILABLE,
+            "keyvalet_no_approver",
             "No approval channel is available",
         ),
-        _ => (
-            hyper::StatusCode::BAD_GATEWAY,
-            "Invalid helper approval result",
-        ),
+        _ => return Err(HttpApprovalError { status: hyper::StatusCode::BAD_GATEWAY, message: "Invalid helper approval result".into() }),
     };
-    Err(HttpApprovalError {
-        status,
-        message: message.into(),
-    })
+    Ok(Some(error_response(status, error_type, message, decision["approval_id"].as_str())))
+}
+
+pub(crate) fn error_response(status: hyper::StatusCode, error_type: &str, message: &str, id: Option<&str>) -> hyper::Response<Full<Bytes>> {
+    let mut error = json!({"type": error_type, "message": message});
+    if let Some(id) = id.filter(|id| valid_id(id)) { error["approval_id"] = json!(id); }
+    hyper::Response::builder().status(status)
+        .header("content-type", "application/json; charset=utf-8")
+        // Both official SDKs retry 409/408/5xx; a terminal local outcome must not
+        // create another approval as an automatic transport retry.
+        .header("x-should-retry", "false")
+        .body(Full::new(Bytes::from(json!({"error":error}).to_string()))).unwrap()
 }
 
 fn completed_response(result: &Value) -> io::Result<hyper::Response<Full<Bytes>>> {

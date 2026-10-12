@@ -34,7 +34,12 @@ public enum NativeRuntime {
         // Populate only public caches before the extension is ever woken.
         for slot in 0...2 { _ = try store.publicKey(slot) }
         keys = store
-        let config: [String: Any] = ["directory": directory.appendingPathComponent("core").path,
+        let coreDirectory = directory.appendingPathComponent("core")
+        try FileManager.default.createDirectory(at: coreDirectory, withIntermediateDirectories: true,
+            attributes: [.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication])
+        try FileManager.default.setAttributes([.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication],
+            ofItemAtPath: coreDirectory.path)
+        let config: [String: Any] = ["directory": coreDirectory.path,
             "label": "iPhone", "os": "ios", "key_kind": "secure_enclave"]
         let result = try consume(JSONSerialization.data(withJSONObject: config)) { kv_mobile_open($0, callback) }
         guard result["ok"] as? Bool == true else { keys = nil; throw NativeFailure.unavailable }

@@ -1,0 +1,30 @@
+{
+  "runtime": "codex",
+  "kind": "stop",
+  "command": [
+    "codex",
+    "exec",
+    "--ignore-user-config",
+    "--skip-git-repo-check",
+    "--ephemeral",
+    "--sandbox",
+    "read-only",
+    "--json",
+    "-c",
+    "mcp_servers.keyvalet.command=\"/opt/homebrew/opt/python@3.14/bin/python3.14\"",
+    "-c",
+    "mcp_servers.keyvalet.args=[\"/Users/guang/dev/keyvalet/rust/crates/kv-mcp/tests/r2d_runtime_lab.py\", \"relay\", \"--binary\", \"/Users/guang/dev/keyvalet/rust/target-r2d/debug/examples/approval_fixture-before\", \"--kind\", \"stop\", \"--log\", \"/Users/guang/dev/keyvalet/docs/remote-approval-reports/assets/r2d-runtime-before/codex-stop/wire.jsonl\", \"--delay\", \"35\", \"--budget\", \"10\", \"--socket\", \"/tmp/kv-r2d-8o_of8lw/h.sock\", \"--helper-log\", \"/Users/guang/dev/keyvalet/docs/remote-approval-reports/assets/r2d-runtime-before/codex-stop/helper.json\"]",
+    "-c",
+    "mcp_servers.keyvalet.default_tools_approval_mode=\"approve\"",
+    "-c",
+    "features.hooks=true",
+    "--dangerously-bypass-hook-trust",
+    "-c",
+    "hooks.Stop=[{hooks=[{type=\"command\",command=\"/Users/guang/dev/keyvalet/rust/target-r2d/debug/examples/stop_fixture codex-stop /tmp/kv-r2d-8o_of8lw/h.sock /Users/guang/dev/keyvalet/docs/remote-approval-reports/assets/r2d-runtime-before/codex-stop/hook.jsonl\",timeout=10}]}]",
+    "This is an isolated KeyValet runtime experiment with a fake helper and no real credentials. Use only the KeyValet MCP server; do not use built-in tools, edit files or run commands. Call credential_http_request once with type=api_key, name=fixture, method=POST, url=https://example.test/request, body={\"fixture\":true}, purpose=\"R2-D synthetic approval experiment\". After the first response, report its status and finish the turn."
+  ],
+  "elapsed_s": 180.046,
+  "status": "supervisor_deadline",
+  "exit": 0,
+  "private_config_removed": true
+}

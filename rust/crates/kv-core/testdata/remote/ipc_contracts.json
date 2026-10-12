@@ -17,6 +17,7 @@
     "remote.pair.start",
     "remote.pair.complete",
     "remote.pair.confirm",
+    "remote.account.recover",
     "remote.devices.list",
     "remote.devices.revoke",
     "remote.devices.rename",
@@ -64,6 +65,7 @@
       "remote.pair.start",
       "remote.pair.complete",
       "remote.pair.confirm",
+      "remote.account.recover",
       "remote.devices.list",
       "remote.devices.revoke",
       "remote.devices.rename",
@@ -99,6 +101,7 @@
         "remote.client_timeout_observed"
       ],
       "cli_owner": [
+        "remote.account.recover",
         "remote.audit.list",
         "remote.pending.list",
         "remote.decide",
