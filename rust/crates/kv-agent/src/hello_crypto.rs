@@ -13,7 +13,7 @@ pub fn public_key(bytes: &[u8]) -> Result<RsaPublicKey, String> {
     Ok(key)
 }
 
-pub fn verify(public: &[u8], challenge: &[u8; 32], signature: &[u8]) -> Result<(), String> {
+pub fn verify(public: &[u8], challenge: &[u8], signature: &[u8]) -> Result<(), String> {
     if signature.len() != 256 {
         return Err("expected an RSA-2048 signature".into());
     }

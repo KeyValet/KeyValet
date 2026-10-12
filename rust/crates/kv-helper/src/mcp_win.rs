@@ -13,6 +13,7 @@ pub async fn serve_launcher(
     mut launcher: NamedPipeServer,
     owner: Arc<Vec<u8>>,
     session: u32,
+    launcher_pid: u32,
     mut stop: tokio::sync::watch::Receiver<bool>,
 ) -> io::Result<()> {
     if *stop.borrow() {
@@ -28,6 +29,7 @@ pub async fn serve_launcher(
             &mut launcher,
             &owner,
             session,
+            launcher_pid,
             request,
             &mut stop,
             &mut started,
@@ -49,6 +51,7 @@ async fn run(
     launcher: &mut NamedPipeServer,
     owner: &[u8],
     session: u32,
+    launcher_pid: u32,
     request: kv_ipc::mcp_worker::Launch,
     stop: &mut tokio::sync::watch::Receiver<bool>,
     started: &mut bool,
@@ -97,24 +100,25 @@ async fn run(
             .map_err(io::Error::other)??,
     };
     let handshake = async {
-        loop {
+        let binding = loop {
             channel.connect().await?;
             let peer = accept_client(&channel).await?;
             if child.matches(peer.pid)
                 && sid_equal(&peer.sid, owner)
                 && same_file_path(&peer.exe_path, path)
             {
-                break;
+                break kv_helper::remote::server::bind_windows_mcp_worker(peer.pid, launcher_pid)
+                    .map_err(io::Error::other)?;
             }
             // Keep the original instance while creating its replacement, preserving the name.
             let next = factory.create(false)?;
             channel.disconnect()?;
             channel = next;
-        }
+        };
         kv_platform::worker::accept_worker(&mut channel, request.context).await?;
         kv_platform::worker::write_json(launcher, &json!({"ok":true})).await?;
         *started = true;
-        Ok::<(), io::Error>(())
+        Ok::<_, io::Error>(binding)
     };
     let started = tokio::select! {
         biased;
@@ -126,12 +130,15 @@ async fn run(
             result.unwrap_or_else(|_| Err(io::Error::new(io::ErrorKind::TimedOut, "MCP worker did not connect")))
         },
     };
-    let result = match started {
-        Ok(()) => tokio::select! {
-            result = kv_platform::worker::relay(launcher, &mut channel) => result,
-            _ = stop.changed() => Ok(()),
-        },
-        Err(e) => Err(e),
+    let (result, binding) = match started {
+        Ok(binding) => (
+            tokio::select! {
+                result = kv_platform::worker::relay(launcher, &mut channel) => result,
+                _ = stop.changed() => Ok(()),
+            },
+            Some(binding),
+        ),
+        Err(e) => (Err(e), None),
     };
     // Named pipes have no half-close. Explicitly close both directions on client EOF; the
     // worker then locks its helper session and deletes its exported files before exiting.
@@ -154,6 +161,7 @@ async fn run(
             tokio::time::sleep(Duration::from_millis(100)).await;
         }
     }
+    drop(binding);
     drop(child); // Close the retained process/job handles before stale-file cleanup.
     if let Ok(cleaner) = ProtectedProcess::launch_cleanup(session, owner) {
         for _ in 0..10 {

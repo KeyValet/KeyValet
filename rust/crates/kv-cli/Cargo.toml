@@ -13,16 +13,18 @@ path = "src/main.rs"
 kv-core = { path = "../kv-core" }
 kv-hook = { path = "../kv-hook" }
 kv-i18n = { path = "../kv-i18n" }
+kv-ipc = { path = "../kv-ipc" }
 kv-platform = { path = "../kv-platform" }
+kv-proxy = { path = "../kv-proxy" }
 kv-vault = { path = "../kv-vault" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 rpassword = "7"
 libc = "0.2"
 zeroize = "1"
-
-[target.'cfg(windows)'.dependencies]
-tokio = { version = "1", features = ["rt", "net", "io-util", "time"] }
+tokio = { version = "1", features = ["rt-multi-thread", "net", "io-util", "time", "process", "sync"] }
 
 [dev-dependencies]
 tempfile = "3"
+kv-helper = { path = "../kv-helper" }
+kv-agent = { path = "../kv-agent" }

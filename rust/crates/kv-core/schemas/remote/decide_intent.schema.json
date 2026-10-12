@@ -1,0 +1,92 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DecideIntent",
+  "type": "object",
+  "properties": {
+    "approval_id": {
+      "type": "string",
+      "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+    },
+    "decision": {
+      "enum": [
+        "allow",
+        "deny"
+      ]
+    },
+    "scope": {
+      "$ref": "#/$defs/DecisionScope"
+    },
+    "scope_option": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "level": {
+      "anyOf": [
+        {
+          "enum": [
+            "quick",
+            "strong"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "reason": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "approval_id",
+    "decision",
+    "scope"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "DecisionScope": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "enum": [
+            "per_use",
+            "per_credential",
+            "per_session",
+            "remember",
+            "standing"
+          ]
+        },
+        "level": {
+          "enum": [
+            "credential",
+            "device"
+          ]
+        },
+        "until": {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "mode",
+        "level",
+        "until"
+      ],
+      "additionalProperties": true
+    }
+  }
+}

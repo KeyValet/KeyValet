@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DirectiveIntent",
+  "type": "object",
+  "properties": {
+    "kind": {
+      "enum": [
+        "directive"
+      ]
+    },
+    "aud": {
+      "type": "string"
+    },
+    "op": {
+      "enum": [
+        "set_mode",
+        "revoke_grant",
+        "revoke_all_grants",
+        "lock",
+        "set_unlock_ttl",
+        "set_class",
+        "set_device_label",
+        "revoke_device",
+        "notify",
+        "query_status",
+        "query_pending",
+        "query_grants",
+        "query_audit",
+        "cancel_approval"
+      ]
+    },
+    "args": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "kind",
+    "aud",
+    "op",
+    "args"
+  ],
+  "additionalProperties": false
+}

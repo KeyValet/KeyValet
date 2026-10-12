@@ -20,7 +20,14 @@
     "remote.devices.list",
     "remote.devices.revoke",
     "remote.devices.rename",
-    "remote.status"
+    "remote.status",
+    "remote.audit.list",
+    "remote.relay.identity",
+    "remote.relay.outbound.ack",
+    "remote.relay.control.poll",
+    "remote.relay.control.complete",
+    "remote.relay.control.sign",
+    "remote.client_timeout_observed"
   ],
   "request": {
     "op": "remote.status",
@@ -60,14 +67,26 @@
       "remote.devices.list",
       "remote.devices.revoke",
       "remote.devices.rename",
-      "remote.status"
+      "remote.status",
+      "remote.audit.list",
+      "remote.relay.identity",
+      "remote.relay.outbound.ack",
+      "remote.relay.control.poll",
+      "remote.relay.control.complete",
+      "remote.relay.control.sign",
+      "remote.client_timeout_observed"
     ],
     "allowed": {
       "relay_client": [
         "remote.relay.inbound",
         "remote.relay.outbound.poll",
         "remote.relay.status",
-        "remote.sign_identity"
+        "remote.sign_identity",
+        "remote.relay.identity",
+        "remote.relay.outbound.ack",
+        "remote.relay.control.poll",
+        "remote.relay.control.complete",
+        "remote.relay.control.sign"
       ],
       "hook": [
         "remote.pending.for_agent",
@@ -76,9 +95,11 @@
       "mcp": [
         "remote.wait",
         "remote.pending.list",
-        "remote.status"
+        "remote.status",
+        "remote.client_timeout_observed"
       ],
       "cli_owner": [
+        "remote.audit.list",
         "remote.pending.list",
         "remote.decide",
         "remote.grant.issue",

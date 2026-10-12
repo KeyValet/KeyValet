@@ -1,0 +1,5 @@
+#!/bin/sh
+# The pinned code generator needs expanded Rust. Avoid installing another build dependency.
+set -eu
+export RUSTC_BOOTSTRAP=1 CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0
+exec cargo +1.99.0 rustc -p kv-mobile-core --lib -- -Zunpretty=expanded

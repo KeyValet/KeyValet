@@ -34,6 +34,7 @@ impl EnclaveMetadata {
             2 => ProviderId::WindowsHello,
             3 => ProviderId::Tpm2,
             4 => ProviderId::SoftwareKey,
+            5 => ProviderId::DeviceIdentity,
             _ => return Err(invalid_enclave_metadata()),
         };
         self.decode()?;
@@ -58,6 +59,17 @@ impl EnclaveMetadata {
         }
     }
 
+    /// Used only by the remote metadata vault. Its background key is distinct from the UMK.
+    pub fn device_identity(metadata: &serde_json::Value, peer: &[u8]) -> Result<Self> {
+        let value = Self {
+            version: 5,
+            key_blob: STANDARD.encode(serde_json::to_vec(metadata)?),
+            peer_public_key: STANDARD.encode(peer),
+        };
+        value.decode()?;
+        Ok(value)
+    }
+
     pub fn hello(&self) -> Result<(HelloMetadata, [u8; 32])> {
         let (blob, challenge) = self.decode()?;
         if self.version != 2 {
@@ -74,7 +86,7 @@ impl EnclaveMetadata {
 
     pub fn decode(&self) -> Result<(Vec<u8>, Vec<u8>)> {
         let invalid = invalid_enclave_metadata;
-        if !matches!(self.version, 1..=4)
+        if !matches!(self.version, 1..=5)
             || self.key_blob.len() > 8192
             || self.peer_public_key.len() > 128
         {
@@ -127,6 +139,12 @@ impl EnclaveMetadata {
             {
                 return Err(invalid());
             }
+        } else if self.version == 5 {
+            let metadata: serde_json::Value =
+                serde_json::from_slice(&blob).map_err(|_| invalid())?;
+            if metadata["role"] != "identity" || peer.len() != 65 || peer[0] != 4 {
+                return Err(invalid());
+            }
         } else if blob.len() != 32 || !peer.is_empty() {
             return Err(invalid());
         }
@@ -176,6 +194,7 @@ pub enum ProviderId {
     WindowsHello,
     Tpm2,
     SoftwareKey,
+    DeviceIdentity,
 }
 
 impl ProviderId {
@@ -185,6 +204,7 @@ impl ProviderId {
             Self::WindowsHello => "windows_hello",
             Self::Tpm2 => "tpm2",
             Self::SoftwareKey => "software_key",
+            Self::DeviceIdentity => "device_identity",
         }
     }
 }

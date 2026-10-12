@@ -1,6 +1,6 @@
 +++
 title = "Pricing"
-description = "KeyValet is free and open source. Team plans — shared credentials, org policy, audit export, CI identity — are planned, not available yet."
+description = "KeyValet is free and open source on macOS, Linux and Windows, and remote approval from your phone will be free on the official relay within a fair-use quota. Team plans — shared credentials, org policy, audit export, CI identity, hosted relay — are planned, not available yet."
 +++
 
 <div class="plans wide">
@@ -9,22 +9,24 @@ description = "KeyValet is free and open source. Team plans — shared credentia
     <p class="price">$0</p>
     <p>Open source (Apache-2.0), forever. Everything the product does today:</p>
     <ul>
-      <li>Local vault protected by Secure Enclave + device binding</li>
+      <li>Local vault protected by Secure Enclave (macOS) or TPM 2.0 (Linux), with device binding; Windows Hello in the Windows preview</li>
+      <li>The broker runs as a privileged system service the agent can’t read — on all three platforms</li>
       <li>All credential kinds: API keys, OAuth 2.0, Google service accounts, GitHub Apps, JWT, TOTP, AWS STS</li>
       <li>~50 service templates + generic bearer/header/query/basic</li>
       <li>Proxied calls and the loopback SDK gateway</li>
-      <li>Touch ID approval modes: per-use, per-credential, per-session, remember</li>
+      <li>Approval modes: per-use, per-credential, per-session, remember — Touch ID, polkit or Hello</li>
       <li>Hooks for Claude Code, Codex, Cursor, Grok Build and Devin CLI</li>
       <li><code>keyvalet scan</code> and the local, root-only audit log</li>
     </ul>
-    <p>Planned for Free:</p>
+    <p>In development, also Free:</p>
     <ul>
+      <li>Remote approval: agents on a server or headless Mac, approvals on your phone (iOS + Android) or laptop</li>
+      <li>Pairing and remote settings: modes, standing grants, lock, revoke-all</li>
+      <li>Official relay (relay.keyvalet.dev) within a fair-use quota: 3 devices, 2,000 remote approvals/month; the phone app always uses it</li>
+      <li>Self-hosted relay (nginx + Cloudflare) for laptop approvers, no quota</li>
       <li>Policy engine (risk tiers, policy.yaml)</li>
-      <li>Linux helper</li>
-      <li>Self-hosted relay</li>
-      <li>iPhone approvals</li>
     </ul>
-    <p class="cta-plan"><a class="btn primary" href="/#install">Install on macOS</a></p>
+    <p class="cta-plan"><a class="btn primary" href="/#install">Install on macOS or Linux</a></p>
   </div>
   <div class="plan">
     <span class="badge">Planned — not available yet</span>
@@ -49,9 +51,9 @@ description = "KeyValet is free and open source. Team plans — shared credentia
     <p class="price">$18 <small>per seat / month · $15 billed annually</small></p>
     <p>Everything in Team, plus:</p>
     <ul>
-      <li>Approval routing to an owner’s phone</li>
+      <li>Shared credentials routed to the owner’s phone for approval</li>
       <li>N-of-M approvals for sensitive credentials</li>
-      <li>Phone approvals for Linux/CI</li>
+      <li>Hosted relay without quotas for the whole team</li>
       <li>OIDC SSO (Okta, Entra, Google)</li>
       <li>90-day encrypted audit retention</li>
     </ul>
@@ -75,7 +77,7 @@ Shared keys, CI identity, policy distribution and audit export need a relay — 
 
 ### Can I self-host the relay?
 
-Planned, yes — and open source.
+Yes, for laptop approvers (Mac / Windows): the relay server ships in the Linux and macOS packages and deploys behind nginx + Cloudflare. The phone app connects only to the official relay, so phone approvals use relay.keyvalet.dev. The relay sees ciphertext either way.
 
 ### What about Enterprise?
 

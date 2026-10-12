@@ -16,6 +16,8 @@ use windows::Win32::System::WinRT::{
 };
 use zeroize::{Zeroize, Zeroizing};
 
+mod remote_key;
+
 fn error(e: impl std::fmt::Display) -> String {
     format!("Windows Hello failed: {e}; no file-key fallback")
 }
@@ -227,6 +229,9 @@ pub fn handle(request: &Value, active: Option<&EnclaveMetadata>) -> Reply {
         }
     }
     let _apartment = Apartment;
+    if request["op"] == "device_key" {
+        return remote_key::handle(request);
+    }
     crate::hello_logic::handle(request, active, &mut WindowsHello)
 }
 #[cfg(test)]

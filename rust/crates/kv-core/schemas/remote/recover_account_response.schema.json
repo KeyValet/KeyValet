@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RecoverAccountResponse",
+  "type": "object",
+  "properties": {
+    "ok": {
+      "const": true
+    },
+    "account_id": {
+      "type": "string"
+    },
+    "device_id": {
+      "type": "string"
+    },
+    "recovery_code": {
+      "type": "string",
+      "minLength": 43,
+      "maxLength": 43
+    }
+  },
+  "required": [
+    "ok",
+    "account_id",
+    "device_id",
+    "recovery_code"
+  ],
+  "additionalProperties": false
+}

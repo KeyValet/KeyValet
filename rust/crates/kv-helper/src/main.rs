@@ -264,10 +264,10 @@ where
 /// One session over any byte stream: handshake (30 s deadline), then the request loop, then the
 /// session-end audit entry. All session state is per-call, so the daemon can run many of these
 /// concurrently with nothing shared but the AgentHub and the socket limit.
-#[cfg(any(unix, windows))] // session serving is shared; Windows uses the named-pipe daemon
+#[cfg(any(target_os = "macos", test))]
 #[allow(clippy::too_many_arguments)] // the session context is a fixed contract; grouping it adds indirection
 async fn serve<R, W, A, C, M>(
-    mut reader: R,
+    reader: R,
     writer: W,
     vault: Arc<Vault>,
     gateway_uid: Option<kv_platform::peer::GatewayPeer>,
@@ -277,7 +277,41 @@ async fn serve<R, W, A, C, M>(
     provider: Arc<M>,
 ) -> Reject
 where
-    R: AsyncRead + Unpin,
+    R: AsyncRead + Unpin + Send,
+    W: AsyncWrite + Unpin + Send + 'static,
+    A: kv_platform::Authenticator + Send + Sync + 'static,
+    C: kv_platform::Confirmer + Clone + Send + Sync + 'static,
+    M: kv_vault::MasterKeyProvider + Send + Sync + 'static,
+{
+    serve_with_remote(
+        reader,
+        writer,
+        vault,
+        gateway_uid,
+        agent_trust,
+        authenticator,
+        confirmer,
+        provider,
+        None,
+    )
+    .await
+}
+
+#[cfg(any(unix, windows))]
+#[allow(clippy::too_many_arguments)]
+async fn serve_with_remote<R, W, A, C, M>(
+    mut reader: R,
+    writer: W,
+    vault: Arc<Vault>,
+    gateway_uid: Option<kv_platform::peer::GatewayPeer>,
+    agent_trust: &'static str,
+    authenticator: A,
+    confirmer: C,
+    provider: Arc<M>,
+    remote_context: Option<kv_helper::remote::ipc::CallerContext>,
+) -> Reject
+where
+    R: AsyncRead + Unpin + Send,
     W: AsyncWrite + Unpin + Send + 'static,
     A: kv_platform::Authenticator + Send + Sync + 'static,
     C: kv_platform::Confirmer + Clone + Send + Sync + 'static,
@@ -299,7 +333,7 @@ where
     let auth = Arc::new(AsyncMutex::new(SessionAuth::new(gate)));
     // The session's gateway. We keep our own clone so teardown doesn't have to wait on the
     // auth lock (a dispatch may be holding it, e.g. inside a Touch ID prompt).
-    let gateway = {
+    let mut gateway = {
         let vault_for_audit = vault.clone();
         let ctx_for_audit = ctx.clone();
         let gateway_audit: kv_proxy::gateway::GatewayAudit =
@@ -310,10 +344,11 @@ where
                 }
                 let _ = vault_for_audit.audit(e);
             });
+        #[allow(clippy::clone_on_copy)] // GatewayPeer is Vec<u8> on Windows.
         let gateway = Arc::new(kv_proxy::gateway::Gateway::new(
             vault.clone(),
             gateway_audit,
-            gateway_uid,
+            gateway_uid.clone(),
         ));
         auth.lock().await.gateway = Some(gateway.clone());
         gateway
@@ -380,6 +415,47 @@ where
 
             let mut st = state.lock().await;
             if *st == State::Handshake {
+                let first_op = serde_json::from_str::<Value>(&line)
+                    .ok()
+                    .and_then(|value| value.get("op").and_then(Value::as_str).map(str::to_owned));
+                if first_op
+                    .as_deref()
+                    .is_some_and(|op| op == "relay" || op.starts_with("remote."))
+                {
+                    drop(st);
+                    let Some(remote_context) = remote_context else {
+                        let _ = vault.audit(
+                            json!({"op":"ipc_rejected","reason":"untrusted_caller","ok":false})
+                                .as_object()
+                                .cloned()
+                                .unwrap_or_default(),
+                        );
+                        send(&stdout, &json!({"id":serde_json::from_str::<Value>(&line).ok().and_then(|v|v["id"].as_u64()),"ok":false,"error":{"code":"forbidden","message":"forbidden"}})).await;
+                        break 'outer Reject::Refused;
+                    };
+                    // Reuse the already-read frame and any coalesced bytes without a second
+                    // credential handshake. This channel never transitions into Ready.
+                    let mut prefix = zeroize::Zeroizing::new(line_bytes);
+                    prefix.extend_from_slice(&buf);
+                    let prefixed_reader = prefix.as_slice().chain(&mut reader);
+                    let mut writer = stdout.lock().await;
+                    let result = kv_helper::remote::server::serve(
+                        prefixed_reader,
+                        &mut *writer,
+                        remote_context,
+                        kv_helper::remote::server::runtime(),
+                    )
+                    .await;
+                    if let Err(error) = result {
+                        let _ = vault.audit(
+                            json!({"op":"ipc_rejected","reason":error.code(),"ok":false})
+                                .as_object()
+                                .cloned()
+                                .unwrap_or_default(),
+                        );
+                    }
+                    break 'outer Reject::Refused;
+                }
                 if let Ok(ProtectionProbe::Status { protocol, lang }) = serde_json::from_str(&line)
                 {
                     drop(st);
@@ -428,7 +504,87 @@ where
                 drop(ctx_guard);
                 drop(auth_guard);
                 match handshake {
-                    Ok(()) => *state.lock().await = State::Ready,
+                    Ok(()) => {
+                        if let (Some(context), Some(helper), Some(runner)) = (
+                            remote_context,
+                            kv_helper::remote::server::runtime(),
+                            kv_helper::remote::server::production_runner(),
+                        ) {
+                            let mut client = ctx.lock().await;
+                            client.ppid = Some(context.agent_pid());
+                            let session = client.session.clone().unwrap_or_default();
+                            let executor =
+                                Arc::new(kv_helper::remote::production::CredentialSession {
+                                    vault: vault.clone(),
+                                    context: client.clone(),
+                                    auth: auth.clone(),
+                                    confirmer: confirmer.clone(),
+                                });
+                            if let Err(error) = runner.attach(
+                                session.clone(),
+                                context.uid(),
+                                context.agent_pid(),
+                                std::time::Duration::from_secs(helper.unlock_ttl_s()),
+                                executor,
+                            ) {
+                                break 'outer Reject::ProtocolError(error.to_string());
+                            }
+                            drop(client);
+                            let audit_vault = vault.clone();
+                            let audit_context = ctx.clone();
+                            let audit = Arc::new(move |mut entry: Map<String, Value>| {
+                                if let Ok(context) = audit_context.try_lock() {
+                                    entry.insert("client".into(), json!(&*context));
+                                }
+                                let _ = audit_vault.audit(entry);
+                            });
+                            let provider = kv_helper::remote::gateway::Provider::new(
+                                helper.clone(),
+                                runner,
+                                session,
+                                context.uid(),
+                                context.agent_pid(),
+                            );
+                            let layer = kv_proxy::approval::ApprovalLayer {
+                                provider: Arc::new(provider),
+                                http_wait: std::time::Duration::from_secs(helper.http_wait_s()),
+                                notice: if context.role() == kv_ipc::remote::Caller::CliOwner {
+                                    let stdout = stdout.clone();
+                                    Some(Arc::new(move |label: &str, _: &str| {
+                                        let stdout = stdout.clone();
+                                        let label = label.to_owned();
+                                        tokio::spawn(async move {
+                                            send(&stdout, &json!({"op":"gateway.approval_pending","params":{"label":label}})).await;
+                                        });
+                                    }))
+                                } else {
+                                    None
+                                },
+                            };
+                            gateway.close();
+                            #[allow(clippy::clone_on_copy)] // GatewayPeer is Vec<u8> on Windows.
+                            let peer = gateway_uid.clone();
+                            gateway = Arc::new(
+                                kv_proxy::gateway::Gateway::new(vault.clone(), audit, peer)
+                                    .with_approval(layer),
+                            );
+                            auth.lock().await.gateway = Some(gateway.clone());
+                        }
+                        *state.lock().await = State::Ready;
+                        if let (Some(context), Some(helper)) =
+                            (remote_context, kv_helper::remote::server::runtime())
+                        {
+                            if context.role() == kv_ipc::remote::Caller::Mcp {
+                                let stdout = stdout.clone();
+                                requests.spawn(async move {
+                                    let _ = kv_helper::remote::server::push_approval_notices(
+                                        &helper, context, &stdout,
+                                    )
+                                    .await;
+                                });
+                            }
+                        }
+                    }
                     Err(reject) => break 'outer reject,
                 }
                 continue;
@@ -440,6 +596,69 @@ where
                 ));
             }
             drop(st);
+
+            // The established MCP connection can also use the remote namespace. Its OS role
+            // was verified by the real transport; a prior credential unlock adds no remote ACL.
+            if serde_json::from_str::<Value>(&line)
+                .ok()
+                .is_some_and(|v| v["op"].as_str().is_some_and(|op| op.starts_with("remote.")))
+            {
+                while requests.try_join_next().is_some() {}
+                let Ok(permit) = in_flight.clone().try_acquire_owned() else {
+                    if requests.len() >= 2 * MAX_IN_FLIGHT {
+                        break 'outer Reject::ProtocolError(kv_i18n::t(
+                            "待处理请求过多",
+                            "Too many pending requests",
+                        ));
+                    }
+                    let id = serde_json::from_str::<Value>(&line)
+                        .ok()
+                        .and_then(|v| v["id"].as_u64());
+                    let stdout = stdout.clone();
+                    requests.spawn(async move {
+                        send(
+                            &stdout,
+                            &json!({"id":id,"ok":false,"error":{"code":"busy","message":"busy"}}),
+                        )
+                        .await;
+                    });
+                    continue;
+                };
+                let remote_request = kv_core::remote::canonical::from_json::<kv_ipc::remote::Request>(
+                    line.as_bytes(),
+                );
+                let id = serde_json::from_str::<Value>(&line)
+                    .ok()
+                    .and_then(|v| v["id"].as_u64());
+                let stdout = stdout.clone();
+                requests.spawn(async move {
+                    let _permit = permit;
+                    let response = match (
+                        remote_context,
+                        remote_request,
+                        kv_helper::remote::server::runtime(),
+                    ) {
+                        (Some(context), Ok(request), Some(helper)) => {
+                            helper.handle(context, request).await
+                        }
+                        (None, _, _) => kv_ipc::remote::Response::err("forbidden", "forbidden"),
+                        (_, Err(_), _) => {
+                            kv_ipc::remote::Response::err("invalid_remote_op", "invalid_remote_op")
+                        }
+                        _ => kv_ipc::remote::Response::err(
+                            "remote_unavailable",
+                            "remote_unavailable",
+                        ),
+                    };
+                    let mut value = serde_json::to_value(response).unwrap();
+                    if let Some(id) = id {
+                        value["id"] = json!(id);
+                    }
+                    send(&stdout, &value).await;
+                    kv_vault::scrub_json(&mut value);
+                });
+                continue;
+            }
 
             let req: Request = match serde_json::from_str(&line) {
                 Ok(r) => r,
@@ -485,6 +704,156 @@ where
                 let _permit = permit;
                 let id = req.id;
                 let client_ctx = ctx.lock().await.clone();
+                if matches!(
+                    req.op.as_str(),
+                    "proxyCertificate" | "proxySignLeaf" | "proxyWait"
+                ) {
+                    let result = async {
+                        let context = remote_context.ok_or("forbidden")?;
+                        if context.role() != kv_ipc::remote::Caller::CliOwner {
+                            return Err("forbidden");
+                        }
+                        let authority = kv_helper::remote::server::certificate_authority()
+                            .ok_or("remote_unavailable")?;
+                        match req.op.as_str() {
+                            "proxyCertificate" => {
+                                Ok(json!({"certificate":authority.certificate()}))
+                            }
+                            "proxySignLeaf" => {
+                                let field = |key: &str| {
+                                    req.params
+                                        .get(key)
+                                        .and_then(Value::as_str)
+                                        .ok_or("invalid_proxy_request")
+                                };
+                                let (ty, name, host, csr) = (
+                                    field("type")?,
+                                    field("name")?,
+                                    field("host")?,
+                                    field("csr")?,
+                                );
+                                let gateway = auth
+                                    .lock()
+                                    .await
+                                    .gateway
+                                    .clone()
+                                    .ok_or("gateway_unavailable")?;
+                                if !gateway.permits_certificate(ty, name, host) {
+                                    return Err("unbound_proxy_host");
+                                }
+                                let leaf = authority
+                                    .sign_leaf(host, csr)
+                                    .map_err(|_| "invalid_proxy_csr")?;
+                                Ok(json!({"certificate":kv_core::remote::keys::encode_b64(&leaf)}))
+                            }
+                            _ => {
+                                let approval = req
+                                    .params
+                                    .get("approval_id")
+                                    .and_then(Value::as_str)
+                                    .ok_or("invalid_approval_id")?;
+                                let helper = kv_helper::remote::server::runtime()
+                                    .ok_or("remote_unavailable")?;
+                                let value = helper
+                                    .wait(approval, 60_000, 70, context.uid(), context.agent_pid())
+                                    .await
+                                    .map_err(|_| "approval_wait_failed")?;
+                                serde_json::to_value(value).map_err(|_| "invalid_approval_result")
+                            }
+                        }
+                    }
+                    .await;
+                    let response = match result {
+                        Ok(value) => Response::ok(id, value),
+                        Err(error) => Response::err(id, error),
+                    };
+                    let mut value = serde_json::to_value(response).unwrap();
+                    send(&stdout, &value).await;
+                    kv_vault::scrub_json(&mut value);
+                    return;
+                }
+                if matches!(
+                    req.op.as_str(),
+                    "get"
+                        | "accessToken"
+                        | "totp"
+                        | "aws"
+                        | "httpRequest"
+                        | "httpTest"
+                        | "gatewayOpen"
+                ) {
+                    if let (Some(context), Some(helper), Some(runner)) = (
+                        remote_context,
+                        kv_helper::remote::server::runtime(),
+                        kv_helper::remote::server::production_runner(),
+                    ) {
+                        let session = client_ctx.session.as_deref().unwrap_or_default();
+                        let approval_id = req
+                            .params
+                            .get("approval_id")
+                            .and_then(Value::as_str)
+                            .map(str::to_owned);
+                        let budget = req
+                            .params
+                            .get("runtime_budget_s")
+                            .and_then(Value::as_u64)
+                            .unwrap_or(context.runtime_budget_s())
+                            .min(context.runtime_budget_s());
+                        let budget = req
+                            .params
+                            .get("wait_in_call_ms")
+                            .and_then(Value::as_u64)
+                            .map_or(budget, |ms| budget.min(ms / 1000 + 10));
+                        let result = match helper.local_channel_available().and_then(|local| {
+                            runner.prepare(&helper, session, &req.op, req.params, local)
+                        }) {
+                            Ok((input, hosts, methods)) => match approval_id {
+                                Some(approval_id) => {
+                                    let canonical = helper
+                                        .retry_canonical(
+                                            &approval_id,
+                                            input.canonical,
+                                            &input.full_request,
+                                            context.uid(),
+                                            context.agent_pid(),
+                                        )
+                                        .and_then(|canonical| {
+                                            runner.rebind(&canonical, session)?;
+                                            Ok(canonical)
+                                        });
+                                    match canonical {
+                                        Ok(canonical) => helper
+                                            .retry(
+                                                &approval_id,
+                                                &canonical,
+                                                input.full_request,
+                                                context.uid(),
+                                                context.agent_pid(),
+                                            )
+                                            .await
+                                            .and_then(|value| {
+                                                serde_json::to_value(value).map_err(Into::into)
+                                            }),
+                                        Err(error) => Err(error),
+                                    }
+                                }
+                                None => helper.run(input, hosts, methods, budget).await.and_then(
+                                    |value| serde_json::to_value(value).map_err(Into::into),
+                                ),
+                            },
+                            Err(error) => Err(error),
+                        };
+                        let mut response = match result {
+                            Ok(value) => serde_json::to_value(Response::ok(id, value)).unwrap(),
+                            Err(error) => {
+                                serde_json::to_value(Response::err(id, error.to_string())).unwrap()
+                            }
+                        };
+                        send(&stdout, &response).await;
+                        kv_vault::scrub_json(&mut response);
+                        return;
+                    }
+                }
                 let mut auth_guard = auth.lock().await;
                 let resp = kv_core::dispatch(
                     &vault,
@@ -546,6 +915,10 @@ fn main() {
     let args: Vec<String> = std::env::args().collect();
     #[cfg(target_os = "linux")]
     {
+        if args.len() == 2 && args[1] == "--peer-broker" {
+            peer_broker::run().unwrap_or_else(|e| fatal(&e));
+            return;
+        }
         if args.len() != 2 || args[1] != "--daemon" {
             fatal("usage: kv-helper --daemon (systemd, User=keyvalet)");
         }
@@ -641,23 +1014,83 @@ async fn stdio_main() {
 
 /// Answers a privileged control connection: `{"op":"control","command":"sessions"}` ->
 /// `{"sessions":N}`; anything else closes the connection (matches the macOS daemon exactly).
-#[cfg(unix)]
+#[cfg(all(target_os = "macos", test))]
 pub(crate) async fn control<S>(stream: S, sessions: Arc<std::sync::atomic::AtomicUsize>)
 where
-    S: AsyncRead + AsyncWrite + Unpin,
+    S: AsyncRead + AsyncWrite + Unpin + Send,
 {
-    let (mut reader, mut writer) = tokio::io::split(stream);
-    let mut line = String::new();
-    let n = tokio::io::AsyncBufReadExt::read_line(
-        &mut tokio::io::BufReader::new(&mut reader),
-        &mut line,
+    control_with_remote(stream, sessions, None).await;
+}
+
+#[cfg(unix)]
+pub(crate) async fn control_with_remote<S>(
+    stream: S,
+    sessions: Arc<std::sync::atomic::AtomicUsize>,
+    remote_context: Option<kv_helper::remote::ipc::CallerContext>,
+) where
+    S: AsyncRead + AsyncWrite + Unpin + Send,
+{
+    let (reader, mut writer) = tokio::io::split(stream);
+    let mut reader = tokio::io::BufReader::new(reader);
+    let Ok(Ok(Some(mut frame))) = tokio::time::timeout(
+        std::time::Duration::from_secs(5),
+        kv_helper::remote::server::read_frame(&mut reader),
     )
-    .await;
-    let ok = matches!(n, Ok(1..)) && {
-        let v: Value = serde_json::from_str(line.trim()).unwrap_or(Value::Null);
-        v.get("op").and_then(Value::as_str) == Some("control")
-            && v.get("command").and_then(Value::as_str) == Some("sessions")
+    .await
+    else {
+        return;
     };
+    let mut frame = zeroize::Zeroizing::new(std::mem::take(&mut frame));
+    let value =
+        kv_vault::SecretJson(kv_core::remote::canonical::from_json(&frame).unwrap_or(Value::Null));
+    if value["op"]
+        .as_str()
+        .is_some_and(|op| op.starts_with("remote."))
+    {
+        let Some(context) = remote_context else {
+            return;
+        };
+        frame.push(b'\n');
+        let replay = frame.as_slice().chain(&mut reader);
+        let _ = kv_helper::remote::server::serve(
+            replay,
+            &mut writer,
+            context,
+            kv_helper::remote::server::runtime(),
+        )
+        .await;
+        return;
+    }
+    let ok = value["op"] == "control" && value["command"] == "sessions";
+    if value["op"] == "control" && value["command"] == "remote_settings" {
+        let reply = match remote_context {
+            Some(context) => {
+                match kv_helper::remote::settings::control(context, value["params"].clone()).await {
+                    Ok(result) => json!({"ok":true,"result":result}),
+                    Err(error) => json!({"ok":false,"error":error.code()}),
+                }
+            }
+            None => json!({"ok":false,"error":"forbidden"}),
+        };
+        let mut bytes = serde_json::to_vec(&reply).unwrap();
+        bytes.push(b'\n');
+        let _ = writer.write_all(&bytes).await;
+    }
+    if value["op"] == "control" && value["command"] == "remote_bootstrap" {
+        let reply = match remote_context {
+            Some(context) => {
+                match kv_helper::remote::startup::initialize(context, value["params"].clone()).await
+                {
+                    Ok(result) => json!({"ok":true,"result":result}),
+                    Err(error) => json!({"ok":false,"error":error.code()}),
+                }
+            }
+            None => json!({"ok":false,"error":"forbidden"}),
+        };
+        let mut bytes = serde_json::to_vec(&reply).unwrap();
+        bytes.push(b'\n');
+        let _ = writer.write_all(&bytes).await;
+    }
     if ok {
         let reply = json!({"sessions": sessions.load(std::sync::atomic::Ordering::SeqCst)});
         let mut bytes = serde_json::to_vec(&reply).unwrap();
@@ -675,6 +1108,8 @@ mod daemon_linux;
 mod daemon_win;
 #[cfg(windows)]
 mod mcp_win;
+#[cfg(target_os = "linux")]
+mod peer_broker;
 
 #[cfg(all(test, any(unix, windows)))]
 mod session_tests {
@@ -761,7 +1196,8 @@ mod session_tests {
             weak.upgrade().is_none(),
             "ended session must release its unlocked vault"
         );
-        assert!(tokio::net::TcpStream::connect(&authority).await.is_err());
+        // Another parallel test can receive the released ephemeral port. The original
+        // connection and vault lifetime identify this gateway without assuming port ownership.
         use tokio::io::AsyncReadExt;
         let read =
             tokio::time::timeout(std::time::Duration::from_secs(1), idle.read(&mut [0u8; 1]))
@@ -1655,7 +2091,9 @@ mod session_tests {
             .unwrap() as u16;
 
         // The gateway accepts connections while the session is live.
-        assert!(std::net::TcpStream::connect(format!("127.0.0.1:{port}")).is_ok());
+        let mut idle = tokio::net::TcpStream::connect(format!("127.0.0.1:{port}"))
+            .await
+            .unwrap();
 
         drop(cw);
         drop(buf);
@@ -1670,9 +2108,17 @@ mod session_tests {
             1,
             "nothing from the session may retain the vault key"
         );
+        // A parallel test may reuse the released port; observe this session's connection.
+        let mut byte = [0u8; 1];
+        let closed = tokio::time::timeout(
+            std::time::Duration::from_secs(1),
+            tokio::io::AsyncReadExt::read(&mut idle, &mut byte),
+        )
+        .await
+        .unwrap();
         assert!(
-            std::net::TcpStream::connect(format!("127.0.0.1:{port}")).is_err(),
-            "the gateway listener must be gone with the session"
+            matches!(closed, Ok(0) | Err(_)),
+            "the session gateway must close its connections"
         );
     }
 
@@ -1760,7 +2206,9 @@ mod session_tests {
                     .and_then(|b| b.rsplit(':').next()?.parse::<u64>().ok())
             })
             .unwrap() as u16;
-        assert!(std::net::TcpStream::connect(format!("127.0.0.1:{port}")).is_ok());
+        let mut idle = tokio::net::TcpStream::connect(format!("127.0.0.1:{port}"))
+            .await
+            .unwrap();
 
         // This dispatch parks inside the grant prompt, holding the session auth lock.
         let get = json!({"id": 3, "op": "get", "params": {
@@ -1785,9 +2233,17 @@ mod session_tests {
             started.elapsed() < std::time::Duration::from_secs(1),
             "teardown must not wait on a prompt-blocked dispatch"
         );
+        // A parallel test may reuse the released port; observe this session's connection.
+        let mut byte = [0u8; 1];
+        let closed = tokio::time::timeout(
+            std::time::Duration::from_secs(1),
+            tokio::io::AsyncReadExt::read(&mut idle, &mut byte),
+        )
+        .await
+        .unwrap();
         assert!(
-            std::net::TcpStream::connect(format!("127.0.0.1:{port}")).is_err(),
-            "the gateway listener must be gone with the session"
+            matches!(closed, Ok(0) | Err(_)),
+            "the session gateway must close its connections"
         );
         assert_eq!(Arc::strong_count(&vault), 1);
     }

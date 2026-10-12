@@ -1,10 +1,11 @@
 # Installed integration test for a disposable Windows machine. No Hello, GUI or secrets.
 # Ordinary unit tests do not invoke this script. It refuses an existing installation/vault.
 [CmdletBinding()]
-param([switch]$AllowSystemChanges, [string]$BinaryDirectory, [string]$ResultPath,
+param([switch]$AllowSystemChanges, [switch]$DeferProfileCleanup, [string]$BinaryDirectory, [string]$ResultPath,
       [string]$WslDistribution, [string]$WslUser = 'kvwsltest')
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
+[Console]::OutputEncoding = [Text.UTF8Encoding]::new($false)
 if (!$AllowSystemChanges) { throw 'This test installs/removes a SYSTEM service. Use -AllowSystemChanges on a disposable clean Windows machine.' }
 if ($env:OS -ne 'Windows_NT') { throw 'Run this integration test on Windows.' }
 $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
@@ -12,6 +13,7 @@ if (!([Security.Principal.WindowsPrincipal]$identity).IsInRole([Security.Princip
 $install = 'C:\Program Files\KeyValet'; $vault = 'C:\ProgramData\KeyValet'
 if ((Test-Path -LiteralPath $install) -or (Test-Path -LiteralPath $vault) -or
     (Get-Service KeyValetHelper -ErrorAction SilentlyContinue) -or
+    (Get-Service KeyValetRelay -ErrorAction SilentlyContinue) -or
     (Get-ScheduledTask -TaskName KeyValetAgent -ErrorAction SilentlyContinue)) {
     throw 'This test requires a clean machine with no KeyValet installation, task, service or retained vault.'
 }
@@ -26,6 +28,7 @@ $testUser = $null
 $testPassword = $null
 $checks = [Collections.Generic.List[string]]::new()
 $failure = $null
+$pendingProfiles = [Collections.Generic.List[object]]::new()
 function Assert([bool]$Condition, [string]$Message) { if (!$Condition) { throw $Message } }
 function Assert-Throws([scriptblock]$Action, [string]$Message) {
     $threw = $false
@@ -43,6 +46,39 @@ using Microsoft.Win32.SafeHandles;
 public static class KeyValetSmokePipe {
     [DllImport("kernel32.dll", SetLastError = true)]
     public static extern bool GetNamedPipeServerProcessId(SafePipeHandle pipe, out uint pid);
+}
+public static class KeyValetSmokeAccountRights {
+    [StructLayout(LayoutKind.Sequential)] struct Attributes {
+        public uint Length; public IntPtr RootDirectory; public IntPtr ObjectName;
+        public uint Flags; public IntPtr SecurityDescriptor; public IntPtr SecurityQualityOfService;
+    }
+    [StructLayout(LayoutKind.Sequential)] struct UnicodeString {
+        public ushort Length; public ushort MaximumLength; public IntPtr Buffer;
+    }
+    [DllImport("advapi32.dll")] static extern uint LsaOpenPolicy(IntPtr system, ref Attributes attributes, uint access, out IntPtr policy);
+    [DllImport("advapi32.dll")] static extern uint LsaAddAccountRights(IntPtr policy, IntPtr sid, UnicodeString[] rights, uint count);
+    [DllImport("advapi32.dll")] static extern uint LsaRemoveAccountRights(IntPtr policy, IntPtr sid, [MarshalAs(UnmanagedType.U1)] bool all, UnicodeString[] rights, uint count);
+    [DllImport("advapi32.dll")] static extern uint LsaClose(IntPtr policy);
+    [DllImport("advapi32.dll")] static extern uint LsaNtStatusToWinError(uint status);
+    public static void SetBatchLogon(string sidText, bool grant) {
+        var sid = new System.Security.Principal.SecurityIdentifier(sidText);
+        var bytes = new byte[sid.BinaryLength]; sid.GetBinaryForm(bytes, 0);
+        var buffer = Marshal.AllocHGlobal(bytes.Length);
+        var right = Marshal.StringToHGlobalUni("SeBatchLogonRight");
+        IntPtr policy = IntPtr.Zero;
+        try {
+            Marshal.Copy(bytes, 0, buffer, bytes.Length);
+            var attributes = new Attributes(); attributes.Length = (uint)Marshal.SizeOf(attributes);
+            uint status = LsaOpenPolicy(IntPtr.Zero, ref attributes, 0x810, out policy);
+            if (status != 0) throw new System.ComponentModel.Win32Exception((int)LsaNtStatusToWinError(status));
+            var rights = new[]{new UnicodeString{Length=34, MaximumLength=36, Buffer=right}};
+            status = grant ? LsaAddAccountRights(policy, buffer, rights, 1) : LsaRemoveAccountRights(policy, buffer, false, rights, 1);
+            if (status != 0) throw new System.ComponentModel.Win32Exception((int)LsaNtStatusToWinError(status));
+        } finally {
+            if (policy != IntPtr.Zero) LsaClose(policy);
+            Marshal.FreeHGlobal(right); Marshal.FreeHGlobal(buffer);
+        }
+    }
 }
 '@
 function Test-ServicePipe {
@@ -72,6 +108,96 @@ function Test-ServicePipe {
         } finally { $writer.Dispose(); $reader.Dispose() }
     } finally { $channel.Dispose() }
 }
+function Test-StandardOwnerStatus {
+    # Task Scheduler supplies the standard user's own noninteractive window station. An SSH
+    # logon desktop cannot be inherited by a newly created user (STATUS_DLL_INIT_FAILED).
+    $probeName = 'KeyValetOwnerProbe-' + [guid]::NewGuid().ToString('N')
+    $probeRoot = Join-Path 'C:\Windows\Temp' $probeName
+    $probeTask = $false
+    $probeBatchRight = $false
+    New-Item -Path $probeRoot -ItemType Directory | Out-Null
+    try {
+        $probeAcl = [Security.AccessControl.DirectorySecurity]::new()
+        $probeAcl.SetOwner([Security.Principal.SecurityIdentifier]::new('S-1-5-32-544'))
+        $probeAcl.SetAccessRuleProtection($true, $false)
+        foreach ($probeSid in 'S-1-5-18','S-1-5-32-544',$owner) {
+            $probeAcl.AddAccessRule([Security.AccessControl.FileSystemAccessRule]::new(
+                [Security.Principal.SecurityIdentifier]::new($probeSid), 'FullControl',
+                'ContainerInherit,ObjectInherit', 'None', 'Allow'))
+        }
+        Set-Acl -LiteralPath $probeRoot $probeAcl
+        $probeScript = Join-Path $probeRoot 'probe.ps1'
+        $probeResult = Join-Path $probeRoot 'result.json'
+        $probeCode = @'
+$ErrorActionPreference = 'Stop'
+$probeProcess = $null
+try {
+$probeIdentity = [Security.Principal.WindowsIdentity]::GetCurrent()
+$probeStart = [Diagnostics.ProcessStartInfo]::new()
+$probeStart.FileName = 'C:\Program Files\KeyValet\bin\kv-cli.exe'
+$probeStart.Arguments = 'status --json'
+$probeStart.WorkingDirectory = 'C:\Windows\System32'
+$probeStart.UseShellExecute = $false; $probeStart.CreateNoWindow = $true
+$probeStart.RedirectStandardOutput = $true; $probeStart.RedirectStandardError = $true
+$probeStart.StandardOutputEncoding = [Text.UTF8Encoding]::new($false)
+$probeStart.StandardErrorEncoding = [Text.UTF8Encoding]::new($false)
+$probeProcess = [Diagnostics.Process]::Start($probeStart)
+    $probeOutput = $probeProcess.StandardOutput.ReadToEndAsync()
+    $probeError = $probeProcess.StandardError.ReadToEndAsync()
+    if (!$probeProcess.WaitForExit(15000)) { $probeProcess.Kill(); throw 'Standard-owner CLI timed out.' }
+    $probeReport = @{ sid=$probeIdentity.User.Value;
+        elevated=([Security.Principal.WindowsPrincipal]$probeIdentity).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator);
+        exit_code=$probeProcess.ExitCode; stdout=$probeOutput.Result; stderr=$probeError.Result }
+    [IO.File]::WriteAllText('__KV_PROBE_RESULT__', ($probeReport | ConvertTo-Json -Depth 8), [Text.UTF8Encoding]::new($false))
+} catch {
+    $probeReport = @{ error=$_.Exception.Message; error_type=$_.Exception.GetType().FullName }
+    [IO.File]::WriteAllText('__KV_PROBE_RESULT__', ($probeReport | ConvertTo-Json -Depth 8), [Text.UTF8Encoding]::new($false))
+} finally { if ($probeProcess) { $probeProcess.Dispose() } }
+'@
+        [IO.File]::WriteAllText($probeScript, $probeCode.Replace('__KV_PROBE_RESULT__', $probeResult), [Text.UTF8Encoding]::new($false))
+        $probeAction = New-ScheduledTaskAction -Execute 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe' -Argument ('-NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "' + $probeScript + '"')
+        $probeSettings = New-ScheduledTaskSettingsSet -ExecutionTimeLimit ([TimeSpan]::FromMinutes(1)) -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
+        $probeCredential = [Management.Automation.PSCredential]::new(($env:COMPUTERNAME + '\' + $testName), $testPassword)
+        [KeyValetSmokeAccountRights]::SetBatchLogon($owner, $true)
+        $probeBatchRight = $true
+        $probePrincipal = New-ScheduledTaskPrincipal -UserId $probeCredential.UserName -LogonType Password -RunLevel Limited
+        $probeDefinition = New-ScheduledTask -Action $probeAction -Settings $probeSettings -Principal $probePrincipal
+        Register-ScheduledTask -TaskName $probeName -InputObject $probeDefinition -User $probeCredential.UserName -Password $probeCredential.GetNetworkCredential().Password | Out-Null
+        $probeTask = $true
+        Start-ScheduledTask -TaskName $probeName
+        $probeDeadline = [DateTime]::UtcNow.AddSeconds(30)
+        while (!(Test-Path -LiteralPath $probeResult)) {
+            if ([DateTime]::UtcNow -gt $probeDeadline) {
+                $probeInfo = Get-ScheduledTaskInfo -TaskName $probeName
+                $probeDetails = Get-ScheduledTask -TaskName $probeName
+                Get-WinEvent -LogName 'Microsoft-Windows-TaskScheduler/Operational' -MaxEvents 100 -ErrorAction SilentlyContinue |
+                    Where-Object { $_.ToXml().Contains($probeName) } | Select-Object TimeCreated, Id, Message | Format-List | Out-Host
+                throw ('Standard-owner scheduled probe timed out; task result: ' + $probeInfo.LastTaskResult + '; state: ' + $probeDetails.State + '; logon: ' + $probeDetails.Principal.LogonType)
+            }
+            Start-Sleep -Milliseconds 100
+        }
+        $probe = Get-Content -LiteralPath $probeResult -Raw -Encoding UTF8 | ConvertFrom-Json
+        if ($probe.PSObject.Properties.Name -contains 'error') { throw ('Standard-owner scheduled probe failed: ' + $probe.error) }
+        Assert ($probe.sid -eq $owner -and !$probe.elevated) 'The status probe must run as the real unelevated owner.'
+        Assert ($probe.exit_code -eq 0) ("Standard-owner status probe failed (exit " + $probe.exit_code + "): " + $probe.stderr + $probe.stdout)
+        $ordinaryStatus = $probe.stdout | ConvertFrom-Json
+        Assert ($ordinaryStatus.ok -and $ordinaryStatus.result.protection.provider -eq 'uninitialized') 'Standard owner must read authenticated public status without elevation or Hello.'
+        Assert ($ordinaryStatus.result.remote_error.code -eq 'remote_unavailable') 'An unpaired owner must receive the structured remote-unavailable reply.'
+    } finally {
+        if ($probeTask) {
+            Stop-ScheduledTask -TaskName $probeName -ErrorAction SilentlyContinue
+            $probeStopDeadline = [DateTime]::UtcNow.AddSeconds(15)
+            while ((Get-ScheduledTask -TaskName $probeName).State -eq 'Running') {
+                if ([DateTime]::UtcNow -gt $probeStopDeadline) { throw 'Standard-owner task did not stop.' }
+                Start-Sleep -Milliseconds 100
+            }
+            Unregister-ScheduledTask -TaskName $probeName -Confirm:$false -ErrorAction SilentlyContinue
+        }
+        if ($probeBatchRight) { [KeyValetSmokeAccountRights]::SetBatchLogon($owner, $false) }
+        Remove-Item -LiteralPath $probeRoot -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
+
 function Assert-NoKeys {
     Assert (!(Test-Path "$vault/master.key")) 'No-Hello installation must not create a software master key.'
     Assert (!(Test-Path "$vault/vault.enc")) 'Public status must not initialize an encrypted vault.'
@@ -108,9 +234,14 @@ try {
     Wait-Service 'Running'
     Test-ServicePipe
     $checks.Add('fresh install, SYSTEM identity and authenticated pipe control')
-    foreach ($binary in 'kv-helper', 'kv-agent', 'kv-cli', 'kv-mcp', 'kv-hook') {
+    foreach ($binary in 'kv-helper', 'kv-agent', 'kv-cli', 'kv-mcp', 'kv-hook', 'kv-server', 'kv-relay-client') {
         Assert ((Get-FileHash "$BinaryDirectory/$binary.exe").Hash -eq (Get-FileHash "$install/bin/$binary.exe").Hash) 'Installed executable differs from package input.'
     }
+    $relay = Get-CimInstance Win32_Service -Filter "Name='KeyValetRelay'"
+    Assert ($null -ne $relay -and $relay.StartName -ieq 'NT SERVICE\KeyValetRelay') 'Relay must use its dedicated virtual service account.'
+    Assert ($relay.PathName -ieq ('"' + "$install\bin\kv-relay-client.exe" + '" --service')) 'Relay service executable differs from the package.'
+    Assert ($relay.State -eq 'Stopped' -and $relay.StartMode -eq 'Manual') 'An unpaired relay must remain stopped with manual startup.'
+    $checks.Add('complete remote binaries and unpaired relay virtual service account')
     foreach ($file in 'bridge.sh', 'install.sh', 'uninstall.sh', 'configure.py', 'verify.py') {
         Assert ((Get-FileHash "$repo/scripts/wsl/$file").Hash -eq (Get-FileHash "$install/wsl/$file").Hash) 'Installed WSL bridge differs from package input.'
     }
@@ -120,25 +251,16 @@ try {
         else { [Security.Principal.NTAccount]::new($task.Principal.UserId).Translate([Security.Principal.SecurityIdentifier]).Value }
     Assert ($taskSid -eq $owner -and $task.Principal.RunLevel -eq 'Limited') 'Login launcher must use the installing owner without elevation.'
     $cli = "$install/bin/kv-cli.exe"
-    $output = & $cli status
+    $output = & $cli status --json
+    Assert ($LASTEXITCODE -eq 3) 'Another administrator must not obtain the owner remote status.'
+    $rejected = ($output | Out-String) | ConvertFrom-Json
+    Assert (!$rejected.ok -and $rejected.error.code -eq 'forbidden') 'Cross-account remote status must be rejected explicitly.'
+    $checks.Add('cross-account remote status rejection for another administrator')
+    $output = & $cli status --summary --json
     Assert ($LASTEXITCODE -eq 0) 'Installed CLI cannot read public protection status.'
     $status = ($output | Out-String) | ConvertFrom-Json
-    Assert ($status.provider -eq 'uninitialized') 'A clean no-Hello machine must report an uninitialized vault.'
-    $start = [Diagnostics.ProcessStartInfo]::new()
-    $start.FileName = $cli; $start.Arguments = 'status'
-    $start.WorkingDirectory = 'C:\Windows\System32'
-    $start.UserName = $testName; $start.Domain = $env:COMPUTERNAME; $start.Password = $testPassword
-    $start.UseShellExecute = $false; $start.CreateNoWindow = $true
-    $start.LoadUserProfile = $true; $start.RedirectStandardOutput = $true; $start.RedirectStandardError = $true
-    $ordinary = [Diagnostics.Process]::Start($start)
-    try {
-        $readOutput = $ordinary.StandardOutput.ReadToEndAsync()
-        $readError = $ordinary.StandardError.ReadToEndAsync()
-        if (!$ordinary.WaitForExit(15000)) { $ordinary.Kill(); throw 'Standard-owner status probe timed out.' }
-        Assert ($ordinary.ExitCode -eq 0) ("Standard-owner service identity/status probe failed: " + $readError.Result)
-        $ordinaryStatus = $readOutput.Result | ConvertFrom-Json
-        Assert ($ordinaryStatus.provider -eq 'uninitialized') 'Standard owner must read authenticated public status without elevation or Hello.'
-    } finally { $ordinary.Dispose() }
+    Assert ($status.ok -and $status.result.protection.provider -eq 'uninitialized') 'A clean no-Hello machine must report an uninitialized vault.'
+    Test-StandardOwnerStatus
     Test-ServicePipe
     Assert-NoKeys
     $checks.Add('real standard-owner authenticated public status without Hello; no fallback or binding keys')
@@ -176,6 +298,7 @@ try {
 
     & "$repo/scripts/uninstall.ps1"
     Assert (!(Get-Service KeyValetHelper -ErrorAction SilentlyContinue)) 'Uninstall left its service registered.'
+    Assert (!(Get-Service KeyValetRelay -ErrorAction SilentlyContinue)) 'Uninstall left its relay service registered.'
     Assert (!(Get-ScheduledTask -TaskName KeyValetAgent -ErrorAction SilentlyContinue)) 'Uninstall left its login task.'
     Assert (!(Test-Path $install) -and (Test-Path "$vault/owner.sid")) 'Default uninstall must retain the vault and remove executables.'
     $checks.Add('uninstall retains the vault by default')
@@ -193,14 +316,26 @@ try {
     } catch { $failure = "${failure} Cleanup failed: $($_.Exception.Message)" }
     if ($testUser) {
         try {
-            Get-CimInstance Win32_UserProfile | Where-Object { $_.SID -eq $testUser.SID.Value -and !$_.Special } | Remove-CimInstance
-            Remove-LocalUser -SID $testUser.SID
+            $profileDeadline = [DateTime]::UtcNow.AddSeconds(15)
+            while (@(Get-CimInstance Win32_UserProfile | Where-Object { $_.SID -eq $testUser.SID.Value -and $_.Loaded }).Count) {
+                if ([DateTime]::UtcNow -gt $profileDeadline) {
+                    if (!$DeferProfileCleanup) { throw 'Test-user profile did not unload.' }
+                    $pendingProfiles.Add(@{ sid=$testUser.SID.Value; path="C:\Users\$testName" })
+                    break
+                }
+                Start-Sleep -Milliseconds 100
+            }
+            if (!$pendingProfiles.Count) {
+                Get-CimInstance Win32_UserProfile | Where-Object { $_.SID -eq $testUser.SID.Value -and !$_.Special } | Remove-CimInstance
+            }
         } catch { $failure = "${failure} Test-user cleanup failed: $($_.Exception.Message)" }
+        finally { Remove-LocalUser -SID $testUser.SID }
     }
     if ($testPassword) { $testPassword.Dispose() }
     $report = @{ windows_build = [Environment]::OSVersion.Version.ToString(); architecture = $architecture;
         hello_tested = $false; signing = 'unsigned development'; checks = @($checks.ToArray());
         wsl_interop_tested = ($checks -contains 'live WSL native CLI/hooks/WSLENV/TTL and per-user client installation; no Hello or desktop MCP');
+        profile_cleanup_pending_reboot = @($pendingProfiles.ToArray());
         passed = !$failure; error = $failure; timestamp_utc = [DateTime]::UtcNow.ToString('o') }
     New-Item (Split-Path $ResultPath -Parent) -ItemType Directory -Force | Out-Null
     [IO.File]::WriteAllText($ResultPath, ($report | ConvertTo-Json -Depth 8), [Text.UTF8Encoding]::new($false))

@@ -58,9 +58,287 @@
         "envelope"
       ],
       "additionalProperties": true
+    },
+    {
+      "type": "object",
+      "properties": {
+        "t": {
+          "const": "pair_accept"
+        },
+        "pairing_id": {
+          "type": "string",
+          "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+        },
+        "joiner": {
+          "$ref": "#/$defs/DeviceRecord"
+        }
+      },
+      "required": [
+        "t",
+        "pairing_id",
+        "joiner"
+      ],
+      "additionalProperties": true
+    },
+    {
+      "type": "object",
+      "properties": {
+        "t": {
+          "const": "approval_cancel"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+        }
+      },
+      "required": [
+        "t",
+        "id"
+      ],
+      "additionalProperties": true
     }
   ],
   "$defs": {
+    "DeviceRecord": {
+      "type": "object",
+      "properties": {
+        "device_id": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "os": {
+          "type": "string"
+        },
+        "key_kind": {
+          "type": "string"
+        },
+        "dk_pub": {
+          "$ref": "#/$defs/PublicJwk"
+        },
+        "dk_sig": {
+          "type": "object",
+          "properties": {
+            "pub": {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/PublicJwk"
+                },
+                {
+                  "properties": {
+                    "kty": {
+                      "const": "EC"
+                    },
+                    "crv": {
+                      "const": "P-256"
+                    }
+                  }
+                }
+              ]
+            },
+            "alg": {
+              "const": "ES256"
+            }
+          },
+          "required": [
+            "pub",
+            "alg"
+          ],
+          "additionalProperties": true
+        },
+        "ak_q": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ApprovalKey"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ak_s": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ApprovalKey"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "caps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "attestation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Attestation"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "device_id",
+        "label",
+        "os",
+        "key_kind",
+        "dk_pub",
+        "ak_q",
+        "ak_s",
+        "caps",
+        "attestation"
+      ],
+      "additionalProperties": true
+    },
+    "Attestation": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "doc": {}
+      },
+      "required": [
+        "kind",
+        "doc"
+      ],
+      "additionalProperties": true
+    },
+    "ApprovalKey": {
+      "type": "object",
+      "properties": {
+        "pub": {
+          "$ref": "#/$defs/PublicJwk"
+        },
+        "alg": {
+          "enum": [
+            "ES256",
+            "RS256"
+          ]
+        }
+      },
+      "required": [
+        "pub",
+        "alg"
+      ],
+      "additionalProperties": true
+    },
+    "PublicJwk": {
+      "type": "object",
+      "properties": {
+        "kty": {
+          "type": "string"
+        },
+        "crv": {
+          "type": "string"
+        },
+        "x": {
+          "type": "string"
+        },
+        "y": {
+          "type": "string"
+        },
+        "n": {
+          "type": "string"
+        },
+        "e": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kty"
+      ],
+      "additionalProperties": true,
+      "anyOf": [
+        {
+          "properties": {
+            "kty": {
+              "const": "EC"
+            },
+            "crv": {
+              "const": "P-256"
+            },
+            "x": {
+              "type": "string",
+              "minLength": 43,
+              "maxLength": 43
+            },
+            "y": {
+              "type": "string",
+              "minLength": 43,
+              "maxLength": 43
+            }
+          },
+          "required": [
+            "crv",
+            "x",
+            "y"
+          ]
+        },
+        {
+          "properties": {
+            "kty": {
+              "const": "RSA"
+            }
+          },
+          "required": [
+            "n",
+            "e"
+          ]
+        }
+      ],
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "d"
+            ]
+          },
+          {
+            "required": [
+              "p"
+            ]
+          },
+          {
+            "required": [
+              "q"
+            ]
+          },
+          {
+            "required": [
+              "dp"
+            ]
+          },
+          {
+            "required": [
+              "dq"
+            ]
+          },
+          {
+            "required": [
+              "qi"
+            ]
+          },
+          {
+            "required": [
+              "oth"
+            ]
+          },
+          {
+            "required": [
+              "k"
+            ]
+          }
+        ]
+      }
+    },
     "Envelope": {
       "type": "object",
       "properties": {

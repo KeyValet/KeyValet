@@ -6,12 +6,14 @@ param(
     [string]$PackagePath,
     [switch]$AllowUnsignedAgent,
     [switch]$SkipSetup,
+    [switch]$Uninstall,
     [switch]$InstallSystem,
     [string]$OwnerSid,
     [string]$OwnerProfile
 )
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
+[Console]::OutputEncoding = [Text.UTF8Encoding]::new($false)
 $installDir = 'C:\Program Files\KeyValet'
 $vaultDir = 'C:\ProgramData\KeyValet'
 $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
@@ -184,6 +186,97 @@ function Quote-Argument([string]$Value) {
     '"' + [regex]::Replace([regex]::Replace($Value, '(\\*)"', '$1$1\"'), '(\\+)$', '$1$1') + '"'
 }
 
+function Set-KeyValetToolTimeout([string]$Text, [string]$Mcp) {
+    # Refuse ambiguous multiline/inline layouts rather than edit another server's value.
+    if ($Text.Contains('"""') -or $Text.Contains("'''")) { throw 'Multiline TOML needs manual review before updating the KeyValet timeout.' }
+    $header = '(?m)^\s*\[mcp_servers\.(?:keyvalet|"keyvalet"|''keyvalet'')\]\s*(?:#[^\r\n]*)?$'
+    $match = [regex]::Match($Text, $header)
+    if (!$match.Success) {
+        if ($Text -match '(?m)^\s*(?:mcp_servers\.|keyvalet\s*=|\[\s*["'']mcp_servers)') {
+            throw 'Unsupported existing KeyValet TOML layout; original configuration retained.'
+        }
+        return $Text.TrimEnd() + "`n`n[mcp_servers.keyvalet]`ncommand = '" + $Mcp + "'`nargs = []`ntool_timeout_sec = 900`n"
+    }
+    $start = $match.Index + $match.Length
+    $next = [regex]::Match($Text.Substring($start), '(?m)^\s*\[')
+    $length = if ($next.Success) { $next.Index } else { $Text.Length - $start }
+    $body = $Text.Substring($start, $length)
+    $timeout = '(?m)^\s*(?:tool_timeout_sec|"tool_timeout_sec"|''tool_timeout_sec'')\s*=[^\r\n]*(?:\r?\n|$)'
+    $body = [regex]::Replace($body, $timeout, '').TrimEnd() + "`ntool_timeout_sec = 900`n"
+    return $Text.Substring(0, $start) + $body + $Text.Substring($start + $length)
+}
+
+function Remove-KeyValetMcpTable([string]$Text) {
+    if ($Text.Contains('"""') -or $Text.Contains("'''")) { throw 'Multiline TOML needs manual review before removing the KeyValet entry.' }
+    $table = '(?ms)^\s*\[mcp_servers\.(?:keyvalet|"keyvalet"|''keyvalet'')(?:\.[^\]]+)?\][^\r\n]*\r?\n.*?(?=^\s*\[|\z)'
+    return [regex]::Replace($Text, $table, '')
+}
+
+function Install-RelayClient {
+    $binary = "$installDir\bin\kv-relay-client.exe"
+    if (!(Test-Path -LiteralPath $binary)) { return }
+    $existing = Get-Service KeyValetRelay -ErrorAction SilentlyContinue
+    if ($existing) {
+        $configuration = Get-CimInstance Win32_Service -Filter "Name='KeyValetRelay'"
+        if ($configuration.PathName.Trim() -ine ('"' + $binary + '" --service') -or
+            $configuration.StartName -ine 'NT SERVICE\KeyValetRelay') { throw 'Unexpected existing KeyValetRelay service identity.' }
+        Stop-Service KeyValetRelay -Force
+        $existing.WaitForStatus('Stopped', [TimeSpan]::FromSeconds(20))
+    } else {
+        # Use W3's SCM registration, virtual account, service SID and recovery configuration.
+        & $binary service install
+        if ($LASTEXITCODE -ne 0) { throw 'Cannot register KeyValetRelay.' }
+    }
+    $relaySid = ([Security.Principal.NTAccount]::new('NT SERVICE\KeyValetRelay')).Translate([Security.Principal.SecurityIdentifier])
+    $directory = "$vaultDir\Relay"
+    if (Test-Path -LiteralPath $directory) {
+        $item = Get-Item -LiteralPath $directory -Force
+        if (!$item.PSIsContainer -or ($item.Attributes -band [IO.FileAttributes]::ReparsePoint)) { throw 'Unsafe relay queue directory.' }
+        $descriptor = [Security.AccessControl.RawSecurityDescriptor]::new((Get-Acl -LiteralPath $directory).GetSecurityDescriptorBinaryForm(), 0)
+        if (!$descriptor.Owner -or $descriptor.Owner.Value -notin 'S-1-5-18','S-1-5-32-544' -or $null -eq $descriptor.DiscretionaryAcl) { throw 'Untrusted relay queue owner or DACL.' }
+        Assert-RelayDescriptor $descriptor $relaySid $false
+    } else { Set-ProtectedDirectory $directory $false }
+    $acl = [Security.AccessControl.DirectorySecurity]::new()
+    $acl.SetOwner([Security.Principal.SecurityIdentifier]::new('S-1-5-32-544'))
+    $acl.SetAccessRuleProtection($true, $false)
+    foreach ($sid in 'S-1-5-18','S-1-5-32-544') {
+        $acl.AddAccessRule([Security.AccessControl.FileSystemAccessRule]::new([Security.Principal.SecurityIdentifier]::new($sid), 'FullControl', 'ContainerInherit,ObjectInherit', 'None', 'Allow'))
+    }
+    $acl.AddAccessRule([Security.AccessControl.FileSystemAccessRule]::new($relaySid, 'Modify', 'ContainerInherit,ObjectInherit', 'None', 'Allow'))
+    Set-Acl -LiteralPath $directory $acl
+    $config = "$vaultDir\relay-client.toml"
+    if (Test-Path -LiteralPath $config) {
+        $item = Get-Item -LiteralPath $config -Force
+        if ($item.PSIsContainer -or ($item.Attributes -band [IO.FileAttributes]::ReparsePoint)) { throw 'Unsafe relay configuration.' }
+        $descriptor = [Security.AccessControl.RawSecurityDescriptor]::new((Get-Acl -LiteralPath $config).GetSecurityDescriptorBinaryForm(), 0)
+        Assert-RelayDescriptor $descriptor $relaySid $true
+        # The service gets read access to public binding metadata, never the vault directory.
+        $acl = [Security.AccessControl.FileSecurity]::new()
+        $acl.SetOwner([Security.Principal.SecurityIdentifier]::new('S-1-5-32-544'))
+        $acl.SetAccessRuleProtection($true, $false)
+        foreach ($sid in 'S-1-5-18','S-1-5-32-544') { $acl.AddAccessRule([Security.AccessControl.FileSystemAccessRule]::new([Security.Principal.SecurityIdentifier]::new($sid), 'FullControl', 'Allow')) }
+        $acl.AddAccessRule([Security.AccessControl.FileSystemAccessRule]::new($relaySid, 'Read', 'Allow'))
+        Set-Acl -LiteralPath $config $acl
+        $text = Get-Content -LiteralPath $config -Raw -Encoding UTF8
+        if ($text -match '(?m)^\s*device_id\s*=' -and $text -match '(?m)^\s*account_id\s*=') { return $true }
+    }
+    # The control worker creates the first binding through authenticated helper IPC.
+    return $true
+}
+
+function Assert-RelayDescriptor($Descriptor, $RelaySid, [bool]$ReadOnly) {
+    if (!$Descriptor.Owner -or $Descriptor.Owner.Value -notin 'S-1-5-18','S-1-5-32-544' -or $null -eq $Descriptor.DiscretionaryAcl) { throw 'Untrusted relay owner or DACL.' }
+    foreach ($ace in $Descriptor.DiscretionaryAcl) {
+        if ([int]$ace.AceFlags -band [int][Security.AccessControl.AceFlags]::InheritOnly) { continue }
+        if ($ace -is [Security.AccessControl.QualifiedAce] -and $ace.AceQualifier -eq 'AccessDenied') { continue }
+        if ($ace -isnot [Security.AccessControl.CommonAce] -or $ace.IsCallback -or $ace.AceQualifier -ne 'AccessAllowed') { throw 'Unsupported relay DACL entry.' }
+        if ($ace.SecurityIdentifier.Value -in 'S-1-5-18','S-1-5-32-544') { continue }
+        if ($ace.SecurityIdentifier.Value -ne $RelaySid.Value) { throw 'Unexpected relay ACL principal.' }
+        $mask = [BitConverter]::ToUInt32([BitConverter]::GetBytes([int32]$ace.AccessMask), 0)
+        if ($ReadOnly -and ($mask -band 0x500d0156)) { throw 'Relay configuration must be read-only for the service.' }
+    }
+}
+
 if (!$InstallSystem) {
     $OwnerSid = $identity.User.Value
     $OwnerProfile = $env:USERPROFILE
@@ -198,6 +291,7 @@ if (!$InstallSystem) {
     if ($Tag) { $arguments += @('-Tag', $Tag) }
     if ($PackagePath) { $arguments += @('-PackagePath', (Quote-Argument ([IO.Path]::GetFullPath($PackagePath)))) }
     if ($AllowUnsignedAgent) { $arguments += '-AllowUnsignedAgent' }
+    if ($Uninstall) { $arguments += '-Uninstall' }
     $powershell = 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe'
     $process = Start-Process $powershell -Verb RunAs -ArgumentList $arguments -PassThru -Wait
     if ($process.ExitCode -ne 0) { throw 'KeyValet system installation failed.' }
@@ -222,21 +316,73 @@ if (!$InstallSystem) {
     }
     $mcp = "$installDir\bin\kv-mcp.exe"
     $hook = '"' + "$installDir\bin\kv-hook.exe" + '"'
+    function Is-RemoteHook($Entry) {
+        if ($Entry -isnot [hashtable] -or !$Entry.ContainsKey('command') -or $Entry.command -isnot [string]) { return $false }
+        return $Entry.command -in @("$hook claude-stop", "$hook codex-stop", "$hook cursor-stop", "$hook devin-stop", "$hook gemini-after-agent")
+    }
+    if ($Uninstall) {
+        foreach ($path in "$OwnerProfile\.claude.json", "$OwnerProfile\.cursor\mcp.json", "$OwnerProfile\.gemini\settings.json", (Join-Path (Get-Location).Path '.mcp.json')) {
+            if (!(Test-Path -LiteralPath $path)) { continue }
+            Update-Json $path { param($config)
+                if ($config.ContainsKey('mcpServers') -and $config.mcpServers -is [hashtable]) { $config.mcpServers.Remove('keyvalet') }
+            }
+        }
+        foreach ($path in "$OwnerProfile\.claude\settings.json", "$OwnerProfile\.codex\hooks.json", "$OwnerProfile\.cursor\hooks.json", "$OwnerProfile\.gemini\settings.json", "$OwnerProfile\.config\devin\config.json") {
+            if (!(Test-Path -LiteralPath $path)) { continue }
+            Update-Json $path { param($config)
+                if (!$config.ContainsKey('hooks') -or $config.hooks -isnot [hashtable]) { return }
+                foreach ($event in @($config.hooks.Keys)) {
+                    $config.hooks[$event] = @($config.hooks[$event] | ForEach-Object {
+                        if (Is-RemoteHook $_) { return }
+                        if ($_ -is [hashtable] -and $_.ContainsKey('hooks')) {
+                            $_.hooks = @($_.hooks | Where-Object { !(Is-RemoteHook $_) })
+                            if (!$_.hooks.Count) { return }
+                        }
+                        $_
+                    })
+                }
+            }
+        }
+        foreach ($runtime in 'codex','grok') {
+            $path = "$OwnerProfile\.$runtime\config.toml"
+            if (!(Test-Path -LiteralPath $path)) { continue }
+            $text = Get-Content -LiteralPath $path -Raw -Encoding UTF8
+            $text = Remove-KeyValetMcpTable $text
+            Write-Utf8 $path $text
+        }
+        Write-Host 'KeyValet remote services and runtime registrations removed. Vault, relay queue, certificates and service accounts retained.'
+        return
+    }
     foreach ($path in "$OwnerProfile\.claude.json", "$OwnerProfile\.cursor\mcp.json") {
         Update-Json $path { param($config)
             if (!$config.ContainsKey('mcpServers')) { $config.mcpServers = @{} }
             if ($config.mcpServers -isnot [hashtable]) { throw 'Expected mcpServers to be an object.' }
-            $config.mcpServers.keyvalet = @{ command = $mcp; args = @() }
+            if (!$config.mcpServers.ContainsKey('keyvalet')) { $config.mcpServers.keyvalet = @{ command = $mcp; args = @() } }
+            if ($config.mcpServers.keyvalet -isnot [hashtable]) { throw 'Expected keyvalet to be an object.' }
+            if ($path -like '*\.claude.json') { $config.mcpServers.keyvalet.timeout = 900000 }
+        }
+    }
+    $projectMcp = Join-Path (Get-Location).Path '.mcp.json'
+    if (Test-Path -LiteralPath $projectMcp) {
+        Update-Json $projectMcp { param($config)
+            if (!$config.ContainsKey('mcpServers')) { $config.mcpServers = @{} }
+            if ($config.mcpServers -isnot [hashtable]) { throw 'Expected mcpServers to be an object.' }
+            if (!$config.mcpServers.ContainsKey('keyvalet')) { $config.mcpServers.keyvalet = @{ command = $mcp; args = @() } }
+            if ($config.mcpServers.keyvalet -isnot [hashtable]) { throw 'Expected keyvalet to be an object.' }
+            $config.mcpServers.keyvalet.timeout = 900000
         }
     }
     $codex = "$OwnerProfile\.codex\config.toml"
     New-Item (Split-Path $codex -Parent) -ItemType Directory -Force | Out-Null
     if (!(Test-Path $codex)) { Write-Utf8 $codex '' }
     $toml = Get-Content $codex -Raw -Encoding UTF8
-    if ($toml -notmatch '(?m)^\s*\[mcp_servers\.keyvalet\]') {
-        Copy-Item $codex "$codex.bak-keyvalet" -Force
-        Write-Utf8 $codex ($toml + "`n[mcp_servers.keyvalet]`ncommand = '" + $mcp + "'`nargs = []`n")
-    } else { Write-Host 'Existing Codex keyvalet MCP entry kept; ensure its command points to kv-mcp.exe.' }
+    Copy-Item $codex "$codex.bak-keyvalet" -Force
+    Write-Utf8 $codex (Set-KeyValetToolTimeout $toml $mcp)
+    if (Test-Path "$OwnerProfile\.grok") {
+        $grok = "$OwnerProfile\.grok\config.toml"
+        $text = if (Test-Path -LiteralPath $grok) { Get-Content -LiteralPath $grok -Raw -Encoding UTF8 } else { '' }
+        Write-Utf8 $grok (Set-KeyValetToolTimeout $text $mcp)
+    }
     function Is-KeyValetHook($Entry) {
         if ($Entry -isnot [hashtable] -or !$Entry.ContainsKey('command') -or $Entry.command -isnot [string]) { return $false }
         $prefix = '"C:\Program Files\KeyValet\bin\kv-hook.exe"'
@@ -270,14 +416,34 @@ if (!$InstallSystem) {
     Add-Hooks "$OwnerProfile\.claude\settings.json" @{
         UserPromptSubmit = @(@{ hooks = @(@{ type = 'command'; command = "$hook prompt" }) })
         PreToolUse = @(@{ matcher = 'Bash|Write|Edit|MultiEdit|mcp__.*'; hooks = @(@{ type = 'command'; command = "$hook tool" }) })
+        Stop = @(@{ hooks = @(@{ type = 'command'; command = "$hook claude-stop"; timeout = 10 }) })
     }
     Add-Hooks "$OwnerProfile\.codex\hooks.json" @{
         PreToolUse = @(@{ matcher = 'Bash|apply_patch|mcp__.*'; hooks = @(@{ type = 'command'; command = "$hook codex-tool" }) })
+        Stop = @(@{ hooks = @(@{ type = 'command'; command = "$hook codex-stop"; timeout = 10 }) })
     }
     Add-Hooks "$OwnerProfile\.cursor\hooks.json" -Cursor @{
         beforeShellExecution = @(@{ command = "$hook cursor-shell"; timeout = 10 })
         beforeMCPExecution = @(@{ command = "$hook cursor-mcp"; timeout = 10 })
         preToolUse = @(@{ matcher = 'Write|Edit|MultiEdit'; command = "$hook cursor-tool"; timeout = 10 })
+        stop = @(@{ command = "$hook cursor-stop"; timeout = 10 })
+    }
+    if (Test-Path "$OwnerProfile\.gemini") {
+        Update-Json "$OwnerProfile\.gemini\settings.json" { param($config)
+            if (!$config.ContainsKey('mcpServers')) { $config.mcpServers = @{} }
+            if ($config.mcpServers -isnot [hashtable]) { throw 'Expected mcpServers to be an object.' }
+            if (!$config.mcpServers.ContainsKey('keyvalet')) { $config.mcpServers.keyvalet = @{ command = $mcp; args = @() } }
+            if ($config.mcpServers.keyvalet -isnot [hashtable]) { throw 'Expected keyvalet to be an object.' }
+            $config.mcpServers.keyvalet.timeout = 900000
+        }
+        Add-Hooks "$OwnerProfile\.gemini\settings.json" @{
+            AfterAgent = @(@{ hooks = @(@{ type = 'command'; name = 'keyvalet-approval'; command = "$hook gemini-after-agent"; timeout = 10000 }) })
+        }
+    }
+    if (Test-Path "$OwnerProfile\.config\devin") {
+        Add-Hooks "$OwnerProfile\.config\devin\config.json" @{
+            Stop = @(@{ hooks = @(@{ type = 'command'; command = "$hook devin-stop"; timeout = 10 }) })
+        }
     }
     $userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
     if (@($userPath -split ';') -notcontains "$installDir\bin") {
@@ -300,6 +466,19 @@ if (!$InstallSystem) {
 }
 
 if (!$elevated) { throw 'The system installation phase requires UAC elevation.' }
+if ($Uninstall) {
+    $relay = Get-Service KeyValetRelay -ErrorAction SilentlyContinue
+    if ($relay) {
+        $configuration = Get-CimInstance Win32_Service -Filter "Name='KeyValetRelay'"
+        if ($configuration.PathName.Trim() -ine '"C:\Program Files\KeyValet\bin\kv-relay-client.exe" --service' -or $configuration.StartName -ine 'NT SERVICE\KeyValetRelay') { throw 'Unexpected relay service configuration.' }
+        & "$installDir\bin\kv-relay-client.exe" service uninstall
+        if ($LASTEXITCODE -ne 0) { throw 'Cannot remove KeyValetRelay.' }
+    }
+    $legacy = Join-Path $PSScriptRoot 'uninstall.ps1'
+    if (!(Test-Path -LiteralPath $legacy)) { throw 'The base uninstaller is required next to install.ps1.' }
+    & $legacy
+    return
+}
 if (!$OwnerSid -or !$OwnerProfile) { throw 'The installing user SID and profile must be supplied.' }
 $owner = [Security.Principal.SecurityIdentifier]::new($OwnerSid)
 if ($OwnerSid -notmatch '^S-1-(5-21-\d+-\d+-\d+-\d+|12-1-\d+-\d+-\d+-\d+)$') { throw 'Install for an interactive Windows user, not a service/group identity.' }
@@ -307,6 +486,8 @@ $stage = Join-Path 'C:\Windows\Temp' ('KeyValet-' + [guid]::NewGuid().ToString('
 Set-ProtectedDirectory $stage $false
 $service = $null
 $serviceProcess = $null
+$relayService = $null
+$relayProcess = $null
 try {
     $architecture = if ($env:PROCESSOR_ARCHITECTURE -eq 'ARM64' -or $env:PROCESSOR_ARCHITEW6432 -eq 'ARM64') { 'arm64' } else { 'x64' }
     if (!$PackagePath) {
@@ -327,6 +508,12 @@ try {
     foreach ($binary in 'kv-helper', 'kv-agent', 'kv-cli', 'kv-mcp', 'kv-hook') {
         Assert-BinaryArchitecture "$package/bin/$binary.exe" $architecture
         Assert-SignedBinary "$package/bin/$binary.exe"
+    }
+    foreach ($binary in 'kv-server','kv-relay-client') {
+        if (Test-Path -LiteralPath "$package/bin/$binary.exe") {
+            Assert-BinaryArchitecture "$package/bin/$binary.exe" $architecture
+            Assert-SignedBinary "$package/bin/$binary.exe"
+        }
     }
     if (!(Test-Path "$package/templates/catalog.json")) { throw 'Package template catalog is missing.' }
     # Refuse to silently retarget a device-bound vault during an upgrade by another account.
@@ -352,7 +539,7 @@ try {
     # Validate existing leaf permissions before overwriting anything or stopping the service.
     Set-ProtectedDirectory "$installDir/bin" $true
     Set-ProtectedDirectory "$installDir/templates" $true
-    foreach ($binary in 'kv-helper', 'kv-agent', 'kv-cli', 'kv-mcp', 'kv-hook') { Assert-PrivilegedFile "$installDir/bin/$binary.exe" $true }
+    foreach ($binary in 'kv-helper', 'kv-agent', 'kv-cli', 'kv-mcp', 'kv-hook','kv-server','kv-relay-client') { Assert-PrivilegedFile "$installDir/bin/$binary.exe" $true }
     Assert-PrivilegedFile "$installDir/bin/keyvalet.ps1" $true
     Assert-PrivilegedFile "$installDir/templates/catalog.json" $true
     $wslFiles = @('bridge.sh', 'install.sh', 'uninstall.sh', 'configure.py', 'verify.py')
@@ -360,10 +547,24 @@ try {
         Set-ProtectedDirectory "$installDir/wsl" $true
         foreach ($file in $wslFiles) { Assert-PrivilegedFile "$installDir/wsl/$file" $true }
     }
+    $relayService = Get-Service KeyValetRelay -ErrorAction SilentlyContinue
+    if ($relayService) {
+        $relayConfiguration = Get-CimInstance Win32_Service -Filter "Name='KeyValetRelay'"
+        if ($relayConfiguration.PathName.Trim() -ine '"C:\Program Files\KeyValet\bin\kv-relay-client.exe" --service' -or $relayConfiguration.StartName -ine 'NT SERVICE\KeyValetRelay') { throw 'Unexpected existing relay service configuration.' }
+        if ($relayConfiguration.ProcessId -gt 0) {
+            $relayProcess = [Diagnostics.Process]::GetProcessById($relayConfiguration.ProcessId)
+            [void]$relayProcess.Handle
+        }
+    }
     if ($service) {
         Stop-Service KeyValetHelper -Force
         $service.WaitForStatus('Stopped', [TimeSpan]::FromSeconds(20))
         if ($serviceProcess -and !$serviceProcess.WaitForExit(20000)) { throw 'The stopped helper process has not exited; binaries were not replaced.' }
+    }
+    if ($relayService) {
+        Stop-Service KeyValetRelay -Force
+        $relayService.WaitForStatus('Stopped', [TimeSpan]::FromSeconds(20))
+        if ($relayProcess -and !$relayProcess.WaitForExit(20000)) { throw 'The stopped relay process has not exited; binaries were not replaced.' }
     }
     Get-CimInstance Win32_Process -Filter "Name='kv-agent.exe' OR Name='kv-mcp.exe'" | Where-Object { $_.ExecutablePath -in @("$installDir\bin\kv-agent.exe", "$installDir\bin\kv-mcp.exe") } |
         ForEach-Object { Stop-Process -Id $_.ProcessId -Force }
@@ -374,6 +575,14 @@ try {
         if ($LASTEXITCODE -ne 0) { throw 'Cannot reset binary permissions.' }
         & 'C:\Windows\System32\icacls.exe' "$installDir\bin\$binary.exe" /setowner '*S-1-5-32-544' | Out-Null
         if ($LASTEXITCODE -ne 0) { throw 'Cannot set binary owner.' }
+    }
+    foreach ($binary in 'kv-server','kv-relay-client') {
+        if (!(Test-Path -LiteralPath "$package/bin/$binary.exe")) { continue }
+        Copy-Item "$package/bin/$binary.exe" "$installDir/bin/" -Force
+        & 'C:\Windows\System32\icacls.exe' "$installDir\bin\$binary.exe" /reset | Out-Null
+        if ($LASTEXITCODE -ne 0) { throw 'Cannot reset remote binary permissions.' }
+        & 'C:\Windows\System32\icacls.exe' "$installDir\bin\$binary.exe" /setowner '*S-1-5-32-544' | Out-Null
+        if ($LASTEXITCODE -ne 0) { throw 'Cannot protect remote binaries.' }
     }
     Copy-Item "$package/templates/catalog.json" "$installDir/templates/" -Force
     if (Test-Path "$package/wsl") {
@@ -420,7 +629,9 @@ try {
     $principal = New-ScheduledTaskPrincipal -UserId $OwnerSid -LogonType Interactive -RunLevel Limited
     $settings = New-ScheduledTaskSettingsSet -ExecutionTimeLimit ([TimeSpan]::Zero) -RestartCount 3 -RestartInterval ([TimeSpan]::FromMinutes(1)) -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
     Register-ScheduledTask -TaskName KeyValetAgent -Action $action -Trigger $trigger -Principal $principal -Settings $settings -Force | Out-Null
+    $relayReady = Install-RelayClient
     Start-Service KeyValetHelper
+    if ($relayReady) { Set-Service KeyValetRelay -StartupType Automatic; Start-Service KeyValetRelay }
     # Management commands require elevation; public status queries run in the original console.
     # Use kv-cli.exe from an elevated terminal for piped input.
     Write-Utf8 "$installDir/bin/keyvalet.ps1" @'
@@ -439,5 +650,7 @@ exit $process.ExitCode
 } finally {
     if ($service) { $service.Dispose() }
     if ($serviceProcess) { $serviceProcess.Dispose() }
+    if ($relayService) { $relayService.Dispose() }
+    if ($relayProcess) { $relayProcess.Dispose() }
     Remove-Item $stage -Recurse -Force -ErrorAction SilentlyContinue
 }

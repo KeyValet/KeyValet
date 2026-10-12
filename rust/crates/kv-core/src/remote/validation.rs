@@ -3,9 +3,45 @@ use super::keys::verify_object;
 use super::*;
 use std::collections::BTreeMap;
 
+pub fn same_device_authority(a: &DeviceRecord, b: &DeviceRecord) -> bool {
+    let mut candidate = b.clone();
+    candidate.label.clone_from(&a.label);
+    *a == candidate
+}
+
 pub trait NonceStore {
     /// Atomically inserts a nonce, returning Replay on conflict.
     fn consume(&mut self, nonce: &str, digest: &str, exp: Timestamp) -> Result<()>;
+}
+
+/// A revocation is monotonic and authorizes only its exact device/account pair.
+/// Its Strong proof is shared with relay deletion; a DK signature alone is insufficient.
+pub fn verify_device_revoke(
+    value: &DeviceRevoke,
+    sender: &DeviceRecord,
+    account: &str,
+) -> Result<()> {
+    let proof: super::relay::DeviceDeleteProof = serde_json::from_value(
+        value
+            .extra
+            .get("proof")
+            .cloned()
+            .ok_or(RemoteError::InvalidDirective)?,
+    )
+    .map_err(|_| RemoteError::InvalidDirective)?;
+    if proof.device_id != value.device_id
+        || proof.by != sender.device_id
+        || proof.account != account
+        || super::keys::decode_b64(&proof.challenge)?.len() != 32
+    {
+        return Err(RemoteError::InvalidDirective);
+    }
+    let sig = value
+        .extra
+        .get("sig")
+        .and_then(serde_json::Value::as_str)
+        .ok_or(RemoteError::InvalidDirective)?;
+    verify_object(&proof, sig, approval_key(sender, ApprovalLevel::Strong)?)
 }
 
 pub fn approval_key(device: &DeviceRecord, level: ApprovalLevel) -> Result<&ApprovalKey> {
@@ -265,6 +301,14 @@ pub fn directive_required_level(
                 .ok_or_else(invalid)?;
             if integer("limit")? > 200 {
                 return Err(invalid());
+            }
+            for name in ["after", "through"] {
+                if args
+                    .get(name)
+                    .is_some_and(|value| value.as_u64().is_none_or(|n| n > 9_007_199_254_740_991))
+                {
+                    return Err(invalid());
+                }
             }
             ApprovalLevel::Quick
         }

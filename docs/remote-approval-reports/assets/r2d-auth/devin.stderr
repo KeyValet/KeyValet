@@ -1,0 +1,2 @@
+Error: Refusing to run in an untrusted workspace: /private/var/folders/0h/p1772ckx3yq8qn5sqb_wpg_40000gn/T/keyvalet-r2d-login-393vlek6
+Start `devin` interactively in this directory to trust it, or set `respect_workspace_trust: false` in your config to restore the previous behavior.

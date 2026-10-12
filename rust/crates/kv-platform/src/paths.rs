@@ -61,6 +61,18 @@ pub const TEAM_ID: &str = "PWCRJPY7YC";
 pub const AGENT_REQUIREMENT: &str =
     "identifier \"dev.keyvalet.touchid\" and anchor apple generic and certificate leaf[subject.OU] = \"PWCRJPY7YC\"";
 
+#[cfg(target_os = "macos")]
+pub const RELAY_SOCKET: &str = HELPER_SOCKET;
+#[cfg(target_os = "macos")]
+pub const RELAY_BIN: &str = "/usr/local/lib/keyvalet/bin/kv-relay-client";
+#[cfg(target_os = "macos")]
+pub const RELAY_LABEL: &str = "dev.keyvalet.relay";
+#[cfg(target_os = "macos")]
+pub const RELAY_PLIST: &str = "/Library/LaunchAgents/dev.keyvalet.relay.plist";
+#[cfg(target_os = "macos")]
+pub const RELAY_REQUIREMENT: &str =
+    "identifier \"dev.keyvalet.relay-client\" and anchor apple generic and certificate leaf[subject.OU] = \"PWCRJPY7YC\"";
+
 /// Linux code/configuration is root-owned; the vault and runtime socket belong to the
 /// dedicated, non-login service account. None of these paths accept environment overrides.
 #[cfg(target_os = "linux")]
@@ -82,6 +94,8 @@ pub const RUN_DIR: &str = "/run/keyvalet";
 #[cfg(target_os = "linux")]
 pub const HELPER_SOCKET: &str = "/run/keyvalet/helper.sock";
 #[cfg(target_os = "linux")]
+pub const PEER_BROKER_SOCKET: &str = "/run/keyvalet-peer/peer.sock";
+#[cfg(target_os = "linux")]
 pub const OWNER_UID_FILE: &str = "/etc/keyvalet/owner.uid";
 #[cfg(target_os = "linux")]
 pub const SERVICE_USER: &str = "keyvalet";
@@ -91,6 +105,18 @@ pub const SERVICE_NAME: &str = "keyvalet.service";
 pub const POLKIT_POLICY: &str = "/usr/share/polkit-1/actions/dev.keyvalet.policy";
 #[cfg(target_os = "linux")]
 pub const PKCHECK_BIN: &str = "/usr/bin/pkcheck";
+#[cfg(target_os = "linux")]
+pub const RELAY_SOCKET: &str = "/run/keyvalet/relay.sock";
+#[cfg(target_os = "linux")]
+pub const RELAY_SERVICE_USER: &str = "keyvalet-relay";
+#[cfg(target_os = "linux")]
+pub const RELAY_SERVICE_NAME: &str = "keyvalet-relay.service";
+#[cfg(target_os = "linux")]
+pub const RELAY_CONFIG: &str = "/etc/keyvalet/relay-client.toml";
+#[cfg(target_os = "linux")]
+pub const RELAY_QUEUE: &str = "/var/lib/keyvalet-relay/queue";
+#[cfg(target_os = "linux")]
+pub const RELAY_BIN: &str = "/usr/local/lib/keyvalet/bin/kv-relay-client";
 
 /// Install directory (SYSTEM/Administrators only writable); binaries under `bin\`.
 #[cfg(windows)]
@@ -140,3 +166,15 @@ pub const ALLOW_UNSIGNED_AGENT: &str = r"C:\Program Files\KeyValet\allow-unsigne
 /// Authenticode leaf-certificate CN the agent binary must be signed by.
 #[cfg(windows)]
 pub const AGENT_PUBLISHER: &str = "Simvito Limited";
+#[cfg(windows)]
+pub const RELAY_PIPE: &str = r"\\.\pipe\keyvalet-relay";
+#[cfg(windows)]
+pub const RELAY_BIN: &str = r"C:\Program Files\KeyValet\bin\kv-relay-client.exe";
+#[cfg(windows)]
+pub const RELAY_SERVICE_NAME: &str = "KeyValetRelay";
+#[cfg(windows)]
+pub const RELAY_SERVICE_ACCOUNT: &str = r"NT SERVICE\KeyValetRelay";
+#[cfg(windows)]
+pub const RELAY_CONFIG: &str = r"C:\ProgramData\KeyValet\relay-client.toml";
+#[cfg(windows)]
+pub const RELAY_QUEUE: &str = r"C:\ProgramData\KeyValet\Relay\queue";

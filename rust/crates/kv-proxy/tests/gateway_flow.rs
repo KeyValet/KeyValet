@@ -95,6 +95,181 @@ async fn shutdown_cancels_an_upstream_request_and_prevents_reopening() {
 }
 
 struct AlwaysApprove;
+
+struct RemoteApprovalFixture {
+    delay: Option<std::time::Duration>,
+    completed: bool,
+}
+
+impl kv_proxy::approval::ApprovalProvider for RemoteApprovalFixture {
+    fn authorize(
+        &self,
+        request: kv_proxy::approval::ApprovalRequest,
+    ) -> futures_util::future::BoxFuture<'_, Result<serde_json::Value, String>> {
+        assert!(request.headers.keys().all(|name| name != "authorization"));
+        Box::pin(async {
+            Ok(
+                json!({"status": "approval_pending", "approval_id": "01J00000000000000000000000", "approver": {"label": "Fixture MacBook", "online": true}}),
+            )
+        })
+    }
+    fn wait(
+        &self,
+        _id: String,
+        max_wait: std::time::Duration,
+    ) -> futures_util::future::BoxFuture<'_, Result<serde_json::Value, String>> {
+        Box::pin(async move {
+            match self.delay {
+                Some(delay) => {
+                    tokio::time::sleep(delay).await;
+                    if self.completed {
+                        Ok(
+                            json!({"status": "ok", "result": {"status": 200, "body": "completed by helper", "headers": {}, "body_encoding": "text"}}),
+                        )
+                    } else {
+                        Ok(json!({"status": "ok"}))
+                    }
+                }
+                None => {
+                    tokio::time::sleep(max_wait).await;
+                    Ok(
+                        json!({"status": "still_pending", "approval_id": "01J00000000000000000000000"}),
+                    )
+                }
+            }
+        })
+    }
+}
+
+#[tokio::test]
+async fn remote_gateway_waits_without_http_heartbeats_and_returns_normal_response_on_approval() {
+    use tokio::io::{AsyncReadExt, AsyncWriteExt};
+    let _guard = with_insecure_loopback();
+    let server = MockServer::start().await;
+    let (_tmp, _vault, gateway) =
+        new_gateway_with_credential(&server, "synthetic-gateway-secret").await;
+    Mock::given(method("GET"))
+        .and(path("/approved"))
+        .respond_with(ResponseTemplate::new(200).set_body_string("approved upstream"))
+        .expect(1)
+        .mount(&server)
+        .await;
+    let gateway = gateway.with_approval(kv_proxy::approval::ApprovalLayer {
+        provider: Arc::new(RemoteApprovalFixture {
+            delay: Some(std::time::Duration::from_millis(120)),
+            completed: false,
+        }),
+        http_wait: std::time::Duration::from_secs(1),
+        notice: None,
+    });
+    let opened = gateway
+        .open("api_key", "svc", Some("Synthetic approval test"))
+        .await
+        .unwrap();
+    let mut socket = tokio::net::TcpStream::connect(("127.0.0.1", opened.port))
+        .await
+        .unwrap();
+    let request = format!("GET /127.0.0.1:{}/approved HTTP/1.1\r\nHost: 127.0.0.1:{}\r\nAuthorization: Bearer {}\r\nConnection: close\r\n\r\n", server.address().port(), opened.port, opened.token);
+    socket.write_all(request.as_bytes()).await.unwrap();
+    assert!(tokio::time::timeout(
+        std::time::Duration::from_millis(40),
+        socket.read(&mut [0u8; 1])
+    )
+    .await
+    .is_err());
+    let mut response = String::new();
+    socket.read_to_string(&mut response).await.unwrap();
+    assert!(response.starts_with("HTTP/1.1 200"));
+    assert!(response.contains("approved upstream"));
+}
+
+#[tokio::test]
+async fn remote_gateway_deadline_returns_429_and_does_not_send_the_upstream_request() {
+    let _guard = with_insecure_loopback();
+    let server = MockServer::start().await;
+    let (_tmp, _vault, gateway) =
+        new_gateway_with_credential(&server, "synthetic-gateway-secret").await;
+    let gateway = gateway.with_approval(kv_proxy::approval::ApprovalLayer {
+        provider: Arc::new(RemoteApprovalFixture {
+            delay: None,
+            completed: false,
+        }),
+        http_wait: std::time::Duration::from_millis(30),
+        notice: None,
+    });
+    let opened = gateway
+        .open("api_key", "svc", Some("Synthetic approval test"))
+        .await
+        .unwrap();
+    let response = reqwest::Client::new()
+        .get(format!(
+            "{}/127.0.0.1:{}/pending",
+            opened.base,
+            server.address().port()
+        ))
+        .bearer_auth(opened.token)
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(response.status(), 429);
+    assert_eq!(response.headers()["retry-after"], "30");
+    assert_eq!(
+        response.headers()["x-keyvalet-approval"],
+        "pending; id=01J00000000000000000000000"
+    );
+    let body: serde_json::Value = serde_json::from_str(&response.text().await.unwrap()).unwrap();
+    assert_eq!(
+        body,
+        json!({"error": {"type": "keyvalet_approval_pending", "approval_id": "01J00000000000000000000000"}})
+    );
+    assert!(server.received_requests().await.unwrap().is_empty());
+}
+
+#[tokio::test]
+async fn remote_gateway_returns_an_already_executed_helper_result_without_duplicate_post() {
+    let _guard = with_insecure_loopback();
+    let server = MockServer::start().await;
+    let (_tmp, vault, gateway) =
+        new_gateway_with_credential(&server, "synthetic-gateway-secret").await;
+    vault
+        .set(SetParams {
+            r#type: "api_key".into(),
+            name: "svc".into(),
+            template: Some("openai".into()),
+            value: Some("synthetic-gateway-secret".into()),
+            http: vault.get_record("api_key", "svc").unwrap().2.http.clone(),
+            overwrite: true,
+            ..Default::default()
+        })
+        .unwrap();
+    let gateway = gateway.with_approval(kv_proxy::approval::ApprovalLayer {
+        provider: Arc::new(RemoteApprovalFixture {
+            delay: Some(std::time::Duration::from_millis(10)),
+            completed: true,
+        }),
+        http_wait: std::time::Duration::from_secs(1),
+        notice: None,
+    });
+    let opened = gateway
+        .open("api_key", "svc", Some("Synthetic approval test"))
+        .await
+        .unwrap();
+    let response = reqwest::Client::new()
+        .post(format!(
+            "{}/127.0.0.1:{}/approved",
+            opened.base,
+            server.address().port()
+        ))
+        .bearer_auth(opened.token)
+        .body("synthetic request")
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(response.status(), 200);
+    assert_eq!(response.text().await.unwrap(), "completed by helper");
+    assert!(server.received_requests().await.unwrap().is_empty());
+}
+
 impl kv_platform::Confirmer for AlwaysApprove {
     async fn confirm(&self, _message: &str, _ok_label: &str) -> bool {
         true
@@ -614,4 +789,280 @@ async fn streaming_requests_keep_their_permits_and_revocation_releases_them() {
     assert_eq!(response.status(), 200);
     drop(responses);
     gateway.shutdown().await;
+}
+
+#[tokio::test]
+async fn oversized_approval_body_is_rejected_before_contacting_the_helper() {
+    let _guard = with_insecure_loopback();
+    let server = MockServer::start().await;
+    let (_tmp, _vault, gateway) = new_gateway_with_credential(&server, "synthetic-secret").await;
+    let gateway = gateway.with_approval(kv_proxy::approval::ApprovalLayer {
+        provider: Arc::new(RemoteApprovalFixture {
+            delay: None,
+            completed: false,
+        }),
+        http_wait: std::time::Duration::from_millis(30),
+        notice: None,
+    });
+    let opened = gateway
+        .open("api_key", "svc", Some("Synthetic size test"))
+        .await
+        .unwrap();
+    let response = reqwest::Client::new()
+        .post(format!(
+            "{}/127.0.0.1:{}/oversize",
+            opened.base,
+            server.address().port()
+        ))
+        .bearer_auth(&opened.token)
+        .body(vec![b'x'; 1024 * 1024 + 1])
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(response.status(), 413);
+    assert!(server.received_requests().await.unwrap().is_empty());
+}
+
+#[tokio::test]
+async fn certificates_require_a_live_explicit_route_and_current_host_configuration() {
+    let server = MockServer::start().await;
+    let (_tmp, vault, gateway) = new_gateway_with_credential(&server, "synthetic").await;
+    assert!(!gateway.requires_request_approval());
+    assert!(!gateway.permits_certificate("api_key", "svc", "api.example.com"));
+    let (_, _, record) = vault.get_record("api_key", "svc").unwrap();
+    let mut http = record.http.clone().unwrap();
+    http.allowed_hosts = vec!["api.example.com".into()];
+    vault
+        .patch_record(
+            "api_key",
+            "svc",
+            kv_vault::Kind::Static,
+            record.generation.as_deref(),
+            |record| {
+                record.http = Some(http);
+            },
+        )
+        .unwrap();
+    let _opened = gateway
+        .open("api_key", "svc", Some("CI certificate binding"))
+        .await
+        .unwrap();
+    assert!(gateway.permits_certificate("api_key", "svc", "api.example.com"));
+    assert!(!gateway.permits_certificate("api_key", "other", "api.example.com"));
+    assert!(!gateway.permits_certificate("api_key", "svc", "other.example.com"));
+    assert!(!gateway.permits_certificate("api_key", "svc", "*.example.com"));
+    vault
+        .patch_record(
+            "api_key",
+            "svc",
+            kv_vault::Kind::Static,
+            record.generation.as_deref(),
+            |record| {
+                record.http = None;
+            },
+        )
+        .unwrap();
+    assert!(!gateway.permits_certificate("api_key", "svc", "api.example.com"));
+    vault.delete("api_key", "svc").unwrap();
+    assert!(!gateway.permits_certificate("api_key", "svc", "api.example.com"));
+    gateway.close();
+    assert!(!gateway.permits_certificate("api_key", "svc", "api.example.com"));
+}
+
+#[derive(Default)]
+struct RetryingSdk(std::sync::Mutex<Vec<kv_proxy::approval::ApprovalRequest>>);
+impl kv_proxy::approval::ApprovalProvider for RetryingSdk {
+    fn authorize(
+        &self,
+        request: kv_proxy::approval::ApprovalRequest,
+    ) -> futures_util::future::BoxFuture<'_, Result<serde_json::Value, String>> {
+        Box::pin(async move {
+            self.0.lock().unwrap().push(request);
+            Ok(
+                json!({"status":"approval_pending","approval_id":"01J00000000000000000000000","relay":"offline"}),
+            )
+        })
+    }
+    fn wait(
+        &self,
+        _: String,
+        _: std::time::Duration,
+    ) -> futures_util::future::BoxFuture<'_, Result<serde_json::Value, String>> {
+        Box::pin(async { panic!("offline requests must not wait") })
+    }
+}
+
+#[tokio::test]
+async fn sdk_retry_metadata_does_not_change_the_approval_binding() {
+    let _guard = with_insecure_loopback();
+    let server = MockServer::start().await;
+    let (_tmp, _vault, gateway) = new_gateway_with_credential(&server, "synthetic").await;
+    let provider = Arc::new(RetryingSdk::default());
+    let gateway = gateway.with_approval(kv_proxy::approval::ApprovalLayer {
+        provider: provider.clone(),
+        http_wait: std::time::Duration::from_secs(1),
+        notice: None,
+    });
+    let opened = gateway
+        .open("api_key", "svc", Some("Retry test"))
+        .await
+        .unwrap();
+    for count in ["0", "1"] {
+        let response = reqwest::Client::new()
+            .post(format!(
+                "{}/127.0.0.1:{}/retry",
+                opened.base,
+                server.address().port()
+            ))
+            .bearer_auth(&opened.token)
+            .header("x-stainless-retry-count", count)
+            .header("x-request-purpose", "stable")
+            .header(
+                "x-opaque",
+                reqwest::header::HeaderValue::from_bytes(&[255]).unwrap(),
+            )
+            .body("identical request")
+            .send()
+            .await
+            .unwrap();
+        assert_eq!(response.status(), 429);
+    }
+    {
+        let requests = provider.0.lock().unwrap();
+        assert_eq!(requests.len(), 2);
+        assert_eq!(requests[0].headers, requests[1].headers);
+        assert!(!requests[0].headers.contains_key("x-stainless-retry-count"));
+        assert!(!requests[0].headers.contains_key("x-opaque"));
+        assert_eq!(requests[0].headers["x-request-purpose"], "stable");
+    }
+    assert!(server.received_requests().await.unwrap().is_empty());
+}
+
+#[tokio::test]
+async fn duplicate_headers_are_rejected_before_authorization_or_forwarding() {
+    let _guard = with_insecure_loopback();
+    let server = MockServer::start().await;
+    let (_tmp, _vault, gateway) = new_gateway_with_credential(&server, "synthetic").await;
+    let provider = Arc::new(RetryingSdk::default());
+    let gateway = gateway.with_approval(kv_proxy::approval::ApprovalLayer {
+        provider: provider.clone(),
+        http_wait: std::time::Duration::from_secs(1),
+        notice: None,
+    });
+    let opened = gateway
+        .open("api_key", "svc", Some("Duplicate header binding"))
+        .await
+        .unwrap();
+    let response = reqwest::Client::new()
+        .post(format!(
+            "{}/127.0.0.1:{}/duplicates",
+            opened.base,
+            server.address().port()
+        ))
+        .bearer_auth(&opened.token)
+        .header("x-operation", "delete")
+        .header("x-operation", "read")
+        .body("identical body")
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(response.status(), 400);
+    assert!(provider.0.lock().unwrap().is_empty());
+    assert!(server.received_requests().await.unwrap().is_empty());
+}
+
+struct EditOnApproval(Arc<Vault>);
+impl kv_proxy::approval::ApprovalProvider for EditOnApproval {
+    fn authorize(
+        &self,
+        _: kv_proxy::approval::ApprovalRequest,
+    ) -> futures_util::future::BoxFuture<'_, Result<serde_json::Value, String>> {
+        Box::pin(async {
+            Ok(json!({"status":"approval_pending","approval_id":"01J00000000000000000000000"}))
+        })
+    }
+    fn wait(
+        &self,
+        _: String,
+        _: std::time::Duration,
+    ) -> futures_util::future::BoxFuture<'_, Result<serde_json::Value, String>> {
+        Box::pin(async move {
+            let (_, _, record) = self.0.get_record("api_key", "svc").unwrap();
+            self.0
+                .set(SetParams {
+                    r#type: "api_key".into(),
+                    name: "svc".into(),
+                    value: Some("unapproved-new-secret".into()),
+                    http: record.http.clone(),
+                    overwrite: true,
+                    ..Default::default()
+                })
+                .unwrap();
+            Ok(json!({"status":"ok"}))
+        })
+    }
+}
+#[tokio::test]
+async fn a_credential_edit_during_approval_never_uses_the_replacement_secret() {
+    let _guard = with_insecure_loopback();
+    let server = MockServer::start().await;
+    let (_tmp, vault, gateway) = new_gateway_with_credential(&server, "approved-secret").await;
+    Mock::given(method("GET"))
+        .respond_with(ResponseTemplate::new(200))
+        .expect(0)
+        .mount(&server)
+        .await;
+    let gateway = gateway.with_approval(kv_proxy::approval::ApprovalLayer {
+        provider: Arc::new(EditOnApproval(vault)),
+        http_wait: std::time::Duration::from_secs(1),
+        notice: None,
+    });
+    assert!(gateway.requires_request_approval());
+    let opened = gateway
+        .open("api_key", "svc", Some("Verify credential version binding"))
+        .await
+        .unwrap();
+    let response = reqwest::Client::new()
+        .get(format!(
+            "{}/127.0.0.1:{}/must-not-forward",
+            opened.base,
+            server.address().port()
+        ))
+        .bearer_auth(opened.token)
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(response.status(), 401);
+}
+
+#[tokio::test]
+async fn approval_gateway_rejects_get_body_instead_of_approving_a_different_request() {
+    let _guard = with_insecure_loopback();
+    let server = MockServer::start().await;
+    let (_tmp, _vault, gateway) = new_gateway_with_credential(&server, "synthetic").await;
+    let gateway = gateway.with_approval(kv_proxy::approval::ApprovalLayer {
+        provider: Arc::new(RemoteApprovalFixture {
+            delay: None,
+            completed: false,
+        }),
+        http_wait: std::time::Duration::from_secs(1),
+        notice: None,
+    });
+    let opened = gateway
+        .open("api_key", "svc", Some("Verify GET body binding"))
+        .await
+        .unwrap();
+    let response = reqwest::Client::new()
+        .get(format!(
+            "{}/127.0.0.1:{}/get-body",
+            opened.base,
+            server.address().port()
+        ))
+        .bearer_auth(opened.token)
+        .body("must not be discarded")
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(response.status(), 400);
+    assert!(server.received_requests().await.unwrap().is_empty());
 }

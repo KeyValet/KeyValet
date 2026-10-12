@@ -34,6 +34,10 @@ pub struct Environment {
 
 impl Environment {
     pub fn system() -> Self {
+        let mut args: Vec<String> = std::env::args().collect();
+        if args.get(1).map(String::as_str) == Some("--lang") {
+            args.drain(1..3.min(args.len()));
+        }
         Self {
             cli_path: kv_platform::paths::CLI_BIN.into(),
             agent_path: "/usr/bin/pkttyagent".into(),
@@ -41,7 +45,7 @@ impl Environment {
             tty_path: "/dev/tty".into(),
             current_exe: std::env::current_exe,
             uid: libc::getuid,
-            args: std::env::args().collect(),
+            args,
             invoking_user: kv_platform::user::invoking_user,
             lookup: libc::getpwuid_r,
             start_time: kv_platform::peer::process_start_time,

@@ -22,6 +22,45 @@ use windows::Win32::System::Threading::{
 /// Identity the gateway compares a loopback client against: the owner's user SID.
 pub type GatewayPeer = Vec<u8>;
 
+/// Resolve the virtual service account through Windows; never accept a model-provided SID.
+pub fn account_sid(name: &str) -> io::Result<Vec<u8>> {
+    use windows::core::{PCWSTR, PWSTR};
+    use windows::Win32::Security::{LookupAccountNameW, SID_NAME_USE};
+    let name: Vec<u16> = name.encode_utf16().chain(std::iter::once(0)).collect();
+    let (mut sid_size, mut domain_size) = (0, 0);
+    let mut kind = SID_NAME_USE::default();
+    unsafe {
+        let _ = LookupAccountNameW(
+            None,
+            PCWSTR(name.as_ptr()),
+            None,
+            &mut sid_size,
+            None,
+            &mut domain_size,
+            &mut kind,
+        );
+    }
+    if sid_size == 0 || sid_size > 1024 || domain_size > 32768 {
+        return Err(io::Error::other("service account unavailable"));
+    }
+    let mut sid = vec![0u8; sid_size as usize];
+    let mut domain = vec![0u16; domain_size as usize];
+    unsafe {
+        LookupAccountNameW(
+            None,
+            PCWSTR(name.as_ptr()),
+            Some(PSID(sid.as_mut_ptr().cast())),
+            &mut sid_size,
+            Some(PWSTR(domain.as_mut_ptr())),
+            &mut domain_size,
+            &mut kind,
+        )
+        .map_err(|error| io::Error::from_raw_os_error(error.code().0))?;
+    }
+    sid.truncate(sid_size as usize);
+    Ok(sid)
+}
+
 /// Who is on the other end of a connection.
 pub struct PeerIdentity {
     /// The peer process token's user SID, as binary SID bytes.
@@ -290,8 +329,45 @@ pub fn loopback_client(port: u16) -> Option<PeerIdentity> {
     }
 }
 
+/// Read the actual parent from the OS process snapshot, never from an IPC hint.
+pub fn parent_pid(pid: u32) -> std::io::Result<u32> {
+    use windows::Win32::Foundation::CloseHandle;
+    use windows::Win32::System::Diagnostics::ToolHelp::{
+        CreateToolhelp32Snapshot, Process32FirstW, Process32NextW, PROCESSENTRY32W,
+        TH32CS_SNAPPROCESS,
+    };
+    let snapshot = unsafe { CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0) }
+        .map_err(std::io::Error::other)?;
+    let mut entry = PROCESSENTRY32W {
+        dwSize: std::mem::size_of::<PROCESSENTRY32W>() as u32,
+        ..Default::default()
+    };
+    let mut available = unsafe { Process32FirstW(snapshot, &mut entry) }.is_ok();
+    let mut parent = None;
+    while available {
+        if entry.th32ProcessID == pid {
+            parent = Some(entry.th32ParentProcessID);
+            break;
+        }
+        available = unsafe { Process32NextW(snapshot, &mut entry) }.is_ok();
+    }
+    unsafe {
+        let _ = CloseHandle(snapshot);
+    }
+    parent
+        .filter(|pid| *pid > 0)
+        .ok_or_else(|| std::io::Error::other("Process parent unavailable"))
+}
+
 #[cfg(all(test, windows))]
 mod tests {
+    #[test]
+    fn process_parent_lookup_uses_the_os_and_rejects_missing_processes() {
+        assert!(super::parent_pid(std::process::id()).unwrap() > 0);
+        assert!(super::parent_pid(0).is_err());
+        assert!(super::parent_pid(u32::MAX).is_err());
+    }
+
     use super::*;
 
     #[test]

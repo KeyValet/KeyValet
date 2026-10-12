@@ -25,8 +25,8 @@ pub use master_key::{
     MasterKeyProvider, ProviderId, TpmMetadata, WrappedMasterKey, DEVICE_BINDING_BYTES,
 };
 pub use types::{
-    scrub_json, BasicAuth, CredentialRecord, HttpConfig, InjectRule, Kind, TestRequest, TypeRecord,
-    VaultData, KINDS,
+    scrub_json, BasicAuth, CredentialRecord, HttpConfig, InjectRule, Kind, SecretJson, TestRequest,
+    TypeRecord, VaultData, KINDS,
 };
 pub use validate::{normalize_name, normalize_type, MAX_PROTOCOL_BYTES, MAX_VALUE_LENGTH};
 pub use vault::{

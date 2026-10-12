@@ -14,13 +14,13 @@
 //!                sid==owner && exe==AGENT_BIN && allow-unsigned marker -> register ("unsigned")
 //!                anything else          -> drop + audit `agent-rejected`
 
-use crate::{fatal, serve, MAX_CLIENTS};
+use crate::{fatal, serve_with_remote, MAX_CLIENTS};
 use kv_platform::agent::{
     read_hello, AgentAuthenticator, AgentConfirmer, AgentHub, AgentKey, AgentMasterKeyProvider,
 };
 use kv_platform::paths::{
     AGENT_BIN, AGENT_PIPE, AGENT_PUBLISHER, ALLOW_UNSIGNED_AGENT, HELPER_PIPE, MCP_PIPE,
-    OWNER_SID_FILE, SERVICE_NAME, VAULT_DIR,
+    OWNER_SID_FILE, RELAY_PIPE, SERVICE_NAME, VAULT_DIR,
 };
 use kv_platform::peer::{accept_client, sid_equal, sid_to_string};
 use kv_platform::trust::{
@@ -65,7 +65,18 @@ async fn accept_loop(
     if *stop.borrow() {
         return;
     }
-    let factory = match kv_platform::pipe::server_options(pipe_name, &owner_sid) {
+    let relay_sid = if pipe_name == RELAY_PIPE {
+        match kv_platform::peer::account_sid(kv_platform::paths::RELAY_SERVICE_ACCOUNT) {
+            Ok(sid) => Some(sid),
+            Err(_) => return, // W9 has not provisioned the relay service yet.
+        }
+    } else {
+        None
+    };
+    let factory = match kv_platform::pipe::server_options(
+        pipe_name,
+        relay_sid.as_deref().unwrap_or(&owner_sid),
+    ) {
         Ok(f) => f,
         Err(e) => fatal(&format!("cannot create {pipe_name}: {e}")),
     };
@@ -115,14 +126,25 @@ async fn accept_loop(
                 let next = factory.create(false).unwrap_or_else(|e| fatal(&format!("cannot rebind {pipe_name}: {e}")));
                 let mut pipe = std::mem::replace(&mut pipe, next);
                 let identity = accept_client(&pipe).await.ok();
-                if pipe_name == MCP_PIPE {
+                if pipe_name == RELAY_PIPE {
+                    let Some(context) = identity.as_ref().and_then(|peer|
+                        kv_helper::remote::server::authenticate_windows_relay_peer(peer,
+                            relay_sid.as_deref().expect("relay listener has a service SID")).ok()) else { continue; };
+                    let Ok(permit) = permits.clone().try_acquire_owned() else { continue; };
+                    join_set.spawn(async move {
+                        let _permit = permit;
+                        let (reader,writer) = tokio::io::split(pipe);
+                        let _ = kv_helper::remote::server::serve(reader,writer,context,
+                            kv_helper::remote::server::runtime()).await;
+                    });
+                } else if pipe_name == MCP_PIPE {
                     if let Some(p) = identity.filter(|p| sid_equal(&p.sid, &owner_sid)) {
                         let Ok(permit) = permits.clone().try_acquire_owned() else { continue; };
                         let owner_sid = owner_sid.clone();
                         let stop = stop.clone();
                         join_set.spawn(async move {
                             let _permit = permit;
-                            if let Err(e) = crate::mcp_win::serve_launcher(pipe, owner_sid, p.session_id, stop).await {
+                            if let Err(e) = crate::mcp_win::serve_launcher(pipe, owner_sid, p.session_id, p.pid, stop).await {
                                 eprintln!("keyvalet-helper: MCP worker: {e}");
                             }
                         });
@@ -143,15 +165,17 @@ async fn accept_loop(
                             // Hello always goes to the recorded owner's interactive agent.
                             let trusted_cli = same_file_path(&p.exe_path, Path::new(kv_platform::paths::CLI_BIN))
                                 && trusted_path(&p.exe_path);
+                            let remote_context = kv_helper::remote::server::authenticate_windows_peer(&p, &owner_sid).ok();
                             join_set.spawn(async move {
                                 let _permit = permit;
-                                control_windows(pipe, sessions, hub, key, trusted_cli).await;
+                                control_windows(pipe, sessions, hub, key, trusted_cli, remote_context).await;
                             });
                         }
                         Some(p) if sid_equal(&p.sid, &owner_sid) => {
                             let Ok(permit) = permits.clone().try_acquire_owned() else {
                                 continue; // drop the pipe: too many sessions
                             };
+                            let remote_context = kv_helper::remote::server::authenticate_windows_peer(&p, &owner_sid).ok();
                             let vault = Arc::new(Vault::new(VAULT_DIR));
                             if vault.prepare().is_err() {
                                 continue;
@@ -173,7 +197,7 @@ async fn accept_loop(
                                     hub: hub.clone(),
                                     key: key.clone(),
                                 });
-                                match serve(
+                                match serve_with_remote(
                                     reader,
                                     writer,
                                     vault,
@@ -182,6 +206,7 @@ async fn accept_loop(
                                     AgentAuthenticator { hub: hub.clone(), key: key.clone() },
                                     AgentConfirmer { hub, key },
                                     provider,
+                                    remote_context,
                                 )
                                 .await
                                 {
@@ -274,9 +299,12 @@ async fn accept_loop(
                         let _ = pipe.write_all(&kv_ipc::agent::encode_line(&kv_ipc::agent::hello_reply(false, Some(reason)))).await;
                         continue;
                     }
-                    if pipe.write_all(&kv_ipc::agent::encode_line(&kv_ipc::agent::hello_reply(true, None))).await.is_ok() {
+                    if pipe.write_all(&kv_ipc::agent::encode_line(&kv_platform::agent::registration_reply())).await.is_ok() {
                         hub.register(owner_key(&owner_sid), pipe, if unsigned { "unsigned" } else { "signed" });
                         agent_registered = true;
+                        if let Some(startup) = kv_helper::remote::startup::current() {
+                            if let Err(error) = startup.load_existing().await { eprintln!("keyvalet: remote startup failed: {error}"); }
+                        }
                     }
                 }
             }
@@ -324,31 +352,114 @@ async fn control_windows(
     hub: Arc<AgentHub>,
     key: AgentKey,
     trusted_cli: bool,
+    remote_context: Option<kv_helper::remote::ipc::CallerContext>,
 ) {
     use tokio::io::AsyncReadExt;
-    let request = tokio::time::timeout(std::time::Duration::from_secs(5), async {
-        let mut line = Vec::new();
-        loop {
-            let byte = pipe.read_u8().await?;
-            if byte == b'\n' {
-                break;
-            }
-            if line.len() >= kv_ipc::agent::MAX_LINE_BYTES {
-                return Err(std::io::Error::other("control request too large"));
-            }
-            line.push(byte);
-        }
-        serde_json::from_slice::<serde_json::Value>(&line).map_err(std::io::Error::from)
-    })
+    let (reader, mut writer) = tokio::io::split(&mut pipe);
+    let mut reader = tokio::io::BufReader::new(reader);
+    let frame = tokio::time::timeout(
+        std::time::Duration::from_secs(5),
+        kv_helper::remote::server::read_frame(&mut reader),
+    )
     .await;
-    let Ok(Ok(request)) = request else {
+    let Ok(Ok(Some(frame))) = frame else {
         return;
     };
+    let mut frame = zeroize::Zeroizing::new(frame);
+    let request = kv_vault::SecretJson(
+        kv_core::remote::canonical::from_json(&frame).unwrap_or(serde_json::Value::Null),
+    );
+    if request["op"]
+        .as_str()
+        .is_some_and(|op| op.starts_with("remote."))
+    {
+        let Some(context) = remote_context else {
+            let _ = Vault::new(VAULT_DIR).audit(
+                json!({"op":"ipc_rejected","reason":"untrusted_caller","ok":false})
+                    .as_object()
+                    .cloned()
+                    .unwrap_or_default(),
+            );
+            let response: kv_ipc::remote::Response =
+                kv_ipc::remote::Response::err("forbidden", "forbidden");
+            let _ = writer
+                .write_all(&kv_ipc::agent::encode_line(&json!(response)))
+                .await;
+            return;
+        };
+        frame.push(b'\n');
+        let replay = frame.as_slice().chain(&mut reader);
+        let _ = kv_helper::remote::server::serve(
+            replay,
+            &mut writer,
+            context,
+            kv_helper::remote::server::runtime(),
+        )
+        .await;
+        return;
+    }
+    if frame.len() >= kv_ipc::agent::MAX_LINE_BYTES {
+        return;
+    }
+    if request["op"] == "protection" {
+        let response = if !trusted_cli {
+            kv_ipc::Response::err(0, "Protection status caller is not the installed CLI")
+        } else if let Ok(kv_ipc::ProtectionProbe::Status { protocol, lang }) =
+            serde_json::from_slice(&frame)
+        {
+            kv_i18n::set_lang(lang.as_deref().unwrap_or(""));
+            if protocol != kv_ipc::PROTOCOL_VERSION {
+                kv_ipc::Response::err(0, "Helper version mismatch; please reinstall")
+            } else {
+                match kv_platform::protection::status(&Vault::new(VAULT_DIR)) {
+                    Ok(report) => kv_ipc::Response::ok(
+                        0,
+                        json!({"protocol":kv_ipc::PROTOCOL_VERSION,"vault_protection":report}),
+                    ),
+                    Err(error) => kv_ipc::Response::err(0, error.0),
+                }
+            }
+        } else {
+            kv_ipc::Response::err(0, "Invalid protection status probe")
+        };
+        let _ = writer
+            .write_all(&kv_ipc::agent::encode_line(&json!(response)))
+            .await;
+        return;
+    }
     if request["op"] != "control" {
         return;
     }
     let (reply, payload) = match request["command"].as_str() {
         Some("sessions") => (json!({"sessions": sessions.load(Ordering::SeqCst)}), None),
+        Some("remote_settings") if trusted_cli => {
+            let reply = match remote_context {
+                Some(context) => {
+                    match kv_helper::remote::settings::control(context, request["params"].clone())
+                        .await
+                    {
+                        Ok(result) => json!({"ok":true,"result":result}),
+                        Err(error) => json!({"ok":false,"error":error.code()}),
+                    }
+                }
+                None => json!({"ok":false,"error":"forbidden"}),
+            };
+            (reply, None)
+        }
+        Some("remote_bootstrap") if trusted_cli => {
+            let reply = match remote_context {
+                Some(context) => {
+                    match kv_helper::remote::startup::initialize(context, request["params"].clone())
+                        .await
+                    {
+                        Ok(result) => json!({"ok":true,"result":result}),
+                        Err(error) => json!({"ok":false,"error":error.code()}),
+                    }
+                }
+                None => json!({"ok":false,"error":"forbidden"}),
+            };
+            (reply, None)
+        }
         Some("agent") if trusted_cli => {
             let work = request["request"].clone();
             if work["op"] != "enclave" {
@@ -364,16 +475,16 @@ async fn control_windows(
         }
         _ => (json!({"ok":false,"error":"control operation denied"}), None),
     };
-    if pipe
+    if writer
         .write_all(&kv_ipc::agent::encode_line(&reply))
         .await
         .is_ok()
     {
         if let Some((buffer, len)) = payload {
-            let _ = pipe.write_all(&buffer[..len]).await;
+            let _ = writer.write_all(&buffer[..len]).await;
         }
     }
-    let _ = pipe.shutdown().await;
+    let _ = writer.shutdown().await;
 }
 
 /// The shared runtime: both service and console mode end up here.
@@ -403,6 +514,18 @@ async fn run_daemon(stop_tx: tokio::sync::watch::Sender<bool>) {
     }
 
     let hub = AgentHub::new();
+    let startup = kv_helper::remote::startup::Startup::new(
+        std::path::PathBuf::from(VAULT_DIR).join("remote"),
+        Arc::new(kv_helper::remote::platform_keys::AgentKeys {
+            hub: hub.clone(),
+            owner: owner_key(&owner_sid),
+        }),
+        kv_core::remote::Os::Windows,
+        0,
+    );
+    if let Err(error) = kv_helper::remote::startup::install(startup.clone()) {
+        fatal(&error.to_string());
+    }
     let sessions = Arc::new(AtomicUsize::new(0));
     let permits = Arc::new(tokio::sync::Semaphore::new(MAX_CLIENTS));
     // Re-broadcast the single sender so both accept loops can watch it.
@@ -426,13 +549,21 @@ async fn run_daemon(stop_tx: tokio::sync::watch::Sender<bool>) {
     );
     let mcp = accept_loop(
         MCP_PIPE,
+        owner_sid.clone(),
+        hub.clone(),
+        Arc::new(AtomicUsize::new(0)),
+        Arc::new(tokio::sync::Semaphore::new(MAX_CLIENTS)),
+        stop_rx.clone(),
+    );
+    let relay = accept_loop(
+        RELAY_PIPE,
         owner_sid,
         hub,
         Arc::new(AtomicUsize::new(0)),
         Arc::new(tokio::sync::Semaphore::new(MAX_CLIENTS)),
         stop_rx,
     );
-    tokio::join!(clients, agents, mcp);
+    tokio::join!(clients, agents, mcp, relay);
 }
 
 /// `kv-helper --console`: same loops, foreground, Ctrl-C to stop.

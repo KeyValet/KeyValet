@@ -1,0 +1,423 @@
+RUN 1, exit 101
+   Compiling kv-ipc v0.3.0 (/Users/guang/dev/keyvalet/rust/crates/kv-ipc)
+   Compiling kv-platform v0.3.0 (/Users/guang/dev/keyvalet/rust/crates/kv-platform)
+   Compiling kv-proxy v0.3.0 (/Users/guang/dev/keyvalet/rust/crates/kv-proxy)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.16s
+     Running unittests src/lib.rs (target-r2d/debug/deps/kv_proxy-e7d93dc8880a1622)
+
+running 2 tests
+
+thread 'transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections' (4203591) panicked at crates/kv-proxy/src/transparent.rs:509:73:
+called `Result::unwrap()` on an `Err` value: Os { code: 61, kind: ConnectionRefused, message: "Connection refused" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections ... FAILED
+test gateway::tests::idle_connections_are_bounded_and_release_their_slots_on_disconnect ... ok
+
+failures:
+
+failures:
+    transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 23 filtered out; finished in 0.02s
+
+error: test failed, to rerun pass `-p kv-proxy --lib`
+RUN 2, exit 101
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running unittests src/lib.rs (target-r2d/debug/deps/kv_proxy-e7d93dc8880a1622)
+
+running 2 tests
+
+thread 'transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections' (4203650) panicked at crates/kv-proxy/src/transparent.rs:509:73:
+called `Result::unwrap()` on an `Err` value: Os { code: 61, kind: ConnectionRefused, message: "Connection refused" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections ... FAILED
+test gateway::tests::idle_connections_are_bounded_and_release_their_slots_on_disconnect ... ok
+
+failures:
+
+failures:
+    transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 23 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `-p kv-proxy --lib`
+RUN 3, exit 101
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s
+     Running unittests src/lib.rs (target-r2d/debug/deps/kv_proxy-e7d93dc8880a1622)
+
+running 2 tests
+
+thread 'transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections' (4203707) panicked at crates/kv-proxy/src/transparent.rs:509:73:
+called `Result::unwrap()` on an `Err` value: Os { code: 24, kind: TooManyOpenFiles, message: "Too many open files" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'gateway::tests::idle_connections_are_bounded_and_release_their_slots_on_disconnect' (4203706) panicked at crates/kv-proxy/src/gateway.rs:959:22:
+called `Result::unwrap()` on an `Err` value: Os { code: 54, kind: ConnectionReset, message: "Connection reset by peer" }
+test gateway::tests::idle_connections_are_bounded_and_release_their_slots_on_disconnect ... FAILED
+test transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections ... FAILED
+
+failures:
+
+failures:
+    gateway::tests::idle_connections_are_bounded_and_release_their_slots_on_disconnect
+    transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 23 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `-p kv-proxy --lib`
+RUN 4, exit 101
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s
+     Running unittests src/lib.rs (target-r2d/debug/deps/kv_proxy-e7d93dc8880a1622)
+
+running 2 tests
+
+thread 'gateway::tests::idle_connections_are_bounded_and_release_their_slots_on_disconnect' (4203766) panicked at crates/kv-proxy/src/gateway.rs:959:22:
+called `Result::unwrap()` on an `Err` value: Os { code: 54, kind: ConnectionReset, message: "Connection reset by peer" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test gateway::tests::idle_connections_are_bounded_and_release_their_slots_on_disconnect ... FAILED
+test transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections ... ok
+
+failures:
+
+failures:
+    gateway::tests::idle_connections_are_bounded_and_release_their_slots_on_disconnect
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 23 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `-p kv-proxy --lib`
+RUN 5, exit 101
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running unittests src/lib.rs (target-r2d/debug/deps/kv_proxy-e7d93dc8880a1622)
+
+running 2 tests
+
+thread 'transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections' (4203872) panicked at crates/kv-proxy/src/transparent.rs:509:73:
+called `Result::unwrap()` on an `Err` value: Os { code: 61, kind: ConnectionRefused, message: "Connection refused" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections ... FAILED
+test gateway::tests::idle_connections_are_bounded_and_release_their_slots_on_disconnect ... ok
+
+failures:
+
+failures:
+    transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 23 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `-p kv-proxy --lib`
+RUN 6, exit 101
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s
+     Running unittests src/lib.rs (target-r2d/debug/deps/kv_proxy-e7d93dc8880a1622)
+
+running 2 tests
+test transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections ... ok
+
+thread 'gateway::tests::idle_connections_are_bounded_and_release_their_slots_on_disconnect' (4203923) panicked at crates/kv-proxy/src/gateway.rs:959:22:
+called `Result::unwrap()` on an `Err` value: Os { code: 61, kind: ConnectionRefused, message: "Connection refused" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test gateway::tests::idle_connections_are_bounded_and_release_their_slots_on_disconnect ... FAILED
+
+failures:
+
+failures:
+    gateway::tests::idle_connections_are_bounded_and_release_their_slots_on_disconnect
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 23 filtered out; finished in 0.05s
+
+error: test failed, to rerun pass `-p kv-proxy --lib`
+RUN 7, exit 101
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s
+     Running unittests src/lib.rs (target-r2d/debug/deps/kv_proxy-e7d93dc8880a1622)
+
+running 2 tests
+
+thread 'transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections' (4203976) panicked at crates/kv-proxy/src/transparent.rs:509:73:
+called `Result::unwrap()` on an `Err` value: Os { code: 24, kind: TooManyOpenFiles, message: "Too many open files" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections ... FAILED
+
+thread 'gateway::tests::idle_connections_are_bounded_and_release_their_slots_on_disconnect' (4203975) panicked at crates/kv-proxy/src/gateway.rs:968:10:
+called `Result::unwrap()` on an `Err` value: Elapsed(())
+test gateway::tests::idle_connections_are_bounded_and_release_their_slots_on_disconnect ... FAILED
+
+failures:
+
+failures:
+    gateway::tests::idle_connections_are_bounded_and_release_their_slots_on_disconnect
+    transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 23 filtered out; finished in 2.01s
+
+error: test failed, to rerun pass `-p kv-proxy --lib`
+RUN 8, exit 101
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s
+     Running unittests src/lib.rs (target-r2d/debug/deps/kv_proxy-e7d93dc8880a1622)
+
+running 2 tests
+
+thread 'transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections' (4204109) panicked at crates/kv-proxy/src/transparent.rs:509:73:
+called `Result::unwrap()` on an `Err` value: Os { code: 61, kind: ConnectionRefused, message: "Connection refused" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections ... FAILED
+test gateway::tests::idle_connections_are_bounded_and_release_their_slots_on_disconnect ... ok
+
+failures:
+
+failures:
+    transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 23 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `-p kv-proxy --lib`
+RUN 9, exit 101
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s
+     Running unittests src/lib.rs (target-r2d/debug/deps/kv_proxy-e7d93dc8880a1622)
+
+running 2 tests
+
+thread 'transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections' (4204161) panicked at crates/kv-proxy/src/transparent.rs:509:73:
+called `Result::unwrap()` on an `Err` value: Os { code: 54, kind: ConnectionReset, message: "Connection reset by peer" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections ... FAILED
+test gateway::tests::idle_connections_are_bounded_and_release_their_slots_on_disconnect ... ok
+
+failures:
+
+failures:
+    transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 23 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `-p kv-proxy --lib`
+RUN 10, exit 101
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s
+     Running unittests src/lib.rs (target-r2d/debug/deps/kv_proxy-e7d93dc8880a1622)
+
+running 2 tests
+
+thread 'transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections' (4204214) panicked at crates/kv-proxy/src/transparent.rs:509:73:
+called `Result::unwrap()` on an `Err` value: Os { code: 24, kind: TooManyOpenFiles, message: "Too many open files" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'gateway::tests::idle_connections_are_bounded_and_release_their_slots_on_disconnect' (4204213) panicked at crates/kv-proxy/src/gateway.rs:959:22:
+called `Result::unwrap()` on an `Err` value: Os { code: 54, kind: ConnectionReset, message: "Connection reset by peer" }
+test gateway::tests::idle_connections_are_bounded_and_release_their_slots_on_disconnect ... FAILED
+test transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections ... FAILED
+
+failures:
+
+failures:
+    gateway::tests::idle_connections_are_bounded_and_release_their_slots_on_disconnect
+    transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 23 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `-p kv-proxy --lib`
+RUN 11, exit 101
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.08s
+     Running unittests src/lib.rs (target-r2d/debug/deps/kv_proxy-e7d93dc8880a1622)
+
+running 2 tests
+
+thread 'transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections' (4204267) panicked at crates/kv-proxy/src/transparent.rs:509:73:
+called `Result::unwrap()` on an `Err` value: Os { code: 61, kind: ConnectionRefused, message: "Connection refused" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections ... FAILED
+test gateway::tests::idle_connections_are_bounded_and_release_their_slots_on_disconnect ... ok
+
+failures:
+
+failures:
+    transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 23 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `-p kv-proxy --lib`
+RUN 12, exit 101
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s
+     Running unittests src/lib.rs (target-r2d/debug/deps/kv_proxy-e7d93dc8880a1622)
+
+running 2 tests
+
+thread 'transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections' (4204321) panicked at crates/kv-proxy/src/transparent.rs:509:73:
+called `Result::unwrap()` on an `Err` value: Os { code: 61, kind: ConnectionRefused, message: "Connection refused" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections ... FAILED
+test gateway::tests::idle_connections_are_bounded_and_release_their_slots_on_disconnect ... ok
+
+failures:
+
+failures:
+    transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 23 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `-p kv-proxy --lib`
+RUN 13, exit 101
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s
+     Running unittests src/lib.rs (target-r2d/debug/deps/kv_proxy-e7d93dc8880a1622)
+
+running 2 tests
+
+thread 'transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections' (4204382) panicked at crates/kv-proxy/src/transparent.rs:509:73:
+called `Result::unwrap()` on an `Err` value: Os { code: 24, kind: TooManyOpenFiles, message: "Too many open files" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections ... FAILED
+
+thread 'gateway::tests::idle_connections_are_bounded_and_release_their_slots_on_disconnect' (4204381) panicked at crates/kv-proxy/src/gateway.rs:959:22:
+called `Result::unwrap()` on an `Err` value: Os { code: 61, kind: ConnectionRefused, message: "Connection refused" }
+test gateway::tests::idle_connections_are_bounded_and_release_their_slots_on_disconnect ... FAILED
+
+failures:
+
+failures:
+    gateway::tests::idle_connections_are_bounded_and_release_their_slots_on_disconnect
+    transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 23 filtered out; finished in 0.04s
+
+error: test failed, to rerun pass `-p kv-proxy --lib`
+RUN 14, exit 101
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s
+     Running unittests src/lib.rs (target-r2d/debug/deps/kv_proxy-e7d93dc8880a1622)
+
+running 2 tests
+
+thread 'transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections' (4204454) panicked at crates/kv-proxy/src/transparent.rs:509:73:
+called `Result::unwrap()` on an `Err` value: Os { code: 61, kind: ConnectionRefused, message: "Connection refused" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections ... FAILED
+test gateway::tests::idle_connections_are_bounded_and_release_their_slots_on_disconnect ... ok
+
+failures:
+
+failures:
+    transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 23 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `-p kv-proxy --lib`
+RUN 15, exit 101
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s
+     Running unittests src/lib.rs (target-r2d/debug/deps/kv_proxy-e7d93dc8880a1622)
+
+running 2 tests
+test transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections ... ok
+
+thread 'gateway::tests::idle_connections_are_bounded_and_release_their_slots_on_disconnect' (4204504) panicked at crates/kv-proxy/src/gateway.rs:959:22:
+called `Result::unwrap()` on an `Err` value: Os { code: 61, kind: ConnectionRefused, message: "Connection refused" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test gateway::tests::idle_connections_are_bounded_and_release_their_slots_on_disconnect ... FAILED
+
+failures:
+
+failures:
+    gateway::tests::idle_connections_are_bounded_and_release_their_slots_on_disconnect
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 23 filtered out; finished in 0.04s
+
+error: test failed, to rerun pass `-p kv-proxy --lib`
+RUN 16, exit 101
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s
+     Running unittests src/lib.rs (target-r2d/debug/deps/kv_proxy-e7d93dc8880a1622)
+
+running 2 tests
+
+thread 'transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections' (4204559) panicked at crates/kv-proxy/src/transparent.rs:509:73:
+called `Result::unwrap()` on an `Err` value: Os { code: 24, kind: TooManyOpenFiles, message: "Too many open files" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'gateway::tests::idle_connections_are_bounded_and_release_their_slots_on_disconnect' (4204558) panicked at crates/kv-proxy/src/gateway.rs:959:22:
+called `Result::unwrap()` on an `Err` value: Os { code: 54, kind: ConnectionReset, message: "Connection reset by peer" }
+test transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections ... FAILED
+test gateway::tests::idle_connections_are_bounded_and_release_their_slots_on_disconnect ... FAILED
+
+failures:
+
+failures:
+    gateway::tests::idle_connections_are_bounded_and_release_their_slots_on_disconnect
+    transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 23 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `-p kv-proxy --lib`
+RUN 17, exit 101
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s
+     Running unittests src/lib.rs (target-r2d/debug/deps/kv_proxy-e7d93dc8880a1622)
+
+running 2 tests
+
+thread 'transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections' (4204608) panicked at crates/kv-proxy/src/transparent.rs:509:73:
+called `Result::unwrap()` on an `Err` value: Os { code: 61, kind: ConnectionRefused, message: "Connection refused" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections ... FAILED
+test gateway::tests::idle_connections_are_bounded_and_release_their_slots_on_disconnect ... ok
+
+failures:
+
+failures:
+    transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 23 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `-p kv-proxy --lib`
+RUN 18, exit 101
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s
+     Running unittests src/lib.rs (target-r2d/debug/deps/kv_proxy-e7d93dc8880a1622)
+
+running 2 tests
+test gateway::tests::idle_connections_are_bounded_and_release_their_slots_on_disconnect ... ok
+
+thread 'transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections' (4204660) panicked at crates/kv-proxy/src/transparent.rs:509:73:
+called `Result::unwrap()` on an `Err` value: Os { code: 61, kind: ConnectionRefused, message: "Connection refused" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections ... FAILED
+
+failures:
+
+failures:
+    transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 23 filtered out; finished in 0.06s
+
+error: test failed, to rerun pass `-p kv-proxy --lib`
+RUN 19, exit 101
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s
+     Running unittests src/lib.rs (target-r2d/debug/deps/kv_proxy-e7d93dc8880a1622)
+
+running 2 tests
+
+thread 'transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections' (4204714) panicked at crates/kv-proxy/src/transparent.rs:509:73:
+called `Result::unwrap()` on an `Err` value: Os { code: 61, kind: ConnectionRefused, message: "Connection refused" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections ... FAILED
+test gateway::tests::idle_connections_are_bounded_and_release_their_slots_on_disconnect ... ok
+
+failures:
+
+failures:
+    transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 23 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `-p kv-proxy --lib`
+RUN 20, exit 101
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s
+     Running unittests src/lib.rs (target-r2d/debug/deps/kv_proxy-e7d93dc8880a1622)
+
+running 2 tests
+
+thread 'transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections' (4204766) panicked at crates/kv-proxy/src/transparent.rs:509:73:
+called `Result::unwrap()` on an `Err` value: Os { code: 61, kind: ConnectionRefused, message: "Connection refused" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections ... FAILED
+test gateway::tests::idle_connections_are_bounded_and_release_their_slots_on_disconnect ... ok
+
+failures:
+
+failures:
+    transparent::capacity_tests::connection_capacity_is_bounded_and_stop_closes_existing_connections
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 23 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `-p kv-proxy --lib`

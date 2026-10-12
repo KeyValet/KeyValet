@@ -5,6 +5,13 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 
+[lib]
+path = "src/remote_lib.rs"
+
+[[bin]]
+name = "kv-agent"
+path = "src/remote_main.rs"
+
 [dependencies]
 kv-i18n = { path = "../kv-i18n" }
 kv-ipc = { path = "../kv-ipc" }
@@ -17,6 +24,9 @@ rand = "0.8"
 hkdf = "0.12"
 sha2 = { version = "0.10", features = ["oid"] }
 rsa = "0.9"
+
+[dev-dependencies]
+kv-core = { path = "../kv-core" }
 
 [target.'cfg(windows)'.dependencies]
 kv-platform = { path = "../kv-platform" }

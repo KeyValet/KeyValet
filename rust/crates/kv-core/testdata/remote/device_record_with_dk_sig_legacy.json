@@ -1,0 +1,80 @@
+{
+  "device": {
+    "device_id": "dev_mac",
+    "label": "MacBook",
+    "os": "macos",
+    "key_kind": "software",
+    "dk_pub": {
+      "kty": "EC",
+      "crv": "P-256",
+      "x": "fPJ7GI0DT36KUjgDBLUaw8CJaeJ38hs1pgtI_EdmmXg",
+      "y": "B3dVENuO0EApPZrGn3Qw27p9reY86YIpngS3nSJ4c9E"
+    },
+    "ak_q": {
+      "pub": {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "Xsvk0aYzCkTI9--VHUvxZebGtyHvramF-0FmG8bn_Ww",
+        "y": "hzRkDEmY_343SwbOGmSi7NgqsDY4T7g9mnmxJ6J9UDI"
+      },
+      "alg": "ES256"
+    },
+    "ak_s": {
+      "pub": {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "4lNKNTLQj7ugLd5lnuYr0AMf4tt4VZbvUJMCRGsDCFI",
+        "y": "4PFXWkxjPMcZ3-5f2oYtdk78lsPzDuAFXELCPxhO2MY"
+      },
+      "alg": "ES256"
+    },
+    "caps": [
+      "approve_quick",
+      "approve_strong"
+    ],
+    "attestation": null
+  },
+  "proof": {
+    "action": "device_record",
+    "device": {
+      "device_id": "dev_mac",
+      "label": "MacBook",
+      "os": "macos",
+      "key_kind": "software",
+      "dk_pub": {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "fPJ7GI0DT36KUjgDBLUaw8CJaeJ38hs1pgtI_EdmmXg",
+        "y": "B3dVENuO0EApPZrGn3Qw27p9reY86YIpngS3nSJ4c9E"
+      },
+      "ak_q": {
+        "pub": {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "Xsvk0aYzCkTI9--VHUvxZebGtyHvramF-0FmG8bn_Ww",
+          "y": "hzRkDEmY_343SwbOGmSi7NgqsDY4T7g9mnmxJ6J9UDI"
+        },
+        "alg": "ES256"
+      },
+      "ak_s": {
+        "pub": {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "4lNKNTLQj7ugLd5lnuYr0AMf4tt4VZbvUJMCRGsDCFI",
+          "y": "4PFXWkxjPMcZ3-5f2oYtdk78lsPzDuAFXELCPxhO2MY"
+        },
+        "alg": "ES256"
+      },
+      "caps": [
+        "approve_quick",
+        "approve_strong"
+      ],
+      "attestation": null
+    }
+  },
+  "sig": "cJOWIigE8ukgbSUW1xk3moPeu11uKWUkN26b6sQepgSI-8pKu8DkUWOkmZBXmPLc-05A0ssspGBAo0B-ivvmyQ",
+  "expect": {
+    "ok": true,
+    "canonical": "{\"ak_q\":{\"alg\":\"ES256\",\"pub\":{\"crv\":\"P-256\",\"kty\":\"EC\",\"x\":\"Xsvk0aYzCkTI9--VHUvxZebGtyHvramF-0FmG8bn_Ww\",\"y\":\"hzRkDEmY_343SwbOGmSi7NgqsDY4T7g9mnmxJ6J9UDI\"}},\"ak_s\":{\"alg\":\"ES256\",\"pub\":{\"crv\":\"P-256\",\"kty\":\"EC\",\"x\":\"4lNKNTLQj7ugLd5lnuYr0AMf4tt4VZbvUJMCRGsDCFI\",\"y\":\"4PFXWkxjPMcZ3-5f2oYtdk78lsPzDuAFXELCPxhO2MY\"}},\"attestation\":null,\"caps\":[\"approve_quick\",\"approve_strong\"],\"device_id\":\"dev_mac\",\"dk_pub\":{\"crv\":\"P-256\",\"kty\":\"EC\",\"x\":\"fPJ7GI0DT36KUjgDBLUaw8CJaeJ38hs1pgtI_EdmmXg\",\"y\":\"B3dVENuO0EApPZrGn3Qw27p9reY86YIpngS3nSJ4c9E\"},\"key_kind\":\"software\",\"label\":\"MacBook\",\"os\":\"macos\"}"
+  }
+}

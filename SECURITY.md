@@ -21,6 +21,34 @@ unconfirmed TPM implementation or missing Hello attestation is reported as unkno
 hardware protection. Linux polkit approval is OS authorization, without a TPM PIN/PCR policy.
 See the [cross-platform protection matrix and status fields](docs/key-protection.md).
 
+## Remote approval V1
+
+The current source has shared cryptographic verification and software integration tests; the
+complete installed desktop/phone, public relay and background-push acceptance remains open.
+See [W9 evidence](docs/remote-approval-reports/W9.md) and
+[remaining integrations](docs/remote-approval-reports/OPEN-QUESTIONS.md).
+
+| Actor or situation | Guarantee and limit |
+| --- | --- |
+| Prompt-injected unprivileged agent | May request operations and invent a purpose, but approval is bound to the complete request and accepted only from paired approval keys. Purpose is displayed as the agent's own description. |
+| Relay operator or Cloudflare edge | Sees public registration/routing metadata, traffic size/type/time and encrypted envelopes. Approval bodies, credential values and decision contents are end-to-end ciphertext. The relay cannot manufacture a valid approval signature; the helper checks recipient, digest, expiry and once-only nonce/state. Availability is not guaranteed. |
+| Pairing intermediary | Both users must compare the six-digit SAS and complete the appropriate confirmation. An unconfirmed device or unsigned relay control hint is not approval authority. |
+| Unlocked stolen approver | Quick permits its limited scope. T2, standing authorization, expanded settings and device revocation require Strong through the recorded approval key. Hardware/provider failure is an error. |
+| User enabled unattended T2 | The agent may perform sensitive operations within that Grant. The settings flow requires Strong and exact label confirmation; defaults expire after seven days, the UI marks unattended and each covered T2 use is audited. Revocation removes future authorization, not an already sent external operation. Global/permanent confirmation contract gaps remain in the ledger. |
+| Compromised execution helper/root/SYSTEM | Can read/use credentials and bypass local enforcement. **Remote approval does not give a Linux/Windows helper protection against root/SYSTEM**（远程审批不让 Linux / Windows helper 获得抵御 root / SYSTEM 的能力）. The same root/OS limit applies on macOS. |
+| Malicious same-user desktop process | Can imitate UI and try to mislead a user. It does not gain a valid paired approval through a fake dialog; native helper/agent identity and key checks remain required. V1 does not provide a secure input desktop. |
+
+Loosening remains Strong; this integration does not relax signature/issuer/presence policy to
+make a test pass. Quick tightening and Grant revocation do not increase permission. A presence
+hint affects delivery, not authentication level. Unknown hardware attestation is unverified.
+TPM/PCP are device key providers and do not themselves enforce the desktop approval click.
+
+The full request remains bounded in helper memory; relay spools contain ciphertext. Explicit
+secret exports and data already returned to a model retain the local caveats below. The helper's
+SQLite audit chain is not hardware rollback protection. Gateways use once-only permits, but an
+upstream side effect or response lost during disconnect cannot be promised external exactly-once
+or recoverable streaming behavior.
+
 ## Reporting a vulnerability
 
 Please **do not** open a public issue. Use GitHub's private vulnerability reporting ("Security" tab → "Report a vulnerability") on this repository. Include steps to reproduce and the affected version/commit. We aim to acknowledge reports within a few days.

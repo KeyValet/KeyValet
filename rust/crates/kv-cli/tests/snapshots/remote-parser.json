@@ -1,0 +1,23 @@
+[
+  {"argv":["devices","list","--json"],"parsed":{"json":true,"command":"DevicesList"}},
+  {"argv":["devices","revoke","dev_srv"],"parsed":{"json":false,"command":{"DevicesRevoke":{"id":"dev_srv"}}}},
+  {"argv":["devices","rename","dev_srv","build"],"parsed":{"json":false,"command":{"DevicesRename":{"id":"dev_srv","label":"build"}}}},
+  {"argv":["pair","--new"],"parsed":{"json":false,"command":{"Pair":{"uri":null}}}},
+  {"argv":["approvals","--on-approve","my-command"],"parsed":{"json":false,"command":{"Approvals":{"watch":true,"on_approve":"my-command"}}}},
+  {"argv":["approve","approval_test","--scope","remember:8h"],"parsed":{"json":false,"command":{"Decide":{"id":"approval_test","decision":"allow","scope":"remember:8h","reason":null}}}},
+  {"argv":["deny","approval_test","--reason","no"],"parsed":{"json":false,"command":{"Decide":{"id":"approval_test","decision":"deny","scope":"per_use","reason":"no"}}}},
+  {"argv":["grant","list"],"parsed":{"json":false,"command":"GrantList"}},
+  {"argv":["grant","revoke","jti_test"],"parsed":{"json":false,"command":{"GrantRevoke":{"jti":"jti_test"}}}},
+  {"argv":["grant","revoke-all"],"parsed":{"json":false,"command":{"Directive":{"target":"*","op":"revoke_all_grants","args":{}}}}},
+  {"argv":["remote","srv","mode","per_use"],"parsed":{"json":false,"command":{"Directive":{"target":"srv","op":"set_mode","args":{"mode":"per_use"}}}}},
+  {"argv":["remote","srv","lock"],"parsed":{"json":false,"command":{"Directive":{"target":"srv","op":"lock","args":{}}}}},
+  {"argv":["remote","srv","unlock-ttl","6h"],"parsed":{"json":false,"command":{"Directive":{"target":"srv","op":"set_unlock_ttl","args":{"seconds":21600}}}}},
+  {"argv":["remote","srv","notify","always-phone"],"parsed":{"json":false,"command":{"Directive":{"target":"srv","op":"notify","args":{"policy":"always-phone"}}}}},
+  {"argv":["remote","srv","class","batch","--exp","12h","--credential","github/*"],"parsed":{"json":false,"command":{"Directive":{"target":"srv","op":"set_class","args":{"name":"batch","match":{"credential":"github/*"},"exp_s":43200}}}}},
+  {"argv":["remote","srv","audit","--since","24h"],"parsed":{"json":false,"command":{"Directive":{"target":"srv","op":"query_audit","args":{"since_text":"24h","limit":100}}}}},
+  {"argv":["remote","srv","allow","--all","--standing"],"parsed":{"json":false,"command":{"Grant":{"target":"srv","options":{"credential":null,"all":true,"hosts":null,"methods":null,"paths":null,"agent":null,"budget":null,"until":null},"unattended":false,"preauthorization":false}}}},
+  {"argv":["remote","srv","unattended","--include-sensitive","--until","7d"],"parsed":{"json":false,"command":{"Grant":{"target":"srv","options":{"credential":null,"all":true,"hosts":null,"methods":null,"paths":null,"agent":null,"budget":null,"until":"7d"},"unattended":true,"preauthorization":false}}}},
+  {"argv":["relay","set-url","https://relay.example.com"],"parsed":{"json":false,"command":{"RelaySetUrl":{"url":"https://relay.example.com"}}}},
+  {"argv":["relay","status"],"parsed":{"json":false,"command":{"RelayStatus":{"url":null}}}},
+  {"argv":["status","--summary","--json"],"parsed":{"json":true,"command":{"Status":{"summary":true}}}}
+]

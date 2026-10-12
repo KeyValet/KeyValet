@@ -57,6 +57,22 @@ pub fn signed_payload<T: Serialize + ?Sized>(value: &T) -> Result<Vec<u8>> {
     jcs(&value)
 }
 
+/// Hash native runtime executables without allocating their entire contents.
+pub fn sha256_reader(mut reader: impl std::io::Read) -> std::io::Result<(String, u64)> {
+    let mut hasher = Sha256::new();
+    let mut buffer = [0u8; 64 * 1024];
+    let mut total = 0u64;
+    loop {
+        let count = reader.read(&mut buffer)?;
+        if count == 0 {
+            break;
+        }
+        hasher.update(&buffer[..count]);
+        total += count as u64;
+    }
+    Ok((format!("{:x}", hasher.finalize()), total))
+}
+
 pub fn sha256_hex(bytes: &[u8]) -> String {
     Sha256::digest(bytes)
         .iter()

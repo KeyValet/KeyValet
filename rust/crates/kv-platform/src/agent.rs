@@ -32,6 +32,27 @@ pub type AgentKey = String;
 pub const REQUEST_TIMEOUT: Duration = Duration::from_millis(130_000);
 const KICKSTART_WAIT: Duration = Duration::from_secs(5);
 
+fn remote_identity() -> &'static Mutex<Option<String>> {
+    static ID: std::sync::OnceLock<Mutex<Option<String>>> = std::sync::OnceLock::new();
+    ID.get_or_init(Default::default)
+}
+
+pub fn set_remote_identity(device_id: String) {
+    if let Ok(mut identity) = remote_identity().lock() {
+        *identity = Some(device_id);
+    }
+}
+
+pub fn registration_reply() -> Value {
+    let mut reply = wire::hello_reply(true, None);
+    if let Ok(identity) = remote_identity().lock() {
+        if let Some(identity) = identity.as_ref() {
+            reply["device_id"] = json!(identity);
+        }
+    }
+    reply
+}
+
 type Payload = (wire::EnclavePayload, usize);
 type PendingReply = std::result::Result<(Value, Option<Payload>), String>;
 
@@ -176,6 +197,15 @@ impl AgentConn {
     }
 
     async fn request(self: &Arc<Self>, msg: Value, timeout: Duration) -> PendingReply {
+        self.request_with_input(msg, None, timeout).await
+    }
+
+    async fn request_with_input(
+        self: &Arc<Self>,
+        msg: Value,
+        input: Option<&[u8]>,
+        timeout: Duration,
+    ) -> PendingReply {
         if self.dead.load(Ordering::SeqCst) {
             return Err("agent disconnected".to_string());
         }
@@ -187,6 +217,9 @@ impl AgentConn {
         let _pending = AgentPending { conn: self, id };
         let operation = async {
             let line = wire::encode_line(&msg);
+            if line.len() > wire::MAX_LINE_BYTES {
+                return Err("agent request line too large".into());
+            }
             let writer = self.writer.lock().await;
             if self.dead.load(Ordering::SeqCst) || writer.is_none() {
                 return Err("agent disconnected".to_string());
@@ -202,6 +235,15 @@ impl AgentConn {
                 result = &mut rx => return result.unwrap_or_else(|_| Err("agent disconnected".to_string())),
                 result = writer.writer.as_mut().unwrap().write_all(&line) => {
                     result.map_err(|e| format!("cannot write to the agent: {e}"))?;
+                }
+            }
+            if let Some(input) = input {
+                tokio::select! {
+                    biased;
+                    result = &mut rx => return result.unwrap_or_else(|_| Err("agent disconnected".to_string())),
+                    result = writer.writer.as_mut().unwrap().write_all(input) => {
+                        result.map_err(|_| "cannot write device-key input to the agent".to_string())?;
+                    }
                 }
             }
             writer.complete = true;
@@ -264,7 +306,7 @@ impl AgentHub {
     }
 
     /// One prompt at a time per user: dialogs/flows queue rather than stacking.
-    fn prompt_lock(&self, key: &AgentKey) -> Arc<AsyncMutex<()>> {
+    pub(crate) fn prompt_lock(&self, key: &AgentKey) -> Arc<AsyncMutex<()>> {
         self.prompt_locks
             .lock()
             .unwrap()
@@ -320,6 +362,55 @@ impl AgentHub {
     pub async fn request(&self, key: &AgentKey, msg: Value, timeout: Duration) -> PendingReply {
         let conn = self.ensure(key).await?;
         conn.request(msg, timeout).await
+    }
+
+    /// Private desktop dialogs share the same per-user queue as hardware prompts.
+    pub async fn request_dialog(
+        &self,
+        key: &AgentKey,
+        msg: Value,
+        timeout: Duration,
+    ) -> PendingReply {
+        let prompt = self.prompt_lock(key);
+        let _prompt = prompt.lock().await;
+        self.request(key, msg, timeout).await
+    }
+
+    pub(crate) async fn request_with_input(
+        &self,
+        key: &AgentKey,
+        msg: Value,
+        input: Option<&[u8]>,
+        timeout: Duration,
+    ) -> PendingReply {
+        let length = crate::device_key::agent::input_length(&msg)
+            .map_err(|_| "invalid device-key input length".to_string())?;
+        match (input, length) {
+            (None, None) => {}
+            (Some(bytes), Some(length)) if bytes.len() == length => {}
+            _ => return Err("invalid device-key input length".into()),
+        }
+        let conn = self.ensure(key).await?;
+        let started = std::time::Instant::now();
+        if input.is_some() {
+            // CONTRACT: §5 / Appendix C: negotiate the binary-input extension on this
+            // authenticated connection before sending bytes an older agent cannot frame.
+            let (header, payload) = conn
+                .request(
+                    json!({"op":"device_key","operation":"capabilities"}),
+                    timeout,
+                )
+                .await?;
+            if header["ok"] != true
+                || header["device_key_protocol"].as_u64()
+                    != Some(crate::device_key::agent::DEVICE_KEY_PROTOCOL)
+                || payload.is_some()
+            {
+                return Err("agent device-key protocol unavailable".into());
+            }
+        }
+        conn.request_with_input(msg, input, timeout.saturating_sub(started.elapsed()))
+            .await
     }
 }
 
@@ -495,7 +586,7 @@ pub async fn negotiate<S: AsyncRead + AsyncWrite + Unpin>(
         let _ = stream.shutdown().await;
         return None;
     }
-    let line = wire::encode_line(&wire::hello_reply(true, None));
+    let line = wire::encode_line(&registration_reply());
     if stream.write_all(&line).await.is_err() {
         return None;
     }
@@ -631,6 +722,106 @@ mod tests {
         let mut bytes = wire::encode_line(&json!({"id": id, "ok": true, "len": payload.len()}));
         bytes.extend_from_slice(payload);
         bytes
+    }
+
+    #[tokio::test]
+    async fn device_input_is_a_bounded_binary_frame_following_its_header() {
+        let (server, client) = tokio::io::duplex(1024);
+        let hub = AgentHub::new();
+        #[cfg(unix)]
+        let key = 1000;
+        #[cfg(windows)]
+        let key = "test-owner".to_string();
+        #[allow(clippy::clone_on_copy)]
+        hub.register(key.clone(), server, "signed");
+        let conn = hub.conn(&key).unwrap();
+        let caller = hub.clone();
+        let request = tokio::spawn(async move {
+            let input = zeroize::Zeroizing::new(vec![42; 80 * 1024]);
+            caller
+                .request_with_input(
+                    &key,
+                    json!({"op":"device_key","operation":"sign","input_len":input.len()}),
+                    Some(&input),
+                    Duration::from_secs(5),
+                )
+                .await
+        });
+        let mut peer = BufReader::new(client);
+        let capability = read_request(&mut peer).await;
+        assert_eq!(capability["operation"], "capabilities");
+        peer.get_mut()
+            .write_all(&wire::encode_line(
+                &json!({"id":capability["id"],"ok":true,"device_key_protocol":1}),
+            ))
+            .await
+            .unwrap();
+        let mut line = String::new();
+        peer.read_line(&mut line).await.unwrap();
+        let header: Value = serde_json::from_str(&line).unwrap();
+        assert_eq!(header["input_len"], 80 * 1024);
+        let mut input = zeroize::Zeroizing::new(vec![0; 80 * 1024]);
+        peer.read_exact(&mut input).await.unwrap();
+        assert!(input.iter().all(|b| *b == 42));
+        peer.get_mut()
+            .write_all(&wire::encode_line(
+                &json!({"id":header["id"],"ok":false,"error":"key_operation_failed"}),
+            ))
+            .await
+            .unwrap();
+        assert!(request.await.unwrap().is_ok());
+        assert!(conn.pending.lock().unwrap().is_empty());
+    }
+
+    #[tokio::test]
+    async fn older_agents_receive_no_binary_input_or_partial_request() {
+        let (hub, key, mut peer) = registered_hub();
+        let caller = hub.clone();
+        let request = tokio::spawn(async move {
+            caller
+                .request_with_input(
+                    &key,
+                    json!({"op":"device_key","operation":"sign","input_len":1}),
+                    Some(&[42]),
+                    Duration::from_secs(1),
+                )
+                .await
+        });
+        let capability = read_request(&mut peer).await;
+        assert_eq!(capability["operation"], "capabilities");
+        peer.get_mut()
+            .write_all(&wire::encode_line(
+                &json!({"id":capability["id"],"ok":false,"error":"unknown op"}),
+            ))
+            .await
+            .unwrap();
+        assert!(request.await.unwrap().is_err());
+        assert!(
+            tokio::time::timeout(Duration::from_millis(20), peer.read_u8())
+                .await
+                .is_err()
+        );
+    }
+
+    #[tokio::test]
+    async fn oversized_request_line_sends_no_frame_or_binary_input() {
+        let (server, mut peer) = tokio::io::duplex(16);
+        let conn = AgentConn::start(server);
+        let result = conn
+            .request_with_input(
+                json!({"op":"device_key","data":"x".repeat(wire::MAX_LINE_BYTES)}),
+                Some(&[42]),
+                Duration::from_secs(1),
+            )
+            .await;
+        assert_eq!(result.unwrap_err(), "agent request line too large");
+        assert!(conn.pending.lock().unwrap().is_empty());
+        assert!(!conn.dead.load(Ordering::SeqCst));
+        assert!(
+            tokio::time::timeout(Duration::from_millis(20), peer.read_u8())
+                .await
+                .is_err()
+        );
     }
 
     #[tokio::test]

@@ -1,0 +1,17 @@
+{
+  "runtime": "gemini",
+  "command": [
+    "gemini",
+    "-p",
+    "Reply only HI. Do not use any tool.",
+    "--skip-trust",
+    "--allowed-mcp-server-names",
+    "r2dprobe",
+    "-e",
+    "none"
+  ],
+  "elapsed_s": 45.031,
+  "exit": 0,
+  "supervised_end": true,
+  "cwd": "/var/folders/0h/p1772ckx3yq8qn5sqb_wpg_40000gn/T/keyvalet-r2d-login-393vlek6"
+}

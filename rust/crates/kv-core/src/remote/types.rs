@@ -571,6 +571,9 @@ pub struct DeviceRecord {
     pub os: Os,
     pub key_kind: KeyKind,
     pub dk_pub: PublicJwk,
+    /// K1: optional dedicated P-256/ES256 identity key; dk_pub remains the HPKE key.
+    #[serde(default, skip_serializing_if = "Optional::is_missing")]
+    pub dk_sig: Optional<ApprovalKey>,
     #[serde(deserialize_with = "nullable")]
     pub ak_q: Option<ApprovalKey>,
     #[serde(deserialize_with = "nullable")]

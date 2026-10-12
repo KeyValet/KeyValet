@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RelayBinding",
+  "type": "object",
+  "properties": {
+    "relay_url": {
+      "type": "string"
+    },
+    "device_id": {
+      "type": "string"
+    },
+    "account_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "relay_url",
+    "device_id",
+    "account_id"
+  ],
+  "additionalProperties": false
+}

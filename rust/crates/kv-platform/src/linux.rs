@@ -51,12 +51,23 @@ impl LinuxHost {
     }
 
     pub fn service_identity(&self) -> io::Result<(u32, u32)> {
+        self.lookup_identity(&self.service_user)
+    }
+
+    pub fn relay_identity(&self) -> io::Result<(u32, u32)> {
+        self.lookup_identity(
+            &std::ffi::CString::new(crate::paths::RELAY_SERVICE_USER)
+                .expect("fixed service account contains no NUL"),
+        )
+    }
+
+    fn lookup_identity(&self, name: &std::ffi::CStr) -> io::Result<(u32, u32)> {
         let mut entry: libc::passwd = unsafe { std::mem::zeroed() };
         let mut result = std::ptr::null_mut();
         let mut buffer = vec![0u8; 16384];
         let rc = unsafe {
             (self.passwd_lookup)(
-                self.service_user.as_ptr(),
+                name.as_ptr(),
                 &mut entry,
                 buffer.as_mut_ptr() as *mut _,
                 buffer.len(),
@@ -265,7 +276,7 @@ impl Confirmer for Polkit {
     }
 }
 
-fn trusted_command(path: &str) -> std::result::Result<Command, String> {
+pub(crate) fn trusted_command(path: &str) -> std::result::Result<Command, String> {
     if let Some(reason) = crate::trust::untrusted_reason(Path::new(path)) {
         return Err(reason);
     }

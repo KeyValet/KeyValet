@@ -7,7 +7,7 @@ license.workspace = true
 
 [[bin]]
 name = "kv-touchid"
-path = "src/main.rs"
+path = "src/remote_main.rs"
 
 [dependencies]
 kv-i18n = { path = "../kv-i18n" }

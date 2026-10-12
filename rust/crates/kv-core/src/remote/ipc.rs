@@ -1,4 +1,5 @@
 use super::*;
+pub use kv_ipc::remote::OutboundStage;
 pub use kv_ipc::remote::{allowed_ops, Caller, Op, Request, Response, CALLER_OPS, OPS};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
@@ -36,13 +37,21 @@ impl<'de, T: serde::de::DeserializeOwned> Deserialize<'de> for Unsigned<T> {
 pub type RelayInboundParams = kv_ipc::remote::RelayInboundParams<Envelope>;
 pub type RelayInboundRequest = kv_ipc::remote::RelayInboundRequest<Envelope>;
 pub type RelayOutboundPollResult = kv_ipc::remote::RelayOutboundPollResult<Envelope>;
+pub type RelayOutboundAckParams = kv_ipc::remote::RelayOutboundAckParams<Envelope>;
+pub type RelayOutboundAckRequest = kv_ipc::remote::RelayOutboundAckRequest<Envelope>;
 pub type PresenceUpdateRequest = kv_ipc::remote::PresenceUpdateRequest<PresenceHint>;
 pub type PendingListResult = kv_ipc::remote::PendingListResult<ApprovalRequest>;
 pub type DecideParams = kv_ipc::remote::DecideParams<DecisionScope, Decision, ApprovalLevel>;
+pub type DecideIntent = kv_ipc::remote::DecideIntent<DecisionScope, Decision, ApprovalLevel>;
+pub type GrantIntent = kv_ipc::remote::GrantIntent<GrantScope, Budget, GrantKind>;
+pub type DirectiveIntent = kv_ipc::remote::DirectiveIntent<DirectiveOp, DirectiveKind>;
+pub use kv_ipc::remote::{
+    GrantConfirmation, GrantSource, PairConfirmIntent, PairJoinIntent, RelayBinding,
+};
 pub type DecideRequest = kv_ipc::remote::DecideRequest<DecisionScope, Decision, ApprovalLevel>;
 pub type GrantIssueRequest = kv_ipc::remote::GrantIssueRequest<Unsigned<Grant>>;
 pub type GrantIssueResult = kv_ipc::remote::GrantIssueResult<Grant>;
-pub type GrantListResult = kv_ipc::remote::GrantListResult<Grant>;
+pub type GrantListResult = kv_ipc::remote::GrantListResult<kv_ipc::remote::GrantMetadata>;
 pub type DirectiveIssueRequest = kv_ipc::remote::DirectiveIssueRequest<Unsigned<Directive>>;
 pub type DirectiveIssueResult = kv_ipc::remote::DirectiveIssueResult<DirectiveResult>;
 pub type PairStartRequest = kv_ipc::remote::PairStartRequest<PairOffer>;

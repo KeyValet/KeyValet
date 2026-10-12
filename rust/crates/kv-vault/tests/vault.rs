@@ -65,6 +65,30 @@ fn creates_directory_and_master_key_with_owner_only_permissions() {
 }
 
 #[test]
+fn approved_record_views_pin_reads_and_share_key_revocation() {
+    let (_tmp, vault) = new_vault();
+    set(&vault, "api_key", "service", "approved-secret");
+    let view = vault.pin_record("api_key", "service").unwrap();
+    vault
+        .set(SetParams {
+            r#type: "api_key".into(),
+            name: "service".into(),
+            value: Some("new-secret".into()),
+            overwrite: true,
+            ..Default::default()
+        })
+        .unwrap();
+    assert_eq!(vault.get("api_key", "service").unwrap().value, "new-secret");
+    assert_eq!(
+        view.get("api_key", "service").unwrap().value,
+        "approved-secret"
+    );
+    assert!(view.get_record("api_key", "other").is_err());
+    vault.close();
+    assert!(view.get_record("api_key", "service").is_err());
+}
+
+#[test]
 fn creates_the_type_first_when_missing_then_writes_the_value() {
     let (_tmp, vault) = new_vault();
     assert!(!vault.type_exists("api_key").unwrap());

@@ -100,6 +100,7 @@ pub struct Gateway {
     allowed_uid: Option<kv_platform::peer::GatewayPeer>,
     started: tokio::sync::OnceCell<Mutex<Option<JoinHandle<()>>>>,
     shutdown: watch::Sender<bool>,
+    approval: Option<crate::approval::ApprovalLayer>,
 }
 
 pub struct OpenResult {
@@ -128,7 +129,40 @@ impl Gateway {
             allowed_uid,
             started: tokio::sync::OnceCell::new(),
             shutdown: watch::channel(false).0,
+            approval: None,
         }
+    }
+
+    /// The helper installs its authoritative approval policy before opening any routes.
+    pub fn with_approval(mut self, layer: crate::approval::ApprovalLayer) -> Self {
+        self.approval = Some(layer);
+        self
+    }
+
+    pub fn requires_request_approval(&self) -> bool {
+        self.approval.is_some()
+    }
+
+    /// A leaf certificate may be issued only for an explicit, live credential route.
+    pub fn permits_certificate(&self, ty: &str, name: &str, host: &str) -> bool {
+        if self.inner.closed.load(std::sync::atomic::Ordering::SeqCst)
+            || !crate::certificates::valid_host(host)
+            || !self
+                .inner
+                .routes
+                .lock()
+                .unwrap()
+                .values()
+                .any(|route| route.r#type == ty && route.name == name)
+        {
+            return false;
+        }
+        self.vault.get_record(ty, name).is_ok_and(|(_, _, record)| {
+            record
+                .http
+                .as_ref()
+                .is_some_and(|http| crate::config::host_allowed(host, &http.allowed_hosts))
+        })
     }
 
     /// Revoke existing tokens (and stop requests in flight) when the session's policy changes.
@@ -207,13 +241,21 @@ impl Gateway {
         #[allow(clippy::clone_on_copy)] // GatewayPeer is Vec<u8> on Windows
         let allowed_uid = self.allowed_uid.clone();
         let shutdown = self.shutdown.subscribe();
+        let approval = self.approval.clone();
         self.started
             .get_or_try_init(|| async move {
                 let listener = TcpListener::bind("127.0.0.1:0").await?;
                 let port = listener.local_addr()?.port();
                 *inner.port.lock().unwrap() = port;
-                let task =
-                    tokio::spawn(serve(listener, inner, vault, audit, allowed_uid, shutdown));
+                let task = tokio::spawn(serve(
+                    listener,
+                    inner,
+                    vault,
+                    audit,
+                    allowed_uid,
+                    shutdown,
+                    approval,
+                ));
                 Ok::<_, std::io::Error>(Mutex::new(Some(task)))
             })
             .await
@@ -259,6 +301,7 @@ async fn serve(
     audit: GatewayAudit,
     allowed_uid: Option<kv_platform::peer::GatewayPeer>,
     mut shutdown: watch::Receiver<bool>,
+    approval: Option<crate::approval::ApprovalLayer>,
 ) {
     let mut connections = JoinSet::new();
     while !*shutdown.borrow() {
@@ -281,6 +324,7 @@ async fn serve(
         let audit = audit.clone();
         #[allow(clippy::clone_on_copy)] // GatewayPeer is Vec<u8> on Windows
         let allowed_uid = allowed_uid.clone();
+        let approval = approval.clone();
         connections.spawn(async move {
             let _permit = permit;
             if let Some(want_uid) = &allowed_uid {
@@ -288,15 +332,25 @@ async fn serve(
                     return; // a different user's process: disconnect immediately
                 }
             }
+            // Linux/macOS TCP sockets support these options; propagate a transport failure.
+            // The fallible socket preparation is kept outside the HTTP approval decision.
+            let keepalive = approval
+                .as_ref()
+                .map(|_| crate::approval::configure_keepalive(&stream))
+                .transpose();
+            if crate::approval::check_keepalive(keepalive.map(|_| ())).is_err() {
+                return;
+            }
             let io = hyper_util::rt::TokioIo::new(stream);
             let service = hyper::service::service_fn(move |req: Request<Incoming>| {
                 let inner = inner.clone();
                 let vault = vault.clone();
                 let audit = audit.clone();
+                let approval = approval.clone();
                 let port = *inner.port.lock().unwrap();
                 async move {
                     Ok::<_, std::convert::Infallible>(
-                        handle(req, inner, vault, audit, port, peer_addr).await,
+                        handle(req, inner, vault, audit, port, peer_addr, approval).await,
                     )
                 }
             });
@@ -393,6 +447,7 @@ async fn handle(
     audit: GatewayAudit,
     port: u16,
     _peer: SocketAddr,
+    approval: Option<crate::approval::ApprovalLayer>,
 ) -> Response<BoxBody> {
     let path = req.uri().path().to_string();
     let query = req.uri().query().map(str::to_string);
@@ -498,6 +553,7 @@ async fn handle(
             &upstream_host,
             rest,
             query.as_deref(),
+            approval.as_ref(),
         )) => result.unwrap_or_else(|_| Err((
             StatusCode::GATEWAY_TIMEOUT,
             "timeout".to_string(),
@@ -530,6 +586,7 @@ fn revoked_error() -> (StatusCode, String, String) {
     )
 }
 
+#[allow(clippy::too_many_arguments)]
 async fn handle_authorized(
     req: Request<Incoming>,
     vault: &Vault,
@@ -538,6 +595,7 @@ async fn handle_authorized(
     upstream_host: &str,
     rest: &str,
     query: Option<&str>,
+    approval: Option<&crate::approval::ApprovalLayer>,
 ) -> Result<Response<BoxBody>, (StatusCode, String, String)> {
     let (ty, name, record) = vault
         .get_record(&route.r#type, &route.name)
@@ -590,7 +648,7 @@ async fn handle_authorized(
 
     let method = req.method().clone();
     let request_headers = req.headers().clone();
-    let body_bytes = if matches!(method.as_str(), "GET" | "HEAD") {
+    let body_bytes = if matches!(method.as_str(), "GET" | "HEAD") && approval.is_none() {
         Bytes::new()
     } else {
         let too_large = || {
@@ -620,7 +678,87 @@ async fn handle_authorized(
             .to_bytes()
     };
 
-    let inj = build_injection(vault, &ty, &name, &record)
+    if let Some(approval) = approval {
+        if !body_bytes.is_empty() && matches!(method.as_str(), "GET" | "HEAD") {
+            return Err((
+                StatusCode::BAD_REQUEST,
+                "approval_body".into(),
+                "Approval requests cannot use a GET or HEAD body".into(),
+            ));
+        }
+        if body_bytes.len() > 1024 * 1024 {
+            return Err((
+                StatusCode::PAYLOAD_TOO_LARGE,
+                "approval_body".into(),
+                "Approval requests are limited to 1 MiB".into(),
+            ));
+        }
+        let mut headers = HashMap::new();
+        for (name, value) in &request_headers {
+            if CLIENT_AUTH_HEADERS.contains(&name.as_str())
+                || FORBIDDEN_HEADERS.contains(&name.as_str())
+                || drop_request_header(name.as_str())
+            {
+                continue;
+            }
+            if let Ok(value) = value.to_str() {
+                // The approval protocol carries one value per header. Do not bind only
+                // one value while forwarding several values with different semantics.
+                if headers
+                    .insert(name.as_str().to_owned(), value.to_owned())
+                    .is_some()
+                {
+                    return Err((
+                        StatusCode::BAD_REQUEST,
+                        "approval_headers".into(),
+                        "Approval requests cannot use duplicate headers".into(),
+                    ));
+                }
+            }
+        }
+        let request = crate::approval::ApprovalRequest {
+            credential_type: ty.clone(),
+            credential_name: name.clone(),
+            method: method.as_str().into(),
+            url: url.to_string(),
+            headers,
+            body: body_bytes.clone(),
+            purpose: route.purpose.clone(),
+        };
+        let hint = record
+            .template
+            .as_ref()
+            .and_then(|id| {
+                kv_protocols::template_timeout::client_timeout_hint(&serde_json::json!({"id": id}))
+                    .ok()
+                    .flatten()
+            })
+            .or_else(|| kv_protocols::template_timeout::host_timeout_hint(bare_host));
+        let decision = approval
+            .authorize(request, hint)
+            .await
+            .map_err(|error| (StatusCode::BAD_GATEWAY, "approval".into(), error))?;
+        if let Some(response) = crate::approval::http_response(&decision)
+            .map_err(|error| (error.status, "approval".into(), error.to_string()))?
+        {
+            return Ok(crate::approval::boxed_response(response));
+        }
+    }
+
+    let pinned = vault.pin_record(&ty, &name).map_err(|_| revoked_error())?;
+    // Compare and execute through the same authenticated record view.
+    if serde_json::to_value(
+        &pinned
+            .get_record(&ty, &name)
+            .map_err(|_| revoked_error())?
+            .2,
+    )
+    .ok()
+        != serde_json::to_value(&record).ok()
+    {
+        return Err(revoked_error());
+    }
+    let inj = build_injection(&pinned, &ty, &name, &record)
         .await
         .map_err(|e| (StatusCode::BAD_GATEWAY, "inject".to_string(), e.0))?;
     inject_query(&mut url, &inj.query);
@@ -769,12 +907,20 @@ async fn handle_authorized(
 fn drop_request_header(lk: &str) -> bool {
     matches!(
         lk,
-        "referer" | "origin" | "expect" | "forwarded" | "via" | "keep-alive" | "accept-encoding"
+        "referer"
+            | "origin"
+            | "expect"
+            | "forwarded"
+            | "via"
+            | "keep-alive"
+            | "accept-encoding"
+            // SDK retry metadata is removed from both the approval and upstream request.
+            | "x-stainless-retry-count"
     ) || lk.starts_with("x-forwarded-")
         || lk.starts_with("sec-")
         || lk.starts_with("proxy-")
 }
-fn drop_response_header(lk: &str) -> bool {
+pub(crate) fn drop_response_header(lk: &str) -> bool {
     matches!(
         lk,
         "content-length"
@@ -798,15 +944,26 @@ mod tests {
 
     #[tokio::test]
     async fn idle_connections_are_bounded_and_release_their_slots_on_disconnect() {
+        use tokio::io::{AsyncReadExt, AsyncWriteExt};
+        // Each loopback connection consumes two descriptors. Two capacity tests run in
+        // parallel in this test binary, so filling both production limits exceeds 256.
+        // Exercise the same semaphore/accept path with a smaller fixture, leaving the
+        // production cap unchanged.
+        const CAPACITY: usize = 8;
         let tmp = tempfile::tempdir().unwrap();
-        let gateway = Gateway::new(
+        let mut gateway = Gateway::new(
             Arc::new(Vault::new(tmp.path().join("vault"))),
             Arc::new(|_| {}),
             None,
         );
+        assert_eq!(
+            gateway.inner.connections.available_permits(),
+            MAX_CONNECTIONS
+        );
+        Arc::get_mut(&mut gateway.inner).unwrap().connections = Arc::new(Semaphore::new(CAPACITY));
         let entry = gateway.open("api_key", "svc", None).await.unwrap();
         let mut idle = Vec::new();
-        for _ in 0..MAX_CONNECTIONS {
+        for _ in 0..CAPACITY {
             idle.push(
                 tokio::net::TcpStream::connect(("127.0.0.1", entry.port))
                     .await
@@ -820,30 +977,49 @@ mod tests {
         })
         .await
         .unwrap();
-        assert!(reqwest::Client::new()
-            .get(&entry.base)
-            .timeout(Duration::from_secs(2))
-            .send()
+        let mut excess = tokio::net::TcpStream::connect(("127.0.0.1", entry.port))
             .await
-            .is_err());
+            .unwrap();
+        let closed = tokio::time::timeout(Duration::from_secs(2), excess.read(&mut [0]))
+            .await
+            .unwrap();
+        assert!(
+            matches!(closed, Ok(0))
+                || closed.is_err_and(|e| e.kind() == std::io::ErrorKind::ConnectionReset)
+        );
+        drop(excess);
         drop(idle);
         tokio::time::timeout(Duration::from_secs(2), async {
-            while gateway.inner.connections.available_permits() != MAX_CONNECTIONS {
+            while gateway.inner.connections.available_permits() != CAPACITY {
                 tokio::task::yield_now().await;
             }
         })
         .await
         .unwrap();
-        assert_eq!(
-            reqwest::Client::new()
-                .get(&entry.base)
-                .send()
-                .await
-                .unwrap()
-                .status(),
-            401
-        );
+        // A real request on a newly accepted socket proves the listener survived and
+        // the released slot can be reused. Avoid an unrelated reqwest pool here.
+        let mut reused = tokio::net::TcpStream::connect(("127.0.0.1", entry.port))
+            .await
+            .unwrap();
+        reused
+            .write_all(
+                format!("GET / HTTP/1.1\r\nHost: 127.0.0.1:{}\r\n\r\n", entry.port).as_bytes(),
+            )
+            .await
+            .unwrap();
+        let mut status = [0; 12];
+        tokio::time::timeout(Duration::from_secs(2), reused.read_exact(&mut status))
+            .await
+            .unwrap()
+            .unwrap();
+        assert_eq!(&status, b"HTTP/1.1 401");
         gateway.shutdown().await;
+        let mut tail = Vec::new();
+        tokio::time::timeout(Duration::from_secs(2), reused.read_to_end(&mut tail))
+            .await
+            .unwrap()
+            .unwrap();
+        assert_eq!(gateway.inner.connections.available_permits(), CAPACITY);
     }
 
     #[tokio::test]

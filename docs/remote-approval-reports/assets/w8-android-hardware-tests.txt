@@ -1,0 +1,48 @@
+W8 Android hardware tests, 2026-10-12
+
+Physical Pixel 7, Android API 36. Both APKs now declare targetSdk 36, minSdk 31.
+The original targetSdk 31 native test APK was rejected with INSTALL_FAILED_VERIFICATION_FAILURE.
+The user clarified the dialog: 此应用是针对旧版android开发的，因此不含最新的隐私保护功能。
+After updating targeting, normal adb install succeeded without changing verification settings.
+
+Native Rust/JNI bootstrap (hardware DK ECDH + encrypted SQLite + public snapshot): PASS.
+Direct AK_s signing without CryptoObject biometric authentication: PASS (denied).
+Both tests ran on device; no assumptions/skips. Successful interactive Strong signing remains unverified.
+
+INSTRUMENTATION_STATUS: class=dev.keyvalet.nativebridge.StrongSigningGateTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=2
+INSTRUMENTATION_STATUS: stream=
+dev.keyvalet.nativebridge.StrongSigningGateTest:
+INSTRUMENTATION_STATUS: test=nativeWorkerLoadsRustAndReturnsOnlyThePublicSnapshot
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=dev.keyvalet.nativebridge.StrongSigningGateTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=2
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=nativeWorkerLoadsRustAndReturnsOnlyThePublicSnapshot
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=dev.keyvalet.nativebridge.StrongSigningGateTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=2
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=tamperedUiCannotSignWithoutCryptoObjectAuthentication
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=dev.keyvalet.nativebridge.StrongSigningGateTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=2
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=tamperedUiCannotSignWithoutCryptoObjectAuthentication
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_RESULT: stream=
+
+Time: 0.229
+
+OK (2 tests)
+
+
+INSTRUMENTATION_CODE: -1

@@ -1,0 +1,6 @@
+.git
+rust/target
+rust/target-*
+marketing
+mobile
+node_modules

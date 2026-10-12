@@ -1,0 +1,3 @@
+// Copy to OAuth.xcconfig after registering the KeyValet iOS client with Google.
+// Public identifier only; never place provider private keys in this file.
+KEYVALET_GOOGLE_REVERSED_CLIENT_ID = com.googleusercontent.apps.REPLACE_WITH_KEYVALET_IOS_CLIENT

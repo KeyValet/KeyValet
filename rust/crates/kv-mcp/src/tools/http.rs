@@ -676,7 +676,7 @@ pub struct GatewayArgs {
 
 /// Environment variables for common SDKs (the API key can be a placeholder; the gateway swaps in
 /// the real credential).
-fn sdk_env(
+pub(crate) fn sdk_env(
     template: Option<&str>,
     urls: &Map<String, Value>,
     token: &str,

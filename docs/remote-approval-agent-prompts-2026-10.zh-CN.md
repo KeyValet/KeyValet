@@ -1,5 +1,7 @@
 # 远程审批 V1：并行开发的 agent prompt
 
+第二轮（实机闭环）的 prompt 见 [remote-approval-agent-prompts-r2-2026-10.zh-CN.md](remote-approval-agent-prompts-r2-2026-10.zh-CN.md)。
+
 用法：每个工作流一个代码块，**整块复制**给一个 agent，不需要再补任何上下文。每个 prompt 自带全部规则、阅读清单、所有权边界、验收标准与报告格式。顺序：先单独跑 W0（它是所有人的依赖），W0 报告「契约与测试向量已落地」后再并行启动 W1–W8，最后跑 W9。配套设计见 [remote-approval-architecture-2026-10.zh-CN.md](remote-approval-architecture-2026-10.zh-CN.md)。
 
 ---

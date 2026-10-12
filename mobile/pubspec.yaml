@@ -1,0 +1,23 @@
+name: keyvalet_mobile
+description: The KeyValet remote approval and device control app.
+publish_to: none
+version: 0.3.0+1
+environment:
+  sdk: '>=3.7.0 <4.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  flutter_rust_bridge: 2.11.1
+  mobile_scanner: 7.1.3
+  google_sign_in: 7.2.0
+  sign_in_with_apple: 8.1.0
+  kv_native:
+    path: packages/kv_native
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+flutter:
+  uses-material-design: true
+  generate: true

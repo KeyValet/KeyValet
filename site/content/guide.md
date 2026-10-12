@@ -5,9 +5,9 @@ description = "How KeyValet works: vault, approvals, proxy calls, hooks and the 
 
 # KeyValet
 
-**Give your AI agents a valet key, not your master key.**
+**Keys in the chip. Approval in your hand.**
 
-KeyValet is a local credential broker for AI agents on macOS. It lets agents such as Claude Code, Cursor and Codex *use* your API keys, OAuth accounts and other secrets over [MCP](https://modelcontextprotocol.io) — without the secrets ever entering the model's context. You approve each credential with Touch ID, and every use is logged with its stated purpose.
+KeyValet is a credential runtime for AI agents on macOS, Linux and Windows. It lets agents such as Claude Code, Cursor and Codex *use* your API keys, OAuth accounts and other secrets over [MCP](https://modelcontextprotocol.io) or an HTTP gateway — without the secrets ever entering the model's context. The keys live in a hardware-protected vault owned by a privileged system service the agent can't read; you approve each credential with Touch ID (polkit on Linux, Hello on Windows), and every use is logged with its stated purpose.
 
 [Security model](https://github.com/KeyValet/KeyValet/blob/main/SECURITY.md)
 
@@ -18,6 +18,30 @@ protection for machines without TPM. Install the source checkout with `sh script
 see [Linux setup, SSH approval and recovery](https://github.com/KeyValet/KeyValet/blob/main/docs/linux.md).
 
 ---
+
+## Remote approval V1 preview
+
+Current-main source contains signed/encrypted relay and helper checks with software integration
+tests, plus separate relay-client service setup and KeyValet-only timeout/Stop registrations.
+After installing current source, `keyvalet status --summary` shows local protection and relay
+state; an unavailable remote helper reports unknown. `keyvalet relay install --help` describes
+self-hosted nginx deployment. See [Linux preparation](https://github.com/KeyValet/KeyValet/blob/main/docs/linux.md#remote-approval-v1-current-main-integration).
+
+The full `pair --new` → scan/join → compare six-digit SAS → Strong confirmation → approve
+sequence is **planned integration**. Installed CLI/helper bootstrap, native desktop acceptance and
+background push still need completion; installed-device acceptance has not passed. Existing
+Linux SSH/polkit approval remains available.
+
+Phone internal installation currently uses developer builds from
+[W8's instructions](https://github.com/KeyValet/KeyValet/blob/main/docs/remote-approval-reports/W8.md).
+There is no verified TestFlight/Play invitation link yet. App/NSE profiles, production signing
+and push configuration are required; the attached Pixel rejected the instrumentation APK during
+system verification, so its hardware gates remain untested. Track native and distribution
+requirements in [OPEN-QUESTIONS](https://github.com/KeyValet/KeyValet/blob/main/docs/remote-approval-reports/OPEN-QUESTIONS.md).
+
+Remote approval does not give a Linux/Windows helper protection against root/SYSTEM. Relaxing
+authority requires Strong authentication; presence signals only affect delivery. Read the
+[remote security boundaries](https://github.com/KeyValet/KeyValet/blob/main/SECURITY.md#remote-approval-v1).
 
 ## Why
 
@@ -290,6 +314,8 @@ cargo test --workspace --locked   # unit + integration tests in temp dirs with l
 ```
 
 Layout: `rust/crates/kv-mcp` (MCP server, runs as you) · `kv-helper` (root helper: vault, protocols, proxy, Touch ID gate) · `kv-touchid` · `kv-cli` · `kv-hook` (secret-detection hook) · `scripts/` (install, catalog build, optional n8n import).
+
+Source installs: `sh scripts/install.sh` on macOS and Linux (add `--software` on a Linux host without a TPM) uses `CARGO_TARGET_DIR` when set — relative paths are resolved from `rust/` — and otherwise builds into `rust/target`. The installer passes this directory explicitly, overriding Cargo's configured `build.target-dir`, so it always installs the output of the current build.
 
 See [CONTRIBUTING.md](../CONTRIBUTING.md).
 

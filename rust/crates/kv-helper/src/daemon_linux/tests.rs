@@ -45,6 +45,7 @@ fn peer(uid: u32, pid: u32) -> kv_platform::peer::PeerCredentials {
 
 fn environment(directory: &Path) -> (Environment, tokio::sync::oneshot::Sender<()>) {
     let mut env = Environment::system();
+    env.startup = false;
     env.helper = std::env::current_exe().unwrap();
     env.policy = directory.join("policy");
     env.run_dir = directory.join("run");
@@ -55,6 +56,8 @@ fn environment(directory: &Path) -> (Environment, tokio::sync::oneshot::Sender<(
     env.owner = owner;
     env.trust = trusted;
     env.peer = Box::new(|_| Ok(peer(1000, std::process::id())));
+    env.remote_peer = |_, _| None;
+    env.relay_identity = |_| None;
     env.control_timeout = std::time::Duration::from_millis(50);
     std::fs::create_dir_all(&env.run_dir).unwrap();
     std::fs::set_permissions(&env.run_dir, std::fs::Permissions::from_mode(0o700)).unwrap();

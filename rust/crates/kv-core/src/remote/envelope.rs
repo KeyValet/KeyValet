@@ -151,7 +151,11 @@ pub fn open(
     {
         return Err(RemoteError::PayloadTooLarge);
     }
-    verify(envelope, &sender.dk_pub)?;
+    verify_identity_signature(
+        sender,
+        &envelope.signature_payload()?,
+        &decode_b64(&envelope.sig)?,
+    )?;
     hpke::open(
         recipient,
         &decode_b64(&envelope.enc)?,

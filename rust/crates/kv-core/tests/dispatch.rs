@@ -74,6 +74,82 @@ impl kv_core::Confirmer for PanicConfirmer {
     }
 }
 
+#[tokio::test]
+async fn remote_approved_dispatch_uses_real_vault_and_rejects_changed_bindings() {
+    let (_tmp, vault) = new_vault();
+    vault
+        .set(SetParams {
+            r#type: "api_key".into(),
+            name: "service".into(),
+            value: Some("synthetic-approved".into()),
+            ..Default::default()
+        })
+        .unwrap();
+    let params = json!({"type":"api_key","name":"service","purpose":"Verify approved dispatch"})
+        .as_object()
+        .unwrap()
+        .clone();
+    let binding = kv_core::dispatch::operation_binding(&vault, kv_ipc::Op::Get, &params).unwrap();
+    let mut auth = SessionAuth::new(FakeAuth::new());
+    auth.mode = Some(GrantMode::PerUse);
+    let result = kv_core::dispatch::dispatch_approved(
+        &vault,
+        kv_ipc::Op::Get,
+        &params,
+        &binding,
+        &ClientContext::default(),
+        Some(&mut auth),
+        &PanicConfirmer,
+    )
+    .await
+    .unwrap();
+    assert_eq!(result["value"], "synthetic-approved");
+    assert!(kv_core::dispatch::dispatch_approved(
+        &vault,
+        kv_ipc::Op::Delete,
+        &params,
+        &binding,
+        &ClientContext::default(),
+        Some(&mut auth),
+        &PanicConfirmer
+    )
+    .await
+    .is_err());
+    let mut changed = params.clone();
+    changed.insert("field".into(), json!("an-unapproved-field"));
+    assert!(kv_core::dispatch::dispatch_approved(
+        &vault,
+        kv_ipc::Op::Get,
+        &changed,
+        &binding,
+        &ClientContext::default(),
+        Some(&mut auth),
+        &PanicConfirmer
+    )
+    .await
+    .is_err());
+    vault
+        .set(SetParams {
+            r#type: "api_key".into(),
+            name: "service".into(),
+            value: Some("unapproved-replacement".into()),
+            overwrite: true,
+            ..Default::default()
+        })
+        .unwrap();
+    assert!(kv_core::dispatch::dispatch_approved(
+        &vault,
+        kv_ipc::Op::Get,
+        &params,
+        &binding,
+        &ClientContext::default(),
+        Some(&mut auth),
+        &PanicConfirmer
+    )
+    .await
+    .is_err());
+}
+
 fn new_vault() -> (tempfile::TempDir, Vault) {
     // Pin the language deterministically: these tests assert on Chinese prompt/error text, and
     // `kv_i18n::lang()` otherwise falls back to whatever locale happens to be ambient (OS

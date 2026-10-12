@@ -1,0 +1,17 @@
+name: kv_native
+description: Native hardware keys and background delivery for KeyValet.
+version: 0.3.0
+publish_to: none
+environment:
+  sdk: '>=3.7.0 <4.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  plugin:
+    platforms:
+      ios:
+        pluginClass: KvNativePlugin
+      android:
+        package: dev.keyvalet.nativebridge
+        pluginClass: KvNativePlugin

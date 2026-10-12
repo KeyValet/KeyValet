@@ -56,6 +56,76 @@ configuration is preserved. Devin's commands and hooks use the repository's Devi
 For another MCP client, configure the stdio command
 `/usr/local/lib/keyvalet/bin/kv-mcp`.
 
+## Remote approval V1 (current-main integration)
+
+The repository includes the encrypted relay, relay client, helper verifier and MCP wait/Stop
+logic. Software-key integration tests exercise signed approvals through the real relay/helper
+and consume each result once. This is development source, not an assertion that the complete
+Ubuntu → desktop/phone pairing and approval path has passed installed-device acceptance.
+Installed CLI/helper bootstrap, desktop flow verification and background push still need the work listed
+in [the open-question ledger](remote-approval-reports/OPEN-QUESTIONS.md). Native W9 installation
+also found that the non-root helper cannot pin a different UID's executable through `/proc`;
+that remote caller-proof seam remains closed rather than weakening process trust or ptrace policy.
+
+The current installer provisions two separate non-login identities and units:
+
+| Identity / unit | Data / connection |
+| --- | --- |
+| `keyvalet-relay`, `keyvalet-relay.service` | Ciphertext queue `/var/lib/keyvalet-relay/queue`; helper `/run/keyvalet/relay.sock` |
+| `keyvalet-relay-server`, `keyvalet-relay-server.service` | Server SQLite `/var/lib/keyvalet-relay-server`; listens on `127.0.0.1:8787` |
+
+The client config is `/etc/keyvalet/relay-client.toml`, written by root and readable by the relay
+account. It needs the real public `device_id` and `account_id` returned by authenticated setup;
+the installer never creates placeholder identities. With no binding, the client is registered
+but not started. Server and client state directories must stay separate.
+
+For a self-hosted relay on the same Ubuntu host, install nginx and use the current source
+installer. This preparation sequence requires your real domain and Cloudflare Origin CA files:
+
+```sh
+sh scripts/install.sh --no-setup --no-register
+sudo install -d -m 0700 /etc/ssl/keyvalet-relay
+sudo install -m 0644 /private/path/origin.pem /etc/ssl/keyvalet-relay/origin.pem
+sudo install -m 0600 /private/path/origin.key /etc/ssl/keyvalet-relay/origin.key
+keyvalet relay install --listen 127.0.0.1:8787 \
+  --data /var/lib/keyvalet-relay-server --public-url https://relay.example.com
+sudo systemctl daemon-reload
+sudo systemctl enable --now keyvalet-relay-server.service
+sudo nginx -t
+sudo systemctl reload nginx
+keyvalet relay status --public-url https://relay.example.com
+```
+
+Use Cloudflare A/AAAA records pointing to the origin with the orange cloud enabled; select
+Full (strict), and allow inbound 443 only from Cloudflare's published ranges. Keep 8787 private.
+The chain is Cloudflare → nginx → loopback kv-server. No Tailscale/Caddy is installed. The
+installer supplies templates and certificate-directory permissions; it does not obtain a
+certificate or change DNS/firewall rules. Actual edge acceptance is tracked separately in
+[the W9 report](remote-approval-reports/W9.md).
+
+W9 has deployed `https://relay.keyvalet.dev` on `simvito` with proxied DNS, a dedicated Origin CA
+certificate and a hostname-only Full (strict) rule. HTTPS, authenticated WSS and a W0 software
+ES256/HPKE round trip passed. This verifies the public relay transport; it does not resolve the
+installed helper/desktop/phone acceptance gaps above.
+
+The intended pairing sequence is `relay set-url`, `pair --new` on the execution host, scanning
+or joining on the Mac/phone, comparing the six-digit SAS on both devices, and Strong confirmation
+on the approver. Then `approvals`, `approve <id>` / `deny <id>` and remote settings are the CLI
+entry points. **This complete sequence remains planned integration:** the new joining/bootstrap path has not passed installed-device acceptance. Do not treat a
+successful parser or software test as successful device pairing. Phone internal distribution also requires the resources in the
+[mobile report](remote-approval-reports/W8.md).
+
+Requester protection is displayed as hardware kind or `software_key`; software receives a red
+warning in the approval UI. Unknown attestation stays unverified. A remote approval does not
+unlock an unopened credential vault by itself. Remote approval does not give a Linux/Windows
+helper protection against root/SYSTEM; the existing server trust boundary remains in force.
+
+To remove the new service and runtime registrations from current source, use
+`sh scripts/install.sh --uninstall`. Workflow-built packages route their uninstaller through
+this mode. Queued ciphertext, certificates and service accounts are retained by default.
+Direct older `scripts/uninstall.sh` entry points predate remote cleanup; see the W9 ownership
+follow-up in the ledger.
+
 ## Desktop and SSH approval
 
 A desktop session needs a running polkit authentication agent. Polkit's PAM configuration

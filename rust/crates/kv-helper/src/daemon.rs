@@ -2,7 +2,9 @@
 //! local user it was installed for, and accepts the per-user agent's connection after code
 //! verification. Holds no vault key while idle.
 
-use crate::{control, fatal, serve, MAX_CLIENTS};
+#[cfg(test)]
+use crate::control;
+use crate::{control_with_remote, fatal, serve_with_remote, MAX_CLIENTS};
 use kv_platform::agent::{
     accept_agent, AgentAuthenticator, AgentConfirmer, AgentHub, AgentMasterKeyProvider,
 };
@@ -102,6 +104,18 @@ pub async fn run(uid: u32) {
     let client_listener = bind(HELPER_SOCKET);
     let agent_listener = bind(AGENT_SOCKET);
     let hub = AgentHub::new();
+    let startup = kv_helper::remote::startup::Startup::new(
+        std::path::PathBuf::from(VAULT_DIR).join("remote"),
+        Arc::new(kv_helper::remote::platform_keys::AgentKeys {
+            hub: hub.clone(),
+            owner: uid,
+        }),
+        kv_core::remote::Os::Macos,
+        uid,
+    );
+    if let Err(error) = kv_helper::remote::startup::install(startup.clone()) {
+        fatal(&error.to_string());
+    }
     let sessions = Arc::new(AtomicUsize::new(0));
     // Session streams keyed by a counter so each finished session removes its own dup'd fd.
     let session_streams: Arc<AsyncMutex<std::collections::HashMap<u64, UnixStream>>> =
@@ -152,6 +166,7 @@ pub async fn run(uid: u32) {
     // Agent accept loop.
     {
         let hub = hub.clone();
+        let startup = startup.clone();
         tokio::spawn(async move {
             loop {
                 match agent_listener.accept().await {
@@ -160,6 +175,9 @@ pub async fn run(uid: u32) {
                             accept_agent(stream, uid, |r| audit_reject(r.to_string())).await
                         {
                             hub.register(uid, stream, "signed");
+                            if let Err(error) = startup.load_existing().await {
+                                eprintln!("keyvalet: remote startup failed: {error}");
+                            }
                         }
                     }
                     Err(_) => tokio::time::sleep(std::time::Duration::from_millis(100)).await,
@@ -198,10 +216,12 @@ pub async fn run(uid: u32) {
                 let peer = kv_platform::peer::peer_uid(stream.as_raw_fd());
                 match peer {
                     Ok(0) => {
+                        let remote_context = kv_helper::remote::server::authenticate_peer(stream.as_raw_fd(), uid, None).ok();
                         let sessions = sessions.clone();
-                        join_set.spawn(control(stream, sessions));
+                        join_set.spawn(control_with_remote(stream, sessions, remote_context));
                     }
                     Ok(u) if u == uid => {
+                        let remote_context = kv_helper::remote::server::authenticate_peer(stream.as_raw_fd(), uid, None).ok();
                         let Ok(permit) = permits.clone().try_acquire_owned() else {
                             // Tell the client why instead of a silent close.
                             let msg = kv_ipc::ReadyMessage::NotReady {
@@ -252,7 +272,7 @@ pub async fn run(uid: u32) {
                                         hub: hub.clone(),
                                         key: uid,
                                     });
-                                    let _ = serve(
+                                    let _ = serve_with_remote(
                                         stream,
                                         writer,
                                         vault,
@@ -262,6 +282,7 @@ pub async fn run(uid: u32) {
                                         AgentAuthenticator { hub: hub.clone(), key: uid },
                                         AgentConfirmer { hub, key: uid },
                                         provider,
+                                        remote_context,
                                     )
                                     .await;
                                 }

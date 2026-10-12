@@ -1,0 +1,34 @@
+{
+  "ok": {
+    "zh": "请求已执行，结果已返回。不要重复发起同一请求。",
+    "en": "The request executed and its result is returned. Do not repeat the same request."
+  },
+  "approval_pending": {
+    "zh": "用户还未决定，这不是拒绝。你可以先做不需要这条凭证的事。需要结果时调用 credential_wait_approval(approval_id)，批准后它直接返回本次请求的结果。不要重复发起同一请求，不要向用户索要密钥。",
+    "en": "The user has not decided; this is not a denial. Continue work that does not need this credential. Call credential_wait_approval(approval_id) when you need the result; after approval it returns this request's result directly. Do not repeat the original request or ask the user for a key."
+  },
+  "still_pending": {
+    "zh": "用户还未决定，这不是拒绝。你可以先做不需要这条凭证的事。需要结果时调用 credential_wait_approval(approval_id)，批准后它直接返回本次请求的结果。不要重复发起同一请求，不要向用户索要密钥。",
+    "en": "The user has not decided; this is not a denial. Continue work that does not need this credential. Call credential_wait_approval(approval_id) when you need the result; after approval it returns this request's result directly. Do not repeat the original request or ask the user for a key."
+  },
+  "approval_denied": {
+    "zh": "用户拒绝了这次请求。不要重试或绕过审批，不要让用户粘贴密钥。将拒绝原因告诉用户。",
+    "en": "The user denied this request. Do not retry or bypass approval, and do not ask the user to paste a key. Tell the user the reason for the denial."
+  },
+  "approval_expired": {
+    "zh": "这次请求已过期，没有收到决定。重新发起会产生新的审批提示；除非确有必要，不要自动重发。",
+    "en": "This request expired without a decision. A new request creates a new approval prompt; do not resend automatically unless necessary."
+  },
+  "no_approver": {
+    "zh": "没有可用的审批通道。请告诉用户配置审批设备，或通过 SSH 在执行端本地审批；不要索要密钥。",
+    "en": "No approval channel is available. Tell the user to configure an approval device or approve locally on the executor over SSH; do not ask for a key."
+  },
+  "approved_retry_required": {
+    "zh": "请求已批准，但 helper 重启后丢失了内存中的原请求。用完全相同的参数和这个 approval_id 重发原工具调用一次；不要更改请求，不要创建新的审批。",
+    "en": "Approval was granted, but the helper lost the original request from memory after restarting. Resend the original tool call once with identical arguments and this approval_id. Do not change the request or create a new approval."
+  },
+  "already_consumed": {
+    "zh": "这次批准的结果已被领取，请求不会再次执行。使用先前返回的结果；不要重复发起请求。",
+    "en": "This approval's result was already consumed and the request will not execute again. Use the previously returned result; do not repeat the request."
+  }
+}

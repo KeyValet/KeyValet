@@ -222,12 +222,13 @@ impl Server {
             } else {
                 None
             };
-            let merged = protection_status_view(
+            let mut merged = protection_status_view(
                 self.session.status_snapshot(),
                 grants,
                 self.session.protection(),
             )
             .await;
+            merged["remote_approval"] = self.session.remote_status().await;
             Ok(ok_data(kv_i18n::t("状态：", "Status:"), merged))
         })
         .await

@@ -169,6 +169,7 @@ footer a { color: var(--muted); }
 .plan .price { font: 800 2rem/1.2 var(--display); margin: 0.4rem 0; }
 .plan .price small { display: block; font: 400 0.95rem var(--body); color: var(--muted); }
 .plan .badge { display: inline-block; align-self: flex-start; border: 1px solid var(--brass); color: var(--brass); border-radius: 999px; padding: 0.15rem 0.6rem; font-size: 0.78rem; font-weight: 700; margin-bottom: 0.6rem; }
+h2 .badge { display: inline-block; vertical-align: middle; border: 1px solid var(--brass); color: var(--brass); border-radius: 999px; padding: 0.1rem 0.6rem; margin-left: 0.6rem; font: 700 0.78rem var(--body); }
 .plan ul { margin: 0.6rem 0 1.2rem; padding-left: 1.1rem; color: var(--muted); font-size: 0.95rem; }
 .plan ul li { margin-bottom: 0.4rem; }
 .plan .cta-plan { margin-top: auto; }

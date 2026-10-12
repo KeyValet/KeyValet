@@ -246,6 +246,11 @@ mod os {
 
     /// Owner-only DACL, protected from inheritance (see `kv_platform::fs::set_private_permissions`).
     pub fn set_private_dacl(path: &Path) -> io::Result<()> {
+        let inheritance = if std::fs::symlink_metadata(path)?.is_dir() {
+            0x03 // OBJECT_INHERIT_ACE | CONTAINER_INHERIT_ACE
+        } else {
+            0
+        };
         let wide: Vec<u16> = path
             .as_os_str()
             .encode_wide()
@@ -271,7 +276,7 @@ mod os {
             let entry = EXPLICIT_ACCESS_W {
                 grfAccessPermissions: 0x001F_01FF, // FILE_ALL_ACCESS
                 grfAccessMode: GRANT_ACCESS,
-                grfInheritance: windows::Win32::Security::ACE_FLAGS(0),
+                grfInheritance: windows::Win32::Security::ACE_FLAGS(inheritance),
                 Trustee: TRUSTEE_W {
                     TrusteeForm: TRUSTEE_IS_SID,
                     TrusteeType: TRUSTEE_IS_USER,
@@ -327,8 +332,9 @@ pub struct Vault {
     data_path: PathBuf,
     audit_path: PathBuf,
     lock_path: PathBuf,
-    key: std::sync::Mutex<Option<Zeroizing<[u8; KEY_BYTES]>>>,
-    metadata: std::sync::Mutex<Option<MasterKeyMetadata>>,
+    key: std::sync::Arc<std::sync::Mutex<Option<Zeroizing<[u8; KEY_BYTES]>>>>,
+    metadata: std::sync::Arc<std::sync::Mutex<Option<MasterKeyMetadata>>>,
+    pinned_record: Option<(String, String, CredentialRecord)>,
     /// Set only by `open_recovery_read_only`; any newly installed key clears it.
     read_only: AtomicBool,
     #[cfg(unix)]
@@ -374,8 +380,9 @@ impl Vault {
             audit_path: dir.join("audit.log"),
             lock_path: dir.join(".lock"),
             dir,
-            key: std::sync::Mutex::new(None),
-            metadata: std::sync::Mutex::new(None),
+            key: std::sync::Arc::new(std::sync::Mutex::new(None)),
+            metadata: std::sync::Arc::new(std::sync::Mutex::new(None)),
+            pinned_record: None,
             read_only: AtomicBool::new(false),
             #[cfg(unix)]
             owner_uid: unsafe { libc::getuid() },
@@ -429,6 +436,9 @@ impl Vault {
         if self.data_path.symlink_metadata().is_ok() {
             self.assert_private(&self.data_path, false)?;
         }
+        // Validate existing sensitive paths before restoring private inheritance for new files.
+        #[cfg(windows)]
+        set_private(&self.dir, 0o700)?;
         Ok(())
     }
 
@@ -490,7 +500,7 @@ impl Vault {
             hardware_required: !metadata.as_ref().is_some_and(|m| {
                 matches!(
                     m.provider,
-                    ProviderId::SoftwareKey | ProviderId::WindowsHello
+                    ProviderId::SoftwareKey | ProviderId::WindowsHello | ProviderId::DeviceIdentity
                 )
             }),
         })
@@ -976,6 +986,9 @@ impl Vault {
                 ProviderId::WindowsHello => aad.extend_from_slice(b"/windows-hello/v1/"),
                 ProviderId::Tpm2 => aad.extend_from_slice(b"/tpm2/v1/"),
                 ProviderId::SoftwareKey => aad.extend_from_slice(b"/software-key/v1/"),
+                ProviderId::DeviceIdentity => {
+                    aad.extend_from_slice(b"/device-identity/metadata/v1/")
+                }
             }
             aad.extend_from_slice(&serde_json::to_vec(metadata)?);
         }
@@ -1192,6 +1205,43 @@ impl Vault {
     }
 
     /// Read-modify-write, holding the cross-process write lock.
+    /// Read a helper namespace only after the containing vault passed AEAD verification.
+    pub fn authenticated_metadata(&self, namespace: &str) -> Result<Option<serde_json::Value>> {
+        Ok(self.read()?.private_metadata.get(namespace).cloned())
+    }
+
+    /// Serialize replacements with credential writes and reject stale directory snapshots.
+    pub fn replace_authenticated_metadata(
+        &self,
+        namespace: &str,
+        expected: Option<&serde_json::Value>,
+        replacement: serde_json::Value,
+    ) -> Result<()> {
+        if namespace.is_empty() || namespace.len() > 100 {
+            return Err(VaultError::new(
+                "元数据命名空间无效",
+                "Invalid metadata namespace",
+            ));
+        }
+        self.mutate(|data| {
+            if data.private_metadata.get(namespace) != expected {
+                return Err(VaultError::new(
+                    "元数据已更改，请重新读取",
+                    "Metadata changed; reload before replacing",
+                ));
+            }
+            data.private_metadata.insert(namespace.into(), replacement);
+            Ok(())
+        })?;
+        self.authenticated_metadata(namespace)?;
+        Ok(())
+    }
+
+    /// Revoke the cached credential key when a session lease is closed.
+    pub fn close(&self) {
+        self.clear_key();
+    }
+
     fn mutate<T>(&self, f: impl FnOnce(&mut VaultData) -> Result<T>) -> Result<T> {
         let _guard = self.lock()?;
         let mut data = self.read()?;
@@ -1261,7 +1311,36 @@ impl Vault {
             .collect()
     }
 
+    /// Read retained audit files strictly: I/O errors and partial records are never empty success.
+    pub fn read_audit_records(&self) -> Result<Vec<serde_json::Value>> {
+        use std::io::{BufRead, BufReader};
+        let mut result = Vec::new();
+        for path in [
+            self.audit_path.with_extension("log.1"),
+            self.audit_path.clone(),
+        ] {
+            let file = match std::fs::File::open(&path) {
+                Ok(file) => file,
+                Err(error) if error.kind() == std::io::ErrorKind::NotFound => continue,
+                Err(error) => return Err(error.into()),
+            };
+            for line in BufReader::new(file).lines() {
+                let line = line?;
+                if line.trim().is_empty() {
+                    continue;
+                }
+                let entry: serde_json::Value = serde_json::from_str(&line)?;
+                if !entry.is_object() {
+                    return Err(VaultError("Invalid audit record".into()));
+                }
+                result.push(entry);
+            }
+        }
+        Ok(result)
+    }
+
     pub fn audit(&self, mut entry: serde_json::Map<String, serde_json::Value>) -> Result<()> {
+        let durable = entry.contains_key("remote_hash");
         entry.insert("ts".to_string(), serde_json::Value::String(now_iso()));
         entry.insert(
             "pid".to_string(),
@@ -1272,6 +1351,9 @@ impl Vault {
         let mut f = open_private_append(&self.audit_path)?;
         self.adopt_file_owner(&f)?;
         f.write_all(line.as_bytes())?;
+        if durable {
+            f.sync_all()?;
+        }
         drop(f);
         // Rotate once past 10MB (keeping the previous one), so it never grows unbounded.
         if let Ok(meta) = std::fs::metadata(&self.audit_path) {
@@ -1410,11 +1492,39 @@ impl Vault {
             .unwrap_or(false))
     }
 
+    /// Pin one authenticated record for an approved operation. Reads cannot switch to a
+    /// concurrently edited credential; protocol cache writes still use their generation CAS.
+    /// Both views share the key lease, so closing the original revokes this view too.
+    pub fn pin_record(&self, ty: &str, name: &str) -> Result<Self> {
+        let record = self.get_record(ty, name)?;
+        let mut view = Self::new(self.dir.clone());
+        view.key = self.key.clone();
+        view.metadata = self.metadata.clone();
+        view.pinned_record = Some(record);
+        view.read_only
+            .store(self.read_only.load(Ordering::SeqCst), Ordering::SeqCst);
+        #[cfg(unix)]
+        {
+            view.owner_uid = self.owner_uid;
+        }
+        Ok(view)
+    }
+
     /// Full record (including secrets), deep-cloned. For the root helper's internal protocol
     /// implementations and the root CLI only.
     pub fn get_record(&self, ty: &str, name: &str) -> Result<(String, String, CredentialRecord)> {
         let ty = normalize_type(ty)?;
         let name = normalize_name(name)?;
+        if let Some((pinned_type, pinned_name, record)) = &self.pinned_record {
+            self.check_epoch()?;
+            if self.key.lock().unwrap().is_none() || &ty != pinned_type || &name != pinned_name {
+                return Err(VaultError::new(
+                    "审批快照不可用",
+                    "The approved credential snapshot is unavailable",
+                ));
+            }
+            return Ok((ty, name, record.clone()));
+        }
         let data = self.read()?;
         if own(&data.types, &ty).is_none() {
             return Err(VaultError::new(

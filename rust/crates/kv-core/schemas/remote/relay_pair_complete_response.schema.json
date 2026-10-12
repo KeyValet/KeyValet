@@ -9,6 +9,16 @@
     },
     "initiator": {
       "$ref": "#/$defs/DeviceRecord"
+    },
+    "account_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
     }
   },
   "required": [
@@ -34,6 +44,36 @@
         },
         "dk_pub": {
           "$ref": "#/$defs/PublicJwk"
+        },
+        "dk_sig": {
+          "type": "object",
+          "properties": {
+            "pub": {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/PublicJwk"
+                },
+                {
+                  "properties": {
+                    "kty": {
+                      "const": "EC"
+                    },
+                    "crv": {
+                      "const": "P-256"
+                    }
+                  }
+                }
+              ]
+            },
+            "alg": {
+              "const": "ES256"
+            }
+          },
+          "required": [
+            "pub",
+            "alg"
+          ],
+          "additionalProperties": true
         },
         "ak_q": {
           "anyOf": [

@@ -11,4 +11,5 @@ pub mod index;
 pub mod jwt;
 pub mod jwt_kind;
 pub mod oauth2;
+pub mod template_timeout;
 pub mod totp;

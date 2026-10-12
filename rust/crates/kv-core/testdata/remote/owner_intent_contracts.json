@@ -1,0 +1,235 @@
+{
+  "cases": [
+    {
+      "type": "DecideIntent",
+      "schema": "decide_intent.schema.json",
+      "value": {
+        "approval_id": "01J9W000000000000000000001",
+        "decision": "allow",
+        "scope": {
+          "mode": "per_use",
+          "level": "credential",
+          "until": 0
+        },
+        "scope_option": "per_use"
+      }
+    },
+    {
+      "type": "DecideIntent",
+      "schema": "decide_intent.schema.json",
+      "value": {
+        "approval_id": "01J9W000000000000000000001",
+        "decision": "allow",
+        "scope": {
+          "mode": "per_use",
+          "level": "credential",
+          "until": 0
+        },
+        "scope_option": "per_use",
+        "iss": "caller-chosen-issuer"
+      }
+    },
+    {
+      "type": "GrantIntent",
+      "schema": "grant_intent.schema.json",
+      "value": {
+        "source": "settings",
+        "kind": "grant",
+        "aud": "dev_srv",
+        "scope": {
+          "level": "credential",
+          "credential": "github/default",
+          "hosts": [
+            "api.github.com"
+          ],
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "max_tier": "T1"
+        },
+        "nbf": 1760200012,
+        "exp": 1760203612,
+        "origin": "settings"
+      }
+    },
+    {
+      "type": "GrantIntent",
+      "schema": "grant_intent.schema.json",
+      "value": {
+        "source": "settings",
+        "kind": "grant",
+        "aud": "dev_srv",
+        "scope": {
+          "level": "credential",
+          "credential": "github/default",
+          "hosts": [
+            "api.github.com"
+          ],
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "max_tier": "T1"
+        },
+        "nbf": 1760200012,
+        "exp": 1760203612,
+        "origin": "settings",
+        "iss": "caller-chosen-issuer"
+      }
+    },
+    {
+      "type": "GrantConfirmation",
+      "schema": "grant_confirmation.schema.json",
+      "value": {
+        "confirmation_token": "test-only-one-use-token",
+        "expires_at": 1760200132,
+        "device_id": "dev_srv",
+        "label": "srv",
+        "confirmations_left": 1
+      }
+    },
+    {
+      "type": "GrantConfirmation",
+      "schema": "grant_confirmation.schema.json",
+      "value": {
+        "confirmation_token": "test-only-one-use-token",
+        "expires_at": 1760200132,
+        "device_id": "dev_srv",
+        "label": "srv",
+        "confirmations_left": 1,
+        "iss": "caller-chosen-issuer"
+      }
+    },
+    {
+      "type": "DirectiveIntent",
+      "schema": "directive_intent.schema.json",
+      "value": {
+        "kind": "directive",
+        "aud": "dev_srv",
+        "op": "lock",
+        "args": {}
+      }
+    },
+    {
+      "type": "DirectiveIntent",
+      "schema": "directive_intent.schema.json",
+      "value": {
+        "kind": "directive",
+        "aud": "dev_srv",
+        "op": "lock",
+        "args": {},
+        "iss": "caller-chosen-issuer"
+      }
+    },
+    {
+      "type": "PairJoinIntent",
+      "schema": "pair_join_intent.schema.json",
+      "value": {
+        "uri": "kv-pair://relay.example.com/AAAAAAAAAAAAAAAAAAAAAAAAAA"
+      }
+    },
+    {
+      "type": "PairJoinIntent",
+      "schema": "pair_join_intent.schema.json",
+      "value": {
+        "uri": "kv-pair://relay.example.com/AAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "iss": "caller-chosen-issuer"
+      }
+    },
+    {
+      "type": "PairConfirmIntent",
+      "schema": "pair_confirm_intent.schema.json",
+      "value": {
+        "sas": "957664",
+        "confirmed": true
+      }
+    },
+    {
+      "type": "PairConfirmIntent",
+      "schema": "pair_confirm_intent.schema.json",
+      "value": {
+        "sas": "957664",
+        "confirmed": true,
+        "iss": "caller-chosen-issuer"
+      }
+    },
+    {
+      "type": "RelayBinding",
+      "schema": "relay_binding.schema.json",
+      "value": {
+        "relay_url": "https://relay.example.com",
+        "device_id": "dev_mac",
+        "account_id": "acct_test"
+      }
+    },
+    {
+      "type": "RelayBinding",
+      "schema": "relay_binding.schema.json",
+      "value": {
+        "relay_url": "https://relay.example.com",
+        "device_id": "dev_mac",
+        "account_id": "acct_test",
+        "iss": "caller-chosen-issuer"
+      }
+    }
+  ],
+  "expect": [
+    {
+      "roundtrip": true,
+      "schema_valid": true
+    },
+    {
+      "roundtrip": false,
+      "schema_valid": false
+    },
+    {
+      "roundtrip": true,
+      "schema_valid": true
+    },
+    {
+      "roundtrip": false,
+      "schema_valid": false
+    },
+    {
+      "roundtrip": true,
+      "schema_valid": true
+    },
+    {
+      "roundtrip": false,
+      "schema_valid": false
+    },
+    {
+      "roundtrip": true,
+      "schema_valid": true
+    },
+    {
+      "roundtrip": false,
+      "schema_valid": false
+    },
+    {
+      "roundtrip": true,
+      "schema_valid": true
+    },
+    {
+      "roundtrip": false,
+      "schema_valid": false
+    },
+    {
+      "roundtrip": true,
+      "schema_valid": true
+    },
+    {
+      "roundtrip": false,
+      "schema_valid": false
+    },
+    {
+      "roundtrip": true,
+      "schema_valid": true
+    },
+    {
+      "roundtrip": false,
+      "schema_valid": false
+    }
+  ]
+}

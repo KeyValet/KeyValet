@@ -3,6 +3,26 @@ use super::*;
 use rsa::BigUint;
 use sha2::{Digest, Sha256};
 
+/// Existing executor-initiated vectors retain their joiner key ordering.
+/// When a Strong approver initiates and a pure executor joins, bind the approver's keys.
+pub fn device_sas(token: &[u8], initiator: &DeviceRecord, joiner: &DeviceRecord) -> Result<String> {
+    let approver = if joiner.ak_s.is_some() {
+        joiner
+    } else {
+        initiator
+    };
+    if approver.ak_s.is_none() {
+        return Err(RemoteError::InsufficientLevel);
+    }
+    sas(
+        token,
+        &initiator.dk_pub,
+        &joiner.dk_pub,
+        approver.ak_q.as_ref().map(|key| &key.r#pub),
+        approver.ak_s.as_ref().map(|key| &key.r#pub),
+    )
+}
+
 // CONTRACT: A.7: sort JCS bytes, raw 16-byte token, null for absent keys, decimal prefix padded to six.
 pub fn sas(
     token: &[u8],

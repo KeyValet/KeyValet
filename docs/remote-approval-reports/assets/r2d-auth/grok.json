@@ -1,0 +1,10 @@
+{
+  "command": [
+    "/Users/guang/dev/keyvalet/rust/target-w5/runtime-probes/grok-native",
+    "-p",
+    "Reply only HI. Do not use any tool."
+  ],
+  "exit": 1,
+  "elapsed_s": 0.514,
+  "supervised_end": false
+}

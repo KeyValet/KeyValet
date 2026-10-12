@@ -1,7 +1,7 @@
 [Unit]
 Description=KeyValet credential helper
-After=polkit.service
-Requires=polkit.service
+After=polkit.service keyvalet-peer.service
+Requires=polkit.service keyvalet-peer.service
 
 [Service]
 Type=simple

@@ -25,7 +25,14 @@
         "remote.devices.list",
         "remote.devices.revoke",
         "remote.devices.rename",
-        "remote.status"
+        "remote.status",
+        "remote.audit.list",
+        "remote.relay.identity",
+        "remote.relay.outbound.ack",
+        "remote.relay.control.poll",
+        "remote.relay.control.complete",
+        "remote.relay.control.sign",
+        "remote.client_timeout_observed"
       ]
     },
     "params": {

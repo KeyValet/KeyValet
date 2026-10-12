@@ -1,0 +1,123 @@
+{
+  "date": "2026-10-12",
+  "rust_toolchain": "1.99.0",
+  "cargo_target_dir": "/Users/guang/dev/keyvalet/rust/target-w9",
+  "mac_workspace": {
+    "fmt": "pass",
+    "clippy": "pass",
+    "build": "pass",
+    "test": {
+      "passed": 1246,
+      "failed": 0,
+      "ignored": 10,
+      "groups": 66
+    }
+  },
+  "ubuntu_workspace": {
+    "environment": "Ubuntu 24.04 isolated systemd-nspawn on ndu",
+    "fmt": "pass",
+    "clippy": "pass",
+    "build": "pass",
+    "tests": {
+      "passed": 1225,
+      "failed": 0,
+      "ignored": 8,
+      "groups": 66
+    }
+  },
+  "mobile_target_check": {
+    "ios": "pass",
+    "android_arm64": "pass",
+    "core_remote_only_ios": "pass"
+  },
+  "scripts": {
+    "unix_configuration_tests": 8,
+    "unix_syntax": "pass",
+    "root_quoted_bodies": 3,
+    "root_apostrophe_audit": "pass",
+    "root_external_positional_arguments": "pass",
+    "powershell_portable_syntax_toml": "pass",
+    "powershell_native_acl": "not run: Windows host deferred",
+    "workflow_yaml": 6,
+    "workflow_shell_steps": 34,
+    "workflow_powershell_steps": 26,
+    "zola_build": "pass"
+  },
+  "deployment": {
+    "ssh_host": "simvito",
+    "url": "https://relay.keyvalet.dev",
+    "dns_proxied": true,
+    "origin_tls": "Cloudflare Origin CA; hostname-only Full strict rule",
+    "origin_listen": "127.0.0.1:8787",
+    "nginx_test": "pass",
+    "binary_sha256": "cd465d26df3fa10856baf3124c6b71cb981a2d34fe396c57a5a21acad5b9ecb9",
+    "tls_private_key": "generated and kept root-only on simvito; never read/exported",
+    "https_health": "pass via Cloudflare edge; local negative DNS cache requires temporary edge-IP resolution",
+    "wss_encrypted_smoke": "pass: two temporary software devices, DK auth, both SAS finishes, verified WSS, ES256 and HPKE round trip, typed ack, both devices revoked",
+    "human_sign_in": "Provider configuration absent; native Google/Apple sign-in unverified"
+  },
+  "pixel": {
+    "model": "Pixel 7",
+    "android": "16",
+    "instrumentation_install": "failed: INSTALL_FAILED_VERIFICATION_FAILURE",
+    "hardware_gates": "not run"
+  },
+  "acceptance": "M5 incomplete: installed-device role proof, UI/hardware, background push, native matrix and dogfooding remain open",
+  "remote_schemas": 110,
+  "verification_scope": "Completed whole-workspace checkpoint plus targeted follow-up; parallel main writes remain allowed by owner.",
+  "workspace_checkpoint": {
+    "rust_files": 1004,
+    "source_index_sha256": "145db9c7ac16e0277d715b0299f299925574b9a63dc554d0a138f5af909b799a",
+    "ubuntu_archive": "/tmp/keyvalet-w9-20261012/ci-snapshot-source.tar"
+  },
+  "followup": {
+    "mac_fmt": "pass",
+    "mac_clippy": "pass",
+    "mac_build": "pass",
+    "mac_tests": [
+      {
+        "log": "followup-consumers-test.log",
+        "passed": 355,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "log": "followup-account-test.log",
+        "passed": 5,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "log": "followup-relay-review-test.log",
+        "passed": 26,
+        "failed": 0,
+        "ignored": 0
+      }
+    ],
+    "ubuntu": "pass: same targeted checks in ci-followup.log",
+    "scope": "helper/CLI/mobile/vault; server account and review modules; Windows additions still need native tests",
+    "additional_mobile_tests": {
+      "mac_latest": {
+        "passed": 27,
+        "failed": 0,
+        "ignored": 0
+      },
+      "ubuntu_previous": {
+        "passed": 26,
+        "failed": 0,
+        "ignored": 0
+      },
+      "note": "Four mobile files changed after the Ubuntu follow-up; current mobile crate fmt/clippy/build/test passed on macOS; Windows/native handset acceptance remains separate."
+    },
+    "source_index_sha256": "ddfa0c47874807990a0227ef818a3c4c34ac8388063181d69663939debd1f462",
+    "last_mobile_tests_sha256": "2f5f550054d07ccc5589883ca0dc49dd011c1c99f78e764e2ac41ede0779186a",
+    "source_archive": "/tmp/keyvalet-w9-20261012/followup-source.tar"
+  },
+  "installation": {
+    "isolated_ubuntu": "pass: fresh install, relay field, service users and private state, unpaired client stopped, relay install and nginx -t",
+    "latest_log": "/tmp/keyvalet-w9-20261012/install-latest-acceptance.log",
+    "removal": "pass: owned services/config/hooks removed; queues/certificates/accounts retained",
+    "host_existing_vault": "untouched",
+    "machine_shutdown": "stopped own systemd-nspawn machine; host KeyValet remains active"
+  }
+}

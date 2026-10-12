@@ -1,0 +1,14 @@
+[
+  {"argv":["remote"],"code":"invalid_argument","exit_code":2},
+  {"argv":["remote","srv","mode","remember:0h"],"code":"invalid_argument","exit_code":2},
+  {"argv":["remote","srv","allow","--all","--standing","--until","1h"],"code":"invalid_argument","exit_code":2},
+  {"argv":["remote","srv","unattended","--until","7d"],"code":"invalid_argument","exit_code":2},
+  {"argv":["remote","srv","unattended","--include-sensitive"],"code":"invalid_argument","exit_code":2},
+  {"argv":["remote","srv","unattended","--include-sensitive","--until","7d","--yes"],"code":"invalid_argument","exit_code":2},
+  {"argv":["devices","list","--json","--json"],"code":"invalid_argument","exit_code":2},
+  {"argv":["devices","revoke","*"],"code":"invalid_argument","exit_code":2},
+  {"argv":["approve","approval_test","--scope","remember:2h"],"code":"invalid_argument","exit_code":2},
+  {"argv":["relay","install","--public-url","https://relay.example.com","--listen","0.0.0.0:8787"],"code":"invalid_argument","exit_code":2},
+  {"argv":["relay","set-url","https://user:password@relay.example.com"],"code":"invalid_argument","exit_code":2},
+  {"argv":["pair","kv-pair://relay.example.com/AAAAAAAAAAAAAAAAAAAAAAAAAB"],"code":"invalid_argument","exit_code":2}
+]

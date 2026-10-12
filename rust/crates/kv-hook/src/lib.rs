@@ -19,6 +19,11 @@
 //!   kv-hook grok-tool      Grok Build `PreToolUse`.
 //!   kv-hook devin-tool     Devin CLI `PreToolUse`.
 //!   kv-hook codex-tool     Codex `PreToolUse` (`~/.codex/hooks.json`).
+//!   kv-hook stop           Claude Code `Stop` (also `claude-stop`).
+//!   kv-hook devin-stop     Devin CLI `Stop`.
+//!   kv-hook codex-stop     Codex TUI `Stop`.
+//!   kv-hook cursor-stop    Cursor `stop`.
+//!   kv-hook gemini-after-agent Gemini CLI `AfterAgent` (also `gemini-stop`).
 //!
 //! Cursor and Grok each get their own mode(s), not a translation of `prompt`/`tool`'s output,
 //! because neither speaks Claude Code's `hookSpecificOutput` shape even though both can *load*
@@ -60,6 +65,7 @@
 use regex::Regex;
 use serde_json::Value;
 use std::collections::HashSet;
+pub mod stop;
 
 /// A known key format -> KeyValet template. Order matters: more specific prefixes are listed
 /// before broader, more ambiguous ones, and a pattern that matches first "claims" that text so a

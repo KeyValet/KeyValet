@@ -4,6 +4,28 @@ $ErrorActionPreference = 'Stop'
 $admin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 if (!$admin) { throw 'Run uninstall.ps1 in an elevated PowerShell terminal.' }
 $install = 'C:\Program Files\KeyValet'
+$relay = Get-Service KeyValetRelay -ErrorAction SilentlyContinue
+if ($relay) {
+    $configuration = Get-CimInstance Win32_Service -Filter "Name='KeyValetRelay'"
+    if ($configuration.PathName.Trim() -ine ('"' + "$install\bin\kv-relay-client.exe" + '" --service') -or
+        $configuration.StartName -ine 'NT SERVICE\KeyValetRelay') { throw 'Unexpected relay service configuration.' }
+    $relayProcess = $null
+    if ($configuration.ProcessId -gt 0) {
+        $relayProcess = [Diagnostics.Process]::GetProcessById($configuration.ProcessId)
+        [void]$relayProcess.Handle
+    }
+    if ($relay.Status -ne 'Stopped') {
+        Stop-Service KeyValetRelay -Force
+        $relay.WaitForStatus('Stopped', [TimeSpan]::FromSeconds(20))
+    }
+    if ($relayProcess) {
+        try { if (!$relayProcess.WaitForExit(20000)) { throw 'The stopped relay process has not exited; installation files were not removed.' } }
+        finally { $relayProcess.Dispose() }
+    }
+    $relay.Dispose()
+    & 'C:\Windows\System32\sc.exe' delete KeyValetRelay | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw 'Relay service removal failed.' }
+}
 $service = Get-Service KeyValetHelper -ErrorAction SilentlyContinue
 if ($service) {
     $configuration = Get-CimInstance Win32_Service -Filter "Name='KeyValetHelper'"

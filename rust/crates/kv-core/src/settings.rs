@@ -46,7 +46,7 @@ impl GrantMode {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct Settings {
     pub grant_mode: GrantMode,
     /// Duration of remember mode in hours; 0 means forever.
@@ -54,6 +54,65 @@ pub struct Settings {
     /// Timestamp (ms since epoch) until which this remember period stays active; `None` when not
     /// remembered or already cleared.
     pub remember_until: Option<f64>,
+}
+
+/// A daemon may install one authoritative settings store for its credential vault.
+pub trait SettingsBackend: Send + Sync {
+    fn read(&self) -> std::io::Result<Settings>;
+    fn compare_and_write(&self, expected: &Settings, next: &Settings) -> std::io::Result<bool>;
+}
+
+type Backends = std::collections::HashMap<PathBuf, (u64, std::sync::Arc<dyn SettingsBackend>)>;
+fn backends() -> &'static std::sync::Mutex<Backends> {
+    static BACKENDS: std::sync::OnceLock<std::sync::Mutex<Backends>> = std::sync::OnceLock::new();
+    BACKENDS.get_or_init(Default::default)
+}
+
+pub struct SettingsBinding {
+    path: PathBuf,
+    id: u64,
+}
+impl Drop for SettingsBinding {
+    fn drop(&mut self) {
+        if let Ok(mut backends) = backends().lock() {
+            if backends
+                .get(&self.path)
+                .is_some_and(|(id, _)| *id == self.id)
+            {
+                backends.remove(&self.path);
+            }
+        }
+    }
+}
+
+pub fn install_backend(
+    path: &Path,
+    backend: std::sync::Arc<dyn SettingsBackend>,
+) -> std::io::Result<SettingsBinding> {
+    static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
+    let mut backends = backends()
+        .lock()
+        .map_err(|_| std::io::Error::other("settings unavailable"))?;
+    if backends.contains_key(path) {
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::AlreadyExists,
+            "settings backend already installed",
+        ));
+    }
+    let id = NEXT.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+    backends.insert(path.to_owned(), (id, backend));
+    Ok(SettingsBinding {
+        path: path.to_owned(),
+        id,
+    })
+}
+
+fn backend(path: &Path) -> std::io::Result<Option<std::sync::Arc<dyn SettingsBackend>>> {
+    Ok(backends()
+        .lock()
+        .map_err(|_| std::io::Error::other("settings unavailable"))?
+        .get(path)
+        .map(|(_, backend)| backend.clone()))
 }
 
 const DEFAULTS: Settings = Settings {
@@ -126,6 +185,23 @@ struct RawSettings {
 }
 
 pub fn read_settings(vault_dir: &Path) -> Settings {
+    match backend(vault_dir) {
+        Ok(Some(backend)) => {
+            return backend.read().unwrap_or(Settings {
+                grant_mode: GrantMode::PerUse,
+                remember_hours: 0.0,
+                remember_until: None,
+            })
+        }
+        Err(_) => {
+            return Settings {
+                grant_mode: GrantMode::PerUse,
+                remember_hours: 0.0,
+                remember_until: None,
+            }
+        }
+        Ok(None) => {}
+    }
     let Ok(raw) = std::fs::read_to_string(file(vault_dir)) else {
         return DEFAULTS;
     };
@@ -172,6 +248,13 @@ fn lock_settings(vault_dir: &Path) -> std::io::Result<std::fs::File> {
 }
 
 pub fn write_settings(vault_dir: &Path, s: &Settings) -> std::io::Result<()> {
+    if let Some(backend) = backend(vault_dir)? {
+        let current = backend.read()?;
+        if !backend.compare_and_write(&current, s)? {
+            return Err(std::io::Error::other("settings changed"));
+        }
+        return Ok(());
+    }
     let _lock = lock_settings(vault_dir)?;
     write_settings_locked(vault_dir, s)
 }
@@ -183,6 +266,9 @@ pub fn compare_and_write_settings(
     expected: &Settings,
     next: &Settings,
 ) -> std::io::Result<bool> {
+    if let Some(backend) = backend(vault_dir)? {
+        return backend.compare_and_write(expected, next);
+    }
     let _lock = lock_settings(vault_dir)?;
     if read_settings(vault_dir) != *expected {
         return Ok(false);
@@ -210,10 +296,40 @@ fn write_settings_locked(vault_dir: &Path, s: &Settings) -> std::io::Result<()> 
     kv_platform::linux::inherit_private_owner(tmp.path())?;
     tmp.write_all(body.as_bytes())?;
     tmp.as_file().sync_all()?;
-    tmp.persist(file(vault_dir)).map_err(|e| e.error)?;
+    persist_settings(tmp, &file(vault_dir))?;
     #[cfg(unix)]
     std::fs::File::open(vault_dir)?.sync_all()?;
     Ok(())
+}
+
+fn persist_settings(tmp: tempfile::NamedTempFile, path: &Path) -> std::io::Result<()> {
+    #[cfg(not(windows))]
+    {
+        tmp.persist(path).map_err(|error| error.error)?;
+        Ok(())
+    }
+    #[cfg(windows)]
+    {
+        // A reader can briefly keep a replaced destination pending deletion on Windows.
+        // Retry the atomic replacement while retaining the original private temporary file.
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(1);
+        let mut tmp = tmp;
+        loop {
+            match tmp.persist(path) {
+                Ok(_) => return Ok(()),
+                Err(error) => {
+                    if matches!(error.error.raw_os_error(), Some(5 | 32 | 33))
+                        && std::time::Instant::now() < deadline
+                    {
+                        tmp = error.file;
+                        std::thread::sleep(std::time::Duration::from_millis(2));
+                    } else {
+                        return Err(error.error);
+                    }
+                }
+            }
+        }
+    }
 }
 
 #[cfg(test)]

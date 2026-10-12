@@ -36,6 +36,7 @@ chown -R root:root "$NEXT"
 chmod -R u=rwX,go=rX "$NEXT"
 chmod 0755 "$NEXT" "$NEXT/bin/"*
 systemctl stop keyvalet.service 2>/dev/null || true
+systemctl stop keyvalet-peer.service 2>/dev/null || true
 if [ -e "$INSTALL_DIR" ]; then
   [ -d "$INSTALL_DIR" ] || { echo 'Install path is not a directory' >&2; exit 1; }
   rm -rf "$INSTALL_DIR.old"
@@ -48,7 +49,9 @@ chown root:root /etc/keyvalet/owner.uid
 chmod 0644 /etc/keyvalet/owner.uid
 install -o root -g root -m 0644 "$STAGE/dev.keyvalet.policy" /usr/share/polkit-1/actions/dev.keyvalet.policy
 install -o root -g root -m 0644 "$STAGE/keyvalet.service" /etc/systemd/system/keyvalet.service
+install -o root -g root -m 0644 "$STAGE/keyvalet-peer.service" /etc/systemd/system/keyvalet-peer.service
 systemctl daemon-reload
+systemctl enable --now keyvalet-peer.service
 systemctl enable --now keyvalet.service
 systemctl is-active --quiet keyvalet.service
 rm -rf "$INSTALL_DIR.old"

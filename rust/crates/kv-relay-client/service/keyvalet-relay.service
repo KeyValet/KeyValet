@@ -1,0 +1,34 @@
+[Unit]
+Description=KeyValet remote approval relay client
+After=network-online.target keyvalet.service
+Wants=network-online.target
+Requires=keyvalet.service
+
+[Service]
+Type=simple
+User=keyvalet-relay
+Group=keyvalet-relay
+ExecStart=/usr/local/lib/keyvalet/bin/kv-relay-client
+StateDirectory=keyvalet-relay
+StateDirectoryMode=0700
+UMask=0077
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=15
+LimitCORE=0
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+NoNewPrivileges=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+CapabilityBoundingSet=
+AmbientCapabilities=
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictNamespaces=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+
+[Install]
+WantedBy=multi-user.target

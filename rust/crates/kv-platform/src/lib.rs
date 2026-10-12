@@ -7,9 +7,14 @@
 pub mod agent;
 #[cfg(windows)]
 pub mod agent_process;
+pub mod device_key;
 #[cfg(target_os = "macos")]
 pub mod enclave;
 pub mod fs;
+pub mod presence;
+#[cfg(any(target_os = "linux", all(target_os = "macos", test)))]
+mod remote_process;
+pub use kv_ipc::remote::{DeviceKeyProvider, PresenceProbe};
 #[cfg(target_os = "linux")]
 pub mod linux;
 #[cfg(target_os = "macos")]
@@ -25,6 +30,8 @@ pub mod peer;
 #[cfg(windows)]
 #[path = "peer_windows.rs"]
 pub mod peer;
+#[cfg(target_os = "linux")]
+pub mod peer_broker;
 #[cfg(windows)]
 pub mod pipe;
 pub mod protection;

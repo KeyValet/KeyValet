@@ -62,6 +62,27 @@ jobs:
           if ('${{ inputs.signed }}' -eq 'true') { $options.SigningCertificateThumbprint = $env:WINDOWS_CERT_THUMBPRINT }
           else { $options.AllowUnsigned = $true }
           ./scripts/package-windows.ps1 @options
+          $package = "dist/keyvalet-$env:PACKAGE_TAG-windows-${{ matrix.architecture }}"
+          foreach ($binary in 'kv-server','kv-relay-client') {
+            $source = "rust/target/${{ matrix.target }}/release/$binary.exe"
+            if (!(Test-Path -LiteralPath $source)) { throw "Missing remote artifact: $binary" }
+            Copy-Item -LiteralPath $source "$package/bin/" -Force
+            if ('${{ inputs.signed }}' -eq 'true') {
+              $certificate = Get-Item "Cert:\CurrentUser\My\$env:WINDOWS_CERT_THUMBPRINT"
+              $signature = Set-AuthenticodeSignature -FilePath "$package/bin/$binary.exe" -Certificate $certificate -HashAlgorithm SHA256 -TimestampServer 'http://timestamp.digicert.com'
+              if ($signature.Status -ne 'Valid') { throw "Remote binary signing failed: $binary" }
+              $verified = Get-AuthenticodeSignature "$package/bin/$binary.exe"
+              if ($verified.Status -ne 'Valid' -or $verified.SignerCertificate.GetNameInfo([Security.Cryptography.X509Certificates.X509NameType]::SimpleName, $false) -cne 'Simvito Limited') { throw 'Unexpected remote signing publisher.' }
+            }
+          }
+          New-Item "$package/service/relay-client" -ItemType Directory -Force | Out-Null
+          Copy-Item rust/crates/kv-relay-client/service/* "$package/service/relay-client/" -Force
+          $zip = "$package.zip"
+          Remove-Item -LiteralPath $zip -Force
+          Compress-Archive -LiteralPath $package -DestinationPath $zip
+          $name = Split-Path $zip -Leaf
+          $digest = (Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash.ToLowerInvariant()
+          [IO.File]::WriteAllText("dist/SHA256SUMS-windows-${{ matrix.architecture }}", "$digest  $name`n", [Text.UTF8Encoding]::new($false))
       - uses: actions/upload-artifact@v4
         with:
           name: keyvalet-${{ env.PACKAGE_TAG }}-windows-${{ matrix.architecture }}

@@ -9,6 +9,22 @@ pub fn status(vault: &Vault) -> kv_vault::Result<Value> {
     let mut report = serde_json::to_value(&protection)?;
     report["key_protection"] = describe(&protection);
     report["tpm"] = detect_tpm();
+    #[cfg(windows)]
+    {
+        let keys = crate::device_key::windows::identity_key_status();
+        let state = |field: &str| match keys[field].as_bool() {
+            Some(true) => "present",
+            Some(false) => "absent",
+            None => "unknown",
+        };
+        let summary = report["key_protection"]["summary"].as_str().unwrap_or("");
+        report["key_protection"]["summary"] = json!(format!(
+            "{summary} PCP DK: pcp_ecdh={}, pcp_ecdsa={}.",
+            state("pcp_ecdh"),
+            state("pcp_ecdsa")
+        ));
+        report["remote_identity"] = keys;
+    }
     Ok(report)
 }
 
@@ -766,6 +782,7 @@ mod tests {
         future["key_protection"]["scheme"] = json!("future_provider");
         future["key_protection"]["hardware"] = json!("unknown");
         future["key_protection"]["authentication"] = json!("future_auth");
+        future["key_protection"]["summary"] = json!("Future provider metadata is unconfirmed.");
         let summary = summary(&future);
         assert!(!summary.contains("Uninitialized") && !summary.contains("尚未初始化"));
         assert!(

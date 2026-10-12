@@ -81,6 +81,7 @@ impl Server {
                 account: Option<String>,
                 scope: Option<String>,
             }
+            p.insert("frontend_host".into(), json!(host));
             let tok: Tok = s.request("accessToken", p).await?;
             let Some(username) = a.username.clone().or_else(|| tok.account.clone()) else {
                 return Err(kv_i18n::t("无法确定邮箱地址：请传 username，或在授权 scope 中包含 openid email。", "Cannot determine the email address: pass username, or include openid email in the authorization scopes."));

@@ -23,8 +23,24 @@ pub trait DeviceKeyProvider {
     fn sign(&self, alg: SignatureAlgorithm, payload: &[u8]) -> Result<Vec<u8>>;
     fn ecdh(&self, peer_pub: &[u8]) -> Result<Zeroizing<[u8; 32]>>;
     fn public_jwk(&self) -> Result<PublicJwk>;
+    fn identity_sign_jwk(&self) -> Result<Option<PublicJwk>> {
+        Ok(None)
+    }
     fn presence_kind(&self) -> PresenceKind;
     fn key_kind(&self) -> KeyKind;
+}
+
+/// The metadata vault uses a separate KDF domain and a public, randomly generated peer point.
+pub fn metadata_master_key(
+    identity: &dyn DeviceKeyProvider,
+    peer: &[u8],
+) -> Result<Zeroizing<[u8; 32]>> {
+    let shared = identity.ecdh(peer)?;
+    let mut output = Zeroizing::new([0u8; 32]);
+    hkdf::Hkdf::<Sha256>::new(None, shared.as_ref())
+        .expand(b"keyvalet/remote-metadata/master/v1", output.as_mut())
+        .map_err(|_| RemoteError::InvalidKey)?;
+    Ok(output)
 }
 
 // CONTRACT: §3.1 / §13.1: this adapter lets kv-platform implement the IPC-level hardware interface.
@@ -38,6 +54,12 @@ impl<T: kv_ipc::remote::DeviceKeyProvider + ?Sized> DeviceKeyProvider for T {
     fn public_jwk(&self) -> Result<PublicJwk> {
         let jwk = kv_ipc::remote::DeviceKeyProvider::public_jwk(self).map_err(provider_error)?;
         serde_json::from_value(jwk).map_err(|_| RemoteError::InvalidKey)
+    }
+    fn identity_sign_jwk(&self) -> Result<Option<PublicJwk>> {
+        kv_ipc::remote::DeviceKeyProvider::identity_sign_jwk(self)
+            .map_err(provider_error)?
+            .map(|jwk| serde_json::from_value(jwk).map_err(|_| RemoteError::InvalidKey))
+            .transpose()
     }
     fn presence_kind(&self) -> PresenceKind {
         let kind = kv_ipc::remote::DeviceKeyProvider::presence_kind(self);
@@ -82,9 +104,23 @@ enum SoftwareKey {
 
 pub struct SoftwareDeviceKey(SoftwareKey);
 
+pub struct SoftwareDeviceKeyProvider(SoftwareDeviceKey);
+
 impl SoftwareDeviceKey {
+    /// Adapt an explicitly selected software key to the lower-layer hardware interface.
+    pub fn into_provider(self) -> SoftwareDeviceKeyProvider {
+        SoftwareDeviceKeyProvider(self)
+    }
+
     pub fn generate_p256() -> Self {
         Self(SoftwareKey::P256(p256::SecretKey::random(&mut OsRng)))
+    }
+
+    /// Provision explicit software identity material for storage inside an authenticated vault.
+    pub fn generate_p256_material() -> (Self, Zeroizing<[u8; 32]>) {
+        let key = p256::SecretKey::random(&mut OsRng);
+        let bytes = Zeroizing::new(key.to_bytes().into());
+        (Self(SoftwareKey::P256(key)), bytes)
     }
 
     pub fn from_p256_bytes(bytes: &[u8]) -> Result<Self> {
@@ -106,6 +142,47 @@ impl SoftwareDeviceKey {
             return Err(RemoteError::InvalidKey);
         }
         Ok(Self(SoftwareKey::Rsa(Box::new(key))))
+    }
+}
+
+// CONTRACT: §13.1 / Appendix F: consumers share the IPC provider without a core dependency cycle.
+impl kv_ipc::remote::DeviceKeyProvider for SoftwareDeviceKeyProvider {
+    fn sign(
+        &self,
+        alg: SignatureAlgorithm,
+        payload: &[u8],
+    ) -> std::result::Result<Vec<u8>, kv_ipc::remote::DeviceKeyError> {
+        DeviceKeyProvider::sign(&self.0, alg, payload).map_err(software_provider_error)
+    }
+
+    fn ecdh(
+        &self,
+        peer_pub: &[u8],
+    ) -> std::result::Result<Zeroizing<[u8; 32]>, kv_ipc::remote::DeviceKeyError> {
+        DeviceKeyProvider::ecdh(&self.0, peer_pub).map_err(software_provider_error)
+    }
+
+    fn public_jwk(&self) -> std::result::Result<serde_json::Value, kv_ipc::remote::DeviceKeyError> {
+        let jwk = DeviceKeyProvider::public_jwk(&self.0).map_err(software_provider_error)?;
+        serde_json::to_value(jwk).map_err(|_| kv_ipc::remote::DeviceKeyError::InvalidKey)
+    }
+
+    fn presence_kind(&self) -> &str {
+        "none"
+    }
+
+    fn key_kind(&self) -> &str {
+        "software"
+    }
+}
+
+fn software_provider_error(error: RemoteError) -> kv_ipc::remote::DeviceKeyError {
+    use kv_ipc::remote::DeviceKeyError;
+    match error {
+        RemoteError::InvalidKey | RemoteError::InvalidEncoding => DeviceKeyError::InvalidKey,
+        RemoteError::UnsupportedAlgorithm => DeviceKeyError::UnsupportedAlgorithm,
+        RemoteError::KeyUnavailable => DeviceKeyError::Unavailable,
+        _ => DeviceKeyError::OperationFailed,
     }
 }
 
@@ -263,6 +340,46 @@ pub fn verify_signature(
     }
 }
 
+/// K1: a present dk_sig is authoritative. Malformed/null/unsupported keys never use dk_pub.
+pub fn identity_verifying_jwk(device: &DeviceRecord) -> Result<&PublicJwk> {
+    let public = match &device.dk_sig {
+        Optional::Missing => &device.dk_pub,
+        Optional::Value(key) if key.alg == SignatureAlgorithm::ES256 => &key.r#pub,
+        Optional::Value(_) => return Err(RemoteError::UnsupportedAlgorithm),
+        Optional::Null => return Err(RemoteError::InvalidKey),
+    };
+    p256_public_sec1(public)?;
+    Ok(public)
+}
+
+/// Verify every device identity signature using the authenticated device record.
+pub fn verify_identity_signature(
+    device: &DeviceRecord,
+    payload: &[u8],
+    signature: &[u8],
+) -> Result<()> {
+    verify_signature(
+        SignatureAlgorithm::ES256,
+        identity_verifying_jwk(device)?,
+        payload,
+        signature,
+    )
+}
+
+/// Pin both HPKE and identity signing keys when reopening authenticated provider metadata.
+pub fn verify_identity_provider(
+    device: &DeviceRecord,
+    provider: &dyn DeviceKeyProvider,
+) -> Result<()> {
+    identity_verifying_jwk(device)?;
+    if provider.public_jwk()? != device.dk_pub
+        || provider.identity_sign_jwk()?.as_ref() != device.dk_sig.as_value().map(|key| &key.r#pub)
+    {
+        return Err(RemoteError::WrongSender);
+    }
+    Ok(())
+}
+
 pub fn sign_object<T: serde::Serialize>(
     value: &T,
     alg: SignatureAlgorithm,
@@ -284,4 +401,121 @@ pub fn verify_object<T: serde::Serialize>(
         &super::canonical::signed_payload(value)?,
         &decode_b64(signature)?,
     )
+}
+
+#[cfg(test)]
+mod identity_tests {
+    use super::*;
+    use super::super::canonical::{from_json, jcs, sha256_hex};
+    use serde_json::{json, Value};
+
+    fn fixture(name: &str) -> Value {
+        let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("testdata/remote").join(name);
+        from_json(&std::fs::read(path).unwrap()).unwrap()
+    }
+    fn record(value: &Value) -> DeviceRecord {
+        serde_json::from_value(value.clone()).unwrap()
+    }
+    fn outcome(result: Result<()>) -> Value {
+        match result {
+            Ok(()) => json!({"ok":true}),
+            Err(error) => json!({"error":error.code()}),
+        }
+    }
+
+    #[test]
+    fn device_record_with_dk_sig_vectors() {
+        for name in ["device_record_with_dk_sig_valid.json", "device_record_with_dk_sig_legacy.json"] {
+            let vector = fixture(name);
+            let device = record(&vector["device"]);
+            let bytes = jcs(&device).unwrap();
+            assert_eq!(String::from_utf8(bytes.clone()).unwrap(), vector["expect"]["canonical"], "{name}");
+            if let Some(expected) = vector["expect"].get("digest") {
+                assert_eq!(sha256_hex(&bytes), *expected, "{name}");
+            }
+            let payload = jcs(&vector["proof"]).unwrap();
+            let signature = decode_b64(vector["sig"].as_str().unwrap()).unwrap();
+            assert_eq!(outcome(verify_identity_signature(&device, &payload, &signature)), json!({"ok":vector["expect"]["ok"]}), "{name}");
+            assert_eq!(serde_json::to_value(&device).unwrap(), vector["device"], "{name}");
+        }
+        let vector = fixture("device_record_with_dk_sig_wrong_dk.json");
+        let device = record(&vector["device"]);
+        let payload = vector["payload"].as_str().unwrap().as_bytes();
+        let signature = decode_b64(vector["sig"].as_str().unwrap()).unwrap();
+        assert_eq!(verify_identity_signature(&device, payload, &signature).is_ok(), vector["expect"]["identity_ok"]);
+        assert_eq!(verify_signature(SignatureAlgorithm::ES256, &device.dk_pub, payload, &signature).unwrap_err().code(), vector["expect"]["dk_error"]);
+        let vector = fixture("device_record_with_dk_sig_tampered.json");
+        assert_eq!(outcome(verify_identity_signature(&record(&vector["device"]), &jcs(&vector["proof"]).unwrap(), &decode_b64(vector["sig"].as_str().unwrap()).unwrap())), vector["expect"]);
+    }
+
+    #[test]
+    fn device_record_with_dk_sig_envelope_keeps_hpke_key_and_legacy_vectors() {
+        let vector = fixture("device_record_with_dk_sig_envelope.json");
+        let keys = fixture("test_keys.json");
+        let recipient = SoftwareDeviceKey::from_p256_bytes(&decode_b64(keys["recipient"]["private_scalar"].as_str().unwrap()).unwrap()).unwrap();
+        let sender = record(&vector["sender"]);
+        let envelope: super::super::Envelope = serde_json::from_value(vector["envelope"].clone()).unwrap();
+        assert_eq!(super::super::envelope::verify(&envelope, &sender.dk_pub).unwrap_err().code(), vector["expect"]["dk_error"]);
+        let opened = super::super::envelope::open(&envelope, vector["recipient"]["device_id"].as_str().unwrap(), &recipient, &sender, vector["now"].as_i64().unwrap());
+        assert_eq!(opened.is_ok(), vector["expect"]["open_ok"]);
+        assert_eq!(String::from_utf8(opened.unwrap().to_vec()).unwrap(), vector["expect"]["plaintext"]);
+    }
+
+    #[test]
+    fn present_invalid_identity_key_never_uses_dk_or_approval_keys() {
+        let vector = fixture("device_record_with_dk_sig_valid.json");
+        let mut device = record(&vector["device"]);
+        let keys = fixture("test_keys.json");
+        let dk = SoftwareDeviceKey::from_p256_bytes(&decode_b64(keys["recipient"]["private_scalar"].as_str().unwrap()).unwrap()).unwrap();
+        let payload = b"identity challenge";
+        let dk_signature = DeviceKeyProvider::sign(&dk, SignatureAlgorithm::ES256, payload).unwrap();
+        assert!(verify_identity_signature(&device, payload, &dk_signature).is_err());
+        let valid = device.dk_sig.clone();
+        device.dk_sig = Optional::Null;
+        assert!(verify_identity_signature(&device, payload, &dk_signature).is_err());
+        device.dk_sig = valid.clone();
+        if let Optional::Value(key) = &mut device.dk_sig { key.alg = SignatureAlgorithm::RS256; }
+        assert!(verify_identity_signature(&device, payload, &dk_signature).is_err());
+        device.dk_sig = valid.clone();
+        if let Optional::Value(key) = &mut device.dk_sig { key.r#pub = serde_json::from_value(keys["rsa_public_jwk"].clone()).unwrap(); }
+        assert!(verify_identity_signature(&device, payload, &dk_signature).is_err());
+        device.dk_sig = valid;
+        if let Optional::Value(key) = &mut device.dk_sig { key.r#pub.extra.insert("d".into(), json!("private")); }
+        assert!(verify_identity_signature(&device, payload, &dk_signature).is_err());
+        device.dk_sig = Optional::Missing;
+        verify_identity_signature(&device, payload, &dk_signature).unwrap();
+    }
+
+    #[test]
+    fn dk_sig_schema_covers_nested_device_records_and_preserves_extensions() {
+        let vector = fixture("device_record_with_dk_sig_valid.json");
+        for (schema, value) in [
+            ("device_record", vector["device"].clone()),
+            ("register_device_request", vector["device"].clone()),
+            ("relay_pair_start_request", json!({"token_hash":"0".repeat(64),"initiator":vector["device"],"exp":1760200600})),
+            ("relay_pair_complete_request", json!({"token":"A".repeat(22),"joiner":vector["device"]})),
+        ] {
+            let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join("schemas/remote").join(format!("{schema}.schema.json"));
+            let document: Value = serde_json::from_slice(&std::fs::read(path).unwrap()).unwrap();
+            let validator = jsonschema::draft7::new(&document).unwrap();
+            assert!(validator.is_valid(&value), "{schema}");
+        }
+        let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("schemas/remote/device_record.schema.json");
+        let document: Value = serde_json::from_slice(&std::fs::read(path).unwrap()).unwrap();
+        let validator = jsonschema::draft7::new(&document).unwrap();
+        for bad in [Value::Null, json!({"pub":vector["device"]["dk_pub"],"alg":"RS256"}), json!({"pub":fixture("test_keys.json")["rsa_public_jwk"],"alg":"ES256"})] {
+            let mut device = vector["device"].clone();
+            device["dk_sig"] = bad;
+            assert!(!validator.is_valid(&device));
+        }
+        let a = record(&vector["device"]);
+        let mut b = a.clone();
+        b.dk_sig = Optional::Missing;
+        assert!(!super::super::validation::same_device_authority(&a, &b));
+        b = a.clone();
+        if let Optional::Value(key) = &mut b.dk_sig { key.extra.insert("future_key".into(), json!({"binding":"tampered"})); }
+        assert!(!super::super::validation::same_device_authority(&a, &b));
+    }
 }

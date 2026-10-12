@@ -1,0 +1,13 @@
+rust_input: crate::api
+rust_root: ../rust/target-w8/verification/crates/kv-mobile-core
+rust_output: ../rust/target-w8/verification/crates/kv-mobile-core/src/frb_generated.rs
+dart_output: lib/src/rust
+dart_root: .
+web: false
+full_dep: false
+add_mod_to_lib: false
+build_runner: false
+deps_check: false
+auto_upgrade_dependency: false
+type_64bit_int: true
+stop_on_error: true

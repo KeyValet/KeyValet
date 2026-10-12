@@ -4,6 +4,8 @@ set -eu
 [ "$(uname -s)" = Linux ] || exit 1
 case "${1:-}" in ''|--purge) ;; *) echo 'usage: uninstall.sh [--purge]' >&2; exit 1 ;; esac
 sudo systemctl disable --now keyvalet.service 2>/dev/null || true
+sudo systemctl disable --now keyvalet-peer.service 2>/dev/null || true
+sudo rm -f /etc/systemd/system/keyvalet-peer.service
 sudo rm -f /etc/systemd/system/keyvalet.service /usr/share/polkit-1/actions/dev.keyvalet.policy /usr/local/bin/keyvalet
 sudo rm -rf /usr/local/lib/keyvalet
 sudo systemctl daemon-reload

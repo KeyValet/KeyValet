@@ -1,0 +1,12 @@
+{
+  "runtime": "devin",
+  "command": [
+    "devin",
+    "-p",
+    "Reply only HI. Do not use any tool."
+  ],
+  "elapsed_s": 1.082,
+  "exit": 1,
+  "supervised_end": false,
+  "cwd": "/var/folders/0h/p1772ckx3yq8qn5sqb_wpg_40000gn/T/keyvalet-r2d-login-393vlek6"
+}

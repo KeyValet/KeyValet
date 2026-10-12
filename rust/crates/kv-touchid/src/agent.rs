@@ -189,6 +189,54 @@ pub fn handle_request(
 ) -> (Value, Option<(wire::EnclavePayload, usize)>) {
     let id = v.get("id").and_then(Value::as_u64).unwrap_or(0);
     match v.get("op").and_then(Value::as_str) {
+        Some("device_key") => {
+            if v["operation"] == "capabilities" {
+                return (
+                    wire::reply(
+                        id,
+                        &[
+                            ("ok", json!(true)),
+                            (
+                                "device_key_protocol",
+                                json!(kv_platform::device_key::agent::DEVICE_KEY_PROTOCOL),
+                            ),
+                        ],
+                    ),
+                    None,
+                );
+            }
+            let input = serde_json::to_vec(v).unwrap_or_default();
+            if input.len() > kv_platform::device_key::agent::MAX_DEVICE_REQUEST_BYTES {
+                return (
+                    wire::reply(id, &[("ok", json!(false)), ("error", json!("invalid_key"))]),
+                    None,
+                );
+            }
+            let mut payload: wire::EnclavePayload =
+                Zeroizing::new([0u8; wire::MAX_ENCLAVE_PAYLOAD + 1]);
+            match runner.run_capture(
+                TOUCHID_BIN,
+                &["--device-key"],
+                Some(&input),
+                AUTH_TIMEOUT,
+                &mut payload[..],
+            ) {
+                Ok((Some(0), n, false)) if (5..=wire::MAX_ENCLAVE_PAYLOAD).contains(&n) => (
+                    wire::reply(id, &[("ok", json!(true)), ("len", json!(n))]),
+                    Some((payload, n)),
+                ),
+                _ => (
+                    wire::reply(
+                        id,
+                        &[
+                            ("ok", json!(false)),
+                            ("error", json!("key_operation_failed")),
+                        ],
+                    ),
+                    None,
+                ),
+            }
+        }
         Some("authenticate") => {
             let reason = s(v, "reason");
             let cancel = s(v, "cancel");
@@ -311,12 +359,26 @@ fn read_line_capped(reader: &mut impl BufRead) -> io::Result<Option<String>> {
 }
 
 fn serve(reader: &mut impl BufRead, writer: &mut UnixStream) -> io::Result<()> {
-    let runner = ProcessRunner;
+    serve_with(reader, writer, &ProcessRunner)
+}
+fn serve_with(
+    reader: &mut impl BufRead,
+    writer: &mut impl Write,
+    runner: &dyn Runner,
+) -> io::Result<()> {
     while let Some(line) = read_line_capped(reader)? {
-        let Ok(v) = serde_json::from_str::<Value>(&line) else {
+        let Ok(mut v) = serde_json::from_str::<Value>(&line) else {
             continue;
         };
-        let (reply, payload) = handle_request(&v, &runner);
+        if let Some(length) = kv_platform::device_key::agent::input_length(&v)
+            .map_err(|_| io::Error::other("invalid device-key input length"))?
+        {
+            let mut input = Zeroizing::new(vec![0; length]);
+            reader.read_exact(&mut input)?;
+            v.as_object_mut().unwrap().remove("input_len");
+            v["data"] = json!(kv_platform::device_key::encode_b64(&input));
+        }
+        let (reply, payload) = handle_request(&v, runner);
         writer.write_all(&wire::encode_line(&reply))?;
         if let Some((buf, len)) = payload {
             writer.write_all(&buf[..len])?;
@@ -470,6 +532,135 @@ mod tests {
         let calls = fake.calls.lock().unwrap();
         assert_eq!(calls[0].0, TOUCHID_BIN);
         assert_eq!(calls[0].1[..2], ["--enclave", "derive"]);
+    }
+
+    #[test]
+    fn device_key_bridge_returns_only_bounded_binary_results_and_static_errors() {
+        let good = Fake {
+            calls: Mutex::new(vec![]),
+            code: Some(0),
+            stdout: vec![42; 64],
+        };
+        let (capability, payload) = handle_request(
+            &json!({"id":8,"op":"device_key","operation":"capabilities"}),
+            &good,
+        );
+        assert_eq!(
+            capability,
+            json!({"id":8,"ok":true,"device_key_protocol":1})
+        );
+        assert!(payload.is_none());
+        assert!(good.calls.lock().unwrap().is_empty());
+        let request =
+            json!({"id":9,"op":"device_key","role":"identity","operation":"sign","data":"AA"});
+        let (reply, payload) = handle_request(&request, &good);
+        assert_eq!(reply, json!({"id":9,"ok":true,"len":64}));
+        assert!(payload.is_some());
+        assert_eq!(good.calls.lock().unwrap()[0].1, ["--device-key"]);
+        let (reply, payload) = handle_request(
+            &json!({"id":9,"op":"device_key","data":"x".repeat(kv_platform::device_key::agent::MAX_DEVICE_REQUEST_BYTES)}),
+            &good,
+        );
+        assert_eq!(reply, json!({"id":9,"ok":false,"error":"invalid_key"}));
+        assert!(payload.is_none());
+        assert_eq!(good.calls.lock().unwrap().len(), 1);
+        for (code, stdout) in [
+            (Some(1), vec![42; 64]),
+            (Some(0), vec![42; 8193]),
+            (Some(0), vec![42; 4]),
+        ] {
+            let fake = Fake {
+                calls: Mutex::new(vec![]),
+                code,
+                stdout,
+            };
+            let (reply, payload) = handle_request(&request, &fake);
+            assert_eq!(
+                reply,
+                json!({"id":9,"ok":false,"error":"key_operation_failed"})
+            );
+            assert!(payload.is_none());
+        }
+    }
+
+    #[test]
+    fn device_input_stream_is_exact_and_truncated_or_ambiguous_input_is_rejected() {
+        struct InputRunner(Mutex<Vec<Value>>);
+        impl Runner for InputRunner {
+            fn run(
+                &self,
+                _: &str,
+                _: &[&str],
+                _: Option<&[u8]>,
+                _: Duration,
+            ) -> io::Result<RunOut> {
+                panic!("device-key requests use bounded capture");
+            }
+            fn run_capture(
+                &self,
+                _: &str,
+                args: &[&str],
+                input: Option<&[u8]>,
+                _: Duration,
+                output: &mut [u8],
+            ) -> io::Result<(Option<i32>, usize, bool)> {
+                assert_eq!(args, ["--device-key"]);
+                self.0
+                    .lock()
+                    .unwrap()
+                    .push(serde_json::from_slice(input.unwrap()).unwrap());
+                output[..5].copy_from_slice(&[0, 0, 0, 0, b'{']);
+                Ok((Some(0), 5, false))
+            }
+        }
+        let runner = InputRunner(Mutex::new(Vec::new()));
+        let input = vec![0, b'\n', 255];
+        let mut frames = b"malformed\n".to_vec();
+        frames.extend(wire::encode_line(
+            &json!({"id":1,"op":"device_key","operation":"sign","input_len":input.len()}),
+        ));
+        frames.extend_from_slice(&input);
+        frames.extend(wire::encode_line(
+            &json!({"id":2,"op":"device_key","operation":"capabilities"}),
+        ));
+        let mut output = Vec::new();
+        serve_with(&mut io::Cursor::new(frames), &mut output, &runner).unwrap();
+        let calls = runner.0.lock().unwrap();
+        assert_eq!(calls.len(), 1);
+        assert!(calls[0].get("input_len").is_none());
+        assert_eq!(
+            calls[0]["data"],
+            kv_platform::device_key::encode_b64(&input)
+        );
+        drop(calls);
+        let mut reader = BufReader::new(io::Cursor::new(output));
+        let reply: Value =
+            serde_json::from_str(&read_line_capped(&mut reader).unwrap().unwrap()).unwrap();
+        assert_eq!(reply, json!({"id":1,"ok":true,"len":5}));
+        let mut payload = [0; 5];
+        reader.read_exact(&mut payload).unwrap();
+        assert_eq!(payload, [0, 0, 0, 0, b'{']);
+        let reply: Value =
+            serde_json::from_str(&read_line_capped(&mut reader).unwrap().unwrap()).unwrap();
+        assert_eq!(reply, json!({"id":2,"ok":true,"device_key_protocol":1}));
+        for request in [
+            json!({"op":"device_key","input_len":1}),
+            json!({"op":"device_key","input_len":1,"data":"AA"}),
+        ] {
+            let error = serve_with(
+                &mut io::Cursor::new(wire::encode_line(&request)),
+                &mut Vec::new(),
+                &runner,
+            )
+            .unwrap_err();
+            assert!(matches!(
+                error.kind(),
+                io::ErrorKind::UnexpectedEof | io::ErrorKind::Other
+            ));
+        }
+        assert_eq!(runner.0.lock().unwrap().len(), 1);
+        let (mut writer, _peer) = UnixStream::pair().unwrap();
+        serve(&mut io::Cursor::new(Vec::<u8>::new()), &mut writer).unwrap();
     }
 
     #[test]

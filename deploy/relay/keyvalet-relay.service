@@ -1,0 +1,31 @@
+[Unit]
+Description=KeyValet encrypted remote approval relay
+After=network.target
+
+[Service]
+Type=simple
+User=keyvalet-relay-server
+Group=keyvalet-relay-server
+ExecStart=/usr/local/lib/keyvalet/kv-server --listen 127.0.0.1:8787 --data /var/lib/keyvalet-relay
+Restart=always
+RestartSec=3
+StateDirectory=keyvalet-relay
+StateDirectoryMode=0700
+UMask=0077
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+RestrictAddressFamilies=AF_INET AF_UNIX
+CapabilityBoundingSet=
+AmbientCapabilities=
+TimeoutStopSec=15
+
+[Install]
+WantedBy=multi-user.target

@@ -190,6 +190,32 @@ ENVELOPE = {**HEADER, "enc": b64(point(KEYS["ephemeral"])), "ct": b64(ct), "sig"
 write("envelope_roundtrip.json", {"keys": KEY_DATA, "header": HEADER, "sender": SERVER, "recipient": APPROVER, "plaintext": plaintext.decode(), "envelope": ENVELOPE, "now": NOW,
                                  "expect": {"aad": aad.decode(), "ciphertext_len": len(ct), "enc": ENVELOPE["enc"], "ct": ENVELOPE["ct"], "plaintext": plaintext.decode(), "signature_ok": True}})
 
+# K1: dedicated identity ECDSA key; all original keys/vectors above remain byte-identical.
+SPLIT_DEVICE = copy.deepcopy(APPROVER)
+SPLIT_DEVICE.update(os="windows", label="Windows fixture", dk_sig={"pub": pub(KEYS["wrong"]), "alg": "ES256", "future_key": {"binding": "signed"}})
+SPLIT_PROOF = {"action": "device_record", "device": SPLIT_DEVICE, "future_proof": {"v": 1}}
+split_payload = canonical(SPLIT_PROOF)
+split_signature = b64(sign_bytes(KEYS["wrong"], split_payload))
+write("device_record_with_dk_sig_valid.json", {"device": SPLIT_DEVICE, "proof": SPLIT_PROOF,
+    "payload": split_payload.decode(), "sig": split_signature,
+    "expect": {"ok": True, "canonical": canonical(SPLIT_DEVICE).decode(), "digest": hashlib.sha256(canonical(SPLIT_DEVICE)).hexdigest()}})
+write("device_record_with_dk_sig_wrong_dk.json", {"device": SPLIT_DEVICE, "payload": split_payload.decode(), "sig": split_signature,
+    "expect": {"identity_ok": True, "dk_error": "invalid_signature"}})
+changed = copy.deepcopy(SPLIT_PROOF)
+changed["device"]["dk_sig"]["future_key"]["binding"] = "tampered"
+write("device_record_with_dk_sig_tampered.json", {"device": SPLIT_DEVICE, "proof": changed, "sig": split_signature,
+    "expect": {"error": "invalid_signature"}})
+legacy_proof = {"action": "device_record", "device": APPROVER}
+write("device_record_with_dk_sig_legacy.json", {"device": APPROVER, "proof": legacy_proof, "sig": b64(sign_bytes(KEYS["recipient"], canonical(legacy_proof))),
+    "expect": {"ok": True, "canonical": canonical(APPROVER).decode()}})
+# Identity selection also applies to the envelope, independently of its HPKE recipient key.
+split_envelope = copy.deepcopy(ENVELOPE)
+split_envelope["sig"] = b64(sign_bytes(KEYS["wrong"], aad + ct))
+split_sender = copy.deepcopy(SERVER)
+split_sender["dk_sig"] = copy.deepcopy(SPLIT_DEVICE["dk_sig"])
+write("device_record_with_dk_sig_envelope.json", {"sender": split_sender, "recipient": APPROVER, "envelope": split_envelope, "now": NOW,
+    "expect": {"open_ok": True, "plaintext": plaintext.decode(), "dk_error": "invalid_signature"}})
+
 official_url = "https://raw.githubusercontent.com/cfrg/draft-irtf-cfrg-hpke/5f503c564da00b0687b3de75f1dfbdfc4079ad31/test-vectors.json"
 official_path = HERE / "rfc9180_p256_base.json"
 if official_path.exists():
@@ -239,7 +265,8 @@ obj("PublicJwk", {"kty": STRING, **{k: STRING for k in ["crv", "x", "y", "n", "e
     "not": {"anyOf": [{"required": [k]} for k in ["d", "p", "q", "dp", "dq", "qi", "oth", "k"]]}})
 obj("ApprovalKey", {"pub": ref("PublicJwk"), "alg": enum("ES256", "RS256")}, APPROVER["ak_q"])
 obj("Attestation", {"kind": STRING, "doc": {}}, {"kind": "future-attestation", "doc": {"opaque": "test"}, "future": 1})
-obj("DeviceRecord", {"device_id": STRING, "label": STRING, "os": STRING, "key_kind": STRING, "dk_pub": ref("PublicJwk"), "ak_q": nullable(ref("ApprovalKey")), "ak_s": nullable(ref("ApprovalKey")), "caps": array(STRING), "attestation": nullable(ref("Attestation"))}, APPROVER)
+identity_sign_schema = {"type": "object", "properties": {"pub": {"allOf": [ref("PublicJwk"), {"properties": {"kty": {"const": "EC"}, "crv": {"const": "P-256"}}}]}, "alg": {"const": "ES256"}}, "required": ["pub", "alg"], "additionalProperties": True}
+obj("DeviceRecord", {"device_id": STRING, "label": STRING, "os": STRING, "key_kind": STRING, "dk_pub": ref("PublicJwk"), "dk_sig": identity_sign_schema, "ak_q": nullable(ref("ApprovalKey")), "ak_s": nullable(ref("ApprovalKey")), "caps": array(STRING), "attestation": nullable(ref("Attestation"))}, APPROVER, ["dk_sig"])
 obj("Protection", {"kind": STRING, "attestation": nullable(ref("Attestation"))}, REQUEST["requester"]["protection"], ["attestation"])
 obj("Requester", {"device_id": STRING, "label": STRING, "os": STRING, "protection": ref("Protection")}, REQUEST["requester"])
 obj("Agent", {"runtime": STRING, "cwd": STRING, "user": STRING, "pid": U32}, REQUEST["agent"])
@@ -279,7 +306,7 @@ obj("SetClassArgs", {"name": STRING, "match": OBJECT, "exp_s": {"type": "integer
 obj("SetDeviceLabelArgs", {"label": STRING}, {"label": "srv"})
 obj("RevokeDeviceArgs", {"device_id": STRING}, {"device_id": "dev_mac"})
 obj("NotifyArgs", {"policy": enum("prefer-local", "always-phone", "both")}, {"policy": "always-phone"})
-obj("QueryAuditArgs", {"since": INT, "limit": {"type": "integer", "minimum": 0, "maximum": 200}}, {"since": NOW, "limit": 200})
+obj("QueryAuditArgs", {"since": INT, "limit": {"type": "integer", "minimum": 0, "maximum": 200}, "after": UINT, "through": UINT}, {"since": NOW, "limit": 200}, ["after","through"])
 obj("CancelApprovalArgs", {"approval_id": ULID}, {"approval_id": ID})
 OP_ARGS = {"set_mode": "SetModeArgs", "revoke_grant": "RevokeGrantArgs", "revoke_all_grants": "EmptyArgs", "lock": "EmptyArgs", "set_unlock_ttl": "SetUnlockTtlArgs",
            "set_class": "SetClassArgs", "set_device_label": "SetDeviceLabelArgs", "revoke_device": "RevokeDeviceArgs", "notify": "NotifyArgs", "query_status": "EmptyArgs", "query_pending": "EmptyArgs", "query_grants": "EmptyArgs", "query_audit": "QueryAuditArgs", "cancel_approval": "CancelApprovalArgs"}
@@ -311,7 +338,7 @@ obj("PresenceSignals", {k: nullable(UINT if k == "idle_seconds" else BOOL) for k
 obj("PresenceState", {"state": enum("present", "idle", "away"), "since": INT, "signals": ref("PresenceSignals")}, {"state": "present", "since": NOW, "signals": signals}, rust="traits::PresenceState")
 
 # Appendix B objects.
-obj("RegisterDeviceRequest", {**DEFS["DeviceRecord"]["properties"], "push_token": {}}, {**APPROVER, "push_token": {"provider": "apns", "token": "test-token"}}, ["push_token"], "relay::RegisterDeviceRequest")
+obj("RegisterDeviceRequest", {**DEFS["DeviceRecord"]["properties"], "push_token": {}}, {**APPROVER, "push_token": {"provider": "apns", "token": "test-token"}}, ["push_token", "dk_sig"], "relay::RegisterDeviceRequest")
 obj("RegisterDeviceResponse", {"account_id": STRING, "device_id": STRING, "recovery_code": nullable(STRING)}, {"account_id": "acct_test", "device_id": "dev_mac"}, ["recovery_code"], "relay::RegisterDeviceResponse")
 relay_objects = {
     "ChallengeRequest": ({"device_id": STRING}, {"device_id": "dev_srv"}),
@@ -327,7 +354,7 @@ relay_objects = {
     "ReplyApprovalRequest": ({"envelope": ref("Envelope")}, {"envelope": ENVELOPE}),
     "EnvelopesResponse": ({"envelopes": array(ref("Envelope"))}, {"envelopes": [ENVELOPE]}),
     "SendMessagesRequest": ({"envelopes": array(ref("Envelope"))}, {"envelopes": [ENVELOPE]}),
-    "AckMessagesRequest": ({"ids": array(ULID)}, {"ids": [ID]}),
+    "AckMessagesRequest": ({"ids": array(ULID), "type": {"type": "string"}}, {"ids": [ID]}),
     "AcceptedResponse": ({"accepted": UINT}, {"accepted": 1}), "OkResponse": ({"ok": BOOL}, {"ok": True}),
     "HealthResponse": ({"ok": BOOL, "version": STRING}, {"ok": True, "version": "0.3.0"}),
     "RelayError": ({"code": enum("unauthorized", "forbidden", "not_found", "rate_limited", "payload_too_large", "bad_envelope", "expired", "conflict"), "message": STRING}, {"code": "forbidden", "message": "Access denied"}),
@@ -335,10 +362,21 @@ relay_objects = {
 }
 for name, (props, sample) in relay_objects.items():
     rust_name = name.removeprefix("Relay")
-    obj(name, props, sample, rust="relay::" + rust_name)
+    obj(name, props, sample, optional=("type",) if name == "AckMessagesRequest" else (), rust="relay::" + rust_name)
+DEFS["RelayPairCompleteResponse"]["properties"]["account_id"] = nullable(STRING)
+SAMPLES["RelayPairCompleteResponse"]["account_id"] = "acct_test"
 obj("DeleteDeviceRequest", {"by": enum("device", "recovery"), "recovery_code": nullable(STRING)}, {"by": "device"}, ["recovery_code"], "relay::DeleteDeviceRequest")
-DEFS["WsFrame"] = {"oneOf": [{"type": "object", "properties": {"t": {"const": t}, **extra}, "required": ["t", *extra], "additionalProperties": True} for t, extra in [("ping", {}), ("pong", {}), ("ack", {"id": ULID}), ("envelope", {"envelope": ref("Envelope")})]]}
+obj("DeviceDeleteProof", {"action": {"const":"revoke_device"}, "account":STRING, "by":STRING, "device_id":STRING, "challenge":B64}, {"action":"revoke_device", "account":"acct_test", "by":"dev_mac", "device_id":"dev_srv", "challenge":b64(bytes(32))}, rust="relay::DeviceDeleteProof")
+DEFS["WsFrame"] = {"oneOf": [{"type": "object", "properties": {"t": {"const": t}, **extra}, "required": ["t", *extra], "additionalProperties": True} for t, extra in [("ping", {}), ("pong", {}), ("ack", {"id": ULID}), ("envelope", {"envelope": ref("Envelope")}), ("pair_accept", {"pairing_id":ULID,"joiner":ref("DeviceRecord")}), ("approval_cancel", {"id":ULID})]]}
 SAMPLES["WsFrame"], RUST_TYPES["WsFrame"] = {"t": "envelope", "envelope": ENVELOPE}, "relay::WsFrame"
+relay_extensions = [
+    {"type":"RelayPairCompleteResponse", "schema":"relay_pair_complete_response.schema.json", "value":SAMPLES["RelayPairCompleteResponse"]},
+    {"type":"WsFrame", "schema":"ws_frame.schema.json", "value":{"t":"pair_accept", "pairing_id":ID, "joiner":APPROVER, "future":True}},
+    {"type":"WsFrame", "schema":"ws_frame.schema.json", "value":{"t":"approval_cancel", "id":ID, "future":None}},
+    {"type":"DeviceDeleteProof", "schema":"device_delete_proof.schema.json", "value":SAMPLES["DeviceDeleteProof"]},
+    {"type":"DeviceDeleteProof", "schema":"device_delete_proof.schema.json", "value":{**SAMPLES["DeviceDeleteProof"], "action":"future_action"}},
+]
+write("relay_contract_extensions.json", {"cases":relay_extensions, "expect":[{"roundtrip":True,"schema_valid":True}] * 4 + [{"roundtrip":False,"schema_valid":False}]})
 
 # Appendix C generic payloads are concretized by kv-core aliases.
 ipc_objects = {
@@ -369,7 +407,28 @@ ipc_objects = {
 concrete = {"RelayInboundParams", "RelayOutboundPollResult", "PendingListResult", "DecideParams", "GrantIssueResult", "GrantListResult", "DirectiveIssueResult", "DevicesListResult"}
 for name, (props, sample) in ipc_objects.items(): obj(name, props, sample, rust=("ipc::" + name if name in concrete else "kv_ipc::remote::" + name.removeprefix("Ipc")))
 obj("PendingListParams", {"agent_pid": U32}, {}, ["agent_pid"], "kv_ipc::remote::PendingListParams")
-OPS = ["remote.relay.inbound", "remote.relay.outbound.poll", "remote.relay.status", "remote.sign_identity", "remote.presence.update", "remote.pending.list", "remote.pending.for_agent", "remote.pending.stop_block", "remote.wait", "remote.decide", "remote.grant.issue", "remote.grant.list", "remote.grant.revoke", "remote.directive.issue", "remote.pair.start", "remote.pair.complete", "remote.pair.confirm", "remote.devices.list", "remote.devices.revoke", "remote.devices.rename", "remote.status"]
+# Owner intents are projections, not signed Appendix A objects; issuer fields are rejected.
+owner_objects = {
+    "DecideIntent": ({"approval_id": ULID, "decision": enum("allow", "deny"), "scope": ref("DecisionScope"), "scope_option": nullable(STRING), "level": nullable(enum("quick", "strong")), "reason": nullable(STRING)}, {"approval_id": ID, "decision": "allow", "scope": DECISION["scope"], "scope_option": "per_use"}, ["scope_option", "level", "reason"]),
+    "GrantIntent": ({"source": enum("preauthorization", "settings"), "kind": enum("grant"), "aud": STRING, "scope": ref("GrantScope"), "budget": nullable(ref("Budget")), "nbf": INT, "exp": nullable(INT), "origin": STRING, "confirm": nullable(STRING), "confirmation_token": nullable(STRING)}, {"source": "settings", "kind": "grant", "aud": "dev_srv", "scope": GRANT["scope"], "nbf": NOW, "exp": NOW + 3600, "origin": "settings"}, ["budget", "confirm", "confirmation_token"]),
+    "GrantConfirmation": ({"confirmation_token": STRING, "expires_at": INT, "device_id": STRING, "label": STRING, "confirmations_left": {"type": "integer", "minimum": 0, "maximum": 255, "default": 1}}, {"confirmation_token": "test-only-one-use-token", "expires_at": NOW + 120, "device_id": "dev_srv", "label": "srv", "confirmations_left": 1}, ["confirmations_left"]),
+    "DirectiveIntent": ({"kind": enum("directive"), "aud": STRING, "op": enum(*OP_ARGS), "args": OBJECT}, {"kind": "directive", "aud": "dev_srv", "op": "lock", "args": {}}, []),
+    "PairJoinIntent": ({"uri": STRING}, {"uri": "kv-pair://relay.example.com/AAAAAAAAAAAAAAAAAAAAAAAAAA"}, []),
+    "PairConfirmIntent": ({"sas": STRING, "confirmed": BOOL}, {"sas": SAS, "confirmed": True}, []),
+    "RelayBinding": ({"relay_url": STRING, "device_id": STRING, "account_id": STRING}, {"relay_url": "https://relay.example.com", "device_id": "dev_mac", "account_id": "acct_test"}, []),
+}
+owner_cases, owner_expect = [], []
+for name, (props, sample, optional) in owner_objects.items():
+    obj(name, props, sample, optional, "ipc::" + name, {"additionalProperties": False})
+    owner_cases.append({"type": name, "schema": snake(name) + ".schema.json", "value": sample})
+    owner_expect.append({"roundtrip": True, "schema_valid": True})
+    owner_cases.append({"type": name, "schema": snake(name) + ".schema.json", "value": {**sample, "iss": "caller-chosen-issuer"}})
+    owner_expect.append({"roundtrip": False, "schema_valid": False})
+DEFS["GrantSource"], SAMPLES["GrantSource"], RUST_TYPES["GrantSource"] = enum("preauthorization", "settings"), "settings", "ipc::GrantSource"
+write("owner_intent_contracts.json", {"cases": owner_cases, "expect": owner_expect})
+obj("RecoverAccountRequest", {"account_id": STRING, "recovery_code": {"type":"string","minLength":43,"maxLength":43}, "new_recovery_code": {"type":"string","minLength":43,"maxLength":43}, "device": ref("DeviceRecord"), "nonce": {"type":"string","minLength":43,"maxLength":43}, "sig": {"type":"string","minLength":86,"maxLength":86}}, {"account_id":"acct_test","recovery_code":"A"*43,"new_recovery_code":"B"*43,"device":SERVER,"nonce":"A"*43,"sig":"A"*86}, rules={"additionalProperties":False}, rust="relay::RecoverAccountRequest")
+obj("RecoverAccountResponse", {"ok":{"const":True},"account_id":STRING,"device_id":STRING,"recovery_code":{"type":"string","minLength":43,"maxLength":43}}, {"ok":True,"account_id":"acct_test","device_id":"dev_srv","recovery_code":"A"*43}, rules={"additionalProperties":False}, rust="relay::RecoverAccountResponse")
+OPS = ["remote.relay.inbound", "remote.relay.outbound.poll", "remote.relay.status", "remote.sign_identity", "remote.presence.update", "remote.pending.list", "remote.pending.for_agent", "remote.pending.stop_block", "remote.wait", "remote.decide", "remote.grant.issue", "remote.grant.list", "remote.grant.revoke", "remote.directive.issue", "remote.pair.start", "remote.pair.complete", "remote.pair.confirm", "remote.devices.list", "remote.devices.revoke", "remote.devices.rename", "remote.status", "remote.audit.list", "remote.relay.identity", "remote.relay.outbound.ack", "remote.relay.control.poll", "remote.relay.control.complete", "remote.relay.control.sign", "remote.client_timeout_observed"]
 obj("IpcRequest", {"op": enum(*OPS), "params": OBJECT}, {"op": "remote.relay.inbound", "params": SAMPLES["RelayInboundParams"]}, rust="kv_ipc::remote::Request")
 DEFS["IpcResponse"] = {"oneOf": [{"type": "object", "properties": {"ok": {"const": True}, "result": {}}, "required": ["ok", "result"], "additionalProperties": True},
                                  {"type": "object", "properties": {"ok": {"const": False}, "error": ref("IpcError")}, "required": ["ok", "error"], "additionalProperties": True}]}
@@ -395,7 +454,7 @@ for name, definition in DEFS.items():
     if needed: document["$defs"] = needed
     (SCHEMAS / (snake(name) + ".schema.json")).write_text(json.dumps(document, ensure_ascii=False, indent=2) + "\n")
 write("schema_samples.json", {"samples": [{"type": name, "schema": snake(name) + ".schema.json", "value": value} for name, value in SAMPLES.items()],
-                             "expect": {"schemas": len(DEFS), "samples": {name: {"valid": True, "roundtrip": True, "extra_roundtrip": True} for name in SAMPLES}}})
+                             "expect": {"schemas": len(DEFS), "samples": {name: {"valid": True, "roundtrip": True, "extra_roundtrip": isinstance(value, dict) and name not in owner_objects and name not in ["RecoverAccountRequest", "RecoverAccountResponse"]} for name, value in SAMPLES.items()}}})
 
 # Rust deserialization dispatch is generated from the same explicit fixture inventory.
 dispatch = ["use kv_core::remote::*;", "use serde_json::Value;", "", "pub fn roundtrip(name: &str, value: Value) -> kv_core::remote::Result<Value> {", "    match name {"]
@@ -505,8 +564,8 @@ for name, sample, updates in [("ApprovalRequest", REQUEST, {"tier": "T3"}), ("Ap
 missing = copy.deepcopy(REQUEST); missing.pop("agent"); negative_schema.append({"type": "ApprovalRequest", "schema": "approval_request.schema.json", "value": missing})
 write("schema_rejections.json", {"samples": negative_schema, "expect": [False] * len(negative_schema)})
 
-caller_ops = {"relay_client": OPS[:4], "hook": ["remote.pending.for_agent", "remote.pending.stop_block"], "mcp": ["remote.wait", "remote.pending.list", "remote.status"],
-              "cli_owner": ["remote.pending.list", "remote.decide", "remote.grant.issue", "remote.grant.list", "remote.grant.revoke", "remote.directive.issue", "remote.pair.start", "remote.pair.complete", "remote.pair.confirm", "remote.devices.list", "remote.devices.revoke", "remote.devices.rename", "remote.status"],
+caller_ops = {"relay_client": OPS[:4] + ["remote.relay.identity", "remote.relay.outbound.ack", "remote.relay.control.poll", "remote.relay.control.complete", "remote.relay.control.sign"], "hook": ["remote.pending.for_agent", "remote.pending.stop_block"], "mcp": ["remote.wait", "remote.pending.list", "remote.status", "remote.client_timeout_observed"],
+              "cli_owner": ["remote.audit.list", "remote.pending.list", "remote.decide", "remote.grant.issue", "remote.grant.list", "remote.grant.revoke", "remote.directive.issue", "remote.pair.start", "remote.pair.complete", "remote.pair.confirm", "remote.devices.list", "remote.devices.revoke", "remote.devices.rename", "remote.status"],
               "approval_agent": ["remote.presence.update", "remote.decide", "remote.grant.issue", "remote.directive.issue", "remote.pair.start", "remote.pair.complete", "remote.pair.confirm"]}
 write("ipc_contracts.json", {"ops": OPS, "request": {"op": "remote.status", "params": {}, "future": {"flag": True}}, "response": {"ok": False, "error": {"code": "forbidden", "message": "Access denied", "future": None}, "future": True},
                             "expect": {"ops": OPS, "allowed": caller_ops, "request_roundtrip": True, "response_roundtrip": True, "unknown_op_rejected": True, "false_success_rejected": True}})

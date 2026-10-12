@@ -119,7 +119,16 @@ async fn main() {
             }
             bytes.push(byte);
         }
-        serde_json::from_slice(&bytes).map_err(std::io::Error::from)
+        let mut request: Value = serde_json::from_slice(&bytes).map_err(std::io::Error::from)?;
+        if let Some(length) = kv_platform::device_key::agent::input_length(&request)
+            .map_err(|_| std::io::Error::other("invalid device-key input length"))?
+        {
+            let mut input = zeroize::Zeroizing::new(vec![0; length]);
+            pipe.read_exact(&mut input).await?;
+            request.as_object_mut().unwrap().remove("input_len");
+            request["data"] = json!(kv_platform::device_key::encode_b64(&input));
+        }
+        Ok(request)
     }
 }
 
@@ -127,4 +136,16 @@ async fn main() {
 fn main() {
     eprintln!("kv-agent requires Windows 11 and Windows Hello");
     std::process::exit(2);
+}
+
+pub fn run_existing() {
+    main();
+}
+
+#[cfg(windows)]
+pub fn handle_existing(
+    request: &serde_json::Value,
+    active: Option<&kv_vault::EnclaveMetadata>,
+) -> crate::hello_logic::Reply {
+    hello::handle(request, active)
 }

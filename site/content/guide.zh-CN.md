@@ -5,9 +5,9 @@ description = "KeyValet 的工作方式：凭证库、授权、代理调用、ho
 
 # KeyValet
 
-**给你的 AI agent 一把「代客钥匙」，而不是你的万能钥匙。**
+**钥匙在芯片里，批准在你手上。**
 
-KeyValet 是一个运行在 macOS 本机的「AI agent 凭证代理」。Claude Code、Cursor、Codex 等 agent 可以通过 MCP **使用**你的 API key、OAuth 账号等凭证，但看不到它们。每个凭证都要你用 Touch ID 授权，每次使用都会连同目的一起记录下来。
+KeyValet 是给 AI agent 的凭证运行时，支持 macOS、Linux 和 Windows。Claude Code、Cursor、Codex 等 agent 可以通过 MCP 或 HTTP 网关**使用**你的 API key、OAuth 账号等凭证，但看不到它们。钥匙放在一个由 agent 读不到的特权系统服务管理、硬件保护的凭证库里；每个凭证都要你用 Touch ID（Linux 上是 polkit，Windows 上是 Hello）授权，每次使用都会连同目的一起记录下来。
 
 [安全模型](https://github.com/KeyValet/KeyValet/blob/main/SECURITY.md)
 
@@ -26,6 +26,28 @@ Linux 本地版已实现 systemd 服务、polkit 认证和 TPM 2.0 保护；无 
 - session 结束，授权随之失效；
 - 每次读取、使用、修改凭证都必须说明目的，并记入审计日志，agent 可以查询；
 - 没有你本人的 Touch ID 或登录密码，任何人（包括 AI agent 和你自己的其他进程）都读不到凭证。
+
+## 远程审批 V1 预览
+
+当前 main 已有加密 relay、签名验证、helper 审批检查及软件密钥集成测试；安装器增加独立的
+relay-client 运行身份，并只为 KeyValet 自己的 MCP 条目写超时和 Stop hook。安装当前源码后，
+先运行 `keyvalet status --summary` 查看本地保护和 relay 状态；远程 helper 未就绪时显示未知。
+`keyvalet relay install --help` 提供自建 nginx 部署参数，准备步骤见
+[Linux 远程章节](https://github.com/KeyValet/KeyValet/blob/main/docs/linux.md#remote-approval-v1-current-main-integration)。
+
+「`pair --new` → 手机扫描或桌面加入 → 两端核对 6 位 SAS → Strong 确认 → 远程批准」仍是
+**计划中的完整接线**：CLI/helper 对象投影、桌面原生流程和后台推送还有未决项，尚未通过
+安装后的端到端实机验收。现有 Linux SSH/polkit 后备审批路径不变。
+
+手机内测目前需要按 [W8 报告](https://github.com/KeyValet/KeyValet/blob/main/docs/remote-approval-reports/W8.md)
+构建开发包；尚无已验证的 TestFlight/Play 邀请链接。App/NSE 描述文件、正式签名和推送配置
+仍需补齐。接入的 Pixel 在系统验证阶段拒绝安装 instrumentation 包，硬件门禁测试未执行。
+设备和分发资源清单见
+[OPEN-QUESTIONS](https://github.com/KeyValet/KeyValet/blob/main/docs/remote-approval-reports/OPEN-QUESTIONS.md)。
+
+远程审批不让 Linux / Windows helper 获得抵御 root / SYSTEM 的能力；放宽授权一律需要
+Strong，在场状态只决定投递方式，不提高权限。详见
+[远程安全边界](https://github.com/KeyValet/KeyValet/blob/main/SECURITY.md#remote-approval-v1)。
 
 ## 安全模型
 
@@ -367,6 +389,8 @@ keyvalet recovery-read list     # 应急：用恢复口令只读访问（types /
 cd rust
 cargo test --workspace --locked   # 在临时目录中以普通用户身份测试凭证库与各协议（本地模拟服务端 + RFC/AWS 官方测试向量），不需要 root
 ```
+
+源码安装：macOS 和 Linux 上用 `sh scripts/install.sh`（无 TPM 的 Linux 机器加 `--software`）。设置了 `CARGO_TARGET_DIR` 时使用它（相对路径以 `rust/` 为基准），否则构建到 `rust/target`。安装器显式传入这个目录，覆盖 Cargo 配置里的 `build.target-dir`，确保安装的是本次构建的产物。
 
 ### 获取与使用密码的安全边界
 

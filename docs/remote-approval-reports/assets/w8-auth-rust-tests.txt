@@ -1,0 +1,178 @@
+   Compiling kv-mobile-core v0.3.0 (/Users/guang/dev/keyvalet/rust/crates/kv-mobile-core)
+    Finished `test` profile [unoptimized] target(s) in 7.12s
+     Running unittests src/lib.rs (target-w8/debug/deps/kv_mobile_core-e513d013e77e02ca)
+
+running 27 tests
+test tests::accounts::production_relay_is_fixed_and_only_internal_ci_paths_accept_loopback ... ok
+test tests::encrypted_storage_authenticates_rows_and_rejects_symlinks ... ok
+test tests::accounts::stale_server_refusal_cannot_delete_a_newer_session_or_pending_sign_in ... ok
+test store::tests::independent_handles_wait_until_the_lock_guard_is_dropped ... ok
+test tests::early_escalate_reordering_and_clock_skew_are_visible ... ok
+test tests::malformed_native_signature_is_rejected_before_it_can_be_queued ... ok
+test tests::database_and_wal_do_not_contain_approval_plaintext_and_survive_restart ... ok
+test tests::native_c_abi_rejects_arbitrary_signing_and_exports_only_shared_public_models ... ok
+test tests::executor_audit_is_bounded_metadata_and_stays_separate_from_local_issued_history ... ok
+test tests::accounts::verified_sessions_restore_offline_and_server_revocation_clears_native_access ... ok
+test tests::grants_are_strong_settings_objects_and_sensitive_grants_require_label ... ok
+test tests::accounts::logout_during_login_proof_revokes_the_unused_server_session ... ok
+test tests::native_background_can_display_verified_cached_requests_while_relay_is_offline ... ok
+test tests::accounts::a_revoked_user_session_cannot_fall_back_to_cached_native_notifications ... ok
+test tests::uri_validation_rejects_remote_plaintext_and_noncanonical_tokens ... ok
+test tests::quick_decision_binds_digest_nonce_scope_and_consumes_pending ... ok
+test tests::w0_vectors_decrypt_through_the_native_callback_and_bind_all_pairing_keys ... ok
+test tests::rejected_ciphertext_never_changes_pending_or_exposes_secrets ... ok
+test tests::strong_cannot_be_signed_by_tampered_ui_or_background_worker ... ok
+test tests::accounts::login_gates_native_data_keys_and_transport_and_persists_only_encrypted_session ... ok
+test tests::throttled_and_unavailable_relay_preserve_ciphertext_fifo_across_restart ... ok
+test tests::tightening_directives_are_quick_and_loosened_mode_requires_hardware ... ok
+test tests::silent_escalation_away_and_cancel_follow_verified_envelopes ... ok
+test tests::reported_budget_presence_and_revocation_results_update_the_same_device ... ok
+test tests::accounts::apple_nonce_state_expiry_and_provider_subject_prevent_account_substitution ... ok
+test tests::audit_retention_keeps_the_latest_entries_and_never_truncates_durable_state ... ok
+test tests::w2_pairing_silent_thirty_seconds_escalation_quick_strong_grant_revoke_all ... ok
+
+test result: ok. 27 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 35.63s
+
+     Running unittests src/lib.rs (target-w8/debug/deps/kv_push-1f3f5051b9d9b19d)
+
+running 7 tests
+test tests::status_maps_throttling_without_returning_provider_bodies ... ok
+test tests::fcm_has_no_notification_block_or_approval_content ... ok
+test tests::apns_is_mutable_metadata_only_for_both_delivery_modes ... ok
+test tests::unknown_content_invalid_tokens_and_header_injection_are_rejected ... ok
+test tests::service_authentication_and_json_contract_are_enforced_over_http ... ok
+test tests::apns_transport_signs_es256_sets_headers_and_preserves_provider_errors ... ok
+test tests::fcm_transport_verifies_rs256_oauth_cache_and_bounds_token_responses ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running unittests src/main.rs (target-w8/debug/deps/kv_push-bcba445a5a704f3a)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target-w8/debug/deps/kv_server-1f00939b66b28660)
+
+running 84 tests
+test messages::tests::corrupted_queries_and_insert_failures_are_sanitized ... ok
+test http::tests::metrics_query_failure_returns_a_static_storage_error ... ok
+test messages::tests::duplicate_keys_require_identical_complete_signed_envelopes ... ok
+test account::tests::apple_callback_validates_one_use_state_and_cannot_choose_a_redirect_package ... ok
+test http::tests::middleware_normalizes_extractor_errors_and_preserves_json_errors ... ok
+test messages::tests::readiness_and_delivery_errors_are_sanitized ... ok
+test presence::tests::a_failed_replacement_preserves_the_previous_connection ... ok
+test presence::tests::application_errors_do_not_ack_and_read_only_storage_rejects_heartbeat_updates ... ok
+test presence::tests::heartbeat_disconnects_a_session_that_expires_after_upgrade ... ok
+test presence::tests::incoming_ack_and_cached_authentication_failures_never_acknowledge ... ok
+test presence::tests::presence_upgrade_authenticates_without_an_outer_middleware_guard ... ok
+test account::tests::account_sign_in_is_device_bound_single_use_and_logout_revokes_session ... ok
+test presence::tests::failed_initial_replay_and_stalled_writes_remove_presence ... ok
+test presence::tests::raw_control_frames_and_invalid_application_frames_obey_the_protocol ... ok
+test presence::tests::reconnect_failures_leave_no_stale_online_entry ... ok
+test presence::tests::failed_heartbeat_pong_and_error_writes_terminate_the_connection ... ok
+test messages::tests::account_capacity_blocks_an_additional_message ... ok
+test presence::tests::queued_frame_failures_and_explicit_disconnects_terminate_the_connection ... ok
+test messages::tests::an_identical_retry_at_capacity_preserves_the_original_row ... ok
+test presence::tests::shutdown_interrupts_a_stalled_initial_replay_without_waiting_for_its_timeout ... ok
+test presence::tests::unanswered_heartbeats_close_at_the_idle_deadline_and_stalled_pings_time_out ... ok
+test presence::tests::reconnect_query_faults_preserve_the_previous_connection_and_corrupt_rows_fail_closed ... ok
+test account::tests::google_native_presenters_are_allowed_only_when_registered_and_signatures_are_mandatory ... ok
+test account::tests::identities_use_provider_subject_and_device_proof_instead_of_matching_email ... ok
+test tests::auth_errors_challenge_replay_expiry_and_renewal ... ok
+test account::tests::identity_tokens_require_verified_issuer_audience_time_and_nonce ... ok
+test tests::interfaces::expired_approval_accepts_signed_cleanup_and_typed_ack_never_confirms_another_ciphertext ... ok
+test tests::cleanup_retains_until_seven_days_and_expires_waiting ... ok
+test tests::only_ipv4_local_nginx_may_supply_cloudflare_ip ... ok
+test tests::concurrent_replies_resolve_once_and_invalid_signature_does_not_resolve ... ok
+test tests::interfaces::identical_message_retry_is_idempotent_after_ack_and_changed_ciphertext_conflicts ... ok
+test tests::regions::delivery_tracking_failures_preserve_successful_durable_acceptance ... ok
+test tests::regions::device_lookup_rejects_corrupt_account_record_types_and_invalid_json ... ok
+test tests::interfaces::typed_ack_preserves_opaque_future_envelope_types ... ok
+test tests::regions::corrupt_persisted_rows_fail_closed_without_partial_state_changes ... ok
+test tests::interfaces::split_fanout_replies_and_signed_cancel_survive_lost_http_responses ... ok
+test tests::regions::independent_auth_pairing_and_reply_rate_limits_return_the_contract_error ... ok
+test tests::regions::permission_failures_stop_before_opening_or_exposing_storage ... ok
+test tests::regions::password_worker_failures_and_panics_never_mutate_accounts ... ok
+test tests::regions::query_binding_and_row_decoding_failures_are_sanitized ... ok
+test tests::regions::production_lifecycle_covers_startup_failures_and_clean_shutdown ... ok
+test tests::regions::signed_outer_envelopes_reject_invalid_encodings_before_storage ... ok
+test tests::regions::handlers_recheck_authentication_even_when_invoked_without_middleware ... ok
+test tests::regions::pairing_rejects_invalid_joiners_consumed_expired_tokens_and_corrupt_public_records ... ok
+test tests::regions::strong_revocation_retries_failed_transactions_and_consumes_only_committed_proofs ... ok
+test tests::regions::recovery_rechecks_session_membership_target_and_readiness_after_password_work ... ok
+test tests::endpoint_contract_and_complete_approval_flow ... ok
+test tests::review::background_cleanup_recovers_after_a_storage_failure_and_prunes_challenges ... ok
+test tests::review::bounded_presence_removes_closed_and_slow_consumers ... ok
+test tests::regions::strong_proofs_fail_closed_with_missing_keys_challenges_or_invalid_encodings ... ok
+test tests::review::cached_session_storage_failures_fail_closed ... ok
+test tests::ciphertext_only_database_wal_and_logs ... ok
+test tests::invalid_envelopes_batch_atomicity_and_error_shapes ... ok
+test tests::review::device_validation_rejects_bad_identity_keys_and_capabilities ... ok
+test tests::review::duplicate_and_missing_cloudflare_headers_are_not_trusted ... ok
+test tests::review::errors_are_static_and_map_every_remote_failure ... ok
+test tests::review::api_rejects_wrong_content_type_method_and_upgrade_shapes ... ok
+test tests::review::cached_principals_are_rechecked_after_revocation_and_account_migration ... ok
+test tests::review::metadata_logging_and_poisoned_storage_fail_closed ... ok
+test tests::review::challenges_reject_unknown_devices_mismatches_and_invalid_encodings ... ok
+test tests::review::corrupt_recovery_hash_types_and_missing_pair_partners_are_rejected ... ok
+test tests::review::expiry_cancels_pending_pairing_and_terminal_only_finish_requires_execute ... ok
+test tests::review::approval_escalations_require_the_original_requester_and_recipients ... ok
+test tests::review::production_startup_rejects_exposure_corrupt_storage_and_a_busy_port ... ok
+test tests::review::pairing_checks_start_shape_expiry_token_reuse_and_pending_capacity ... ok
+test tests::review::malformed_approval_message_and_ack_batches_are_rejected_atomically ... ok
+test tests::review::pending_joiners_exchange_only_pairing_envelopes_with_their_partner ... ok
+test tests::regions::canonical_key_failures_rsa_validation_and_schema_initialization_are_rejected ... ok
+test tests::review::sliding_window_recovers_at_the_boundary_without_double_bursts ... ok
+test tests::review::pairing_completion_rejects_bad_tokens_identity_and_registered_history ... ok
+test tests::review::pairing_confirmation_enforces_partner_signature_and_a_single_sas_attempt ... ok
+test tests::review::replacing_presence_does_not_consume_a_live_authentication_challenge ... ok
+test tests::review::registration_rate_and_failed_revocation_leave_storage_unchanged ... ok
+test tests::review::registration_rejects_duplicates_and_preserves_public_push_metadata ... ok
+test tests::review::storage_and_worker_failures_return_only_static_errors ... ok
+test tests::review::websocket_ip_and_device_upgrade_limits_return_the_contract_error ... ok
+test tests::unacknowledged_ciphertext_survives_a_restart ... ok
+test tests::websocket_submission_ack_and_reconnect ... ok
+test tests::review::recovery_and_strong_revocation_fail_closed_and_notify_cancelled_requests ... ok
+test tests::strong_revocation_requires_a_fresh_signed_proof ... ok
+test tests::regions::storage_faults_at_each_sql_prepare_and_execution_boundary_preserve_atomic_mutations ... ok
+test tests::approval_message_and_pending_limits ... ok
+test tests::background_worker_expires_pairing_tokens ... ok
+test tests::heartbeat_tolerates_thirty_seconds_and_disconnects_after_one_hundred has been running for over 60 seconds
+test tests::heartbeat_tolerates_thirty_seconds_and_disconnects_after_one_hundred ... ok
+
+test result: ok. 84 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 100.59s
+
+     Running unittests src/main.rs (target-w8/debug/deps/kv_server-acbb6e29d5be9e49)
+
+running 1 test
+test tests::terminate_interrupt_and_signal_registration_failure_all_finish ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/cli.rs (target-w8/debug/deps/cli-6e7c2f2d75786760)
+
+running 2 tests
+test options_report_success_and_failure_without_exposing_values ... ok
+test production_binary_serves_health_with_private_storage_and_shuts_down_on_signals ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+
+   Doc-tests kv_mobile_core
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests kv_push
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests kv_server
+
+running 1 test
+test crates/kv-server/src/lib.rs - spawn_test_relay (line 79) - compile ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.24s

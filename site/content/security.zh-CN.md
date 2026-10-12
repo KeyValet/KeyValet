@@ -21,7 +21,7 @@ Linux 的 polkit 批准本身不是 TPM PIN 或启动状态策略。三种系统
 
 ## 信任边界
 
-AI agent / MCP 客户端是*半可信*的：它可能被提示注入，可以调用 KeyValet 的 MCP 服务，也能以你的用户身份执行任意命令。KeyValet 的 MCP 服务只是便利层——**安全检查从不只依赖它**。每个安全决策都由 root helper（或 launchd 守护进程 `dev.keyvalet.helper`）做出，它在空闲时不持有凭证库密钥。Touch ID 和 Secure Enclave 的工作由每用户代理 `dev.keyvalet.agent` 完成，守护进程只有在校验了对端 uid 和代码签名（`dev.keyvalet.touchid`、team `PWCRJPY7YC`、精确安装路径）后才接受它——同用户的其他进程无法冒充它来替你批准。
+AI agent / MCP 客户端是*半可信*的：它可能被提示注入，可以调用 KeyValet 的 MCP 服务，也能以你的用户身份执行任意命令。KeyValet 的 MCP 服务只是便利层——**安全检查从不只依赖它**。每个安全决策都由特权 helper 做出——macOS 上是 root 的 launchd 守护进程 `dev.keyvalet.helper`，Linux 上是 `keyvalet` systemd 服务用户，Windows 预览版是 LocalSystem 服务——它在空闲时不持有凭证库密钥。Touch ID 和 Secure Enclave 的工作由每用户代理 `dev.keyvalet.agent` 完成，守护进程只有在校验了对端 uid 和代码签名（`dev.keyvalet.touchid`、team `PWCRJPY7YC`、精确安装路径）后才接受它——同用户的其他进程无法冒充它来替你批准。
 
 ## KeyValet 能保证什么
 

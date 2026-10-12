@@ -1,0 +1,21 @@
+{
+  "stop": {
+    "decision": "block",
+    "reason": "Do not stop yet: KeyValet approval is pending, not denied. Call credential_wait_approval(\"01J00000000000000000000000\") (one approval at a time) to get the original request's result after approval. Do not repeat the original request or ask the user for a key."
+  },
+  "devin-stop": {
+    "decision": "block",
+    "reason": "Do not stop yet: KeyValet approval is pending, not denied. Call credential_wait_approval(\"01J00000000000000000000000\") (one approval at a time) to get the original request's result after approval. Do not repeat the original request or ask the user for a key."
+  },
+  "codex-stop": {
+    "decision": "block",
+    "reason": "Do not stop yet: KeyValet approval is pending, not denied. Call credential_wait_approval(\"01J00000000000000000000000\") (one approval at a time) to get the original request's result after approval. Do not repeat the original request or ask the user for a key."
+  },
+  "cursor-stop": {
+    "followup_message": "Do not stop yet: KeyValet approval is pending, not denied. Call credential_wait_approval(\"01J00000000000000000000000\") (one approval at a time) to get the original request's result after approval. Do not repeat the original request or ask the user for a key."
+  },
+  "gemini-after-agent": {
+    "decision": "deny",
+    "reason": "Do not stop yet: KeyValet approval is pending, not denied. Call credential_wait_approval(\"01J00000000000000000000000\") (one approval at a time) to get the original request's result after approval. Do not repeat the original request or ask the user for a key."
+  }
+}

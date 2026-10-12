@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 
 pub type Extra = Map<String, Value>;
+pub type SharedSecret = zeroize::Zeroizing<[u8; 32]>;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum SignatureAlgorithm {
@@ -45,6 +46,10 @@ pub trait DeviceKeyProvider {
     fn sign(&self, alg: SignatureAlgorithm, payload: &[u8]) -> Result<Vec<u8>, DeviceKeyError>;
     fn ecdh(&self, peer_pub: &[u8]) -> Result<zeroize::Zeroizing<[u8; 32]>, DeviceKeyError>;
     fn public_jwk(&self) -> Result<Value, DeviceKeyError>;
+    /// Separate identity signing public key, when the provider uses a dedicated ECDSA key.
+    fn identity_sign_jwk(&self) -> Result<Option<Value>, DeviceKeyError> {
+        Ok(None)
+    }
     fn presence_kind(&self) -> &str;
     fn key_kind(&self) -> &str;
 }
@@ -109,10 +114,18 @@ operations! {
     PairStart, PAIR_START, "remote.pair.start";
     PairComplete, PAIR_COMPLETE, "remote.pair.complete";
     PairConfirm, PAIR_CONFIRM, "remote.pair.confirm";
+    AccountRecover, ACCOUNT_RECOVER, "remote.account.recover";
     DevicesList, DEVICES_LIST, "remote.devices.list";
     DevicesRevoke, DEVICES_REVOKE, "remote.devices.revoke";
     DevicesRename, DEVICES_RENAME, "remote.devices.rename";
     Status, STATUS, "remote.status";
+    AuditList, AUDIT_LIST, "remote.audit.list";
+    RelayIdentity, RELAY_IDENTITY, "remote.relay.identity";
+    RelayOutboundAck, RELAY_OUTBOUND_ACK, "remote.relay.outbound.ack";
+    RelayControlPoll, RELAY_CONTROL_POLL, "remote.relay.control.poll";
+    RelayControlComplete, RELAY_CONTROL_COMPLETE, "remote.relay.control.complete";
+    RelayControlSign, RELAY_CONTROL_SIGN, "remote.relay.control.sign";
+    ClientTimeoutObserved, CLIENT_TIMEOUT_OBSERVED, "remote.client_timeout_observed";
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -124,16 +137,31 @@ pub enum Caller {
     ApprovalAgent,
 }
 
+/// Non-consuming helper notification; it carries no credential or execution result.
+pub const APPROVAL_RESOLVED: &str = "remote.approval.resolved";
+
 pub const RELAY_OPS: &[Op] = &[
     Op::RelayInbound,
     Op::RelayOutboundPoll,
     Op::RelayStatus,
     Op::SignIdentity,
+    Op::RelayIdentity,
+    Op::RelayOutboundAck,
+    Op::RelayControlPoll,
+    Op::RelayControlComplete,
+    Op::RelayControlSign,
 ];
 pub const HOOK_OPS: &[Op] = &[Op::PendingForAgent, Op::PendingStopBlock];
-pub const MCP_OPS: &[Op] = &[Op::Wait, Op::PendingList, Op::Status];
+pub const MCP_OPS: &[Op] = &[
+    Op::Wait,
+    Op::PendingList,
+    Op::Status,
+    Op::ClientTimeoutObserved,
+];
 // CONTRACT: Appendix C: use the explicit per-op callers; privileged channels are separate roles.
 pub const CLI_OPS: &[Op] = &[
+    Op::AccountRecover,
+    Op::AuditList,
     Op::PendingList,
     Op::Decide,
     Op::GrantIssue,
@@ -243,6 +271,32 @@ object!(SignIdentityParams {
     payload_b64: String
 });
 object!(SignIdentityResult { sig_b64: String });
+object!(RelayIdentityResult {
+    dk_pub: Value,
+    device_id: String,
+    account_id: String
+});
+object!(RelayOutboundAckResult {
+    retired_count: usize
+});
+
+/// Only the helper decides whether a queued prefix is obsolete. A transport receipt grants
+/// no authorization and is bound to the complete ciphertext envelope, including extensions.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum OutboundStage {
+    Spooled,
+    Accepted,
+    Inspect,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RelayOutboundAckParams<E = Value> {
+    pub envelopes: Vec<E>,
+    pub stage: OutboundStage,
+    #[serde(flatten)]
+    pub extra: Extra,
+}
 object!(PendingForAgentParams { agent_pid: u32 });
 object!(ApprovalIdParams {
     approval_id: String
@@ -329,6 +383,126 @@ pub struct DecideParams<S = Value, D = String, L = String> {
     pub extra: Extra,
 }
 
+/// Owner projections contain requests, never issuer identity or signature material.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(
+    deny_unknown_fields,
+    bound(deserialize = "S: Deserialize<'de>, D: Deserialize<'de>, L: Deserialize<'de>")
+)]
+pub struct DecideIntent<S = Value, D = String, L = String> {
+    pub approval_id: String,
+    pub decision: D,
+    pub scope: S,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub scope_option: Option<String>,
+    /// Compatibility hint: the helper may increase, but never lower, its selected level.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub level: Option<L>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reason: Option<String>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum GrantSource {
+    Preauthorization,
+    Settings,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(
+    deny_unknown_fields,
+    bound(deserialize = "S: Deserialize<'de>, B: Deserialize<'de>, K: Deserialize<'de>")
+)]
+pub struct GrantIntent<S = Value, B = Value, K = String> {
+    pub source: GrantSource,
+    pub kind: K,
+    pub aud: String,
+    pub scope: S,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub budget: Option<B>,
+    pub nbf: i64,
+    pub exp: Option<i64>,
+    pub origin: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub confirm: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub confirmation_token: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct GrantConfirmation {
+    pub confirmation_token: String,
+    pub expires_at: i64,
+    pub device_id: String,
+    pub label: String,
+    #[serde(default = "one_confirmation")]
+    pub confirmations_left: u8,
+}
+
+fn one_confirmation() -> u8 {
+    1
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct DirectiveIntent<O = String, K = String> {
+    pub kind: K,
+    pub aud: String,
+    pub op: O,
+    pub args: Extra,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct PairJoinIntent {
+    pub uri: String,
+}
+
+#[derive(Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct AccountRecoverIntent {
+    pub account_id: String,
+    pub recovery_code: String,
+    pub relay_url: String,
+    #[serde(default)]
+    pub software: bool,
+}
+
+#[derive(Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct AccountRecoverResult {
+    pub binding: RelayBinding,
+    pub recovery_code: String,
+}
+impl std::fmt::Debug for AccountRecoverResult {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        formatter
+            .debug_struct("AccountRecoverResult")
+            .field("binding", &self.binding)
+            .field("recovery_code", &"[redacted]")
+            .finish()
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct PairConfirmIntent {
+    pub sas: String,
+    pub confirmed: bool,
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub exclude_global: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct RelayBinding {
+    pub relay_url: String,
+    pub device_id: String,
+    pub account_id: String,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DecideResult {
     pub sent: crate::True,
@@ -350,6 +524,41 @@ pub struct GrantListResult<G = Value> {
     pub extra: Extra,
 }
 
+/// List entries carry metadata, not reusable signed authorization objects.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GrantMetadata {
+    pub jti: String,
+    pub aud: String,
+    pub exp: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sig: Option<String>,
+    #[serde(flatten)]
+    pub extra: Extra,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct GrantListParams {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub after: Option<String>,
+    #[serde(skip_serializing_if = "default_page_limit")]
+    pub limit: u16,
+}
+fn default_page_limit(limit: &u16) -> bool {
+    *limit == 50
+}
+fn is_false(value: &bool) -> bool {
+    !value
+}
+impl Default for GrantListParams {
+    fn default() -> Self {
+        Self {
+            after: None,
+            limit: 50,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DirectiveIssueResult<R = Value> {
     pub result: R,
@@ -365,6 +574,8 @@ pub struct DevicesListResult<D = Value> {
 }
 
 pub type RelayInboundRequest<E = Value> = Request<RelayInboundParams<E>>;
+pub type RelayIdentityRequest = Request<Empty>;
+pub type RelayOutboundAckRequest<E = Value> = Request<RelayOutboundAckParams<E>>;
 pub type RelayOutboundPollRequest = Request<RelayOutboundPollParams>;
 pub type RelayStatusRequest = Request<RelayStatusParams>;
 pub type SignIdentityRequest = Request<SignIdentityParams>;
@@ -375,7 +586,7 @@ pub type PendingStopBlockRequest = Request<ApprovalIdParams>;
 pub type WaitRequest = Request<WaitParams>;
 pub type DecideRequest<S = Value, D = String, L = String> = Request<DecideParams<S, D, L>>;
 pub type GrantIssueRequest<G = Value> = Request<G>;
-pub type GrantListRequest = Request<Empty>;
+pub type GrantListRequest = Request<GrantListParams>;
 pub type GrantRevokeRequest = Request<GrantRevokeParams>;
 pub type DirectiveIssueRequest<D = Value> = Request<D>;
 pub type PairStartRequest<P = Value> = Request<P>;
@@ -385,3 +596,25 @@ pub type DevicesListRequest = Request<Empty>;
 pub type DevicesRevokeRequest = Request<DeviceIdParams>;
 pub type DevicesRenameRequest = Request<DeviceRenameParams>;
 pub type StatusRequest = Request<Empty>;
+
+#[cfg(test)]
+mod metadata_tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn grant_metadata_preserves_signature_presence_without_fabricating_one() {
+        for value in [
+            json!({"jti":"id","aud":"device","exp":null,"sig":"signature","scope":{}}),
+            json!({"jti":"id","aud":"device","exp":null,"sig":"","authority":"approval_decision"}),
+            json!({"jti":"id","aud":"device","exp":null,"object_omitted":true}),
+        ] {
+            let metadata: GrantMetadata = serde_json::from_value(value.clone()).unwrap();
+            assert_eq!(serde_json::to_value(metadata).unwrap(), value);
+        }
+        let params: GrantListParams = serde_json::from_value(json!({})).unwrap();
+        assert_eq!(params.limit, 50);
+        assert_eq!(serde_json::to_value(params).unwrap(), json!({}));
+        assert!(serde_json::from_value::<GrantListParams>(json!({"unknown":true})).is_err());
+    }
+}

@@ -19,6 +19,40 @@ vault and authorization. The original v0.3.0 tag predates these follow-up change
 | W4: installation and packages | UAC installer, login launcher, client config merge, PowerShell exports, signed or explicit development x64/ARM64 ZIPs; no-Hello fresh install/upgrade/uninstall pass; WSL bridge implemented | Interactive owner/UAC installation, live Claude Code/Codex/Cursor and WSL sessions |
 | W5: distribution | Manual artifact workflow with signing required by default | Certificate provisioning, hardware matrix, SmartScreen observation, maintainer publication |
 
+## Remote approval V1 status
+
+Current-main source adds `KeyValetRelay`, a separate virtual service account
+`NT SERVICE\KeyValetRelay`, and its dedicated `\\.\pipe\keyvalet-relay` transport. The installer
+registers the service before restarting the helper, gives it read access to public
+`relay-client.toml` and Modify access only to `C:\ProgramData\KeyValet\Relay`. It does not give
+the relay account access to the credential vault. Unpaired configuration leaves the service
+manual/stopped; the installer never invents account/device IDs.
+
+| Remote path | Tested source evidence | Native Windows acceptance |
+| --- | --- | --- |
+| DK / Quick PCP P-256 | Native LocalSystem probes verify separate ECDH, ES256 and key cleanup | Same-key ECDH/ES256 remains blocked on the tested VM |
+| Strong Hello RSA-2048 / RS256 | Shared W0 signature verification and real software-vector interoperability | Interactive Hello creation/sign/cancel and repeated prompt still pending |
+| Desktop approval / SAS / scope / confirmation | Shared Rust view/flow tests; PairConfirm now uses W0 JCS | TaskDialog DPI, keyboard/timeout and installed protected worker pending |
+| Relay virtual account / private pipe | Service registration, SID/path/publisher checks implemented | SCM lifecycle and dedicated relay DACL need native execution |
+| Presence | Conservative injectable state-machine tests | Real WTS/lock/input/display/Hello transitions pending |
+
+The [2026-10-12 native VM acceptance](windows-native-acceptance-2026-10-12.zh-CN.md) verifies
+current-main x64 workspace tests, installation, ordinary-owner IPC, remote service registration,
+upgrade, uninstall and restart. Interactive Hello and the PCP same-key contract remain pending.
+The older WSL results below verify the earlier local implementation. PCP is an identity key provider, not a
+hardware presence gate. Hardware failure never selects software implicitly; an explicit
+software provider reports `key_kind=software`.
+
+Remote approval does not give a Linux/Windows helper protection against root/SYSTEM. Signed
+approvals protect the protocol against unprivileged agents and an untrusted relay; a compromised
+SYSTEM helper can still read/use credentials. See [remote boundaries](../SECURITY.md#remote-approval-v1).
+
+Workflow-generated Windows packages include the new binaries and W3 service assets. Public
+signing still follows the existing manual workflow; no release protection is bypassed.
+`scripts/install.ps1 -Uninstall`, run as the original owner, removes the remote service and
+managed runtime entries before the base uninstall. Queues/certificates/vault remain by default.
+Installer source/parser tests are separate from real Windows lifecycle acceptance.
+
 ## Build and try a local development package
 
 Use a Windows development machine with stable Rust, Visual Studio C++ build tools and the Windows

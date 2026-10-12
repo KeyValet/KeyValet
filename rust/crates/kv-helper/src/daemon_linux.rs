@@ -1,7 +1,9 @@
 //! Linux resident helper. Never launched through per-session passwordless sudo.
-use crate::{control, serve, MAX_CLIENTS};
+use crate::{control_with_remote, serve_with_remote, MAX_CLIENTS};
 use kv_platform::linux::{LinuxHost, LinuxMasterKeyProvider, Polkit};
-use kv_platform::paths::{HELPER_BIN, HELPER_SOCKET, POLKIT_POLICY, RUN_DIR, VAULT_DIR};
+use kv_platform::paths::{
+    HELPER_BIN, HELPER_SOCKET, POLKIT_POLICY, RELAY_SOCKET, RUN_DIR, VAULT_DIR,
+};
 use kv_platform::trust::untrusted_reason;
 use kv_vault::Vault;
 use std::future::Future;
@@ -98,11 +100,15 @@ pub struct Environment {
     peer: Box<
         dyn Fn(std::os::fd::RawFd) -> io::Result<kv_platform::peer::PeerCredentials> + Send + Sync,
     >,
+    remote_peer: fn(std::os::fd::RawFd, u32) -> Option<kv_helper::remote::ipc::CallerContext>,
+    relay_identity: fn(&LinuxHost) -> Option<u32>,
+    relay_peer: fn(std::os::fd::RawFd, u32, u32) -> Option<kv_helper::remote::ipc::CallerContext>,
     accept: for<'a> fn(&'a tokio::net::UnixListener) -> Accepted<'a>,
     signal: fn(tokio::signal::unix::SignalKind) -> io::Result<tokio::signal::unix::Signal>,
     shutdown: Pin<Box<dyn Future<Output = ()> + Send>>,
     max_clients: usize,
     control_timeout: std::time::Duration,
+    startup: bool,
 }
 impl Environment {
     pub fn system() -> Self {
@@ -113,6 +119,7 @@ impl Environment {
             run_dir: RUN_DIR.into(),
             socket: HELPER_SOCKET.into(),
             vault: VAULT_DIR.into(),
+            startup: true,
             uid: libc::getuid,
             euid: libc::geteuid,
             identity: LinuxHost::service_identity,
@@ -121,11 +128,20 @@ impl Environment {
             current_exe: std::env::current_exe,
             trust: untrusted_reason,
             peer: Box::new(kv_platform::peer::peer_credentials),
+            remote_peer: |fd, owner| {
+                kv_helper::remote::server::authenticate_peer(fd, owner, None).ok()
+            },
+            relay_identity: |host| host.relay_identity().ok().map(|identity| identity.0),
+            relay_peer: |fd, owner, relay| {
+                kv_helper::remote::server::authenticate_peer(fd, owner, Some(relay))
+                    .ok()
+                    .filter(|context| context.role() == kv_ipc::remote::Caller::RelayClient)
+            },
             accept: accept_socket,
             signal: tokio::signal::unix::signal,
             shutdown: Box::pin(std::future::pending()),
             max_clients: MAX_CLIENTS,
-            control_timeout: std::time::Duration::from_secs(5),
+            control_timeout: std::time::Duration::from_secs(180),
         }
     }
 }
@@ -154,6 +170,19 @@ async fn run_async(mut env: Environment) -> Result<(), String> {
     }
     (env.vault_owner)(&env.host)?;
     let owner = (env.owner)(&env.host)?;
+    if env.startup {
+        let directory = env.vault.join("remote");
+        let startup = kv_helper::remote::startup::Startup::new(
+            directory.clone(),
+            Arc::new(kv_helper::remote::platform_keys::TpmKeys { directory }),
+            kv_core::remote::Os::Linux,
+            owner,
+        );
+        kv_helper::remote::startup::install(startup.clone()).map_err(|e| e.to_string())?;
+        if let Err(error) = startup.load_existing().await {
+            eprintln!("keyvalet: remote startup failed: {error}");
+        }
+    }
     verify_run_dir(&env.run_dir, uid).map_err(|e| e.to_string())?;
     let parent = env.run_dir.parent().ok_or("missing runtime parent")?;
     if let Some(reason) = (env.trust)(parent) {
@@ -161,6 +190,16 @@ async fn run_async(mut env: Environment) -> Result<(), String> {
     }
     let _lock = lock_runtime(&env.run_dir).map_err(|e| e.to_string())?;
     let listener = bind_socket(&env.socket, uid).map_err(|e| e.to_string())?;
+    let relay_uid = (env.relay_identity)(&env.host);
+    let relay_path = env.socket.with_file_name(
+        Path::new(RELAY_SOCKET)
+            .file_name()
+            .ok_or("missing relay socket name")?,
+    );
+    let relay_listener = relay_uid
+        .map(|_| bind_socket(&relay_path, uid))
+        .transpose()
+        .map_err(|error| error.to_string())?;
     let sessions = Arc::new(AtomicUsize::new(0));
     let permits = Arc::new(tokio::sync::Semaphore::new(env.max_clients));
     let mut clients = tokio::task::JoinSet::new();
@@ -170,6 +209,23 @@ async fn run_async(mut env: Environment) -> Result<(), String> {
         (env.signal)(tokio::signal::unix::SignalKind::interrupt()).map_err(|e| e.to_string())?;
     loop {
         tokio::select! {
+            accept = async {
+                match &relay_listener {
+                    Some(listener) => (env.accept)(listener).await,
+                    None => std::future::pending().await,
+                }
+            } => {
+                let Ok((stream, _)) = accept else { continue; };
+                let Some(relay_uid) = relay_uid else { continue; };
+                let Some(context) = (env.relay_peer)(stream.as_raw_fd(), owner, relay_uid) else { continue; };
+                let Ok(permit) = permits.clone().try_acquire_owned() else { continue; };
+                clients.spawn(async move {
+                    let _permit = permit;
+                    let (reader,writer) = stream.into_split();
+                    let _ = kv_helper::remote::server::serve(reader,writer,context,
+                        kv_helper::remote::server::runtime()).await;
+                });
+            },
             _ = terminate.recv() => break,
             _ = interrupt.recv() => break,
             _ = &mut env.shutdown => break,
@@ -183,15 +239,17 @@ async fn run_async(mut env: Environment) -> Result<(), String> {
                 let Ok(peer) = (env.peer)(stream.as_raw_fd()) else { continue };
                 let Ok(permit) = permits.clone().try_acquire_owned() else { continue };
                 if peer.uid == 0 {
+                    let remote_context = (env.remote_peer)(stream.as_raw_fd(), owner);
                     let count = sessions.clone();
                     let timeout = env.control_timeout;
                     clients.spawn(async move {
                         let _permit = permit;
-                        let _ = tokio::time::timeout(timeout, control(stream, count)).await;
+                        let _ = tokio::time::timeout(timeout, control_with_remote(stream, count, remote_context)).await;
                     });
                     continue;
                 }
                 if peer.uid != owner { continue; }
+                let remote_context = (env.remote_peer)(stream.as_raw_fd(), owner);
                 let Ok(approval) = Polkit::for_peer(peer) else { continue };
                 let vault = Arc::new(Vault::new(&env.vault));
                 if let Err(e) = vault.prepare() { eprintln!("keyvalet-helper: {}", e.0); continue; }
@@ -202,7 +260,7 @@ async fn run_async(mut env: Environment) -> Result<(), String> {
                     let _permit = permit;
                     let _count = count;
                     let (read, write) = stream.into_split();
-                    if let crate::Reject::ProtocolError(error) = serve(read, write, vault, Some(peer.uid), "polkit", approval.clone(), approval, provider).await {
+                    if let crate::Reject::ProtocolError(error) = serve_with_remote(read, write, vault, Some(peer.uid), "polkit", approval.clone(), approval, provider, remote_context).await {
                         eprintln!("keyvalet-helper: {error}");
                     }
                 });
@@ -210,6 +268,10 @@ async fn run_async(mut env: Environment) -> Result<(), String> {
         }
     }
     drop(listener);
+    if relay_listener.is_some() {
+        drop(relay_listener);
+        let _ = std::fs::remove_file(relay_path);
+    }
     clients.abort_all();
     while clients.join_next().await.is_some() {}
     let _ = std::fs::remove_file(&env.socket);

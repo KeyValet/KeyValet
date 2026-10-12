@@ -86,6 +86,21 @@ config backups and any user-added files. A directory containing user files retai
 marker for a later reinstall. The Windows service and vault are retained. Remove the
 WSL bridge before uninstalling Windows KeyValet, or use this copied uninstaller afterwards.
 
+## Remote approval and WSL
+
+WSL continues to use the Windows helper and Windows device identity; it does not create a Linux
+relay service or TPM identity for the Windows vault. Windows relay/service/Hello hardware
+acceptance is still pending as described in [Windows remote status](windows.md#remote-approval-v1-status).
+Remote approval does not protect the Windows helper from SYSTEM, or an independent Linux
+helper from root.
+
+The existing WSL installer predates the new Stop registrations and timeout updates. Its
+MCP/secret-detection hooks remain covered by the earlier verification below. W9 does not claim
+that it now installs remote Stop hooks: updating the WSL adapter is a follow-up outside the
+supplied installer ownership. The native Windows installer affects Windows client configuration,
+not a Linux user's `~/.codex` or `~/.claude` files. Do not point a WSL Stop command at the Linux
+helper socket and expect it to query the Windows session.
+
 ## Verification
 
 Offline tests exercise byte-exact stdio, EOF, exit codes, arguments containing Unicode/spaces/shell

@@ -1,0 +1,47 @@
+W8 Android target SDK and native loader correction, 2026-10-12
+
+Before:
+mobile/build/kv_native/outputs/apk/androidTest/debug/kv_native-debug-androidTest.apk: targetSdk must be at least 36 (Android 16)
+mobile/build/app/outputs/flutter-apk/app-debug.apk: dev.keyvalet.mobile, targetSdk=36
+mobile/build/kv_native/outputs/apk/androidTest/debug/kv_native-debug-androidTest.apk: dev.keyvalet.nativebridge.test, targetSdk=31
+
+After:
+build/app/outputs/flutter-apk/app-debug.apk: dev.keyvalet.mobile, targetSdk=36
+build/app/outputs/flutter-apk/app-debug.apk: lib/arm64-v8a/libkv_native.so loads bundled libkv_mobile_core.so by name
+build/kv_native/outputs/apk/androidTest/debug/kv_native-debug-androidTest.apk: dev.keyvalet.nativebridge.test, targetSdk=36
+build/kv_native/outputs/apk/androidTest/debug/kv_native-debug-androidTest.apk: lib/arm64-v8a/libkv_native.so loads bundled libkv_mobile_core.so by name
+
+Normal test APK installation:
+Performing Streamed Install
+Success
+
+Normal application installation:
+Performing Streamed Install
+Success
+
+Main app launch:
+Starting: Intent { cmp=dev.keyvalet.mobile/dev.keyvalet.keyvalet_mobile.MainActivity }
+Status: ok
+LaunchState: COLD
+Activity: dev.keyvalet.mobile/dev.keyvalet.keyvalet_mobile.MainActivity
+TotalTime: 1724
+WaitTime: 1725
+Complete
+
+Native device tests: OK (2 tests), no skips.
+App process remained running after launch; the resumed activity was dev.keyvalet.mobile.
+APK signatures verified (v2) for both packages.
+Flutter analyze: No issues found. Flutter tests: 12 passed.
+
+The JNI bridge now links libkv_mobile_core.so by name (IMPORTED_NO_SONAME).
+No compiler-host file path is embedded in DT_NEEDED.
+No Play Protect/package verification change or low-target bypass was used.
+No Rust or dependency changes were required for this correction.
+
+App screenshot: assets/w8-android-api36.png (real Pixel 7, unpaired/offline empty state).
+APK: mobile/build/app/outputs/flutter-apk/app-debug.apk
+
+Primary references:
+https://developers.google.com/android/play-protect/warning-dev-guidance
+https://developer.android.com/about/versions/16/setup-sdk
+https://cmake.org/cmake/help/latest/prop_tgt/IMPORTED_NO_SONAME.html

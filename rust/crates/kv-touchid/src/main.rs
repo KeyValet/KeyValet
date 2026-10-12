@@ -11,6 +11,8 @@
 #[cfg(target_os = "macos")]
 mod agent;
 #[cfg(target_os = "macos")]
+mod device_key;
+#[cfg(target_os = "macos")]
 mod enclave;
 
 #[cfg(target_os = "macos")]
@@ -46,6 +48,9 @@ fn main() {
         .unwrap_or_else(|| kv_i18n::t("解锁凭证库", "unlock your credential vault"));
     if reason == "--agent" {
         std::process::exit(agent::run());
+    }
+    if reason == "--device-key" {
+        std::process::exit(device_key::exit_code(device_key::run()));
     }
     if reason == "--enclave" {
         let operation = args.next().unwrap_or_default();
@@ -85,4 +90,36 @@ fn main() {
 #[cfg(not(target_os = "macos"))]
 fn main() {
     std::process::exit(2);
+}
+
+pub fn run_existing() {
+    main();
+}
+
+#[cfg(target_os = "macos")]
+pub fn handle_existing(
+    request: &serde_json::Value,
+) -> (
+    serde_json::Value,
+    Option<(kv_ipc::agent::EnclavePayload, usize)>,
+) {
+    agent::handle_request(request, &agent::ProcessRunner)
+}
+
+#[cfg(target_os = "macos")]
+pub fn remote_child(input: &[u8]) -> std::io::Result<Vec<u8>> {
+    use agent::Runner;
+    let result = agent::ProcessRunner.run(
+        kv_platform::paths::TOUCHID_BIN,
+        &["--remote-dialog"],
+        Some(input),
+        std::time::Duration::from_secs(120),
+    )?;
+    if result.code != Some(0)
+        || result.timed_out
+        || result.stdout.len() > kv_ipc::agent::MAX_LINE_BYTES
+    {
+        return Err(std::io::Error::other("remote UI unavailable"));
+    }
+    Ok(result.stdout)
 }

@@ -1,0 +1,434 @@
+[
+  {
+    "registry": "crates.io",
+    "name": "addr2line",
+    "version": "0.25.1",
+    "published": "2025-09-13T03:01:38.341107Z",
+    "source": "https://crates.io/api/v1/crates/addr2line/0.25.1"
+  },
+  {
+    "registry": "crates.io",
+    "name": "adler2",
+    "version": "2.0.1",
+    "published": "2025-06-09T22:31:53.608434Z",
+    "source": "https://crates.io/api/v1/crates/adler2/2.0.1"
+  },
+  {
+    "registry": "crates.io",
+    "name": "allo-isolate",
+    "version": "0.1.27",
+    "published": "2025-03-11T13:56:00.020930Z",
+    "source": "https://crates.io/api/v1/crates/allo-isolate/0.1.27"
+  },
+  {
+    "registry": "crates.io",
+    "name": "android_log-sys",
+    "version": "0.3.2",
+    "published": "2025-03-04T09:36:10.495130Z",
+    "source": "https://crates.io/api/v1/crates/android_log-sys/0.3.2"
+  },
+  {
+    "registry": "crates.io",
+    "name": "android_logger",
+    "version": "0.15.1",
+    "published": "2025-06-29T18:20:22.643726Z",
+    "source": "https://crates.io/api/v1/crates/android_logger/0.15.1"
+  },
+  {
+    "registry": "crates.io",
+    "name": "atomic",
+    "version": "0.5.3",
+    "published": "2023-05-15T15:18:16.649398Z",
+    "source": "https://crates.io/api/v1/crates/atomic/0.5.3"
+  },
+  {
+    "registry": "crates.io",
+    "name": "backtrace",
+    "version": "0.3.76",
+    "published": "2025-09-26T02:43:38.784231Z",
+    "source": "https://crates.io/api/v1/crates/backtrace/0.3.76"
+  },
+  {
+    "registry": "crates.io",
+    "name": "build-target",
+    "version": "0.4.0",
+    "published": "2022-04-29T21:26:07.549995Z",
+    "source": "https://crates.io/api/v1/crates/build-target/0.4.0"
+  },
+  {
+    "registry": "crates.io",
+    "name": "bytemuck",
+    "version": "1.25.2",
+    "published": "2026-07-19T19:36:16.239554Z",
+    "source": "https://crates.io/api/v1/crates/bytemuck/1.25.2"
+  },
+  {
+    "registry": "crates.io",
+    "name": "byteorder",
+    "version": "1.5.0",
+    "published": "2023-10-06T00:45:57.877036Z",
+    "source": "https://crates.io/api/v1/crates/byteorder/1.5.0"
+  },
+  {
+    "registry": "crates.io",
+    "name": "console_error_panic_hook",
+    "version": "0.1.7",
+    "published": "2021-10-11T17:01:02.936833Z",
+    "source": "https://crates.io/api/v1/crates/console_error_panic_hook/0.1.7"
+  },
+  {
+    "registry": "crates.io",
+    "name": "dart-sys",
+    "version": "4.1.5",
+    "published": "2024-03-09T02:35:13.296197Z",
+    "source": "https://crates.io/api/v1/crates/dart-sys/4.1.5"
+  },
+  {
+    "registry": "crates.io",
+    "name": "dashmap",
+    "version": "5.5.3",
+    "published": "2023-08-29T21:13:30.093656Z",
+    "source": "https://crates.io/api/v1/crates/dashmap/5.5.3"
+  },
+  {
+    "registry": "crates.io",
+    "name": "delegate-attr",
+    "version": "0.3.1",
+    "published": "2026-08-02T11:34:25.673814Z",
+    "source": "https://crates.io/api/v1/crates/delegate-attr/0.3.1"
+  },
+  {
+    "registry": "crates.io",
+    "name": "env_filter",
+    "version": "0.1.4",
+    "published": "2025-10-13T14:54:38.521226Z",
+    "source": "https://crates.io/api/v1/crates/env_filter/0.1.4"
+  },
+  {
+    "registry": "crates.io",
+    "name": "flutter_rust_bridge",
+    "version": "2.11.1",
+    "published": "2025-07-06T07:24:00.510079Z",
+    "source": "https://crates.io/api/v1/crates/flutter_rust_bridge/2.11.1"
+  },
+  {
+    "registry": "crates.io",
+    "name": "flutter_rust_bridge_macros",
+    "version": "2.11.1",
+    "published": "2025-07-06T07:23:31.227315Z",
+    "source": "https://crates.io/api/v1/crates/flutter_rust_bridge_macros/2.11.1"
+  },
+  {
+    "registry": "crates.io",
+    "name": "gimli",
+    "version": "0.32.3",
+    "published": "2025-09-13T02:44:33.748122Z",
+    "source": "https://crates.io/api/v1/crates/gimli/0.32.3"
+  },
+  {
+    "registry": "crates.io",
+    "name": "hashbrown",
+    "version": "0.14.5",
+    "published": "2024-04-28T18:32:09.203645Z",
+    "source": "https://crates.io/api/v1/crates/hashbrown/0.14.5"
+  },
+  {
+    "registry": "crates.io",
+    "name": "hex",
+    "version": "0.4.3",
+    "published": "2021-03-03T10:48:58.682837Z",
+    "source": "https://crates.io/api/v1/crates/hex/0.4.3"
+  },
+  {
+    "registry": "crates.io",
+    "name": "libc",
+    "version": "0.2.189",
+    "published": "2026-07-21T21:33:28.018110Z",
+    "source": "https://crates.io/api/v1/crates/libc/0.2.189"
+  },
+  {
+    "registry": "crates.io",
+    "name": "md-5",
+    "version": "0.10.6",
+    "published": "2023-09-22T14:19:04.384162Z",
+    "source": "https://crates.io/api/v1/crates/md-5/0.10.6"
+  },
+  {
+    "registry": "crates.io",
+    "name": "miniz_oxide",
+    "version": "0.8.9",
+    "published": "2025-06-09T22:26:12.218895Z",
+    "source": "https://crates.io/api/v1/crates/miniz_oxide/0.8.9"
+  },
+  {
+    "registry": "crates.io",
+    "name": "object",
+    "version": "0.37.3",
+    "published": "2025-08-13T10:32:51.629605Z",
+    "source": "https://crates.io/api/v1/crates/object/0.37.3"
+  },
+  {
+    "registry": "crates.io",
+    "name": "oslog",
+    "version": "0.2.0",
+    "published": "2022-02-17T13:37:46.799444Z",
+    "source": "https://crates.io/api/v1/crates/oslog/0.2.0"
+  },
+  {
+    "registry": "crates.io",
+    "name": "portable-atomic",
+    "version": "1.15.0",
+    "published": "2026-08-09T17:31:27.814296Z",
+    "source": "https://crates.io/api/v1/crates/portable-atomic/1.15.0"
+  },
+  {
+    "registry": "crates.io",
+    "name": "rustc-demangle",
+    "version": "0.1.28",
+    "published": "2026-07-08T16:08:22.858292Z",
+    "source": "https://crates.io/api/v1/crates/rustc-demangle/0.1.28"
+  },
+  {
+    "registry": "crates.io",
+    "name": "threadpool",
+    "version": "1.8.1",
+    "published": "2020-05-11T15:44:07.541079Z",
+    "source": "https://crates.io/api/v1/crates/threadpool/1.8.1"
+  },
+  {
+    "registry": "pub.dev",
+    "name": "flutter_rust_bridge",
+    "version": "2.11.1",
+    "published": "2025-07-06T07:24:21.681487Z",
+    "source": "https://pub.dev/api/packages/flutter_rust_bridge/versions/2.11.1"
+  },
+  {
+    "registry": "pub.dev",
+    "name": "mobile_scanner",
+    "version": "7.1.3",
+    "published": "2025-10-24T08:45:30.796307Z",
+    "source": "https://pub.dev/api/packages/mobile_scanner/versions/7.1.3"
+  },
+  {
+    "registry": "pub.dev",
+    "name": "args",
+    "version": "2.7.0",
+    "published": "2025-03-12T17:56:09.371210Z",
+    "source": "https://pub.dev/api/packages/args/versions/2.7.0"
+  },
+  {
+    "registry": "pub.dev",
+    "name": "async",
+    "version": "2.13.1",
+    "published": "2026-03-26T00:53:13.853173Z",
+    "source": "https://pub.dev/api/packages/async/versions/2.13.1"
+  },
+  {
+    "registry": "pub.dev",
+    "name": "boolean_selector",
+    "version": "2.1.2",
+    "published": "2024-10-22T08:24:19.635674Z",
+    "source": "https://pub.dev/api/packages/boolean_selector/versions/2.1.2"
+  },
+  {
+    "registry": "pub.dev",
+    "name": "build_cli_annotations",
+    "version": "2.1.1",
+    "published": "2025-09-08T22:53:44.861865Z",
+    "source": "https://pub.dev/api/packages/build_cli_annotations/versions/2.1.1"
+  },
+  {
+    "registry": "pub.dev",
+    "name": "characters",
+    "version": "1.4.1",
+    "published": "2025-06-25T15:56:32.563783Z",
+    "source": "https://pub.dev/api/packages/characters/versions/1.4.1"
+  },
+  {
+    "registry": "pub.dev",
+    "name": "clock",
+    "version": "1.1.2",
+    "published": "2024-10-28T08:20:37.591570Z",
+    "source": "https://pub.dev/api/packages/clock/versions/1.1.2"
+  },
+  {
+    "registry": "pub.dev",
+    "name": "collection",
+    "version": "1.19.1",
+    "published": "2024-10-21T07:34:00.994803Z",
+    "source": "https://pub.dev/api/packages/collection/versions/1.19.1"
+  },
+  {
+    "registry": "pub.dev",
+    "name": "fake_async",
+    "version": "1.3.3",
+    "published": "2025-01-28T15:18:30.551930Z",
+    "source": "https://pub.dev/api/packages/fake_async/versions/1.3.3"
+  },
+  {
+    "registry": "pub.dev",
+    "name": "intl",
+    "version": "0.20.2",
+    "published": "2025-01-24T07:59:51.183145Z",
+    "source": "https://pub.dev/api/packages/intl/versions/0.20.2"
+  },
+  {
+    "registry": "pub.dev",
+    "name": "leak_tracker",
+    "version": "11.0.2",
+    "published": "2025-09-10T22:43:39.810799Z",
+    "source": "https://pub.dev/api/packages/leak_tracker/versions/11.0.2"
+  },
+  {
+    "registry": "pub.dev",
+    "name": "leak_tracker_flutter_testing",
+    "version": "3.0.10",
+    "published": "2025-04-21T20:28:24.122862Z",
+    "source": "https://pub.dev/api/packages/leak_tracker_flutter_testing/versions/3.0.10"
+  },
+  {
+    "registry": "pub.dev",
+    "name": "leak_tracker_testing",
+    "version": "3.0.2",
+    "published": "2025-04-21T20:28:12.802586Z",
+    "source": "https://pub.dev/api/packages/leak_tracker_testing/versions/3.0.2"
+  },
+  {
+    "registry": "pub.dev",
+    "name": "matcher",
+    "version": "0.12.19",
+    "published": "2026-02-27T01:52:58.341450Z",
+    "source": "https://pub.dev/api/packages/matcher/versions/0.12.19"
+  },
+  {
+    "registry": "pub.dev",
+    "name": "material_color_utilities",
+    "version": "0.13.0",
+    "published": "2025-06-04T16:40:01.638488Z",
+    "source": "https://pub.dev/api/packages/material_color_utilities/versions/0.13.0"
+  },
+  {
+    "registry": "pub.dev",
+    "name": "meta",
+    "version": "1.17.0",
+    "published": "2025-05-14T22:14:21.904911Z",
+    "source": "https://pub.dev/api/packages/meta/versions/1.17.0"
+  },
+  {
+    "registry": "pub.dev",
+    "name": "path",
+    "version": "1.9.1",
+    "published": "2024-10-17T08:37:58.135322Z",
+    "source": "https://pub.dev/api/packages/path/versions/1.9.1"
+  },
+  {
+    "registry": "pub.dev",
+    "name": "plugin_platform_interface",
+    "version": "2.1.8",
+    "published": "2024-01-04T03:51:50.934076Z",
+    "source": "https://pub.dev/api/packages/plugin_platform_interface/versions/2.1.8"
+  },
+  {
+    "registry": "pub.dev",
+    "name": "source_span",
+    "version": "1.10.2",
+    "published": "2026-02-05T09:07:00.222021Z",
+    "source": "https://pub.dev/api/packages/source_span/versions/1.10.2"
+  },
+  {
+    "registry": "pub.dev",
+    "name": "stack_trace",
+    "version": "1.12.1",
+    "published": "2024-12-20T13:31:01.144563Z",
+    "source": "https://pub.dev/api/packages/stack_trace/versions/1.12.1"
+  },
+  {
+    "registry": "pub.dev",
+    "name": "stream_channel",
+    "version": "2.1.4",
+    "published": "2025-01-07T16:38:32.361753Z",
+    "source": "https://pub.dev/api/packages/stream_channel/versions/2.1.4"
+  },
+  {
+    "registry": "pub.dev",
+    "name": "string_scanner",
+    "version": "1.4.1",
+    "published": "2024-12-17T10:00:43.322120Z",
+    "source": "https://pub.dev/api/packages/string_scanner/versions/1.4.1"
+  },
+  {
+    "registry": "pub.dev",
+    "name": "term_glyph",
+    "version": "1.2.2",
+    "published": "2024-12-17T09:33:15.487660Z",
+    "source": "https://pub.dev/api/packages/term_glyph/versions/1.2.2"
+  },
+  {
+    "registry": "pub.dev",
+    "name": "test_api",
+    "version": "0.7.10",
+    "published": "2026-02-27T01:53:07.313797Z",
+    "source": "https://pub.dev/api/packages/test_api/versions/0.7.10"
+  },
+  {
+    "registry": "pub.dev",
+    "name": "vector_math",
+    "version": "2.2.0",
+    "published": "2025-05-22T00:41:49.994903Z",
+    "source": "https://pub.dev/api/packages/vector_math/versions/2.2.0"
+  },
+  {
+    "registry": "pub.dev",
+    "name": "vm_service",
+    "version": "15.3.0",
+    "published": "2026-08-18T18:13:09.212600Z",
+    "source": "https://pub.dev/api/packages/vm_service/versions/15.3.0"
+  },
+  {
+    "registry": "pub.dev",
+    "name": "web",
+    "version": "1.1.1",
+    "published": "2025-02-26T21:23:27.138850Z",
+    "source": "https://pub.dev/api/packages/web/versions/1.1.1"
+  },
+  {
+    "registry": "Google Maven",
+    "name": "androidx.biometric.biometric",
+    "version": "1.1.0",
+    "published": "Wed, 27 Jan 2021 18:00:00 GMT",
+    "source": "https://dl.google.com/dl/android/maven2/androidx/biometric/biometric/1.1.0/biometric-1.1.0.pom",
+    "note": "Official artifact Last-Modified timestamp"
+  },
+  {
+    "registry": "Google Maven",
+    "name": "com.google.firebase.firebase-messaging",
+    "version": "24.1.2",
+    "published": "Thu, 26 Jun 2025 15:15:12 GMT",
+    "source": "https://dl.google.com/dl/android/maven2/com/google/firebase/firebase-messaging/24.1.2/firebase-messaging-24.1.2.pom",
+    "note": "Official artifact Last-Modified timestamp"
+  },
+  {
+    "registry": "Google Maven",
+    "name": "com.google.android.play.integrity",
+    "version": "1.4.0",
+    "published": "Mon, 29 Jul 2024 15:37:25 GMT",
+    "source": "https://dl.google.com/dl/android/maven2/com/google/android/play/integrity/1.4.0/integrity-1.4.0.pom",
+    "note": "Official artifact Last-Modified timestamp"
+  },
+  {
+    "registry": "Google Maven",
+    "name": "androidx.test.runner",
+    "version": "1.6.2",
+    "published": "Wed, 14 Aug 2024 20:24:34 GMT",
+    "source": "https://dl.google.com/dl/android/maven2/androidx/test/runner/1.6.2/runner-1.6.2.pom",
+    "note": "Official artifact Last-Modified timestamp"
+  },
+  {
+    "registry": "Google Maven",
+    "name": "androidx.test.ext.junit",
+    "version": "1.2.1",
+    "published": "Wed, 26 Jun 2024 22:29:29 GMT",
+    "source": "https://dl.google.com/dl/android/maven2/androidx/test/ext/junit/1.2.1/junit-1.2.1.pom",
+    "note": "Official artifact Last-Modified timestamp"
+  }
+]

@@ -1,0 +1,14 @@
+W8 iOS Secure Enclave tests, latest Simulator result only.
+Both physical-test bodies also compiled using iphoneos build-for-testing (unsigned).
+Physical device/provisioning still required; skipped tests are not hardware verification.
+
+Test Case '-[RunnerTests.StrongSigningGateTests testIdentityBlobSupportsSigningAndECDH]' started.
+/Users/guang/dev/keyvalet/mobile/ios/RunnerTests/StrongSigningGateTests.swift:27: -[RunnerTests.StrongSigningGateTests testIdentityBlobSupportsSigningAndECDH] : Test skipped - Physical Secure Enclave and provisioned App Group required; Simulator does not prove hardware authentication
+Test Case '-[RunnerTests.StrongSigningGateTests testIdentityBlobSupportsSigningAndECDH]' skipped (0.018 seconds).
+Test Case '-[RunnerTests.StrongSigningGateTests testTamperedUICannotSignStrongWithoutBiometry]' started.
+/Users/guang/dev/keyvalet/mobile/ios/RunnerTests/StrongSigningGateTests.swift:9: -[RunnerTests.StrongSigningGateTests testTamperedUICannotSignStrongWithoutBiometry] : Test skipped - Physical Secure Enclave and provisioned App Group required; Simulator does not prove hardware authentication
+Test Case '-[RunnerTests.StrongSigningGateTests testTamperedUICannotSignStrongWithoutBiometry]' skipped (0.001 seconds).
+	 Executed 2 tests, with 2 tests skipped and 0 failures (0 unexpected) in 0.019 (0.020) seconds
+	 Executed 2 tests, with 2 tests skipped and 0 failures (0 unexpected) in 0.019 (0.020) seconds
+	 Executed 2 tests, with 2 tests skipped and 0 failures (0 unexpected) in 0.019 (0.023) seconds
+** TEST SUCCEEDED **

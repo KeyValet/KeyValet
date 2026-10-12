@@ -16,6 +16,41 @@ fn load(name: &str) -> Value {
     canonical::parse_json(&std::fs::read(path).unwrap()).unwrap()
 }
 
+#[test]
+fn streaming_executable_digest_handles_short_reads_and_io_failure() {
+    use std::io::{self, Read};
+    struct Short {
+        data: io::Cursor<Vec<u8>>,
+        fail: bool,
+    }
+    impl Read for Short {
+        fn read(&mut self, buffer: &mut [u8]) -> io::Result<usize> {
+            if self.fail {
+                return Err(io::Error::other("synthetic read failure"));
+            }
+            let length = buffer.len().min(31);
+            self.data.read(&mut buffer[..length])
+        }
+    }
+    for bytes in [vec![], vec![0, 255, 1], vec![37; 131073]] {
+        let expected = canonical::sha256_hex(&bytes);
+        let length = bytes.len() as u64;
+        assert_eq!(
+            canonical::sha256_reader(Short {
+                data: io::Cursor::new(bytes),
+                fail: false
+            })
+            .unwrap(),
+            (expected, length)
+        );
+    }
+    assert!(canonical::sha256_reader(Short {
+        data: io::Cursor::new(vec![]),
+        fail: true
+    })
+    .is_err());
+}
+
 fn decode<T: serde::de::DeserializeOwned>(value: &Value) -> T {
     serde_json::from_value(value.clone()).unwrap()
 }
@@ -546,15 +581,31 @@ fn every_wire_object_roundtrips_and_validates_against_its_schema() {
         let validator = jsonschema::JSONSchema::compile(&schema).unwrap();
         let serialized = schemas::roundtrip(name, sample["value"].clone()).unwrap();
         let mut extended = sample["value"].clone();
-        extended["x_unknown"] = json!({"nested": [true, null, {"future": "value"}]});
-        let extended_roundtrip = schemas::roundtrip(name, extended.clone()).unwrap();
-        observed.insert(name.into(), json!({"valid": validator.is_valid(&serialized), "roundtrip": serialized == sample["value"], "extra_roundtrip": extended == extended_roundtrip}));
+        let extra_roundtrip = if let Some(object) = extended.as_object_mut() {
+            object.insert(
+                "x_unknown".into(),
+                json!({"nested": [true, null, {"future": "value"}]}),
+            );
+            schemas::roundtrip(name, extended.clone())
+                .is_ok_and(|serialized| serialized == extended)
+        } else {
+            false
+        };
+        observed.insert(name.into(), json!({"valid": validator.is_valid(&serialized), "roundtrip": serialized == sample["value"], "extra_roundtrip": extra_roundtrip}));
     }
     let files = std::fs::read_dir(Path::new(env!("CARGO_MANIFEST_DIR")).join("schemas/remote"))
         .unwrap()
         .count();
+    let mismatches: Vec<_> = observed
+        .iter()
+        .filter(|(name, value)| **value != vector["expect"]["samples"][name.as_str()])
+        .map(|(name, _)| name.as_str())
+        .collect();
     check(
-        "schema_samples.json",
+        &format!(
+            "schema_samples.json: {} (schema count {files})",
+            mismatches.join(", ")
+        ),
         json!({"schemas": files, "samples": observed}),
         &vector["expect"],
     );
@@ -607,4 +658,38 @@ fn lossless_unknown_fields_participate_in_signatures() {
         )),
         &wrong["expect"],
     );
+}
+
+#[test]
+fn relay_contract_extensions_match_the_typed_objects_and_schemas() {
+    contract_extensions("relay_contract_extensions.json");
+}
+
+#[test]
+fn owner_intents_match_the_typed_objects_and_schemas() {
+    contract_extensions("owner_intent_contracts.json");
+}
+
+fn contract_extensions(filename: &str) {
+    let vector = load(filename);
+    let observed: Vec<_> = vector["cases"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|sample| {
+            let schema_path = Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join("schemas/remote")
+                .join(sample["schema"].as_str().unwrap());
+            let schema: Value =
+                serde_json::from_slice(&std::fs::read(schema_path).unwrap()).unwrap();
+            let roundtrip = schemas::roundtrip(
+                sample["type"].as_str().unwrap(),
+                sample["value"].clone(),
+            )
+            .is_ok_and(|serialized| serialized == sample["value"]);
+            json!({"roundtrip":roundtrip,
+                "schema_valid":jsonschema::JSONSchema::compile(&schema).unwrap().is_valid(&sample["value"])})
+        })
+        .collect();
+    check(filename, json!(observed), &vector["expect"]);
 }

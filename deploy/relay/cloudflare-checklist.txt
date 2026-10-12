@@ -1,0 +1,29 @@
+KeyValet relay origin deployment checklist
+
+1. Create the dedicated, non-login keyvalet-relay-server user and group.
+2. Install kv-server at /usr/local/lib/keyvalet/kv-server (root owned, executable).
+3. Install keyvalet-relay.service as
+   /etc/systemd/system/keyvalet-relay-server.service and enable/start that unit.
+   The distinct installed name avoids colliding with the relay-client unit.
+   Verify that only 127.0.0.1:8787 listens and /v1/health returns ok=true.
+4. Create a Cloudflare Origin CA certificate for the relay hostname.
+   Store it as /etc/ssl/keyvalet-relay/origin.pem and origin.key (root owned;
+   private key mode 0600). Use the Origin CA certificate, not a self-signed cert.
+5. Replace relay.example.com in nginx.conf.template, install it as
+   /etc/nginx/conf.d/keyvalet-relay.conf, run nginx -t and reload nginx.
+6. Point the hostname's A/AAAA records at the origin's public address.
+   Enable the orange cloud (Proxied). Enable WebSockets in Cloudflare Network.
+7. Set SSL/TLS encryption mode to Full (strict).
+8. Restrict inbound TCP 443 to current Cloudflare IPv4/IPv6 ranges from
+   https://www.cloudflare.com/ips/ . Refresh the allowlist when ranges change.
+   Do not expose port 8787. Restrict administrative SSH separately.
+   This firewall rule is also required to trust CF-Connecting-IP forwarded by nginx.
+9. Optional: enable Authenticated Origin Pulls in Cloudflare, install its CA
+   in /etc/ssl/keyvalet-relay/cloudflare-origin-pull-ca.pem and uncomment
+   ssl_client_certificate / ssl_verify_client in the nginx template.
+10. Check HTTPS /v1/health through the proxied hostname and connect /v1/presence
+    with Authorization: Device <token> and subprotocol kv-relay-v1.
+    Send {"t":"ping"} every 30 seconds; expect {"t":"pong"}.
+    Verify reconnection and inbox replay after an edge or origin restart.
+11. For Docker on Linux, use --network=host and a volume owned by UID/GID 8787.
+    Keep nginx on the host and retain the loopback-only listener.

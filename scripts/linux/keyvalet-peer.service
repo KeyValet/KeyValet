@@ -1,0 +1,35 @@
+[Unit]
+Description=KeyValet Linux caller identity broker
+Before=keyvalet.service
+
+[Service]
+Type=simple
+User=root
+Group=keyvalet
+ExecStart=/usr/local/lib/keyvalet/bin/kv-helper --peer-broker
+RuntimeDirectory=keyvalet-peer
+RuntimeDirectoryMode=0750
+UMask=0077
+Restart=always
+RestartSec=3
+LimitCORE=0
+NoNewPrivileges=yes
+# Required only to inspect other UIDs. The helper and relay client retain no capabilities.
+CapabilityBoundingSet=CAP_SYS_PTRACE
+AmbientCapabilities=CAP_SYS_PTRACE
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictNamespaces=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+RestrictAddressFamilies=AF_UNIX
+InaccessiblePaths=-/var/lib/keyvalet -/var/lib/keyvalet-relay
+
+[Install]
+WantedBy=multi-user.target

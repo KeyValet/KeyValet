@@ -1,0 +1,79 @@
+W8 validation, 2026-10-12
+
+CARGO_TARGET_DIR=/Users/guang/dev/keyvalet/rust/target-w8
+Cargo packages: -p kv-mobile-core -p kv-push; main workspace / shared Cargo.lock (--locked).
+Rust stable 1.99.0; Flutter 3.41.6; Dart 3.11.4; Xcode 26.2; Android NDK 28.2.13676358.
+No installed KeyValet daemon, root, sudo, GUI, real push credentials or physical biometrics are used by software tests.
+
+Rust format: PASS
+Source log: rust/target-w8/fmt-final.log
+
+Rust clippy --locked --all-targets -- -D warnings: PASS
+Source log: rust/target-w8/main-clippy.log
+    Finished `dev` profile [unoptimized] target(s) in 7.05s
+
+Rust host build --locked: PASS
+Source log: rust/target-w8/main-build.log
+    Finished `dev` profile [unoptimized] target(s) in 8.33s
+
+Rust host tests --locked: PASS
+Source log: rust/target-w8/main-tests.log
+    Finished `test` profile [unoptimized] target(s) in 5.28s
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 35.64s
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+Flutter analyze: PASS
+Source log: rust/target-w8/flutter-analyze-final.log
+No issues found! (ran in 2.4s)
+
+Flutter widget tests: PASS
+Source log: rust/target-w8/flutter-tests-final.log
+00:02 +12: All tests passed!
+
+Rust iOS + Simulator libraries / XCFramework: PASS
+Source log: rust/target-w8/native-xcframework-final.log
+    Finished `dev` profile [unoptimized] target(s) in 3.77s
+    Finished `dev` profile [unoptimized] target(s) in 3.72s
+xcframework successfully written out to: /Users/guang/dev/keyvalet/mobile/native/KvMobileCore.xcframework
+
+Rust Android arm64 libraries: PASS
+Source log: rust/target-w8/native-android-final.log
+    Finished `dev` profile [unoptimized] target(s) in 4.34s
+
+Flutter Android APK build: PASS
+Source log: rust/target-w8/flutter-android-final.log
+✓ Built build/app/outputs/flutter-apk/app-debug.apk
+
+Flutter iOS Simulator App and embedded NSE: PASS
+Source log: rust/target-w8/flutter-ios-final.log
+✓ Built build/ios/iphonesimulator/Runner.app
+
+Unsigned iOS device App / NSE / native tests SDK compile: PASS
+Source log: rust/target-w8/ios-device-build-final.log
+** TEST BUILD SUCCEEDED **
+
+iOS Simulator hardware gates: 2 explicitly skipped, no hardware proof
+Source log: rust/target-w8/ios-gate-final.log
+	 Executed 2 tests, with 2 tests skipped and 0 failures (0 unexpected) in 0.019 (0.020) seconds
+	 Executed 2 tests, with 2 tests skipped and 0 failures (0 unexpected) in 0.019 (0.020) seconds
+	 Executed 2 tests, with 2 tests skipped and 0 failures (0 unexpected) in 0.019 (0.023) seconds
+** TEST SUCCEEDED **
+
+Android instrumentation APK SDK compile (device run updated below)
+Source log: rust/target-w8/android-gate-build.log
+BUILD SUCCESSFUL in 21s
+
+Software relay acceptance: W2 spawn_test_relay, DK auth, two-sided SAS pairing, silent -> real 30 second wait -> same-ID escalation, Quick background decision, T2 background rejection / authorized Strong decision, one-hour settings grant, revoke-all, W0 decision/grant/directive verification, ack retry after injected relay storage failure, foreground lifecycle restart.
+Additional regressions: encrypted database/WAL/restart/symlink rejection; native callback vectors/signature validation; bounded QueryGrants/QueryAudit public models; failed Strong signing cannot enqueue/consume; early escalation/cancellation/offline notification cache; 429/503 ciphertext FIFO retries; native C ABI rejects arbitrary signing.
+
+iOS hardware gates: 2 skipped on Simulator. Physical secure enclave signing and lock-screen behavior NOT VERIFIED.
+Android hardware gate updated: targetSdk 31 -> 36; physical Pixel 7 normal install succeeded; 2 native tests passed (Rust/JNI bootstrap and failed Strong signing without authentication), no skips.
+Production APNs / FCM delivery, signed IPA / AAB and store distribution NOT RUN.
+Screenshots are CI public-model fixtures, not a physical end-to-end recording.
+No coverage percentage is inferred from test counts.
+
+Android SDK correction: main and test APK targetSdk=36/minSdk=31; signatures verified; normal installation and main app startup verified on Pixel 7; check-android-apks.py validates packaged targetSdk, portable JNI DT_NEEDED and bundled Rust library.
+Latest evidence: assets/w8-android-sdk-fix.txt and assets/w8-android-api36.png.

@@ -1,0 +1,12 @@
+{
+  "command": [
+    "devin",
+    "-p",
+    "Reply only HI. Do not use any tool.",
+    "--respect-workspace-trust",
+    "false"
+  ],
+  "exit": 0,
+  "elapsed_s": 11.985,
+  "supervised_end": false
+}

@@ -183,6 +183,26 @@ impl CredentialRecord {
 }
 
 /// Wipe owned JSON strings (including object keys) recursively before releasing their allocations.
+pub struct SecretJson(pub serde_json::Value);
+
+impl std::ops::Deref for SecretJson {
+    type Target = serde_json::Value;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+impl std::ops::DerefMut for SecretJson {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+impl Drop for SecretJson {
+    fn drop(&mut self) {
+        scrub_json(&mut self.0);
+    }
+}
+
+/// Wipe owned JSON strings (including object keys) recursively before releasing their allocations.
 pub fn scrub_json(value: &mut serde_json::Value) {
     match value {
         serde_json::Value::String(text) => text.zeroize(),
@@ -239,6 +259,9 @@ pub struct VaultData {
     pub types: HashMap<String, TypeRecord>,
     #[serde(default)]
     pub credentials: HashMap<String, HashMap<String, CredentialRecord>>,
+    /// Authenticated helper metadata, never included in credential list/get responses.
+    #[serde(default, skip_serializing_if = "serde_json::Map::is_empty")]
+    pub private_metadata: serde_json::Map<String, serde_json::Value>,
 }
 
 impl VaultData {
@@ -247,6 +270,15 @@ impl VaultData {
             version: 1,
             types: HashMap::new(),
             credentials: HashMap::new(),
+            private_metadata: serde_json::Map::new(),
+        }
+    }
+}
+
+impl Drop for VaultData {
+    fn drop(&mut self) {
+        for value in self.private_metadata.values_mut() {
+            scrub_json(value);
         }
     }
 }

@@ -1,0 +1,20 @@
+{
+  "runtime": "claude",
+  "command": [
+    "claude",
+    "-p",
+    "Reply only HI. Do not use any tool.",
+    "--strict-mcp-config",
+    "--mcp-config",
+    "/var/folders/0h/p1772ckx3yq8qn5sqb_wpg_40000gn/T/keyvalet-r2d-login-393vlek6/empty-mcp.json",
+    "--settings",
+    "{\"disableAllHooks\":true}",
+    "--tools",
+    "",
+    "--no-session-persistence"
+  ],
+  "elapsed_s": 45.045,
+  "exit": 143,
+  "supervised_end": true,
+  "cwd": "/var/folders/0h/p1772ckx3yq8qn5sqb_wpg_40000gn/T/keyvalet-r2d-login-393vlek6"
+}

@@ -32,6 +32,7 @@ fn install(
         "scripts/install-linux.sh",
         "scripts/install-linux-root.sh",
         "scripts/linux/keyvalet.service",
+        "scripts/linux/keyvalet-peer.service",
         "scripts/linux/dev.keyvalet.policy",
         "templates/catalog.json",
     ] {

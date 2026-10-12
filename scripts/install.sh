@@ -21,8 +21,439 @@
 # Upgrading from the pre-rename credential-mcp: automatically migrates /var/db/credential-mcp to /var/db/keyvalet and removes the old install.
 set -eu
 
+# This mode also provides an installation-free configuration test boundary.
+kv_runtime_config() {
+  python3 - "$@" <<'KV_RUNTIME_PY'
+import argparse
+import copy
+import json
+import os
+from pathlib import Path
+import re
+import shlex
+import shutil
+import tempfile
+
+parser = argparse.ArgumentParser()
+parser.add_argument("action", choices=("install", "remove"))
+parser.add_argument("--home", type=Path, default=Path.home())
+parser.add_argument("--project", type=Path)
+parser.add_argument("--bin", type=Path, default=Path("/usr/local/lib/keyvalet/bin"))
+parser.add_argument("--detected", default="")
+args = parser.parse_args()
+home = args.home.absolute()
+project = args.project.absolute() if args.project else None
+state_path = home / ".keyvalet/remote-runtime-state.json"
+pending = {}
+
+def safe(path):
+    for parent in (path, *path.parents):
+        if parent.is_symlink():
+            raise ValueError("unsafe configuration link")
+    if path.exists() and (not path.is_file() or path.stat().st_uid != os.getuid()):
+        raise ValueError("unsafe configuration owner or type")
+
+def read(path):
+    safe(path)
+    if path.exists():
+        if path.stat().st_size > 4 * 1024 * 1024:
+            raise ValueError("configuration too large")
+        return path.read_text(encoding="utf-8")
+    return ""
+
+def pairs(items):
+    result = {}
+    for key, value in items:
+        if key in result:
+            raise ValueError("duplicate configuration key")
+        result[key] = value
+    return result
+
+def load_json(path):
+    value = json.loads(read(path) or "{}", object_pairs_hook=pairs)
+    if not isinstance(value, dict):
+        raise ValueError("configuration must be an object")
+    return value
+
+def plan_json(path, value):
+    text = json.dumps(value, indent=2, ensure_ascii=False) + "\n"
+    if text != read(path):
+        pending[path] = text
+
+def table(value, key):
+    child = value.setdefault(key, {})
+    if not isinstance(child, dict):
+        raise ValueError("configuration table must be an object")
+    return child
+
+def atomic(path, text):
+    safe(path)
+    path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+    fd, name = tempfile.mkstemp(prefix=".keyvalet-config-", dir=path.parent)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as stream:
+            stream.write(text)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(name, path)
+    finally:
+        if os.path.exists(name):
+            os.unlink(name)
+
+def toml_load(text):
+    try:
+        import tomllib
+        return tomllib.loads(text)
+    except ImportError:
+        try:
+            import tomlkit
+            return tomlkit.parse(text).unwrap()
+        except ImportError:
+            raise ValueError("TOML configuration requires Python 3.11+ or tomlkit") from None
+
+def header_path(header):
+    value = toml_load(header + "\n__keyvalet_probe__ = 1\n")
+    keys = []
+    while isinstance(value, dict) and "__keyvalet_probe__" not in value:
+        if len(value) != 1:
+            return ()
+        key, value = next(iter(value.items()))
+        keys.append(key)
+    return tuple(keys)
+
+def toml_update(path, remove, entry):
+    original = read(path)
+    before = toml_load(original)
+    lines = original.splitlines(keepends=True)
+    if lines and not lines[-1].endswith("\n"):
+        lines[-1] += "\n"
+    headers = []
+    for index, line in enumerate(lines):
+        if re.match(r"^\s*\[", line):
+            headers.append((index, header_path(line.strip())))
+    servers = before.get("mcp_servers", {})
+    if not isinstance(servers, dict):
+        raise ValueError("invalid MCP TOML table")
+    existing = servers.get("keyvalet")
+    if existing is not None and not isinstance(existing, dict):
+        raise ValueError("invalid KeyValet TOML table")
+    section = next((i for i, keys in headers if keys == ("mcp_servers", "keyvalet")), None)
+    if existing is not None and section is None:
+        # Preserve inline/commented TOML exactly when the existing WSL dependency is present.
+        try:
+            import tomlkit
+        except ImportError:
+            raise ValueError("inline KeyValet TOML requires tomlkit; original file retained") from None
+        document = tomlkit.parse(original)
+        current = document["mcp_servers"]["keyvalet"]
+        if remove:
+            if entry.get("created"):
+                del document["mcp_servers"]["keyvalet"]
+            elif current.get("tool_timeout_sec") == 900:
+                if entry.get("had_timeout"):
+                    current["tool_timeout_sec"] = entry["timeout"]
+                else:
+                    current.pop("tool_timeout_sec", None)
+        else:
+            current["tool_timeout_sec"] = 900
+        changed = tomlkit.dumps(document)
+    elif section is None:
+        if remove:
+            return
+        changed = original.rstrip() + "\n\n[mcp_servers.keyvalet]\ncommand = " + json.dumps(str(args.bin / "kv-mcp")) + "\nargs = []\ntool_timeout_sec = 900\n"
+    else:
+        end = next((i for i, _ in headers if i > section), len(lines))
+        timeout = [i for i in range(section + 1, end) if re.match(r'^\s*(?:tool_timeout_sec|"tool_timeout_sec"|\'tool_timeout_sec\')\s*=', lines[i])]
+        if remove and entry.get("created"):
+            ranges = [(i, next((j for j, _ in headers if j > i), len(lines))) for i, keys in headers if keys[:2] == ("mcp_servers", "keyvalet")]
+            for start, stop in reversed(ranges):
+                del lines[start:stop]
+        elif not remove or existing.get("tool_timeout_sec") == 900:
+            if timeout:
+                del lines[timeout[0]]
+                end -= 1
+            if not remove:
+                lines.insert(end, "tool_timeout_sec = 900\n")
+            elif entry.get("had_timeout"):
+                lines.insert(end, "tool_timeout_sec = " + json.dumps(entry["timeout"]) + "\n")
+        changed = "".join(lines)
+    after = toml_load(changed)
+    expected = copy.deepcopy(before)
+    target = expected.setdefault("mcp_servers", {})
+    if remove:
+        if entry.get("created"):
+            target.pop("keyvalet", None)
+            if not target and "mcp_servers" not in after:
+                expected.pop("mcp_servers", None)
+        elif isinstance(target.get("keyvalet"), dict) and target["keyvalet"].get("tool_timeout_sec") == 900:
+            if entry.get("had_timeout"):
+                target["keyvalet"]["tool_timeout_sec"] = entry["timeout"]
+            else:
+                target["keyvalet"].pop("tool_timeout_sec", None)
+    else:
+        current = target.setdefault("keyvalet", {"command": str(args.bin / "kv-mcp"), "args": []})
+        current["tool_timeout_sec"] = 900
+    if after != expected:
+        raise ValueError("TOML update would change unrelated configuration")
+    if changed != original:
+        pending[path] = changed
+
+def strip_hooks(rows, commands):
+    if not isinstance(rows, list):
+        raise ValueError("hook event must be an array")
+    kept = []
+    for row in rows:
+        if not isinstance(row, dict):
+            raise ValueError("hook row must be an object")
+        if row.get("command") in commands:
+            continue
+        item = copy.deepcopy(row)
+        if "hooks" in item:
+            nested = item["hooks"]
+            if not isinstance(nested, list) or any(not isinstance(h, dict) for h in nested):
+                raise ValueError("invalid nested hook array")
+            item["hooks"] = [h for h in nested if h.get("command") not in commands]
+            if not item["hooks"]:
+                continue
+        kept.append(item)
+    return kept
+
+try:
+    state = load_json(state_path)
+    records = table(state, "files")
+    if args.action == "remove":
+        for name, entry in list(records.items()):
+            path = Path(name)
+            if not path.exists():
+                continue
+            if entry["format"] == "toml":
+                toml_update(path, True, entry)
+                continue
+            value = load_json(path)
+            if entry.get("server") and isinstance(value.get("mcpServers"), dict):
+                server = value["mcpServers"].get("keyvalet")
+                if isinstance(server, dict):
+                    if entry.get("created"):
+                        del value["mcpServers"]["keyvalet"]
+                    elif server.get("timeout") == 900000:
+                        if entry.get("had_timeout"):
+                            server["timeout"] = entry["timeout"]
+                        else:
+                            server.pop("timeout", None)
+            if entry.get("event") and isinstance(value.get("hooks"), dict):
+                event = entry["event"]
+                if event in value["hooks"]:
+                    value["hooks"][event] = strip_hooks(value["hooks"][event], entry["commands"])
+                    if not value["hooks"][event]:
+                        del value["hooks"][event]
+            plan_json(path, value)
+    else:
+        specified = set(filter(None, args.detected.split(",")))
+        def detected(name, *paths):
+            return name in specified if specified else any(path.exists() for path in paths) or shutil.which(name) is not None
+        def server(path, timed=True):
+            value = load_json(path)
+            servers = table(value, "mcpServers")
+            current = servers.get("keyvalet")
+            if current is not None and not isinstance(current, dict):
+                raise ValueError("KeyValet MCP entry must be an object")
+            record = records.setdefault(str(path), {"format":"json", "server":True, "created":current is None, "had_timeout":current is not None and "timeout" in current})
+            if current is not None and "timeout" in current and "timeout" not in record:
+                record["timeout"] = current["timeout"]
+            current = servers.setdefault("keyvalet", {"command":str(args.bin / "kv-mcp"), "args":[]})
+            if timed:
+                current["timeout"] = 900000
+            plan_json(path, value)
+        def hook(path, event, mode, cursor=False):
+            value = load_json(path)
+            hooks = table(value, "hooks")
+            command = shlex.quote(str(args.bin / "kv-hook")) + " " + mode
+            rows = strip_hooks(hooks.get(event, []), [command])
+            action = {"type":"command", "command":command, "timeout":10}
+            rows.append({"command":command, "timeout":10} if cursor else {"hooks":[action]})
+            hooks[event] = rows
+            if cursor:
+                value.setdefault("version", 1)
+            records[str(path)] = {"format":"json", "event":event, "commands":[command]}
+            plan_json(path, value)
+        if detected("claude", home / ".claude", home / ".claude.json"):
+            server(home / ".claude.json")
+            hook(home / ".claude/settings.json", "Stop", "claude-stop")
+            if project and (project / ".mcp.json").exists():
+                server(project / ".mcp.json")
+        for runtime in ("codex", "grok"):
+            if detected(runtime, home / ("." + runtime)):
+                path = home / ("." + runtime) / "config.toml"
+                before = toml_load(read(path))
+                current = before.get("mcp_servers", {}).get("keyvalet")
+                record = records.setdefault(str(path), {"format":"toml", "created":current is None, "had_timeout":current is not None and "tool_timeout_sec" in current})
+                if current is not None and "tool_timeout_sec" in current and "timeout" not in record:
+                    record["timeout"] = current["tool_timeout_sec"]
+                toml_update(path, False, record)
+                if runtime == "codex":
+                    hook(home / ".codex/hooks.json", "Stop", "codex-stop")
+        if detected("cursor", home / ".cursor"):
+            hook(home / ".cursor/hooks.json", "stop", "cursor-stop", True)
+        if detected("gemini", home / ".gemini"):
+            path = home / ".gemini/settings.json"
+            server(path)
+            # Merge the staged server entry when the hook shares settings.json.
+            value = json.loads(pending.get(path, read(path) or "{}"))
+            command = shlex.quote(str(args.bin / "kv-hook")) + " gemini-after-agent"
+            hooks = table(value, "hooks")
+            hooks["AfterAgent"] = strip_hooks(hooks.get("AfterAgent", []), [command]) + [{"hooks":[{"type":"command", "name":"keyvalet-approval", "command":command, "timeout":10000}]}]
+            records[str(path)].update(event="AfterAgent", commands=[command])
+            plan_json(path, value)
+        if detected("devin", home / ".config/devin", home / ".devin"):
+            hook(home / ".config/devin/config.json", "Stop", "devin-stop")
+        # Save restoration metadata before changing user files, including interrupted installs.
+        atomic(state_path, json.dumps(state, indent=2) + "\n")
+    for path, text in pending.items():
+        if path.exists():
+            backup = Path(str(path) + ".bak-keyvalet-remote")
+            if not backup.exists():
+                atomic(backup, read(path))
+        atomic(path, text)
+    if args.action == "remove" and state_path.exists():
+        state_path.unlink()
+    print("KeyValet runtime configuration " + args.action + ": " + str(len(pending)) + " files")
+except (OSError, ValueError, TypeError, KeyError, AttributeError):
+    raise SystemExit("Cannot update KeyValet runtime configuration; originals retained where validation failed.") from None
+KV_RUNTIME_PY
+}
+
+if [ "${1:-}" = --runtime-config ]; then
+  shift
+  kv_runtime_config "$@"
+  exit
+fi
+
+KV_PROJECT_DIR=$(pwd)
+
+kv_remote_linux() {
+  KV_SOURCE=$(cd "$(dirname "$0")/.." && pwd)
+  if [ -x "$KV_SOURCE/bin/kv-relay-client" ] && [ ! -d "$KV_SOURCE/rust" ]; then
+    KV_REMOTE_BIN="$KV_SOURCE/bin"
+    KV_CLIENT_ASSETS="$KV_SOURCE/service/relay-client"
+  else
+    case "${CARGO_TARGET_DIR:-target}" in
+      /*) KV_REMOTE_BIN="$CARGO_TARGET_DIR/release" ;;
+      *) KV_REMOTE_BIN="$KV_SOURCE/rust/${CARGO_TARGET_DIR:-target}/release" ;;
+    esac
+    KV_CLIENT_ASSETS="$KV_SOURCE/rust/crates/kv-relay-client/service"
+  fi
+  for binary in kv-server kv-relay-client; do
+    [ -x "$KV_REMOTE_BIN/$binary" ] || { echo "Missing remote approval binary: $binary" >&2; return 1; }
+  done
+  [ -f "$KV_CLIENT_ASSETS/keyvalet-relay.service" ] || { echo "Missing relay-client service template" >&2; return 1; }
+  [ -f "$KV_SOURCE/deploy/relay/keyvalet-relay.service" ] || { echo "Missing relay-server service template" >&2; return 1; }
+  KV_REMOTE_STAGE=$(mktemp -d)
+  cp "$KV_REMOTE_BIN/kv-server" "$KV_REMOTE_BIN/kv-relay-client" "$KV_REMOTE_STAGE/"
+  cp "$KV_CLIENT_ASSETS/keyvalet-relay.service" "$KV_REMOTE_STAGE/client.service"
+  # Server and client cannot share a StateDirectory owned by different service users.
+  sed -e "s@/usr/local/lib/keyvalet/kv-server@/usr/local/lib/keyvalet/bin/kv-server@g" \
+      -e "s@/var/lib/keyvalet-relay@/var/lib/keyvalet-relay-server@g" \
+      -e "s@StateDirectory=keyvalet-relay\$@StateDirectory=keyvalet-relay-server@" \
+      "$KV_SOURCE/deploy/relay/keyvalet-relay.service" > "$KV_REMOTE_STAGE/server.service"
+  cp "$KV_SOURCE/deploy/relay/nginx.conf.template" "$KV_REMOTE_STAGE/nginx.conf.template"
+  KV_SERVER_RESTART=0
+  if systemctl is-active --quiet keyvalet-relay-server.service; then KV_SERVER_RESTART=1; fi
+  sudo /bin/sh -eu -c '
+    STAGE="$1"; OWNER_UID="$2"; SERVER_WAS_ACTIVE="$3"
+    for directory in /etc/keyvalet /etc/systemd/system /etc/ssl/keyvalet-relay /var/lib/keyvalet-relay /var/lib/keyvalet-relay-server /usr/local/lib/keyvalet/bin; do
+      [ ! -L "$directory" ] || { echo "Refusing remote installation symlink" >&2; exit 1; }
+    done
+    for account in keyvalet-relay keyvalet-relay-server; do
+      if ! getent passwd "$account" >/dev/null; then
+        /usr/sbin/useradd --system --user-group --home-dir "/var/lib/$account" --no-create-home --shell /usr/sbin/nologin "$account"
+      fi
+      SERVICE_UID=$(id -u "$account")
+      [ "$SERVICE_UID" -gt 0 ] && [ "$SERVICE_UID" -lt 1000 ] || { echo "Relay account must be a system user" >&2; exit 1; }
+      getent passwd "$account" | grep -Eq ":(/usr/sbin/nologin|/sbin/nologin|/bin/false)$" || { echo "Relay account must have a non-login shell" >&2; exit 1; }
+      if [ -d "/var/lib/$account" ]; then
+        [ "$(stat -c %u "/var/lib/$account")" = "$SERVICE_UID" ] || { echo "Relay state has an unexpected owner" >&2; exit 1; }
+      else
+        install -d -o "$account" -g "$account" -m 0700 "/var/lib/$account"
+      fi
+    done
+    systemctl stop keyvalet-relay.service 2>/dev/null || true
+    systemctl stop keyvalet-relay-server.service 2>/dev/null || true
+    install -o root -g root -m 0755 "$STAGE/kv-relay-client" "$STAGE/kv-server" /usr/local/lib/keyvalet/bin/
+    ln -sfn bin/kv-server /usr/local/lib/keyvalet/kv-server
+    install -o root -g root -m 0644 "$STAGE/client.service" /etc/systemd/system/keyvalet-relay.service
+    if [ -e /etc/systemd/system/keyvalet-relay-server.service ]; then
+      [ -f /etc/systemd/system/keyvalet-relay-server.service ] && [ ! -L /etc/systemd/system/keyvalet-relay-server.service ] && [ "$(stat -c %u /etc/systemd/system/keyvalet-relay-server.service)" = 0 ] || { echo "Untrusted relay-server unit" >&2; exit 1; }
+    else
+      install -o root -g root -m 0644 "$STAGE/server.service" /etc/systemd/system/keyvalet-relay-server.service
+    fi
+    install -d -o root -g root -m 0700 /etc/ssl/keyvalet-relay
+    install -d -o root -g root -m 0755 /usr/local/lib/keyvalet/relay
+    install -o root -g root -m 0644 "$STAGE/nginx.conf.template" /usr/local/lib/keyvalet/relay/nginx.conf.template
+    if [ -e /etc/keyvalet/relay-client.toml ]; then
+      [ -f /etc/keyvalet/relay-client.toml ] && [ ! -L /etc/keyvalet/relay-client.toml ] && [ "$(stat -c %u /etc/keyvalet/relay-client.toml)" = 0 ] || { echo "Untrusted relay-client configuration" >&2; exit 1; }
+      chown root:keyvalet-relay /etc/keyvalet/relay-client.toml
+      chmod 0640 /etc/keyvalet/relay-client.toml
+    fi
+    systemctl daemon-reload
+    # The helper creates the dedicated socket only after the relay UID exists.
+    systemctl restart keyvalet.service
+    if [ -f /etc/keyvalet/relay-client.toml ]; then
+      [ ! -L /etc/keyvalet/relay-client.toml ] && [ "$(stat -c %u /etc/keyvalet/relay-client.toml)" = 0 ] || { echo "Untrusted relay-client configuration" >&2; exit 1; }
+      chown root:keyvalet-relay /etc/keyvalet/relay-client.toml
+      chmod 0640 /etc/keyvalet/relay-client.toml
+    fi
+    systemctl enable keyvalet-relay.service
+    # The control worker must run before pairing creates the first authenticated binding.
+    systemctl start keyvalet-relay.service
+    if [ "$SERVER_WAS_ACTIVE" = 1 ]; then systemctl start keyvalet-relay-server.service; fi
+  ' sh "$KV_REMOTE_STAGE" "$(id -u)" "$KV_SERVER_RESTART"
+  rm -rf "$KV_REMOTE_STAGE"
+  echo "Relay server assets installed. Deploy with: keyvalet relay install --data /var/lib/keyvalet-relay-server --public-url https://relay.example.com"
+  echo "Cloudflare: 1. A/AAAA record + orange cloud. 2. Origin CA certificate + Full (strict). 3. Allow Cloudflare IP ranges on 443; keep 8787 private."
+}
+
+kv_remove_remote() {
+  KV_REMOVE_OS=$(uname -s)
+  sudo /bin/sh -eu -c '
+    PLATFORM="$1"; OWNER_UID="$2"
+    if [ "$PLATFORM" = Linux ]; then
+      systemctl disable --now keyvalet-relay.service 2>/dev/null || true
+      systemctl disable --now keyvalet-relay-server.service 2>/dev/null || true
+      rm -f /etc/systemd/system/keyvalet-relay.service /etc/systemd/system/keyvalet-relay-server.service
+      rm -f /etc/keyvalet/relay-client.toml
+      if [ -f /etc/nginx/conf.d/keyvalet-relay.conf ] && grep -q "KeyValet\|keyvalet-relay" /etc/nginx/conf.d/keyvalet-relay.conf; then
+        rm -f /etc/nginx/conf.d/keyvalet-relay.conf
+        if command -v nginx >/dev/null; then nginx -t && systemctl reload nginx; fi
+      fi
+      systemctl daemon-reload
+    else
+      /bin/launchctl bootout "gui/$OWNER_UID/dev.keyvalet.relay" 2>/dev/null || true
+      rm -f /Library/LaunchAgents/dev.keyvalet.relay.plist
+    fi
+  ' sh "$KV_REMOVE_OS" "$(id -u)"
+  kv_runtime_config remove --home "$HOME" --project "$KV_PROJECT_DIR"
+  echo "Relay services and runtime registrations removed; ciphertext queues, certificates and service accounts retained."
+}
+
+if [ "${1:-}" = --uninstall ]; then
+  shift
+  kv_remove_remote
+  KV_SOURCE=$(cd "$(dirname "$0")/.." && pwd)
+  if [ -f "$KV_SOURCE/scripts/uninstall-legacy.sh" ]; then
+    exec /bin/sh "$KV_SOURCE/scripts/uninstall-legacy.sh" "$@"
+  fi
+  exec /bin/sh "$KV_SOURCE/scripts/uninstall.sh" "$@"
+fi
+
 if [ "$(uname -s)" = Linux ]; then
-  exec /bin/sh "$(dirname "$0")/install-linux.sh" "$@"
+  /bin/sh "$(dirname "$0")/install-linux.sh" "$@"
+  kv_remote_linux
+  KV_REGISTER=1
+  for option in "$@"; do [ "$option" != --no-register ] || KV_REGISTER=0; done
+  if [ "$KV_REGISTER" = 1 ] && [ "${KEYVALET_NO_REGISTER:-0}" != 1 ]; then
+    kv_runtime_config install --home "$HOME" --project "$KV_PROJECT_DIR"
+  fi
+  exit
 fi
 
 # UI language: KEYVALET_LANG=en|zh takes priority, otherwise fall back to the macOS UI language
@@ -50,7 +481,7 @@ if [ -x "$SRC_DIR/bin/kv-helper" ] && [ ! -d "$SRC_DIR/rust" ]; then
   say "==> 使用发行包内的预编译二进制（Apple Silicon）" "==> Using the release package's prebuilt binaries (Apple Silicon)"
   PREBUILT=1
   BIN_DIR="$SRC_DIR/bin"
-  for b in kv-helper kv-touchid kv-mcp kv-cli kv-hook; do
+  for b in kv-helper kv-touchid kv-mcp kv-cli kv-hook kv-server kv-relay-client; do
     [ -x "$BIN_DIR/$b" ] || { say "发行包不完整：缺少 $b" "Incomplete release package: missing $b" >&2; exit 1; }
     [ "$(/usr/bin/lipo -archs "$BIN_DIR/$b" 2>/dev/null)" = arm64 ] || { say "$b 不是 arm64 二进制，此发行包只支持 Apple Silicon；请改用源码安装" "$b is not an arm64 binary; this release package supports Apple Silicon only -- install from source instead" >&2; exit 1; }
   done
@@ -70,7 +501,7 @@ else
   cd "$SRC_DIR/rust"
   cargo build --release --locked --target-dir "$KV_BUILD_TARGET_DIR"
   BIN_DIR="$KV_BUILD_TARGET_DIR/release"
-  for b in kv-helper kv-touchid kv-mcp kv-cli kv-hook; do
+  for b in kv-helper kv-touchid kv-mcp kv-cli kv-hook kv-server kv-relay-client; do
     [ -x "$BIN_DIR/$b" ] || { say "构建产物缺失：$b" "Build artifact missing: $b" >&2; exit 1; }
   done
 fi
@@ -78,7 +509,7 @@ fi
 STAGE=$(mktemp -d)
 trap 'rm -rf "$STAGE"' EXIT
 mkdir -p "$STAGE/bin" "$STAGE/templates"
-cp "$BIN_DIR/kv-helper" "$BIN_DIR/kv-touchid" "$BIN_DIR/kv-mcp" "$BIN_DIR/kv-cli" "$BIN_DIR/kv-hook" "$STAGE/bin/"
+cp "$BIN_DIR/kv-helper" "$BIN_DIR/kv-touchid" "$BIN_DIR/kv-mcp" "$BIN_DIR/kv-cli" "$BIN_DIR/kv-hook" "$BIN_DIR/kv-server" "$BIN_DIR/kv-relay-client" "$STAGE/bin/"
 cp -R "$SRC_DIR/templates/." "$STAGE/templates/" 2>/dev/null || true
 TEAM_ID=PWCRJPY7YC
 team_of() { /usr/bin/codesign -dv --verbose=4 "$1" 2>&1 | /usr/bin/sed -n 's/^TeamIdentifier=\(.*\)/\1/p'; }
@@ -105,7 +536,7 @@ if [ "$PREBUILT" = 1 ] && [ "$(team_of "$BIN_DIR/kv-helper")" = "$TEAM_ID" ] && 
   say "发行包自带 $TEAM_ID 签名，保持原样" "The release package already carries the $TEAM_ID signature; keeping it"
 elif [ -n "$IDENTITY_SHA" ]; then
   say "==> 使用 $TEAM_ID 身份为二进制签名" "==> Signing binaries with the $TEAM_ID identity"
-  for b in helper touchid mcp cli hook; do
+  for b in helper touchid mcp cli hook server relay-client; do
     /usr/bin/codesign --force --options runtime --identifier "dev.keyvalet.$b" -s "$IDENTITY_SHA" "$STAGE/bin/kv-$b" >/dev/null \
       || { say "签名失败：kv-$b" "Signing failed: kv-$b" >&2; exit 1; }
   done
@@ -124,6 +555,19 @@ if /usr/bin/codesign --verify --strict "$STAGE/bin/kv-helper" 2>/dev/null \
   say "==> 启用 launchd 守护进程模式（dev.keyvalet.helper + dev.keyvalet.agent）" "==> Enabling launchd daemon mode (dev.keyvalet.helper + dev.keyvalet.agent)"
 else
   say "未检测到可用的 $TEAM_ID 签名身份，按 sudo 模式安装（功能相同，每个会话经 sudo 起 helper）" "No usable $TEAM_ID signing identity found; installing in sudo mode (same features -- each session spawns the helper via sudo)"
+fi
+
+RELAY_MODE=0
+if [ "$DAEMON_MODE" = 1 ] && /usr/bin/codesign --verify --strict "$STAGE/bin/kv-relay-client" 2>/dev/null \
+    && [ "$(team_of "$STAGE/bin/kv-relay-client")" = "$TEAM_ID" ] \
+    && /usr/bin/codesign -v -R 'identifier "dev.keyvalet.relay-client"' "$STAGE/bin/kv-relay-client" 2>/dev/null; then
+  RELAY_MODE=1
+  if [ "$PREBUILT" = 1 ]; then
+    KV_RELAY_PLIST="$SRC_DIR/service/relay-client/dev.keyvalet.relay.plist"
+  else
+    KV_RELAY_PLIST="$SRC_DIR/rust/crates/kv-relay-client/service/dev.keyvalet.relay.plist"
+  fi
+  cp "$KV_RELAY_PLIST" "$STAGE/dev.keyvalet.relay.plist"
 fi
 
 USER_NAME=$(id -un)
@@ -208,7 +652,7 @@ fi
 # This whole root script is ONE single-quoted string: never use a single quote (apostrophe)
 # anywhere inside it, not even in a comment -- it would end the string early.
 $SUDO /bin/sh -eu -c '
-  INSTALL_DIR="$1"; VAULT_DIR="$2"; CLI_LINK="$3"; STAGE="$4"; SUDOERS_FILE="$5"; KV_LANG="$6"; DAEMON_MODE="$7"; OWNER_UID="$8"
+  INSTALL_DIR="$1"; VAULT_DIR="$2"; CLI_LINK="$3"; STAGE="$4"; SUDOERS_FILE="$5"; KV_LANG="$6"; DAEMON_MODE="$7"; OWNER_UID="$8"; RELAY_MODE="$9"; OWNER_HOME="${10}"
   say() { if [ "$KV_LANG" = zh ]; then printf "%s\n" "$1"; else printf "%s\n" "$2"; fi; }
   rm -rf "$INSTALL_DIR.new"
   mkdir -p "$INSTALL_DIR.new"
@@ -221,6 +665,7 @@ $SUDO /bin/sh -eu -c '
   # GUI domain of the installing user.
   /bin/launchctl bootout "system/dev.keyvalet.helper" 2>/dev/null || true
   /bin/launchctl bootout "gui/$OWNER_UID/dev.keyvalet.agent" 2>/dev/null || true
+  /bin/launchctl bootout "gui/$OWNER_UID/dev.keyvalet.relay" 2>/dev/null || true
   # Revoke sessions before switching the installed executables and rotating the vault key.
   /usr/bin/pkill -TERM -x kv-helper || [ "$?" -eq 1 ]
   /usr/bin/pkill -TERM -u "$OWNER_UID" -x kv-mcp || [ "$?" -eq 1 ]
@@ -261,7 +706,15 @@ $SUDO /bin/sh -eu -c '
     /bin/launchctl print "gui/$OWNER_UID/dev.keyvalet.agent" >/dev/null
     say "launchd 守护进程已启动：dev.keyvalet.helper + dev.keyvalet.agent" "launchd daemon started: dev.keyvalet.helper + dev.keyvalet.agent"
   fi
-' sh "$INSTALL_DIR" "$VAULT_DIR" "$CLI_LINK" "$STAGE" "$SUDOERS_FILE" "$KV_LANG" "$DAEMON_MODE" "$(id -u)"
+  if [ "$RELAY_MODE" = 1 ]; then
+    install -o root -g wheel -m 0644 "$STAGE/dev.keyvalet.relay.plist" /Library/LaunchAgents/dev.keyvalet.relay.plist
+    /bin/launchctl enable "gui/$OWNER_UID/dev.keyvalet.relay"
+    /bin/launchctl bootstrap "gui/$OWNER_UID" /Library/LaunchAgents/dev.keyvalet.relay.plist
+  else
+    rm -f /Library/LaunchAgents/dev.keyvalet.relay.plist
+    say "远程 relay 需要签名的 daemon 与 relay-client" "Remote relay requires the signed daemon and relay-client"
+  fi
+' sh "$INSTALL_DIR" "$VAULT_DIR" "$CLI_LINK" "$STAGE" "$SUDOERS_FILE" "$KV_LANG" "$DAEMON_MODE" "$(id -u)" "$RELAY_MODE" "$HOME"
 sudo -k
 
 # Verify the passwordless rule took effect: the helper exits immediately on reading EOF (no Touch ID prompt)
@@ -271,6 +724,9 @@ if ! /usr/bin/sudo -n -- "$INSTALL_DIR/bin/kv-helper" </dev/null >/dev/null 2>&1
 fi
 
 . "$SRC_DIR/scripts/configure-runtimes.sh"
+if [ "${KEYVALET_NO_REGISTER:-0}" != 1 ]; then
+  kv_runtime_config install --home "$HOME" --project "$KV_PROJECT_DIR"
+fi
 
 echo
 say "安装完成。" "Installation complete."

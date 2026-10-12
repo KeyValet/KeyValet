@@ -19,17 +19,22 @@ $target = if ($Architecture -eq 'arm64') { 'aarch64-pc-windows-msvc' } else { 'x
 if (!$BinaryDirectory) {
     Push-Location "$repo/rust"
     try {
-        & cargo build --release --locked --target $target -p kv-helper -p kv-agent -p kv-cli -p kv-mcp -p kv-hook
+        & cargo build --release --locked --target $target -p kv-helper -p kv-agent -p kv-cli -p kv-mcp -p kv-hook -p kv-server -p kv-relay-client
         if ($LASTEXITCODE -ne 0) { throw 'Windows release build failed.' }
     } finally { Pop-Location }
-    $BinaryDirectory = "$repo/rust/target/$target/release"
+    $buildTarget = "$repo/rust/target"
+    if ($env:CARGO_TARGET_DIR) {
+        $buildTarget = if ([IO.Path]::IsPathRooted($env:CARGO_TARGET_DIR)) { $env:CARGO_TARGET_DIR }
+            else { Join-Path "$repo/rust" $env:CARGO_TARGET_DIR }
+    }
+    $BinaryDirectory = Join-Path $buildTarget "$target/release"
 }
 $BinaryDirectory = (Resolve-Path -LiteralPath $BinaryDirectory).Path
 $name = "keyvalet-$Tag-windows-$Architecture"
 $stage = Join-Path "$repo/dist" $name
 if (Test-Path $stage) { Remove-Item $stage -Recurse -Force }
 New-Item "$stage/bin", "$stage/templates", "$stage/scripts", "$stage/docs", "$stage/wsl" -ItemType Directory -Force | Out-Null
-foreach ($binary in 'kv-helper', 'kv-agent', 'kv-cli', 'kv-mcp', 'kv-hook') {
+foreach ($binary in 'kv-helper', 'kv-agent', 'kv-cli', 'kv-mcp', 'kv-hook', 'kv-server', 'kv-relay-client') {
     Copy-Item -LiteralPath "$BinaryDirectory/$binary.exe" "$stage/bin/"
 }
 if ($SigningCertificateThumbprint) {
@@ -57,6 +62,8 @@ if ($SigningCertificateThumbprint) {
 }
 Copy-Item "$repo/templates/catalog.json" "$stage/templates/"
 Copy-Item "$repo/scripts/install.ps1", "$repo/scripts/uninstall.ps1" "$stage/scripts/"
+New-Item "$stage/service/relay-client" -ItemType Directory -Force | Out-Null
+Copy-Item "$repo/rust/crates/kv-relay-client/service/*" "$stage/service/relay-client/"
 foreach ($file in 'bridge.sh', 'install.sh', 'uninstall.sh', 'configure.py', 'verify.py') {
     Copy-Item -LiteralPath "$repo/scripts/wsl/$file" "$stage/wsl/"
 }

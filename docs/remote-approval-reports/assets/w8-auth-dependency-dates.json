@@ -1,0 +1,62 @@
+[
+  {
+    "name": "google_sign_in",
+    "version": "7.2.0",
+    "published": "2025-09-17T18:37:54.811927Z"
+  },
+  {
+    "name": "google_identity_services_web",
+    "version": "0.3.3+1",
+    "published": "2025-04-22T18:14:12.605534Z"
+  },
+  {
+    "name": "google_sign_in_android",
+    "version": "7.2.11",
+    "published": "2026-05-19T21:22:44.269498Z"
+  },
+  {
+    "name": "google_sign_in_ios",
+    "version": "6.3.6",
+    "published": "2026-09-28T22:56:02.200709Z"
+  },
+  {
+    "name": "google_sign_in_platform_interface",
+    "version": "3.1.0",
+    "published": "2025-09-09T19:25:08.856931Z"
+  },
+  {
+    "name": "google_sign_in_web",
+    "version": "1.1.3",
+    "published": "2026-03-13T17:37:15.539246Z"
+  },
+  {
+    "name": "http",
+    "version": "1.6.0",
+    "published": "2025-11-10T18:27:56.434747Z"
+  },
+  {
+    "name": "http_parser",
+    "version": "4.1.2",
+    "published": "2025-01-02T18:37:12.729308Z"
+  },
+  {
+    "name": "sign_in_with_apple",
+    "version": "8.1.0",
+    "published": "2026-06-01T12:41:03.133319Z"
+  },
+  {
+    "name": "sign_in_with_apple_platform_interface",
+    "version": "2.0.0",
+    "published": "2025-04-05T13:08:17.461895Z"
+  },
+  {
+    "name": "sign_in_with_apple_web",
+    "version": "3.0.0",
+    "published": "2025-04-05T13:09:38.713422Z"
+  },
+  {
+    "name": "typed_data",
+    "version": "1.4.0",
+    "published": "2024-10-17T11:51:21.429117Z"
+  }
+]

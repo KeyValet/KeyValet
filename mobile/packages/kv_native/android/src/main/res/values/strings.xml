@@ -1,0 +1,6 @@
+<resources>
+  <string name="kv_authorize">Authorize KeyValet</string><string name="kv_cancel">Cancel</string>
+  <string name="kv_silent">Silent approvals</string><string name="kv_banner">Approval alerts</string>
+  <string name="kv_allow">Allow once</string><string name="kv_deny">Deny</string>
+  <string name="kv_open">Open app to approve</string><string name="kv_worker">Sending approval</string>
+</resources>

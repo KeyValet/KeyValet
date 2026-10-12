@@ -8,3 +8,25 @@ license.workspace = true
 [features]
 default = ["relay"]
 relay = []
+
+[dependencies]
+kv-core = { path = "../kv-core" }
+axum = { version = "=0.8.4", default-features = false, features = ["http1", "json", "original-uri", "tokio", "ws"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "signal", "sync", "time"] }
+rusqlite = { version = "=0.32.1", features = ["bundled"] }
+argon2 = { version = "0.5", features = ["std", "zeroize"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+rand_core = { version = "0.6", features = ["std"] }
+url = "2"
+zeroize = "=1.9.0"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+
+[dev-dependencies]
+rusqlite = { version = "=0.32.1", features = ["backup", "hooks", "limits"] }
+tokio = { version = "1", features = ["test-util"] }
+tokio-tungstenite = { version = "=0.26.2", default-features = false, features = ["connect", "handshake"] }
+futures-util = { version = "0.3", features = ["sink"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+tempfile = "3"
+jsonschema.workspace = true

@@ -41,6 +41,7 @@ for binary in kv-helper kv-cli kv-mcp kv-hook; do
 done
 cp "$SRC_DIR/templates/catalog.json" "$STAGE/templates/"
 cp "$SRC_DIR/scripts/linux/keyvalet.service" "$SRC_DIR/scripts/linux/dev.keyvalet.policy" "$STAGE/"
+cp "$SRC_DIR/scripts/linux/keyvalet-peer.service" "$STAGE/"
 if getent group tss >/dev/null 2>&1; then
   # Add within [Service], not after [Install].
   sed '/^User=keyvalet$/a SupplementaryGroups=tss' "$STAGE/keyvalet.service" > "$STAGE/keyvalet.service.new"

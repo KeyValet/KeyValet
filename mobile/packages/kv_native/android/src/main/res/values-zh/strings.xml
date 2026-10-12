@@ -1,0 +1,6 @@
+<resources>
+  <string name="kv_authorize">授权 KeyValet</string><string name="kv_cancel">取消</string>
+  <string name="kv_silent">静默审批</string><string name="kv_banner">审批提醒</string>
+  <string name="kv_allow">仅允许这次</string><string name="kv_deny">拒绝</string>
+  <string name="kv_open">打开 App 审批</string><string name="kv_worker">正在发送审批</string>
+</resources>

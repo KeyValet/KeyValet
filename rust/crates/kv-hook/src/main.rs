@@ -58,6 +58,13 @@ fn main() {
         }
         return;
     };
+    if kv_hook::stop::is_stop_mode(&mode) {
+        let output = kv_hook::stop::run_stop(&mode, &input);
+        if output.had_pending {
+            print!("{}", output.value);
+        }
+        return;
+    }
     match mode.as_str() {
         "cursor-shell" => print!("{}", kv_hook::handle_cursor_shell(&input)),
         "cursor-mcp" => print!("{}", kv_hook::handle_cursor_mcp(&input)),

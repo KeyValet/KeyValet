@@ -22,7 +22,7 @@ approval alone is not a TPM PIN or boot-state policy. See the
 
 ## The trust boundary
 
-The AI agent or MCP client is *semi-trusted*: it may be prompt-injected, may speak MCP to the KeyValet server, and may run arbitrary commands as your user. The KeyValet MCP server is a convenience layer — **security checks never rely on it alone**. Every enforcement decision is made by the root helper (or the `dev.keyvalet.helper` launchd daemon), which holds no vault key while idle. Touch ID and Secure Enclave work happens in the per-user agent `dev.keyvalet.agent`, which the daemon only accepts after verifying its peer uid and its code signature (`dev.keyvalet.touchid`, team `PWCRJPY7YC`, exact installed path) — so a same-user process can't impersonate it and approve prompts for you.
+The AI agent or MCP client is *semi-trusted*: it may be prompt-injected, may speak MCP to the KeyValet server, and may run arbitrary commands as your user. The KeyValet MCP server is a convenience layer — **security checks never rely on it alone**. Every enforcement decision is made by the privileged helper — the root `dev.keyvalet.helper` launchd daemon on macOS, the `keyvalet` systemd service user on Linux, the LocalSystem service in the Windows preview — which holds no vault key while idle. Touch ID and Secure Enclave work happens in the per-user agent `dev.keyvalet.agent`, which the daemon only accepts after verifying its peer uid and its code signature (`dev.keyvalet.touchid`, team `PWCRJPY7YC`, exact installed path) — so a same-user process can't impersonate it and approve prompts for you.
 
 ## What KeyValet guarantees
 

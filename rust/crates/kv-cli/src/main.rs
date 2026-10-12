@@ -10,6 +10,7 @@ use serde_json::{json, Map, Value};
 use std::io::IsTerminal;
 #[cfg(target_os = "linux")]
 mod linux_cli;
+mod remote;
 #[cfg(target_os = "linux")]
 fn real_home() -> std::path::PathBuf {
     linux_cli::real_home(&linux_cli::Environment::system()).unwrap_or_else(|e| fatal(&e))
@@ -34,6 +35,15 @@ fn fatal(msg: &str) -> ! {
 }
 
 fn commit_settings(dir: &std::path::Path, expected: &kv_core::Settings, next: &kv_core::Settings) {
+    match remote::system::shared_settings(json!({"expected":expected,"next":next})) {
+        Ok(_) => return,
+        Err(error)
+            if matches!(
+                error.code.as_str(),
+                "remote_unavailable" | "ipc_unavailable"
+            ) && !dir.join("remote/vault.enc").exists() => {}
+        Err(error) => fatal(&error.message),
+    }
     match compare_and_write_settings(dir, expected, next) {
         Ok(true) => {}
         Ok(false) => fatal(&kv_i18n::t(
@@ -122,7 +132,10 @@ fn usage() -> String {
             "\n  setup-software                    无 TPM 时显式开启软件保护\n  recover-vault --software          在无 TPM 的机器上显式恢复到软件保护\n  approve <kv-mcp-pid>               在本 SSH 终端运行 polkit 认证代理\n",
             "\n  setup-software                    Explicit software protection when no TPM is present\n  recover-vault --software          Explicit software recovery on a machine without TPM\n  approve <kv-mcp-pid>               Run a polkit authentication agent in this SSH terminal\n",
         );
-    usage
+    usage + &kv_i18n::t(
+        "\n  setup-remote <account-id> [--software] [--label <label>]  初始化远程审批身份\n  run --inject <type/name> -- <command> [args]             通过 HTTPS 代理运行子进程\n",
+        "\n  setup-remote <account-id> [--software] [--label <label>]  Initialize the remote approval identity\n  run --inject <type/name> -- <command> [args]             Run a child through the HTTPS proxy\n",
+    ) + &remote::usage()
 }
 
 fn read_value(label: &str) -> String {
@@ -246,9 +259,41 @@ fn audited<T>(
     }
 }
 
+mod run;
+
 fn main() {
+    #[cfg(unix)]
+    unsafe {
+        libc::umask(0o077);
+        let limit = libc::rlimit {
+            rlim_cur: 0,
+            rlim_max: 0,
+        };
+        libc::setrlimit(libc::RLIMIT_CORE, &limit);
+    }
+    let mut remote_argv: Vec<String> = std::env::args().skip(1).collect();
+    if remote_argv.first().map(String::as_str) == Some("--lang") {
+        kv_i18n::set_lang(remote_argv.get(1).map(String::as_str).unwrap_or(""));
+        remote_argv = remote_argv.split_off(2.min(remote_argv.len()));
+    }
+    if remote::handles(&remote_argv) {
+        std::process::exit(remote::run_system(&remote_argv));
+    }
+    if remote_argv.first().map(String::as_str) == Some("run") {
+        std::process::exit(run::system(&remote_argv[1..]).unwrap_or_else(|error| fatal(&error)));
+    }
+    // Help is pure text and needs neither installation trust nor a vault session.
+    if remote_argv.is_empty()
+        || matches!(
+            remote_argv.first().map(String::as_str),
+            Some("help" | "--help" | "-h")
+        )
+    {
+        println!("{}", usage());
+        return;
+    }
     #[cfg(target_os = "linux")]
-    if std::env::args().nth(1).as_deref() == Some("approve") {
+    if remote_argv.first().map(String::as_str) == Some("approve") {
         linux_cli::approve(&linux_cli::Environment::system()).unwrap_or_else(|e| fatal(&e));
         return;
     }
@@ -314,6 +359,11 @@ fn main() {
     }
     let mut cmd = cmd.unwrap();
     let mut args = args;
+
+    if cmd == "setup-remote" {
+        setup_remote(&args);
+        return;
+    }
 
     let vault = Vault::new(VAULT_DIR);
     #[cfg(target_os = "linux")]
@@ -569,7 +619,18 @@ fn main() {
             );
         }
         "grant-mode" => {
-            let cur = read_settings(&vault.dir);
+            let cur = match remote::system::shared_settings(json!({})) {
+                Ok(settings) => settings,
+                Err(error)
+                    if matches!(
+                        error.code.as_str(),
+                        "remote_unavailable" | "ipc_unavailable"
+                    ) && !vault.dir.join("remote/vault.enc").exists() =>
+                {
+                    read_settings(&vault.dir)
+                }
+                Err(error) => fatal(&error.message),
+            };
             let Some(m) = args.first() else {
                 let suffix = if cur.grant_mode == kv_core::settings::GrantMode::Remember {
                     format!(
@@ -688,6 +749,82 @@ fn recovery_password(confirm: bool) -> zeroize::Zeroizing<String> {
         }
         return password;
     }
+}
+
+fn setup_remote(args: &[String]) {
+    let Some(account) = args.first().filter(|value| !value.starts_with('-')) else {
+        fatal("Usage: keyvalet setup-remote <account-id> [--software] [--label <label>]");
+    };
+    let mut label = "KeyValet executor".to_owned();
+    let mut software = false;
+    let mut index = 1;
+    while index < args.len() {
+        match args[index].as_str() {
+            "--software" => software = true,
+            "--label" => {
+                index += 1;
+                label = args
+                    .get(index)
+                    .cloned()
+                    .unwrap_or_else(|| fatal("--label requires a value"));
+            }
+            _ => fatal("Unknown remote setup option"),
+        }
+        index += 1;
+    }
+    let password = recovery_password(true);
+    let params = kv_vault::SecretJson(
+        json!({"account_id":account,"label":label,"software":software,"confirmed":true,"recovery_password":password.as_str()}),
+    );
+    #[cfg(unix)]
+    let reply = (|| -> Result<Value, String> {
+        use std::io::{BufRead, Read, Write};
+        let mut stream = std::os::unix::net::UnixStream::connect(kv_platform::paths::HELPER_SOCKET)
+            .map_err(|e| e.to_string())?;
+        remote::system::verify_helper(&stream).map_err(|e| e.message)?;
+        stream
+            .set_read_timeout(Some(std::time::Duration::from_secs(180)))
+            .map_err(|e| e.to_string())?;
+        stream
+            .set_write_timeout(Some(std::time::Duration::from_secs(10)))
+            .map_err(|e| e.to_string())?;
+        let envelope = kv_vault::SecretJson(
+            json!({"op":"control","command":"remote_bootstrap","params":params.0}),
+        );
+        let mut frame =
+            zeroize::Zeroizing::new(serde_json::to_vec(&envelope.0).map_err(|e| e.to_string())?);
+        frame.push(b'\n');
+        stream.write_all(&frame).map_err(|e| e.to_string())?;
+        let mut reply = Vec::new();
+        std::io::BufReader::new(stream)
+            .take(64 * 1024)
+            .read_until(b'\n', &mut reply)
+            .map_err(|e| e.to_string())?;
+        serde_json::from_slice(&reply).map_err(|_| "Invalid helper response".into())
+    })();
+    #[cfg(windows)]
+    let reply = tokio::runtime::Runtime::new()
+        .map_err(|e| e.to_string())
+        .and_then(|runtime| {
+            runtime
+                .block_on(kv_platform::windows::control_request(
+                    "remote_bootstrap",
+                    params.0.clone(),
+                ))
+                .map(|(reply, _)| reply)
+                .map_err(|e| e.to_string())
+        });
+    let reply = reply.unwrap_or_else(|e| fatal(&e));
+    if reply["ok"] != true {
+        fatal(reply["error"].as_str().unwrap_or("Remote setup failed"));
+    }
+    println!(
+        "{}",
+        kv_i18n::t(
+            "远程审批已初始化。请通过 keyvalet pair 配对审批设备。",
+            "Remote approval initialized. Pair an approval device with keyvalet pair."
+        )
+    );
 }
 
 /// Opening an existing recovery wrapper: no strength rules or confirmation, a wrong passphrase

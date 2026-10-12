@@ -1125,24 +1125,40 @@ mod helper_tests {
     fn setup_result_describes_a_fresh_save_without_a_new_type() {
         let r = json!({"type": "oauth2", "name": "github-bot", "typeCreated": false, "replaced": false});
         let msg = setup_result(&r, "OAuth2 凭证", "OAuth2 credential");
-        assert_eq!(msg, "Saved OAuth2 credential \"oauth2/github-bot\"");
-        assert!(!msg.contains("did not exist"));
+        assert_eq!(
+            msg,
+            kv_i18n::t(
+                "已保存 OAuth2 凭证 \"oauth2/github-bot\"",
+                "Saved OAuth2 credential \"oauth2/github-bot\"",
+            )
+        );
     }
 
     #[test]
     fn setup_result_mentions_the_type_being_auto_created() {
         let r =
             json!({"type": "oauth2", "name": "github-bot", "typeCreated": true, "replaced": false});
-        let msg = setup_result(&r, "OAuth2 credential", "OAuth2 credential");
-        assert!(msg.contains("did not exist and was created"));
-        assert!(msg.contains("Saved OAuth2 credential \"oauth2/github-bot\""));
+        let msg = setup_result(&r, "OAuth2 凭证", "OAuth2 credential");
+        assert_eq!(
+            msg,
+            kv_i18n::t(
+                "凭证类型 \"oauth2\" 不存在，已先创建；已保存 OAuth2 凭证 \"oauth2/github-bot\"",
+                "Credential type \"oauth2\" did not exist and was created; Saved OAuth2 credential \"oauth2/github-bot\"",
+            )
+        );
     }
 
     #[test]
     fn setup_result_says_replaced_instead_of_saved_on_overwrite() {
         let r =
             json!({"type": "oauth2", "name": "github-bot", "typeCreated": false, "replaced": true});
-        let msg = setup_result(&r, "OAuth2 credential", "OAuth2 credential");
-        assert!(msg.contains("Replaced OAuth2 credential \"oauth2/github-bot\""));
+        let msg = setup_result(&r, "OAuth2 凭证", "OAuth2 credential");
+        assert_eq!(
+            msg,
+            kv_i18n::t(
+                "已替换 OAuth2 凭证 \"oauth2/github-bot\"",
+                "Replaced OAuth2 credential \"oauth2/github-bot\"",
+            )
+        );
     }
 }

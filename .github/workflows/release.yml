@@ -76,6 +76,32 @@ jobs:
           [ -n "$SIGN_IDENTITY" ] || { echo "Developer ID identity for PWCRJPY7YC not found in the imported p12" >&2; exit 1; }
           echo "SIGN_IDENTITY=$SIGN_IDENTITY" >> "$GITHUB_ENV"
       - run: REQUIRE_SIGNED=1 scripts/package-release.sh "$TAG"
+      - name: Include signed remote approval binaries and service assets
+        run: |
+          set -eu
+          PACKAGE="dist/keyvalet-$TAG-macos-arm64"
+          for binary in kv-server kv-relay-client; do
+            source="rust/target/aarch64-apple-darwin/release/$binary"
+            [ "$(/usr/bin/lipo -archs "$source")" = arm64 ]
+            minos=$(/usr/bin/otool -l "$source" | /usr/bin/awk '/LC_BUILD_VERSION/,/sdk/ { if ($1 == "minos") print $2 }')
+            [ "$minos" = 14.0 ] || { echo "Unexpected remote binary deployment target" >&2; exit 1; }
+            cp "$source" "$PACKAGE/bin/"
+            /usr/bin/codesign --force --options runtime --timestamp --identifier "dev.keyvalet.${binary#kv-}" -s "$SIGN_IDENTITY" "$PACKAGE/bin/$binary"
+            /usr/bin/codesign --verify --strict "$PACKAGE/bin/$binary"
+            team=$(/usr/bin/codesign -dv --verbose=4 "$PACKAGE/bin/$binary" 2>&1 | /usr/bin/sed -n 's/^TeamIdentifier=//p')
+            [ "$team" = PWCRJPY7YC ] || { echo "Unexpected signing team" >&2; exit 1; }
+          done
+          mkdir -p "$PACKAGE/service/relay-client" "$PACKAGE/deploy/relay"
+          cp rust/crates/kv-relay-client/service/* "$PACKAGE/service/relay-client/"
+          cp deploy/relay/* "$PACKAGE/deploy/relay/"
+          mv "$PACKAGE/scripts/uninstall.sh" "$PACKAGE/scripts/uninstall-legacy.sh"
+          cat > "$PACKAGE/scripts/uninstall.sh" <<'SH'
+          #!/bin/sh
+          exec /bin/sh "$(dirname "$0")/install.sh" --uninstall "$@"
+          SH
+          chmod 0755 "$PACKAGE/scripts/uninstall.sh"
+          COPYFILE_DISABLE=1 tar -czf "dist/keyvalet-$TAG-macos-arm64.tar.gz" -C dist "keyvalet-$TAG-macos-arm64"
+          (cd dist && shasum -a 256 "keyvalet-$TAG-macos-arm64.tar.gz" > SHA256SUMS)
       # Apple notarizes the exact signed binaries that are in the tarball (tickets cannot be
       # stapled to bare Mach-O files; Gatekeeper looks them up online). No release without it.
       - name: Notarize the binaries

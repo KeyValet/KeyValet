@@ -1,0 +1,4 @@
+{
+  "openai": { "client_timeout_hint_s": 600 },
+  "anthropic": { "client_timeout_hint_s": 600 }
+}

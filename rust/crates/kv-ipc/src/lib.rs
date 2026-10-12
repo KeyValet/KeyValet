@@ -8,6 +8,7 @@
 use serde::{Deserialize, Serialize};
 
 pub mod agent;
+pub mod continuation;
 pub mod mcp_worker;
 pub mod remote;
 mod request;

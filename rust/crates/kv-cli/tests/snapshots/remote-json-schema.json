@@ -1,0 +1,17 @@
+{
+  "help": {"ok":"boolean","command":"help","result":{"text":"string"}},
+  "relay_install": {"ok":"boolean","command":"relay_install","result":{"service":"string","nginx":"string","listen":"string","data":"string","public_url":"string","cloudflare_steps":["string"]}},
+  "relay_status": {"ok":"boolean","command":"relay_status","result":{"ok":"boolean","version":"string"}},
+  "relay_set_url": {"ok":"boolean","command":"relay_set_url","result":{"relay_url":"string","config":"string"}},
+  "pair": {"ok":"boolean","command":"pair","result":{"uri":"null","sas":"string","paired":"boolean"}},
+  "devices": {"ok":"boolean","command":"devices","result":{"devices":[{"device_id":"string","label":"string","os":"string","key_kind":"string","dk_pub":{"kty":"string","crv":"string","x":"string","y":"string"},"ak_q":"null","ak_s":"null","caps":["string"],"attestation":"null"}]}},
+  "device_revoked": {"ok":"boolean","command":"device_revoked","result":{"device_id":"string"}},
+  "device_renamed": {"ok":"boolean","command":"device_renamed","result":{"device_id":"string","label":"string"}},
+  "approvals": {"ok":"boolean","command":"approvals","result":{"pending":[],"recent":[]}},
+  "decision": {"ok":"boolean","command":"decision","result":{"approval_id":"string","decision":"string","sent":"boolean"}},
+  "grants_issued": {"ok":"boolean","command":"grants_issued","result":{"grants":[{"kind":"string","jti":"string","iss":"string","iss_alg":"string","iss_kind":"string","aud":"string","scope":{"level":"string","max_tier":"string"},"nbf":"number","exp":"number","origin":"string","sig":"string"}]}},
+  "grants": {"ok":"boolean","command":"grants","result":{"grants":[]}},
+  "grant_revoked": {"ok":"boolean","command":"grant_revoked","result":{"jti":"string"}},
+  "remote": {"ok":"boolean","command":"remote","result":{"results":[{"device_id":"string","result":{"id":"string","ok":"boolean","error":"null","state":{"mode":"string"}}}]}},
+  "status": {"ok":"boolean","command":"status","result":{"protection":{"provider":"string"},"remote":{"relay":"string","approvers":[],"pending_n":"number","grants_n":"number","unattended":"boolean","runtime_budget_s":"number","pairing":{"sas":"string"}},"remote_error":"null","paired_devices_n":"number"}}
+}

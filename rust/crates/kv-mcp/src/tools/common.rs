@@ -25,7 +25,14 @@ pub fn fail(text: impl Into<String>) -> CallToolResult {
 pub async fn wrap(fut: impl Future<Output = Result<CallToolResult, String>>) -> CallToolResult {
     match fut.await {
         Ok(r) => r,
-        Err(e) => fail(kv_i18n::t(&format!("错误：{e}"), &format!("Error: {e}"))),
+        Err(e) => match e
+            .strip_prefix(crate::approval::RESULT_PREFIX)
+            .and_then(|v| serde_json::from_str::<Value>(v).ok())
+            .filter(crate::approval::is_approval_result)
+        {
+            Some(value) => crate::approval::tool_result(value),
+            None => fail(kv_i18n::t(&format!("错误：{e}"), &format!("Error: {e}"))),
+        },
     }
 }
 

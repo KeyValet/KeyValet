@@ -5,4 +5,21 @@ templates/n8n-catalog.json
 marketing/
 site/public/
 __pycache__/
-rust/target-w0/
+
+# Rust build and coverage artifacts
+rust/target-*/
+rust/**/*.profraw
+rust/**/*.profdata
+
+# Local system and Python artifacts
+.DS_Store
+*.pyc
+*.pyo
+
+# Local environment configuration (commit example files instead)
+.env
+.env.*
+*.env
+*.env.*
+!.env.example
+!*.env.example

@@ -81,6 +81,8 @@ pub struct CredentialTemplate {
     pub hosts: Vec<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub oauth2: Option<OAuthTemplate>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub client_timeout_hint_s: Option<u64>,
 }
 
 static PLACEHOLDER_RE: OnceLock<regex::Regex> = OnceLock::new();
@@ -152,6 +154,7 @@ fn builtin_templates() -> Vec<CredentialTemplate> {
             test: None,
             hosts: vec![],
             oauth2: None,
+            client_timeout_hint_s: None,
         },
         CredentialTemplate {
             id: "header".into(),
@@ -187,6 +190,7 @@ fn builtin_templates() -> Vec<CredentialTemplate> {
             test: None,
             hosts: vec![],
             oauth2: None,
+            client_timeout_hint_s: None,
         },
         CredentialTemplate {
             id: "query".into(),
@@ -222,6 +226,7 @@ fn builtin_templates() -> Vec<CredentialTemplate> {
             test: None,
             hosts: vec![],
             oauth2: None,
+            client_timeout_hint_s: None,
         },
         CredentialTemplate {
             id: "basic".into(),
@@ -260,6 +265,7 @@ fn builtin_templates() -> Vec<CredentialTemplate> {
             test: None,
             hosts: vec![],
             oauth2: None,
+            client_timeout_hint_s: None,
         },
     ]
 }
@@ -273,7 +279,20 @@ fn load_catalog_from(dir: &std::path::Path, file: &str) -> Vec<CredentialTemplat
         templates: Vec<CredentialTemplate>,
     }
     serde_json::from_str::<Catalog>(&text)
-        .map(|c| c.templates)
+        .map(|mut c| {
+            let hints: std::collections::HashMap<String, serde_json::Value> = serde_json::from_str(
+                include_str!("../../kv-protocols/templates/client-timeouts.json"),
+            )
+            .expect("bundled template timeout hints must be valid");
+            for template in &mut c.templates {
+                if template.client_timeout_hint_s.is_none() {
+                    template.client_timeout_hint_s = hints
+                        .get(&template.id)
+                        .and_then(|v| v["client_timeout_hint_s"].as_u64());
+                }
+            }
+            c.templates
+        })
         .unwrap_or_default()
 }
 
@@ -495,6 +514,7 @@ mod tests {
             test: None,
             hosts: vec![],
             oauth2: None,
+            client_timeout_hint_s: None,
         }
     }
 
@@ -580,6 +600,23 @@ mod tests {
                 .chain(load_catalog_from(&dir, "catalog.json"))
                 .chain(load_catalog_from(&dir, "n8n-catalog.json")),
         )
+    }
+
+    #[test]
+    fn explicit_catalog_timeout_overrides_the_bundled_default() {
+        let directory = tempfile::tempdir().unwrap();
+        let mut template = builtin_templates().remove(0);
+        template.id = "openai".into();
+        template.client_timeout_hint_s = Some(900);
+        std::fs::write(
+            directory.path().join("fixture.json"),
+            serde_json::to_vec(&serde_json::json!({"templates": [template]})).unwrap(),
+        )
+        .unwrap();
+        assert_eq!(
+            load_catalog_from(directory.path(), "fixture.json")[0].client_timeout_hint_s,
+            Some(900)
+        );
     }
 
     #[test]

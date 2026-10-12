@@ -306,7 +306,7 @@ fn safe_error(vault: &Vault, p: &JsonMap, error: String) -> String {
 }
 
 /// Root-only context binds stored test/configuration changes as well as client parameters.
-fn operation_binding(vault: &Vault, op: Op, p: &JsonMap) -> kv_vault::Result<String> {
+pub fn operation_binding(vault: &Vault, op: Op, p: &JsonMap) -> kv_vault::Result<String> {
     let (_, _, record) = vault.get_record(
         &get_str(p, "type").unwrap_or_default(),
         &get_str(p, "name").unwrap_or_default(),
@@ -340,6 +340,61 @@ fn op_fits_kind(op: Op, kind: Kind) -> bool {
         Op::OauthExchange | Op::OauthDeviceStart | Op::OauthDevicePoll => kind == Kind::Oauth2,
         _ => true,
     }
+}
+
+/// Execute a use operation only after the helper verified its approval and execution binding.
+/// The root-owned credential configuration is checked again immediately before use.
+pub async fn dispatch_approved<G: AuthorizeGate, C: Confirmer>(
+    vault: &Vault,
+    op: Op,
+    params: &JsonMap,
+    expected_binding: &str,
+    ctx: &ClientContext,
+    auth: Option<&mut SessionAuth<G>>,
+    confirmer: &C,
+) -> kv_vault::Result<Value> {
+    let pinned = vault.pin_record(
+        &get_str(params, "type").unwrap_or_default(),
+        &get_str(params, "name").unwrap_or_default(),
+    )?;
+    let vault = &pinned;
+    if !matches!(
+        op,
+        Op::Get
+            | Op::AccessToken
+            | Op::Totp
+            | Op::Aws
+            | Op::HttpRequest
+            | Op::HttpTest
+            | Op::GatewayOpen
+    ) || operation_binding(vault, op, params)? != expected_binding
+    {
+        return Err(VaultError::new(
+            "审批与当前凭证操作不匹配",
+            "Approval does not match the current credential operation",
+        ));
+    }
+    if clean_purpose(get_str(params, "purpose").as_deref()).is_none() {
+        return Err(VaultError::new("必须说明操作目的", "A purpose is required"));
+    }
+    let (_, _, record) = vault.get_record(
+        &get_str(params, "type").unwrap_or_default(),
+        &get_str(params, "name").unwrap_or_default(),
+    )?;
+    if !op_fits_kind(op, record.kind_or_static()) {
+        return Err(VaultError::new(
+            "凭证不支持该操作",
+            "The credential does not support this operation",
+        ));
+    }
+    let result = run(vault, op, params, ctx, auth, confirmer).await;
+    let mut entry = Map::new();
+    entry.insert("op".into(), json!(op.as_str()));
+    entry.insert("session".into(), json!(ctx.session));
+    entry.insert("client".into(), json!(ctx));
+    entry.insert("ok".into(), json!(result.is_ok()));
+    vault.audit(entry)?;
+    result
 }
 
 /// What a session grant exposes, from the stored record alone. The operation a client names is
@@ -1174,7 +1229,12 @@ async fn gateway_open_op<G: AuthorizeGate>(
     p: &JsonMap,
     auth: Option<&SessionAuth<G>>,
 ) -> kv_vault::Result<Value> {
-    if auth.is_some_and(|a| a.mode == Some(GrantMode::PerUse)) {
+    if auth.is_some_and(|a| {
+        a.mode == Some(GrantMode::PerUse)
+            && a.gateway
+                .as_ref()
+                .is_none_or(|gateway| !gateway.requires_request_approval())
+    }) {
         return Err(VaultError::new(
             "每次授权模式不支持可复用网关，请使用 credential_http_request",
             "Reusable gateways are unavailable in per-use mode; use credential_http_request",

@@ -35,7 +35,7 @@ fn source_build(platform: &str, target: Option<&str>, configured_target: bool) {
     }))
     .unwrap();
     let (prefix, _) = source
-        .split_once("STAGE=$(mktemp -d)")
+        .split_once("\nSTAGE=$(mktemp -d)")
         .expect("installer staging boundary changed");
     // Use the actual source-build logic, stopping before any installation operation.
     let script = package.join("scripts/source-build.sh");
@@ -72,7 +72,7 @@ if [ -z "$kv_test_target" ]; then
 fi
 case "$kv_test_target" in /*) ;; *) kv_test_target="$PWD/$kv_test_target" ;; esac
 mkdir -p "$kv_test_target/release"
-for binary in kv-helper kv-touchid kv-mcp kv-cli kv-hook; do
+for binary in kv-helper kv-touchid kv-mcp kv-cli kv-hook kv-server kv-relay-client; do
   printf '#!/bin/sh\nexit 88\n' > "$kv_test_target/release/$binary"
   chmod 0700 "$kv_test_target/release/$binary"
 done

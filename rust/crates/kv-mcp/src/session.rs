@@ -8,8 +8,11 @@
 //! temporary files. Process exit closes the pipe and the helper exits.
 //! Direct port of src/server/session.ts.
 
+use crate::approval::{self, scrub_value, ApprovalConfig};
+#[cfg(test)]
+use kv_ipc::Response;
 use kv_ipc::{
-    AuthMessage, CredentialHint, ProtectionProbe, ReadyMessage, Request as WireRequest, Response,
+    AuthMessage, CredentialHint, ProtectionProbe, ReadyMessage, Request as WireRequest,
     GRANT_REQUIRED_PREFIX, PROTOCOL_VERSION,
 };
 #[cfg(windows)]
@@ -24,6 +27,7 @@ use std::collections::HashMap;
 #[cfg(unix)]
 use std::os::unix::fs::FileTypeExt;
 use std::path::Path;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::time::{Duration, SystemTime};
 use tokio::io::{AsyncBufReadExt, AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt, BufReader};
@@ -31,15 +35,171 @@ use tokio::io::{AsyncBufReadExt, AsyncRead, AsyncReadExt, AsyncWrite, AsyncWrite
 use tokio::process::{Child, ChildStdin};
 use tokio::sync::{mpsc, oneshot, Mutex as AsyncMutex, Semaphore};
 
-const UNLOCK_TIMEOUT: Duration = Duration::from_millis(180_000);
-const REQUEST_TIMEOUT: Duration = Duration::from_millis(60_000);
 const PROTECTION_TIMEOUT: Duration = Duration::from_secs(5);
-/// Proxied calls may be streaming responses lasting several minutes (helper-side cap is 180s).
-const PROXY_REQUEST_TIMEOUT: Duration = Duration::from_millis(200_000);
 /// Cooldown after auth failure/cancellation, to stop an agent from spamming prompts.
 const FAILURE_COOLDOWN: Duration = Duration::from_millis(30_000);
-/// Per-credential grants need to wait for the user to press Touch ID.
-const GRANT_TIMEOUT: Duration = Duration::from_millis(150_000);
+
+#[cfg(test)]
+#[path = "session_remote_tests.rs"]
+mod remote_tests;
+
+struct RemoteState {
+    config: std::sync::Mutex<ApprovalConfig>,
+    client: std::sync::Mutex<Value>,
+    budget: std::sync::Mutex<Duration>,
+    peer: std::sync::Mutex<Option<rmcp::Peer<rmcp::RoleServer>>>,
+    notified: std::sync::Mutex<std::collections::HashSet<String>>,
+    policy_loaded: AtomicBool,
+    timeout_observed: AtomicBool,
+    completed: std::sync::Mutex<HashMap<String, (i64, Value)>>,
+}
+
+struct PolicyLoad<'a> {
+    loaded: &'a AtomicBool,
+    completed: bool,
+}
+
+impl Drop for PolicyLoad<'_> {
+    fn drop(&mut self) {
+        if !self.completed {
+            self.loaded.store(false, Ordering::Relaxed);
+        }
+    }
+}
+
+impl RemoteState {
+    fn cache_completed(self: &Arc<Self>, id: String, mut value: Value) {
+        if value["status"] != "ok" {
+            scrub_value(&mut value);
+            return;
+        }
+        let expiry = value["expires_at"]
+            .as_i64()
+            .unwrap_or_else(|| approval::unix_time() + 600);
+        let mut completed = self.completed.lock().unwrap();
+        if completed.contains_key(&id) || completed.len() >= kv_ipc::MAX_IN_FLIGHT_REQUESTS {
+            scrub_value(&mut value);
+            return;
+        }
+        completed.insert(id.clone(), (expiry, value));
+        drop(completed);
+        let remote = Arc::downgrade(self);
+        let deadline = tokio::time::Instant::now()
+            + Duration::from_secs((expiry - approval::unix_time()).max(0) as u64);
+        tokio::spawn(async move {
+            tokio::time::sleep_until(deadline).await;
+            if let Some(remote) = remote.upgrade() {
+                if let Some((_, mut value)) = remote.completed.lock().unwrap().remove(&id) {
+                    scrub_value(&mut value);
+                }
+            }
+        });
+    }
+
+    fn take_completed(&self, id: &str) -> Option<Value> {
+        let mut completed = self.completed.lock().unwrap();
+        completed.retain(|_, (expiry, value)| {
+            if *expiry <= approval::unix_time() {
+                scrub_value(value);
+                false
+            } else {
+                true
+            }
+        });
+        completed.remove(id).map(|(_, value)| value)
+    }
+
+    async fn approved(&self, value: &Value) {
+        if !matches!(
+            value["status"].as_str(),
+            Some("approved" | "granted" | "approved_retry_required" | "ok")
+        ) {
+            return;
+        }
+        let Some(id) = value["approval_id"].as_str() else {
+            return;
+        };
+        if !self.notified.lock().unwrap().insert(id.into()) {
+            return;
+        }
+        let peer = self.peer.lock().unwrap().clone();
+        if let Some(peer) = peer {
+            let content = kv_i18n::t(
+                &format!("approval {id} 已批准；调用 credential_wait_approval(\"{id}\") 获取本次请求的结果。不要重复发起原请求。"),
+                &format!("approval {id} granted; call credential_wait_approval(\"{id}\") to get this request's result. Do not repeat the original request."),
+            );
+            let _ = peer
+                .send_notification(rmcp::model::ServerNotification::CustomNotification(
+                    rmcp::model::CustomNotification::new(
+                        "notifications/claude/channel",
+                        Some(serde_json::json!({
+                            "content": content, "meta": {"approval_id": id},
+                        })),
+                    ),
+                ))
+                .await;
+        }
+    }
+}
+
+impl Drop for RemoteState {
+    fn drop(&mut self) {
+        for (_, value) in self.completed.get_mut().unwrap().values_mut() {
+            scrub_value(value);
+        }
+    }
+}
+
+/// Remote responses retain IPC v4's correlation ID and use Appendix C's structured errors.
+fn decode_response(line: &str) -> Option<(u64, Result<Value, String>)> {
+    let value: Value = serde_json::from_str(line).ok()?;
+    let id = value["id"].as_u64()?;
+    match value["ok"].as_bool()? {
+        true => Some((id, Ok(value.get("result")?.clone()))),
+        false => {
+            let error = value.get("error")?;
+            Some((
+                id,
+                Err(error
+                    .as_str()
+                    .map(str::to_owned)
+                    .unwrap_or_else(|| error.to_string())),
+            ))
+        }
+    }
+}
+
+/// Appendix C responses need no ID on a connection with exactly one request in flight.
+fn decode_public_response(line: &str) -> Result<Value, SessionError> {
+    let mut value: Value = serde_json::from_str(line)
+        .map_err(|_| SessionError("Malformed remote helper response".into()))?;
+    if value.get("id").is_some_and(|id| id != 1) {
+        return Err(SessionError("Malformed remote helper response".into()));
+    }
+    let result = match value["ok"].as_bool() {
+        Some(true) => value
+            .as_object_mut()
+            .and_then(|v| v.remove("result"))
+            .ok_or_else(|| SessionError("Malformed remote helper response".into())),
+        Some(false) => value
+            .get("error")
+            .map(|error| {
+                SessionError(
+                    error
+                        .as_str()
+                        .map(str::to_owned)
+                        .unwrap_or_else(|| error.to_string()),
+                )
+            })
+            .map_or_else(
+                || Err(SessionError("Malformed remote helper response".into())),
+                Err,
+            ),
+        None => Err(SessionError("Malformed remote helper response".into())),
+    };
+    scrub_value(&mut value);
+    result
+}
 
 #[derive(Debug)]
 pub struct SessionError(pub String);
@@ -63,6 +223,17 @@ pub struct CredentialTarget {
 }
 
 type Pending = oneshot::Sender<Result<Value, String>>;
+
+pub fn agent_pid() -> u32 {
+    #[cfg(unix)]
+    {
+        std::os::unix::process::parent_id()
+    }
+    #[cfg(windows)]
+    {
+        kv_platform::peer::parent_pid(std::process::id()).unwrap_or(0)
+    }
+}
 
 fn response_result(
     result: Result<Result<Value, String>, oneshot::error::RecvError>,
@@ -175,20 +346,35 @@ impl Connection {
                 if line.trim().is_empty() {
                     continue;
                 }
-                let Ok(resp) = serde_json::from_str::<Response>(&line) else {
+                let Ok(value) = serde_json::from_str::<Value>(&line) else {
                     break;
                 };
-                let (id, result) = match resp {
-                    Response::Ok { id, result, .. } => (id, Ok(result)),
-                    Response::Err { id, error, .. } => (id, Err(error)),
-                };
                 let Some(inner) = inner.upgrade() else { return };
+                if value["op"] == kv_ipc::remote::APPROVAL_RESOLVED {
+                    let remote = inner.lock().await.remote.clone();
+                    remote.approved(&value["params"]).await;
+                    continue;
+                }
+                let Some((id, result)) = decode_response(&line) else {
+                    break;
+                };
                 let mut state = inner.lock().await;
                 if state.generation != generation {
                     return;
                 }
-                if let Some(tx) = state.pending.remove(&id) {
-                    let _ = tx.send(result);
+                let approval_id = state.waiting_ids.remove(&id);
+                let undelivered = match state.pending.remove(&id) {
+                    Some(tx) => tx.send(result).err(),
+                    None => Some(result),
+                };
+                if let (Some(approval_id), Some(Ok(value))) = (approval_id, undelivered) {
+                    // An MCP cancellation is not a helper denial. Retain an already-executed
+                    // result for the next wait instead of losing it with the cancelled waiter.
+                    let remote = state.remote.clone();
+                    let notice = serde_json::json!({"status": value["status"], "approval_id": value["approval_id"]});
+                    drop(state);
+                    remote.cache_completed(approval_id, value);
+                    remote.approved(&notice).await;
                 }
             }
             if let Some(inner) = inner.upgrade() {
@@ -283,6 +469,12 @@ type HelperConnection = (
     Option<tokio::process::ChildStderr>,
     bool,
 );
+
+type HelperConnector = Arc<
+    dyn Fn() -> futures_util::future::BoxFuture<'static, Result<HelperConnection, SessionError>>
+        + Send
+        + Sync,
+>;
 
 /// Only the public startup exchange. The caller supplies an already verified connection;
 /// owning both halves here also closes them when the enclosing timeout cancels the probe.
@@ -416,10 +608,12 @@ async fn connect_helper() -> Result<HelperConnection, SessionError> {
 }
 
 struct Inner {
+    remote: Arc<RemoteState>,
     child: Option<Connection>,
     ready: bool,
     generation: u64,
     pending: HashMap<u64, Pending>,
+    waiting_ids: HashMap<u64, String>,
     next_id: u64,
     cooldown_until: Option<SystemTime>,
     unlocked_at: Option<SystemTime>,
@@ -433,6 +627,10 @@ impl Inner {
         self.ready = false;
         self.unlocked_at = None;
         self.unlock_purpose = None;
+        self.waiting_ids.clear();
+        for (_, (_, mut value)) in self.remote.completed.lock().unwrap().drain() {
+            scrub_value(&mut value);
+        }
         for (_, pending) in self.pending.drain() {
             let _ = pending.send(Err(kv_i18n::t(
                 "凭证库已锁定",
@@ -460,6 +658,8 @@ pub struct HelperSession {
     unlock_lock: Arc<AsyncMutex<()>>,
     /// Serialize approval prompts; the helper decides whether a broad grant already exists.
     grant_lock: Arc<AsyncMutex<()>>,
+    remote: Arc<RemoteState>,
+    connector: Option<HelperConnector>,
 }
 
 /// A request interface carrying a purpose: tool handlers obtain it via `session.scoped(purpose)`.
@@ -489,6 +689,9 @@ impl Requester<'_> {
             .session
             .request_value(op, params, &self.purpose, self.target.as_ref())
             .await?;
+        if approval::is_approval_result(&v) && v["status"] != "ok" {
+            return Err(SessionError(format!("{}{}", approval::RESULT_PREFIX, v)));
+        }
         serde_json::from_value(v).map_err(|e| SessionError(format!("malformed response: {e}")))
     }
 }
@@ -542,15 +745,66 @@ pub fn parse_ttl_minutes(raw: Option<&str>) -> Result<Duration, SessionError> {
 }
 
 impl HelperSession {
+    /// A fake runner is compiled only for tests or the explicitly requested runtime fixture.
+    #[cfg(any(test, feature = "runtime-probe"))]
+    pub async fn with_test_transport(
+        config: ApprovalConfig,
+        stream: impl AsyncRead + AsyncWrite + Unpin + Send + 'static,
+    ) -> Arc<Self> {
+        let mut session = Self::with_config(Duration::ZERO, config);
+        // A public status/protection probe must never fall through to the installed runner.
+        // Tests that need a second connection provide their own scripted connector.
+        session.connector = Some(Arc::new(|| {
+            Box::pin(async {
+                Err(SessionError(
+                    "Synthetic helper has no separate connection".into(),
+                ))
+            })
+        }));
+        let session = Arc::new(session);
+        let (reader, writer) = tokio::io::split(stream);
+        let mut inner = session.inner.lock().await;
+        inner.ready = true;
+        inner.generation = 1;
+        let mut connection = Connection::new(
+            Transport::Socket {
+                writer: Box::new(writer),
+            },
+            &session.inner,
+            1,
+        );
+        connection.attach_reader(BufReader::new(reader), &session.inner, 1);
+        inner.child = Some(connection);
+        drop(inner);
+        session
+    }
+
+    #[cfg(test)]
     pub fn new(ttl: Duration) -> Self {
+        Self::with_config(ttl, ApprovalConfig::default())
+    }
+
+    pub fn with_config(ttl: Duration, config: ApprovalConfig) -> Self {
+        let remote = Arc::new(RemoteState {
+            config: std::sync::Mutex::new(config),
+            client: std::sync::Mutex::new(Value::Null),
+            budget: std::sync::Mutex::new(Duration::from_secs(approval::UNKNOWN_BUDGET_S)),
+            peer: std::sync::Mutex::new(None),
+            notified: std::sync::Mutex::new(Default::default()),
+            policy_loaded: AtomicBool::new(false),
+            timeout_observed: AtomicBool::new(false),
+            completed: std::sync::Mutex::new(HashMap::new()),
+        });
         Self {
             session_id: gen_session_id(),
             ttl,
             inner: Arc::new(AsyncMutex::new(Inner {
+                remote: remote.clone(),
                 child: None,
                 ready: false,
                 generation: 0,
                 pending: HashMap::new(),
+                waiting_ids: HashMap::new(),
                 next_id: 1,
                 cooldown_until: None,
                 unlocked_at: None,
@@ -558,7 +812,207 @@ impl HelperSession {
             })),
             unlock_lock: Arc::new(AsyncMutex::new(())),
             grant_lock: Arc::new(AsyncMutex::new(())),
+            remote,
+            connector: None,
         }
+    }
+
+    /// Trust checks belong to the real connector; fake transports exercise the request logic.
+    async fn connect(&self) -> Result<HelperConnection, SessionError> {
+        match &self.connector {
+            Some(connector) => connector().await,
+            None => connect_helper().await,
+        }
+    }
+
+    pub fn initialize_client(&self, client: Value, peer: rmcp::Peer<rmcp::RoleServer>) {
+        let name = client["name"].as_str().unwrap_or_default();
+        let budget = self.remote.config.lock().unwrap().budget(name);
+        if !self.remote.timeout_observed.load(Ordering::Relaxed) {
+            *self.remote.budget.lock().unwrap() = budget;
+        }
+        *self.remote.client.lock().unwrap() = client;
+        *self.remote.peer.lock().unwrap() = Some(peer);
+    }
+
+    pub fn runtime_budget(&self) -> Duration {
+        *self.remote.budget.lock().unwrap()
+    }
+
+    pub fn progress_interval(&self) -> Duration {
+        self.remote.config.lock().unwrap().progress_interval
+    }
+
+    pub fn in_call_wait(&self) -> Duration {
+        self.remote
+            .config
+            .lock()
+            .unwrap()
+            .wait_in_call
+            .min(self.runtime_budget())
+    }
+
+    pub fn wait_tool_limit(&self, requested: Option<u64>) -> Duration {
+        self.remote
+            .config
+            .lock()
+            .unwrap()
+            .wait_tool_max
+            .min(Duration::from_secs(requested.unwrap_or(600)))
+            .min(self.runtime_budget())
+    }
+
+    pub(crate) async fn negotiate_policy(&self) {
+        if self.remote.policy_loaded.swap(true, Ordering::Relaxed) {
+            return;
+        }
+        // Cancellation must let the next call retry policy discovery as well as ordinary errors.
+        let mut loading = PolicyLoad {
+            loaded: &self.remote.policy_loaded,
+            completed: false,
+        };
+        if let Ok(status) = self
+            .remote_request(kv_ipc::remote::STATUS, Map::new(), PROTECTION_TIMEOUT)
+            .await
+        {
+            let policy = &status["approval"];
+            let mut config = self.remote.config.lock().unwrap();
+            if let Some(s) = policy["wait_in_call_s"].as_u64() {
+                config.wait_in_call = config.wait_in_call.min(Duration::from_secs(s));
+            }
+            if let Some(s) = policy["wait_tool_max_s"].as_u64() {
+                config.wait_tool_max = config.wait_tool_max.min(Duration::from_secs(s));
+            }
+            if let Some(s) = policy["progress_interval_s"].as_u64().filter(|s| *s > 0) {
+                config.progress_interval =
+                    config.progress_interval.min(Duration::from_secs(s.min(60)));
+            }
+            loading.completed = true;
+        }
+    }
+
+    /// Public remote queries never trigger local authentication or a credential grant.
+    pub async fn remote_request(
+        &self,
+        op: &str,
+        params: Map<String, Value>,
+        timeout: Duration,
+    ) -> Result<Value, SessionError> {
+        if self.inner.lock().await.ready {
+            return self.send(op, params, timeout).await;
+        }
+        let exchange = async {
+            let (mut transport, reader, stderr, _) = self.connect().await?;
+            drop(stderr);
+            let request = WireRequest {
+                id: 1,
+                op: op.into(),
+                params,
+            };
+            let mut frame = serde_json::to_vec(&request).unwrap();
+            frame.push(b'\n');
+            transport
+                .write_all(&frame)
+                .await
+                .map_err(|e| SessionError(e.to_string()))?;
+            let mut line = zeroize::Zeroizing::new(String::new());
+            BufReader::new(reader)
+                .take(kv_ipc::MAX_LINE_BYTES as u64 + 1)
+                .read_line(&mut line)
+                .await
+                .map_err(|e| SessionError(e.to_string()))?;
+            transport.close();
+            if !line.ends_with('\n') || line.len() > kv_ipc::MAX_LINE_BYTES {
+                return Err(SessionError("Malformed remote helper response".into()));
+            }
+            decode_public_response(&line)
+        };
+        tokio::time::timeout(timeout, exchange)
+            .await
+            .unwrap_or_else(|_| Err(SessionError("Remote helper query timed out".into())))
+    }
+
+    pub async fn wait_approval(&self, id: &str, wait: Duration) -> Result<Value, SessionError> {
+        if let Some(value) = self.remote.take_completed(id) {
+            return Ok(value);
+        }
+        let params = serde_json::json!({"approval_id": id, "max_wait_ms": wait.as_millis() as u64,
+            "runtime_budget_s": self.runtime_budget().as_secs().saturating_add(10)});
+        let result = match self
+            .remote_request(
+                kv_ipc::remote::WAIT,
+                params.as_object().unwrap().clone(),
+                wait + Duration::from_secs(2),
+            )
+            .await
+        {
+            Ok(result) => result,
+            Err(error) if error.0.to_ascii_lowercase().contains("timed out") => {
+                serde_json::json!({"status": "still_pending", "approval_id": id})
+            }
+            Err(error) => return Err(error),
+        };
+        let result = if result["status"] == "already_consumed" {
+            self.remote.take_completed(id).unwrap_or(result)
+        } else {
+            result
+        };
+        self.remote.approved(&result).await;
+        Ok(result)
+    }
+
+    pub async fn remote_status(&self) -> Value {
+        let status = self
+            .remote_request(kv_ipc::remote::STATUS, Map::new(), PROTECTION_TIMEOUT)
+            .await;
+        let pending = self
+            .remote_request(
+                kv_ipc::remote::PENDING_LIST,
+                serde_json::json!({"agent_pid": agent_pid()})
+                    .as_object()
+                    .unwrap()
+                    .clone(),
+                PROTECTION_TIMEOUT,
+            )
+            .await;
+        match status {
+            Ok(status) => serde_json::json!({
+                "relay": status["relay"], "approvers": status["approvers"],
+                "pending": pending.ok().and_then(|v| v["pending"].as_array().map(|entries| entries.iter().map(|entry| serde_json::json!({
+                    "approval_id": entry.get("approval_id").or_else(|| entry.get("id")),
+                    "summary": entry.get("summary").or_else(|| entry.get("operation").and_then(|op| op.get("summary"))),
+                    "expires_at": entry.get("exp").or_else(|| entry.get("expires_at")),
+                })).collect::<Vec<_>>())).unwrap_or_default(),
+                "grants": status["grants_n"], "unattended": status["unattended"],
+                "runtime_budget_s": self.runtime_budget().as_secs(),
+            }),
+            Err(error) => serde_json::json!({
+                "relay": "offline", "approvers": [], "pending": [], "grants": 0,
+                "unattended": false, "runtime_budget_s": self.runtime_budget().as_secs(),
+                "status_error": error.to_string(),
+            }),
+        }
+    }
+
+    pub async fn client_timeout_observed(&self, request_id: &rmcp::model::RequestId) {
+        *self.remote.budget.lock().unwrap() = Duration::from_secs(approval::UNKNOWN_BUDGET_S);
+        if self.remote.timeout_observed.swap(true, Ordering::Relaxed) {
+            return;
+        }
+        let event = serde_json::json!({
+            "event": "client_timeout_observed", "clientInfo": *self.remote.client.lock().unwrap(),
+            "request_id": request_id, "runtime_budget_s": approval::UNKNOWN_BUDGET_S,
+            "agent_pid": agent_pid(),
+        });
+        eprintln!("{event}");
+        // Reporting this event never cancels or denies the pending approval.
+        let _ = self
+            .remote_request(
+                kv_ipc::remote::CLIENT_TIMEOUT_OBSERVED,
+                event.as_object().unwrap().clone(),
+                PROTECTION_TIMEOUT,
+            )
+            .await;
     }
 
     /// Read the connection generation and its public state under the same lock.
@@ -590,7 +1044,7 @@ impl HelperSession {
         let status = serde_json::json!({
             "state": state, "session": self.session_id, "auth": auth,
             "unlockedAt": unlocked_at, "unlockPurpose": inner.unlock_purpose,
-            "expiresAt": expires_at, "installProblem": install_problem(),
+            "expiresAt": expires_at, "installProblem": Value::Null,
         });
         (inner.generation, status)
     }
@@ -598,7 +1052,7 @@ impl HelperSession {
     /// Public metadata on a separate trusted connection: no unlock, grant or cooldown changes.
     pub async fn protection(&self) -> Result<Value, SessionError> {
         let probe = async {
-            let (transport, reader, stderr, _) = connect_helper().await?;
+            let (transport, reader, stderr, _) = self.connect().await?;
             drop(stderr);
             probe_protection(transport, reader).await
         };
@@ -609,7 +1063,8 @@ impl HelperSession {
 
     /// Read grants only on an existing session; a concurrent lock must never trigger an unlock.
     pub async fn session_info(&self) -> Result<Value, SessionError> {
-        self.send("sessionInfo", Map::new(), REQUEST_TIMEOUT).await
+        self.send("sessionInfo", Map::new(), self.runtime_budget())
+            .await
     }
 
     /// Returns a request interface: every request carries the purpose; if unlocking is needed, the
@@ -642,6 +1097,44 @@ impl HelperSession {
         self.do_unlock(purpose, target).await
     }
 
+    /// A cold, authenticated result may create private exports without another vault unlock.
+    /// The result's deadline bounds their lifetime; a later unlocked generation owns its files.
+    pub(crate) async fn activate_approval_files(&self, expires_at: i64) {
+        self.approval_files(
+            expires_at,
+            crate::gateway_env::activate_session_files,
+            crate::gateway_env::cleanup_gateway_env,
+        )
+        .await;
+    }
+
+    async fn approval_files(
+        &self,
+        expires_at: i64,
+        activate: impl FnOnce(),
+        cleanup: impl FnOnce() + Send + 'static,
+    ) {
+        let inner = self.inner.lock().await;
+        let generation = inner.generation;
+        if inner.ready {
+            return;
+        }
+        activate();
+        let weak = Arc::downgrade(&self.inner);
+        tokio::spawn(async move {
+            tokio::time::sleep(Duration::from_secs(
+                (expires_at - approval::unix_time()).max(0) as u64,
+            ))
+            .await;
+            if let Some(inner) = weak.upgrade() {
+                let inner = inner.lock().await;
+                if inner.generation == generation && !inner.ready {
+                    cleanup();
+                }
+            }
+        });
+    }
+
     pub async fn lock(&self) {
         let mut inner = self.inner.lock().await;
         inner.revoke();
@@ -655,14 +1148,38 @@ impl HelperSession {
         unlock_purpose: &str,
         target: Option<&CredentialTarget>,
     ) -> Result<Value, SessionError> {
+        if let Some(value) = approval::resuming(op, &params) {
+            return Ok(value);
+        }
         self.unlock(unlock_purpose, target).await?;
-        let timeout = if matches!(op, "httpRequest" | "httpTest") {
-            PROXY_REQUEST_TIMEOUT
-        } else {
-            REQUEST_TIMEOUT
-        };
-        match self.send(op, params.clone(), timeout).await {
-            Ok(v) => Ok(v),
+        self.negotiate_policy().await;
+        let timeout = approval::remaining(self.runtime_budget());
+        let mut wire_params = params.clone();
+        if matches!(
+            op,
+            "get" | "httpRequest" | "httpTest" | "accessToken" | "totp" | "aws" | "gatewayOpen"
+        ) {
+            if let Some(id) = approval::approval_id() {
+                wire_params.insert("approval_id".into(), id);
+            }
+            wire_params.insert("agent".into(), serde_json::json!({"pid": agent_pid(), "runtime": self.remote.client.lock().unwrap()["name"]}));
+            wire_params.insert(
+                "runtime_budget_s".into(),
+                self.runtime_budget().as_secs().saturating_add(10).into(),
+            );
+            wire_params.insert(
+                "wait_in_call_ms".into(),
+                (self.in_call_wait().min(timeout).as_millis() as u64).into(),
+            );
+            if let Some(frontend) = approval::frontend(op, &params) {
+                wire_params.insert("frontend".into(), frontend);
+            }
+        }
+        let mut value = match self
+            .send(op, wire_params.clone(), timeout + Duration::from_secs(2))
+            .await
+        {
+            Ok(v) => v,
             Err(e) => {
                 // per_credential mode: this credential isn't authorized yet -> show Touch ID to
                 // authorize, then retry once.
@@ -672,11 +1189,44 @@ impl HelperSession {
                 let Some((ty, name)) = key.trim().split_once('/') else {
                     return Err(e);
                 };
-                self.grant(ty, name, unlock_purpose, Some(op), Some(&params))
+                let grant = self
+                    .grant(ty, name, unlock_purpose, Some(op), Some(&wire_params))
                     .await?;
-                self.send(op, params, timeout).await
+                if approval::is_approval_result(&grant) {
+                    grant
+                } else {
+                    self.send(op, wire_params, approval::remaining(timeout))
+                        .await?
+                }
+            }
+        };
+        if approval::is_pending(&value) {
+            approval::remember_pending(&value, op, &params);
+            // A disconnected relay must return immediately; it cannot benefit from long polling.
+            if value["relay"] != "offline" && value["approver"]["online"] != false {
+                if let Some(id) = value["approval_id"].as_str() {
+                    let wait = approval::remaining(self.in_call_wait());
+                    if !wait.is_zero() {
+                        value = self.wait_approval(id, wait).await?;
+                    }
+                }
+            }
+            if value["status"] == "still_pending" {
+                value["status"] = serde_json::json!("approval_pending");
             }
         }
+        if approval::is_approval_result(&value) {
+            if value["status"] == "ok" {
+                approval::clear_pending();
+                return Ok(value.get("result").cloned().unwrap_or(Value::Null));
+            }
+            if approval::is_pending(&value) {
+                approval::remember_pending(&value, op, &params);
+            } else {
+                approval::clear_pending();
+            }
+        }
+        Ok(value)
     }
 
     /// Send the complete requested operation; trusted prompt text and binding come from root.
@@ -699,7 +1249,8 @@ impl HelperSession {
         if let Some(request) = request {
             params.insert("request".into(), Value::Object(request.clone()));
         }
-        self.send("grant", params, GRANT_TIMEOUT).await
+        self.send("grant", params, approval::remaining(self.in_call_wait()))
+            .await
     }
 
     async fn send(
@@ -744,6 +1295,11 @@ impl HelperSession {
                 op: op.to_string(),
                 params,
             };
+            if op == kv_ipc::remote::WAIT {
+                if let Some(id) = req.params["approval_id"].as_str() {
+                    inner.waiting_ids.insert(req.id, id.into());
+                }
+            }
             let mut line = zeroize::Zeroizing::new(serde_json::to_vec(&req).unwrap());
             line.push(b'\n');
             let sender = inner.child.as_ref().unwrap().sender.clone();
@@ -821,7 +1377,7 @@ impl HelperSession {
                 "An unlock purpose (purpose) is required",
             ))
         })?;
-        let (mut stdin, read_half, stderr, use_daemon) = connect_helper().await?;
+        let (mut stdin, read_half, stderr, use_daemon) = self.connect().await?;
 
         let stderr_tail = Arc::new(std::sync::Mutex::new(String::new()));
         if let Some(mut stderr) = stderr {
@@ -872,7 +1428,11 @@ impl HelperSession {
         let mut line = serde_json::to_vec(&auth).unwrap();
         line.push(b'\n');
         if !matches!(
-            tokio::time::timeout(UNLOCK_TIMEOUT, stdin.write_all(&line)).await,
+            tokio::time::timeout(
+                approval::remaining(self.runtime_budget()),
+                stdin.write_all(&line)
+            )
+            .await,
             Ok(Ok(()))
         ) {
             stdin.close();
@@ -884,8 +1444,11 @@ impl HelperSession {
 
         let mut reader = BufReader::new(read_half);
         let mut first_line = String::new();
-        let read_result =
-            tokio::time::timeout(UNLOCK_TIMEOUT, reader.read_line(&mut first_line)).await;
+        let read_result = tokio::time::timeout(
+            approval::remaining(self.runtime_budget()),
+            reader.read_line(&mut first_line),
+        )
+        .await;
         match read_result {
             Err(_) => {
                 stdin.close();
