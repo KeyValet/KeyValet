@@ -1,3 +1,0 @@
-[1mWelcome to Devin CLI![0m
-
-I'll first list the KeyValet server's tools to confirm the tool's schema, then call it once.The tool list is large, but per the instruction I'll call `r2d_block_progress` exactly once with empty arguments and wait for its response.

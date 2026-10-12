@@ -1,6 +1,0 @@
-{"type":"thread.started","thread_id":"01a1308d-f844-7f81-ac4b-b03761eec2ed"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’ll call the KeyValet tool once with empty arguments and report its response."}}
-{"type":"item.started","item":{"id":"item_1","type":"mcp_tool_call","server":"keyvalet","tool":"r2d_block_progress","arguments":{},"result":null,"error":null,"status":"in_progress"}}
-{"type":"item.completed","item":{"id":"item_2","type":"agent_message","text":"The call is still pending. I’m waiting for its response without repeating it."}}
-{"type":"item.completed","item":{"id":"item_3","type":"agent_message","text":"The tool has not returned a response yet. The original call remains pending."}}

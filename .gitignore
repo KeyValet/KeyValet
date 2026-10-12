@@ -16,6 +16,19 @@ rust/**/*.profdata
 *.pyc
 *.pyo
 
+# Local execution logs
+*.log
+*.stdout
+*.stderr
+
+# Raw runtime experiments and captured command output
+/docs/remote-approval-reports/assets/**/*.jsonl
+/docs/remote-approval-reports/assets/r2d-auth/
+/docs/remote-approval-reports/assets/r2d-runtime-*/
+/docs/remote-approval-reports/assets/r2d-sdk*/
+/docs/remote-approval-reports/assets/w8-auth-*-tests.txt
+/docs/remote-approval-reports/assets/w8-auth-approval-scenario.txt
+
 # Local environment configuration (commit example files instead)
 .env
 .env.*
