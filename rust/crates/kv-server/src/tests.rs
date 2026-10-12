@@ -1,5 +1,6 @@
 // Integration tests use only ephemeral listeners, software keys and repository schemas.
 mod interfaces;
+mod k1;
 mod push;
 mod recovery;
 pub(crate) mod regions;

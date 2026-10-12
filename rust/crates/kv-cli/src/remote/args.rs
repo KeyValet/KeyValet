@@ -28,7 +28,11 @@ pub(super) enum Command {
     RelaySetUrl {
         url: String,
     },
-    RelayRecover { account_id: String, url: Option<String>, software: bool },
+    RelayRecover {
+        account_id: String,
+        url: Option<String>,
+        software: bool,
+    },
     Pair {
         uri: Option<String>,
     },
@@ -348,15 +352,26 @@ fn parse_relay(args: &[String]) -> Result<Command> {
     };
     match action.as_str() {
         "recover" => {
-            let options = Options::parse(&args[1..],&["--public-url"],&["--software"])?;
+            let options = Options::parse(&args[1..], &["--public-url"], &["--software"])?;
             options.count(1)?;
             let account_id = options.positional[0].clone();
-            if account_id.is_empty() || account_id.len()>256 || account_id.chars().any(|ch|ch.is_control()||ch.is_whitespace()) {
+            if account_id.is_empty()
+                || account_id.len() > 256
+                || account_id
+                    .chars()
+                    .any(|ch| ch.is_control() || ch.is_whitespace())
+            {
                 return Err(Error::argument("无效账户 ID", "Invalid account ID"));
             }
             let url = options.value("--public-url");
-            if let Some(url) = &url { super::relay::RelayUrl::parse(url)?; }
-            Ok(Command::RelayRecover {account_id,url,software:options.flag("--software")})
+            if let Some(url) = &url {
+                super::relay::RelayUrl::parse(url)?;
+            }
+            Ok(Command::RelayRecover {
+                account_id,
+                url,
+                software: options.flag("--software"),
+            })
         }
         "install" => {
             let options = Options::parse(

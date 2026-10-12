@@ -258,6 +258,9 @@ unsafe extern "system" fn callback(
 #[derive(Default)]
 pub struct TaskDialog;
 pub type NativeDialog = super::native::NativeDialog<TaskDialog>;
+#[cfg(test)]
+#[path = "pcp_acceptance.rs"]
+mod pcp_acceptance;
 impl NativeUi for TaskDialog {
     fn show(&mut self, model: &Value, screenshot: Option<&std::path::Path>) -> Result<Value> {
         if screenshot.is_some() {

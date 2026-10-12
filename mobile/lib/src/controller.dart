@@ -69,6 +69,9 @@ class MobileController extends ChangeNotifier with WidgetsBindingObserver {
         state = null;
         _timer?.cancel();
         await _accounts.stop();
+        try {
+          await KvNative.clearNotifications();
+        } catch (_) {}
       }
     } catch (failure) {
       if (!_disposed && epoch == _epoch) {
@@ -145,6 +148,9 @@ class MobileController extends ChangeNotifier with WidgetsBindingObserver {
     try {
       // Rust deletes local credentials before attempting remote revocation.
       await _accounts.logout();
+      try {
+        await KvNative.clearNotifications();
+      } catch (_) {}
       if (_disposed || epoch != _epoch) return;
       final status = await _accounts.status();
       if (_disposed || epoch != _epoch) return;
@@ -190,6 +196,9 @@ class MobileController extends ChangeNotifier with WidgetsBindingObserver {
     notifyListeners();
     try {
       await operation();
+      try {
+        await KvNative.refreshNotifications();
+      } catch (_) {}
       await refresh();
     } catch (_) {
       if (!_disposed && epoch == _epoch) error = 'action_failed';

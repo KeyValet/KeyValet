@@ -159,7 +159,7 @@ impl RemoteHelper {
         self.tick()?;
         let value = request.params;
         match request.op {
-            Op::AccountRecover => super::startup::recover(context,Some(self.clone()),value).await,
+            Op::AccountRecover => super::startup::recover(context, Some(self.clone()), value).await,
             Op::AuditList => {
                 let args: QueryAuditArgs = parse(value)?;
                 let state = self.lock()?;

@@ -406,8 +406,11 @@ impl Host for System {
             rpassword::prompt_password(prompt).map_err(unavailable)?
         } else {
             let mut input = zeroize::Zeroizing::new(String::new());
-            std::io::stdin().take(256).read_to_string(&mut input).map_err(unavailable)?;
-            input.trim_end_matches(['\r','\n']).to_owned()
+            std::io::stdin()
+                .take(256)
+                .read_to_string(&mut input)
+                .map_err(unavailable)?;
+            input.trim_end_matches(['\r', '\n']).to_owned()
         };
         Ok(Some(code))
     }

@@ -1,0 +1,2 @@
+{"event": "initialize", "elapsed_s": 0.005, "client_info": {"name": "codex-mcp-client", "title": "Codex", "version": "0.162.1"}}
+{"event": "tool_started", "elapsed_s": 16.227, "tool": "r2d_block_silent", "request_id": 2, "progress_token": 1}

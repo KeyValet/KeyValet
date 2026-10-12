@@ -45,6 +45,11 @@ class KvNativePlugin: FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAw
                 result.success(identifier)
             }
             "pushToken" -> result.success(context.getSharedPreferences("kv_push", Context.MODE_PRIVATE).getString("token", null))
+            "refreshNotifications" -> worker.execute {
+                Notifications.refresh(context)
+                Handler(Looper.getMainLooper()).post { result.success(null) }
+            }
+            "clearNotifications" -> { Notifications.clear(context); result.success(null) }
             else -> result.notImplemented()
         }
     }

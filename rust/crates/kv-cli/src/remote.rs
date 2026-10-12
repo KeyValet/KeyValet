@@ -86,7 +86,7 @@ trait Host {
     fn install_root(&self) -> Result<PathBuf>;
     fn confirmation(&mut self, prompt: &str, timeout: Duration) -> Result<Option<String>>;
     fn secret(&mut self, prompt: &str) -> Result<Option<String>> {
-        self.confirmation(prompt,Duration::from_secs(180))
+        self.confirmation(prompt, Duration::from_secs(180))
     }
     fn notice(&mut self, text: &str) -> Result<()>;
     fn emit(&mut self, value: &Success, json: bool) -> Result<()>;
@@ -708,23 +708,39 @@ fn execute(host: &mut impl Host, invocation: &Invocation) -> Result<Success> {
                 config: path,
             })
         }
-        Command::RelayRecover { account_id, url, software } => {
-            let base = url.clone().map(Ok).unwrap_or_else(||
-                relay::Config::read(&host.config_path()?).map(|config|config.relay_url))?;
-            let code = zeroize::Zeroizing::new(host.secret(&kv_i18n::t(
-                "账户恢复码：", "Account recovery code: "))?.ok_or_else(Error::cancelled)?);
-            if kv_core::remote::keys::decode_b64(&code).map_or(true,|bytes|bytes.len()!=32) {
-                return Err(Error::argument("恢复码必须是 32 字节的 base64url 字符串", "The recovery code must be a 32-byte base64url value"));
+        Command::RelayRecover {
+            account_id,
+            url,
+            software,
+        } => {
+            let base = url.clone().map(Ok).unwrap_or_else(|| {
+                relay::Config::read(&host.config_path()?).map(|config| config.relay_url)
+            })?;
+            let code = zeroize::Zeroizing::new(
+                host.secret(&kv_i18n::t("账户恢复码：", "Account recovery code: "))?
+                    .ok_or_else(Error::cancelled)?,
+            );
+            if kv_core::remote::keys::decode_b64(&code).map_or(true, |bytes| bytes.len() != 32) {
+                return Err(Error::argument(
+                    "恢复码必须是 32 字节的 base64url 字符串",
+                    "The recovery code must be a 32-byte base64url value",
+                ));
             }
-            let recovered: kv_ipc::remote::AccountRecoverResult = call(host,Op::AccountRecover,
-                json!({"account_id":account_id,"relay_url":base,"recovery_code":code.as_str(),"software":software}))?;
-            if recovered.binding.account_id != *account_id || recovered.binding.device_id.is_empty()
+            let recovered: kv_ipc::remote::AccountRecoverResult = call(
+                host,
+                Op::AccountRecover,
+                json!({"account_id":account_id,"relay_url":base,"recovery_code":code.as_str(),"software":software}),
+            )?;
+            if recovered.binding.account_id != *account_id
+                || recovered.binding.device_id.is_empty()
                 || recovered.binding.relay_url != base
-                || kv_core::remote::keys::decode_b64(&recovered.recovery_code).map_or(true,|bytes|bytes.len()!=32) {
+                || kv_core::remote::keys::decode_b64(&recovered.recovery_code)
+                    .map_or(true, |bytes| bytes.len() != 32)
+            {
                 return Err(Error::protocol());
             }
             let path = host.config_path()?;
-            host.set_binding(&path,&recovered.binding)?;
+            host.set_binding(&path, &recovered.binding)?;
             Ok(Success::RelayRecovered(recovered))
         }
         Command::Pair { uri } => pair(host, uri.as_deref(), invocation.json),

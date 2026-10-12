@@ -103,7 +103,9 @@ impl Recovery {
             let recovered: std::result::Result<RecoverAccountResponse, Error> =
                 self.relay.post("v1/recovery", &*request, None).await;
             // The bound new DK, rather than an untrusted HTTP success body, confirms enrollment.
-            self.relay.authenticate(local, key).await?;
+            if let Err(authentication) = self.relay.authenticate(local, key).await {
+                return Err(recovered.err().unwrap_or(authentication));
+            }
             if self.relay.account(&local.device_id).await? != self.account {
                 return Err(Error("identity_account_mismatch"));
             }

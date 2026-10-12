@@ -9,4 +9,8 @@ class KvNative {
       _channel.invokeMethod<String>('initialApprovalId');
   static Future<String?> pushToken() =>
       _channel.invokeMethod<String>('pushToken');
+  static Future<void> refreshNotifications() =>
+      _channel.invokeMethod<void>('refreshNotifications');
+  static Future<void> clearNotifications() =>
+      _channel.invokeMethod<void>('clearNotifications');
 }

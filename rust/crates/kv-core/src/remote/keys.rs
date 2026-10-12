@@ -405,13 +405,14 @@ pub fn verify_object<T: serde::Serialize>(
 
 #[cfg(test)]
 mod identity_tests {
-    use super::*;
     use super::super::canonical::{from_json, jcs, sha256_hex};
+    use super::*;
     use serde_json::{json, Value};
 
     fn fixture(name: &str) -> Value {
         let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-            .join("testdata/remote").join(name);
+            .join("testdata/remote")
+            .join(name);
         from_json(&std::fs::read(path).unwrap()).unwrap()
     }
     fn record(value: &Value) -> DeviceRecord {
@@ -426,40 +427,93 @@ mod identity_tests {
 
     #[test]
     fn device_record_with_dk_sig_vectors() {
-        for name in ["device_record_with_dk_sig_valid.json", "device_record_with_dk_sig_legacy.json"] {
+        for name in [
+            "device_record_with_dk_sig_valid.json",
+            "device_record_with_dk_sig_legacy.json",
+        ] {
             let vector = fixture(name);
             let device = record(&vector["device"]);
             let bytes = jcs(&device).unwrap();
-            assert_eq!(String::from_utf8(bytes.clone()).unwrap(), vector["expect"]["canonical"], "{name}");
+            assert_eq!(
+                String::from_utf8(bytes.clone()).unwrap(),
+                vector["expect"]["canonical"],
+                "{name}"
+            );
             if let Some(expected) = vector["expect"].get("digest") {
                 assert_eq!(sha256_hex(&bytes), *expected, "{name}");
             }
             let payload = jcs(&vector["proof"]).unwrap();
             let signature = decode_b64(vector["sig"].as_str().unwrap()).unwrap();
-            assert_eq!(outcome(verify_identity_signature(&device, &payload, &signature)), json!({"ok":vector["expect"]["ok"]}), "{name}");
-            assert_eq!(serde_json::to_value(&device).unwrap(), vector["device"], "{name}");
+            assert_eq!(
+                outcome(verify_identity_signature(&device, &payload, &signature)),
+                json!({"ok":vector["expect"]["ok"]}),
+                "{name}"
+            );
+            assert_eq!(
+                serde_json::to_value(&device).unwrap(),
+                vector["device"],
+                "{name}"
+            );
         }
         let vector = fixture("device_record_with_dk_sig_wrong_dk.json");
         let device = record(&vector["device"]);
         let payload = vector["payload"].as_str().unwrap().as_bytes();
         let signature = decode_b64(vector["sig"].as_str().unwrap()).unwrap();
-        assert_eq!(verify_identity_signature(&device, payload, &signature).is_ok(), vector["expect"]["identity_ok"]);
-        assert_eq!(verify_signature(SignatureAlgorithm::ES256, &device.dk_pub, payload, &signature).unwrap_err().code(), vector["expect"]["dk_error"]);
+        assert_eq!(
+            verify_identity_signature(&device, payload, &signature).is_ok(),
+            vector["expect"]["identity_ok"]
+        );
+        assert_eq!(
+            verify_signature(
+                SignatureAlgorithm::ES256,
+                &device.dk_pub,
+                payload,
+                &signature
+            )
+            .unwrap_err()
+            .code(),
+            vector["expect"]["dk_error"]
+        );
         let vector = fixture("device_record_with_dk_sig_tampered.json");
-        assert_eq!(outcome(verify_identity_signature(&record(&vector["device"]), &jcs(&vector["proof"]).unwrap(), &decode_b64(vector["sig"].as_str().unwrap()).unwrap())), vector["expect"]);
+        assert_eq!(
+            outcome(verify_identity_signature(
+                &record(&vector["device"]),
+                &jcs(&vector["proof"]).unwrap(),
+                &decode_b64(vector["sig"].as_str().unwrap()).unwrap()
+            )),
+            vector["expect"]
+        );
     }
 
     #[test]
     fn device_record_with_dk_sig_envelope_keeps_hpke_key_and_legacy_vectors() {
         let vector = fixture("device_record_with_dk_sig_envelope.json");
         let keys = fixture("test_keys.json");
-        let recipient = SoftwareDeviceKey::from_p256_bytes(&decode_b64(keys["recipient"]["private_scalar"].as_str().unwrap()).unwrap()).unwrap();
+        let recipient = SoftwareDeviceKey::from_p256_bytes(
+            &decode_b64(keys["recipient"]["private_scalar"].as_str().unwrap()).unwrap(),
+        )
+        .unwrap();
         let sender = record(&vector["sender"]);
-        let envelope: super::super::Envelope = serde_json::from_value(vector["envelope"].clone()).unwrap();
-        assert_eq!(super::super::envelope::verify(&envelope, &sender.dk_pub).unwrap_err().code(), vector["expect"]["dk_error"]);
-        let opened = super::super::envelope::open(&envelope, vector["recipient"]["device_id"].as_str().unwrap(), &recipient, &sender, vector["now"].as_i64().unwrap());
+        let envelope: super::super::Envelope =
+            serde_json::from_value(vector["envelope"].clone()).unwrap();
+        assert_eq!(
+            super::super::envelope::verify(&envelope, &sender.dk_pub)
+                .unwrap_err()
+                .code(),
+            vector["expect"]["dk_error"]
+        );
+        let opened = super::super::envelope::open(
+            &envelope,
+            vector["recipient"]["device_id"].as_str().unwrap(),
+            &recipient,
+            &sender,
+            vector["now"].as_i64().unwrap(),
+        );
         assert_eq!(opened.is_ok(), vector["expect"]["open_ok"]);
-        assert_eq!(String::from_utf8(opened.unwrap().to_vec()).unwrap(), vector["expect"]["plaintext"]);
+        assert_eq!(
+            String::from_utf8(opened.unwrap().to_vec()).unwrap(),
+            vector["expect"]["plaintext"]
+        );
     }
 
     #[test]
@@ -467,21 +521,31 @@ mod identity_tests {
         let vector = fixture("device_record_with_dk_sig_valid.json");
         let mut device = record(&vector["device"]);
         let keys = fixture("test_keys.json");
-        let dk = SoftwareDeviceKey::from_p256_bytes(&decode_b64(keys["recipient"]["private_scalar"].as_str().unwrap()).unwrap()).unwrap();
+        let dk = SoftwareDeviceKey::from_p256_bytes(
+            &decode_b64(keys["recipient"]["private_scalar"].as_str().unwrap()).unwrap(),
+        )
+        .unwrap();
         let payload = b"identity challenge";
-        let dk_signature = DeviceKeyProvider::sign(&dk, SignatureAlgorithm::ES256, payload).unwrap();
+        let dk_signature =
+            DeviceKeyProvider::sign(&dk, SignatureAlgorithm::ES256, payload).unwrap();
         assert!(verify_identity_signature(&device, payload, &dk_signature).is_err());
         let valid = device.dk_sig.clone();
         device.dk_sig = Optional::Null;
         assert!(verify_identity_signature(&device, payload, &dk_signature).is_err());
         device.dk_sig = valid.clone();
-        if let Optional::Value(key) = &mut device.dk_sig { key.alg = SignatureAlgorithm::RS256; }
+        if let Optional::Value(key) = &mut device.dk_sig {
+            key.alg = SignatureAlgorithm::RS256;
+        }
         assert!(verify_identity_signature(&device, payload, &dk_signature).is_err());
         device.dk_sig = valid.clone();
-        if let Optional::Value(key) = &mut device.dk_sig { key.r#pub = serde_json::from_value(keys["rsa_public_jwk"].clone()).unwrap(); }
+        if let Optional::Value(key) = &mut device.dk_sig {
+            key.r#pub = serde_json::from_value(keys["rsa_public_jwk"].clone()).unwrap();
+        }
         assert!(verify_identity_signature(&device, payload, &dk_signature).is_err());
         device.dk_sig = valid;
-        if let Optional::Value(key) = &mut device.dk_sig { key.r#pub.extra.insert("d".into(), json!("private")); }
+        if let Optional::Value(key) = &mut device.dk_sig {
+            key.r#pub.extra.insert("d".into(), json!("private"));
+        }
         assert!(verify_identity_signature(&device, payload, &dk_signature).is_err());
         device.dk_sig = Optional::Missing;
         verify_identity_signature(&device, payload, &dk_signature).unwrap();
@@ -493,19 +557,37 @@ mod identity_tests {
         for (schema, value) in [
             ("device_record", vector["device"].clone()),
             ("register_device_request", vector["device"].clone()),
-            ("relay_pair_start_request", json!({"token_hash":"0".repeat(64),"initiator":vector["device"],"exp":1760200600})),
-            ("relay_pair_complete_request", json!({"token":"A".repeat(22),"joiner":vector["device"]})),
+            (
+                "relay_pair_start_request",
+                json!({"token_hash":"0".repeat(64),"initiator":vector["device"],"exp":1760200600}),
+            ),
+            (
+                "relay_pair_complete_request",
+                json!({"token":"A".repeat(22),"joiner":vector["device"]}),
+            ),
         ] {
             let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-                .join("schemas/remote").join(format!("{schema}.schema.json"));
+                .join("schemas/remote")
+                .join(format!("{schema}.schema.json"));
             let document: Value = serde_json::from_slice(&std::fs::read(path).unwrap()).unwrap();
-            let validator = jsonschema::draft7::new(&document).unwrap();
+            let validator = jsonschema::JSONSchema::options()
+                .with_draft(jsonschema::Draft::Draft7)
+                .compile(&document)
+                .unwrap();
             assert!(validator.is_valid(&value), "{schema}");
         }
-        let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("schemas/remote/device_record.schema.json");
+        let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("schemas/remote/device_record.schema.json");
         let document: Value = serde_json::from_slice(&std::fs::read(path).unwrap()).unwrap();
-        let validator = jsonschema::draft7::new(&document).unwrap();
-        for bad in [Value::Null, json!({"pub":vector["device"]["dk_pub"],"alg":"RS256"}), json!({"pub":fixture("test_keys.json")["rsa_public_jwk"],"alg":"ES256"})] {
+        let validator = jsonschema::JSONSchema::options()
+            .with_draft(jsonschema::Draft::Draft7)
+            .compile(&document)
+            .unwrap();
+        for bad in [
+            Value::Null,
+            json!({"pub":vector["device"]["dk_pub"],"alg":"RS256"}),
+            json!({"pub":fixture("test_keys.json")["rsa_public_jwk"],"alg":"ES256"}),
+        ] {
             let mut device = vector["device"].clone();
             device["dk_sig"] = bad;
             assert!(!validator.is_valid(&device));
@@ -515,7 +597,10 @@ mod identity_tests {
         b.dk_sig = Optional::Missing;
         assert!(!super::super::validation::same_device_authority(&a, &b));
         b = a.clone();
-        if let Optional::Value(key) = &mut b.dk_sig { key.extra.insert("future_key".into(), json!({"binding":"tampered"})); }
+        if let Optional::Value(key) = &mut b.dk_sig {
+            key.extra
+                .insert("future_key".into(), json!({"binding":"tampered"}));
+        }
         assert!(!super::super::validation::same_device_authority(&a, &b));
     }
 }

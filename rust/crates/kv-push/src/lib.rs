@@ -95,7 +95,7 @@ impl PushRequest {
     pub fn fcm_payload(&self, token: &str) -> Value {
         json!({"message":{"token":token,"data":{"approval_id":self.approval_id,
             "to":self.to,"delivery.mode":if self.delivery.mode==Mode::Silent {"silent"} else {"banner"}},
-            "android":{"priority":"high","ttl":"120s","collapse_key":self.approval_id}}})
+            "android":{"priority":if self.delivery.mode==Mode::Banner {"high"} else {"normal"},"ttl":"120s","collapse_key":self.approval_id}}})
     }
 }
 fn now() -> u64 {

@@ -34,6 +34,7 @@ async fn main() -> anyhow::Result<()> {
         tokio::spawn(async move {
             let mut count = usize::MAX;
             loop {
+                {
                 let requests = helper.requests.lock().unwrap();
                 if requests.len() != count {
                     count = requests.len();
@@ -44,7 +45,7 @@ async fn main() -> anyhow::Result<()> {
                     });
                     let _ = std::fs::write(&path, format!("{summary}\n"));
                 }
-                drop(requests);
+                }
                 tokio::time::sleep(Duration::from_millis(100)).await;
             }
         });
