@@ -2,6 +2,10 @@ use crate::hello_logic::{Backend, Budget, CreationGuard, Reply, Result};
 use base64::{engine::general_purpose::STANDARD, Engine};
 use kv_vault::{EnclaveKey, EnclaveMetadata, HelloMetadata, MasterKey};
 use serde_json::Value;
+use std::sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc,
+};
 use std::time::Duration;
 use windows::core::{Interface, HSTRING};
 use windows::Security::Credentials::{
@@ -11,11 +15,10 @@ use windows::Security::Credentials::{
 use windows::Security::Cryptography::Core::CryptographicPublicKeyBlobType;
 use windows::Security::Cryptography::CryptographicBuffer;
 use windows::Storage::Streams::IBuffer;
-use windows::Win32::System::WinRT::{
-    IBufferByteAccess, RoInitialize, RoUninitialize, RO_INIT_MULTITHREADED,
-};
+use windows::Win32::System::WinRT::IBufferByteAccess;
 use zeroize::{Zeroize, Zeroizing};
 
+mod async_wait;
 mod remote_key;
 
 fn error(e: impl std::fmt::Display) -> String {
@@ -47,28 +50,61 @@ fn wait_for<T: windows::core::RuntimeType>(
             ));
         }
     };
-    wait_completion(&operation, timeout)?;
+    let completed = Arc::new(AtomicBool::new(false));
+    let notification = completed.clone();
+    wait_completion(&operation, timeout, &completed, || {
+        operation.SetCompleted(&windows_future::AsyncOperationCompletedHandler::<T>::new(
+            move |sender, status| {
+                sender.ok()?;
+                if async_wait::terminal_status(status.0) {
+                    notification.store(true, Ordering::Release);
+                }
+                Ok(())
+            },
+        ))
+    })?;
     operation.GetResults()
 }
-fn wait_completion(operation: &impl Interface, timeout: Duration) -> windows::core::Result<()> {
+fn wait_completion(
+    operation: &impl Interface,
+    timeout: Duration,
+    completed: &AtomicBool,
+    subscribe: impl FnOnce() -> windows::core::Result<()>,
+) -> windows::core::Result<()> {
     let info = operation.cast::<windows_future::IAsyncInfo>()?;
-    let deadline = std::time::Instant::now() + timeout;
-    while info.Status()? == windows_future::AsyncStatus::Started {
-        if std::time::Instant::now() >= deadline {
-            let _ = info.Cancel();
-            return Err(windows::core::Error::new(
+    async_wait::wait(
+        timeout,
+        subscribe,
+        || completed.load(Ordering::Acquire),
+        || {
+            info.Status()
+                .map(|status| status == windows_future::AsyncStatus::Started)
+        },
+        || info.Cancel(),
+        || {
+            windows::core::Error::new(
                 windows::core::HRESULT(0x800705b4_u32 as i32),
                 "Windows Hello timed out",
-            ));
-        }
-        std::thread::sleep(Duration::from_millis(100));
-    }
-    Ok(())
+            )
+        },
+    )
 }
 fn delete(name: &str) -> windows::core::Result<()> {
     let operation = KeyCredentialManager::DeleteAsync(&HSTRING::from(name))?;
     // Cleanup has its own short budget, even after the original request expired.
-    wait_completion(&operation, Duration::from_secs(2))?;
+    let completed = Arc::new(AtomicBool::new(false));
+    let notification = completed.clone();
+    wait_completion(&operation, Duration::from_secs(2), &completed, || {
+        operation.SetCompleted(&windows_future::AsyncActionCompletedHandler::new(
+            move |sender, status| {
+                sender.ok()?;
+                if async_wait::terminal_status(status.0) {
+                    notification.store(true, Ordering::Release);
+                }
+                Ok(())
+            },
+        ))
+    })?;
     operation.GetResults()
 }
 fn buffer_bytes(buffer: &IBuffer) -> Result<Vec<u8>> {
@@ -217,26 +253,21 @@ impl Backend for WindowsHello {
 }
 pub fn handle(request: &Value, active: Option<&EnclaveMetadata>) -> Reply {
     let id = request["id"].as_u64().unwrap_or(0);
-    if let Err(e) = unsafe { RoInitialize(RO_INIT_MULTITHREADED) } {
-        return crate::hello_logic::deny(id, error(e));
-    }
-    struct Apartment;
-    impl Drop for Apartment {
-        fn drop(&mut self) {
-            unsafe {
-                RoUninitialize();
-            }
+    match kv_agent::presence::windows::with_winrt(|| {
+        if request["op"] == "device_key" {
+            remote_key::handle(request)
+        } else {
+            crate::hello_logic::handle(request, active, &mut WindowsHello)
         }
+    }) {
+        Ok(reply) => reply,
+        Err(error_value) => crate::hello_logic::deny(id, error(error_value)),
     }
-    let _apartment = Apartment;
-    if request["op"] == "device_key" {
-        return remote_key::handle(request);
-    }
-    crate::hello_logic::handle(request, active, &mut WindowsHello)
 }
 #[cfg(test)]
 mod tests {
     use super::*;
+    use windows::Win32::System::WinRT::{RoInitialize, RoUninitialize, RO_INIT_MULTITHREADED};
     #[test]
     #[ignore = "Interactive Windows 11 Hello test: cargo test -p kv-agent hardware_roundtrip -- --ignored --nocapture"]
     fn hardware_roundtrip() {

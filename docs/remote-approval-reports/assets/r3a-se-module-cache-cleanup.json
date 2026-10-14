@@ -1,0 +1,10 @@
+{
+  "observed_utc": "2026-10-14T00:39:01.437405+00:00",
+  "authorization": "User requested autonomous routine rebuildable cache cleanup",
+  "removed": "/Users/guang/Library/Developer/Xcode/DerivedData/ModuleCache.noindex",
+  "allocated_bytes": 1815805952,
+  "free_before_bytes": 14506766336,
+  "free_after_bytes": 16329252864,
+  "free_increase_bytes": 1822486528,
+  "secret_values_in_evidence": false
+}

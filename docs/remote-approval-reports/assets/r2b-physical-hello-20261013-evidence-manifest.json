@@ -1,0 +1,111 @@
+{
+  "retrieved_after_charge": true,
+  "normalization": "UTF-8, LF; JSON pretty printed; text contents unchanged",
+  "files": [
+    {
+      "source_windows_name": "attempt1-native-repeat-result.json",
+      "original_sha256": "9e7755f8ef889ea0260bcffe494bd483a117ceea9250b39a76512c67d0b5c2ef",
+      "original_encoding": "utf-8-sig",
+      "evidence_file": "r2b-physical-hello-20261013-attempt1-native-repeat-result.json",
+      "evidence_sha256": "76306f6255f7340610f8b0462ef9115b8ce985582159708bfe80a44956ca080e"
+    },
+    {
+      "source_windows_name": "attempt1-native-repeat.log",
+      "original_sha256": "6b8dc6affb7896de369930832a5d70ba788a485fb18911b5d7ada854706c2d11",
+      "original_encoding": "utf-16",
+      "evidence_file": "r2b-physical-hello-20261013-attempt1-native-repeat.log",
+      "evidence_sha256": "eca91459c3484c01ea34b30e9d8e9ece2afca3b9502d80b4dec2b534629f3ce8"
+    },
+    {
+      "source_windows_name": "backup-summary.json",
+      "original_sha256": "04834c748e804615ce12cfe51493550bd822298510be2a849e278359a217a18f",
+      "original_encoding": "utf-8-sig",
+      "evidence_file": "r2b-physical-hello-20261013-backup-summary.json",
+      "evidence_sha256": "3f4f243e86dc6e75213a23c3926b8e467c491bd39d5f254ad5bd3778554ed4cc"
+    },
+    {
+      "source_windows_name": "cleanup-result.json",
+      "original_sha256": "243b713546def70da62396c0029d267044e8ea0eec0a9d9d00eec6b46f7eec3d",
+      "original_encoding": "utf-8-sig",
+      "evidence_file": "r2b-physical-hello-20261013-cleanup-result.json",
+      "evidence_sha256": "7c79fd8a2e7d63904d38a777ffd7f05880571e965169e20441f90c85d3b632bb"
+    },
+    {
+      "source_windows_name": "hello-availability.json",
+      "original_sha256": "41869425ed3b1f9190f21ca678897be8da1ad96537456e3cd6ee550aea8c08e7",
+      "original_encoding": "utf-8-sig",
+      "evidence_file": "r2b-physical-hello-20261013-hello-availability.json",
+      "evidence_sha256": "1efbcd7a1ecd229afaf8e2e13a9cd61c822c6076f10d9f19d5c53263e50672bb"
+    },
+    {
+      "source_windows_name": "install-result.json",
+      "original_sha256": "c394e513f5c016b9e99d8364bc1a0f612b959d7690890d197e15b8c701f629a6",
+      "original_encoding": "utf-8-sig",
+      "evidence_file": "r2b-physical-hello-20261013-install-result.json",
+      "evidence_sha256": "7886d5273d53606970dd794ae04a5c26e23993d3c2b3f64a8f7ae075539f6174"
+    },
+    {
+      "source_windows_name": "install.log",
+      "original_sha256": "09bcb8c85a8977b5c171010542e03afc84c458cf81bc6fe34a8efbbc4e429831",
+      "original_encoding": "utf-16",
+      "evidence_file": "r2b-physical-hello-20261013-install.log",
+      "evidence_sha256": "b45a8300b2b1de5e2c4ea257b3fe138de72f929718ace286365c9b3387e07a7e"
+    },
+    {
+      "source_windows_name": "native-cancel-result.json",
+      "original_sha256": "6aa02d9ba89e4f16517f47649a04992a3586ce40aa0a40eb97cde119fde0f083",
+      "original_encoding": "utf-8-sig",
+      "evidence_file": "r2b-physical-hello-20261013-native-cancel-result.json",
+      "evidence_sha256": "565079234f1586bbe8b54cdb85bc90e0dcdac52c5c02f317a49feb18349c738b"
+    },
+    {
+      "source_windows_name": "native-cancel.log",
+      "original_sha256": "ea71b99880ad5614bf0a9577795ef7b04b6926755598b09a333970c79553dead",
+      "original_encoding": "utf-16",
+      "evidence_file": "r2b-physical-hello-20261013-native-cancel.log",
+      "evidence_sha256": "0c997510d24d6c4a10c9c9dae0ad65ed7d56b6e042d97fc62c127bbe5a99e973"
+    },
+    {
+      "source_windows_name": "native-repeat-result.json",
+      "original_sha256": "3990c7fefc8a7d35e4c7ec1228cb8122d29cc4c02e064748fe47072b54fc4fb4",
+      "original_encoding": "utf-8-sig",
+      "evidence_file": "r2b-physical-hello-20261013-native-repeat-result.json",
+      "evidence_sha256": "86d9c92e685e7056dde19af76ae07a03c888fc21d1caee2bc570cd7c2a06f248"
+    },
+    {
+      "source_windows_name": "native-repeat.log",
+      "original_sha256": "4d98625c25b260c27fb1a6e8b0a821c19149c8e739b7b492fbc05589bde9c8c0",
+      "original_encoding": "utf-16",
+      "evidence_file": "r2b-physical-hello-20261013-native-repeat.log",
+      "evidence_sha256": "1517bd824814bf5df56ba2aff6b0b57cf2b1362aa6fd1c6c8e6ddae53a4f7052"
+    },
+    {
+      "source_windows_name": "native-strong-result.json",
+      "original_sha256": "41cd7ab3752ef06687be41a0bcf135f6657657547f5fbdaba01ca78fb38d3d11",
+      "original_encoding": "utf-8-sig",
+      "evidence_file": "r2b-physical-hello-20261013-native-strong-result.json",
+      "evidence_sha256": "b956b263c5fd98ea1cffbbc4de0fd3b36d82b886935de5bc6b52e245c29cc5b8"
+    },
+    {
+      "source_windows_name": "native-strong.log",
+      "original_sha256": "852a7440fd0daa673be260e19fd1ca95b6550c93597fc1bda441db9be11082ff",
+      "original_encoding": "utf-16",
+      "evidence_file": "r2b-physical-hello-20261013-native-strong.log",
+      "evidence_sha256": "a424bbba7abbdd54558603f6900576f80a62cf1159f9f8e1dee49e71cfd7ce95"
+    },
+    {
+      "source_windows_name": "startup-minmask-result.json",
+      "original_sha256": "06804edc2336ba4df8d495ad41ab219c457d2005cec3ba3ffdcc685589f2f81e",
+      "original_encoding": "utf-8-sig",
+      "evidence_file": "r2b-physical-hello-20261013-startup-minmask-result.json",
+      "evidence_sha256": "0f2b9c3c66da55b435a8117bc8eb9725344fad4b56fd68eb046fdadd407bf079"
+    },
+    {
+      "source_windows_name": "startup-probe-result.json",
+      "original_sha256": "b17a5793f7255ec6501263be6e55a2b05a1301dc672bff8a98b3df44bd6146c3",
+      "original_encoding": "utf-8-sig",
+      "evidence_file": "r2b-physical-hello-20261013-startup-probe-result.json",
+      "evidence_sha256": "25e8cbf57338d5aca1b0ffefe58c0559afbbad79a6b8bf4010d5b633041cf10c"
+    }
+  ]
+}

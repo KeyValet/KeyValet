@@ -1,0 +1,28 @@
+{
+  "services": [
+    {
+      "start_mode": "Auto",
+      "account": "LocalSystem",
+      "name": "KeyValetHelper",
+      "state": "Running"
+    },
+    {
+      "start_mode": "Manual",
+      "account": "NT SERVICE\\KeyValetRelay",
+      "name": "KeyValetRelay",
+      "state": "Stopped"
+    }
+  ],
+  "percent": 21,
+  "ac": 1,
+  "power_read": true,
+  "desktop": [
+    {
+      "session": 13
+    }
+  ],
+  "free_bytes": 375629656064,
+  "utc": "2026-10-14T05:26:32.4163181Z",
+  "owner_sid": "S-1-5-21-3389053113-2113560702-4064643913-1001",
+  "ssh_exit": 0
+}

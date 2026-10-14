@@ -1,0 +1,49 @@
+{
+  "observed_utc": "2026-10-13T04:28:34.917709+00:00",
+  "vault_events": [
+    {
+      "op": "setup-enclave",
+      "ok": true,
+      "ts": "2026-10-11T09:21:42.730Z"
+    },
+    {
+      "op": "list",
+      "ok": true,
+      "ts": "2026-10-11T09:22:55.503Z"
+    },
+    {
+      "op": "listTypes",
+      "ok": true,
+      "ts": "2026-10-12T23:45:08.357Z"
+    },
+    {
+      "op": "list",
+      "ok": true,
+      "ts": "2026-10-13T00:19:00.708Z"
+    },
+    {
+      "op": "unlock",
+      "ok": true,
+      "ts": "2026-10-13T03:52:55.361Z"
+    },
+    {
+      "op": "unlock",
+      "ok": true,
+      "ts": "2026-10-13T04:24:47.777Z"
+    },
+    {
+      "op": "set",
+      "ok": true,
+      "ts": "2026-10-13T04:24:47.793Z"
+    },
+    {
+      "op": "session-end",
+      "ts": "2026-10-13T04:24:47.855Z"
+    }
+  ],
+  "polkit_summary": {
+    "auth_messages": 0,
+    "failed_messages": 0,
+    "keyvalet_actions": 1
+  }
+}

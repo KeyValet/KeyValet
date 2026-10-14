@@ -1,0 +1,41 @@
+{
+  "started_utc": "2026-10-14T08:56:34.028215+00:00",
+  "rust": "1.99.0",
+  "checks": {
+    "fmt": 0,
+    "clippy": 0,
+    "build": 0,
+    "test": 101
+  },
+  "space_checks": [
+    {
+      "check": "fmt",
+      "free_bytes": 27578957824
+    },
+    {
+      "check": "clippy",
+      "free_bytes": 27579846656
+    },
+    {
+      "check": "build",
+      "free_bytes": 27404398592
+    },
+    {
+      "check": "test",
+      "free_bytes": 27362361344
+    }
+  ],
+  "source_files": 528,
+  "minimum_free_bytes": 15000000000,
+  "secret_values_in_evidence": false,
+  "dependency_guard": "clippy --locked and CARGO_NET_OFFLINE=true prevent adding foreign dependencies or changing the lockfile",
+  "source_unchanged_during_checks": false,
+  "changed_source_files": [
+    "rust/crates/kv-cli/src/remote/audit_tests.rs"
+  ],
+  "passed": 220,
+  "failed": 1,
+  "ignored": 0,
+  "groups": 5,
+  "finished_utc": "2026-10-14T08:58:16.594295+00:00"
+}

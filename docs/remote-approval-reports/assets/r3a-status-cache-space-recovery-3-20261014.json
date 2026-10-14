@@ -1,0 +1,12 @@
+{
+  "observed_utc": "2026-10-14T07:00:26.389607+00:00",
+  "free_before": 15020023808,
+  "free_after": 19033759744,
+  "path": "rust/target-status/debug/deps",
+  "files": 30996,
+  "bytes": 5978079730,
+  "kind": "rebuildable_deps",
+  "installed_and_signed_stages_preserved": true,
+  "source_backups_evidence_preserved": true,
+  "no_compiler_active": true
+}

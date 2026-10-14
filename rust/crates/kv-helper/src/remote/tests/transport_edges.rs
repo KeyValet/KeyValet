@@ -4,6 +4,83 @@ use super::workflow::{present_signals, signed_grant};
 use super::*;
 use kv_ipc::remote::{OutboundStage, RelayOutboundAckParams};
 
+#[cfg(any(target_os = "macos", windows))]
+#[test]
+fn r3a_state_lock_wait_does_not_stop_the_private_agent_reply_pump() {
+    use std::sync::mpsc;
+    use std::time::Duration;
+    use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
+
+    // The installed failure had an agent-backed key operation under the state lock,
+    // followed by the timer waiting for that lock on an I/O worker. One worker makes
+    // this scheduling failure deterministic without an installed helper or GUI.
+    let runtime = tokio::runtime::Builder::new_multi_thread()
+        .worker_threads(1)
+        .enable_all()
+        .build()
+        .unwrap();
+    let h = Harness::new();
+    let hub = kv_platform::agent::AgentHub::new();
+    #[cfg(target_os = "macos")]
+    let owner = 501;
+    #[cfg(windows)]
+    let owner = "test-owner".to_string();
+    let (private, fake_agent) = tokio::io::duplex(4096);
+    let (reply_gate, reply_ready) = tokio::sync::oneshot::channel();
+    {
+        let _entered = runtime.enter();
+        #[allow(clippy::clone_on_copy)] // AgentKey is a SID string on Windows.
+        hub.register(owner.clone(), private, "signed");
+    }
+    let agent = runtime.spawn(async move {
+        let mut peer = BufReader::new(fake_agent);
+        let mut line = String::new();
+        peer.read_line(&mut line).await.unwrap();
+        let request: Value = serde_json::from_str(&line).unwrap();
+        reply_ready.await.unwrap();
+        let bytes = kv_ipc::agent::encode_line(&json!({"id": request["id"], "ok": true}));
+        peer.get_mut().write_all(&bytes).await.unwrap();
+    });
+    let (held_tx, held_rx) = mpsc::channel();
+    let (entered_tx, entered_rx) = mpsc::channel();
+    let (result_tx, result_rx) = mpsc::channel();
+    let (abort_tx, abort_rx) = tokio::sync::oneshot::channel();
+    let helper = h.helper.clone();
+    let key_operation = runtime.spawn_blocking(move || {
+        let _state = helper.lock().unwrap();
+        held_tx.send(()).unwrap();
+        let result = tokio::runtime::Handle::current().block_on(async {
+            tokio::select! {
+                reply = hub.request(&owner, json!({"op":"fake_key_operation"}), Duration::from_secs(5)) => reply.is_ok(),
+                _ = abort_rx => false,
+            }
+        });
+        result_tx.send(result).unwrap();
+    });
+    held_rx.recv_timeout(Duration::from_secs(5)).unwrap();
+    let helper = h.helper.clone();
+    let timer = runtime.spawn(async move {
+        entered_tx.send(()).unwrap();
+        helper.tick().unwrap();
+    });
+    entered_rx.recv_timeout(Duration::from_secs(5)).unwrap();
+    reply_gate.send(()).unwrap();
+    // An OS-thread deadline still fires when the Tokio driver is blocked. Release
+    // the fake operation before asserting so even the failing regression cleans up.
+    let received = result_rx.recv_timeout(Duration::from_secs(1));
+    let _ = abort_tx.send(());
+    runtime.block_on(async {
+        key_operation.await.unwrap();
+        timer.await.unwrap();
+        agent.await.unwrap();
+    });
+    assert_eq!(
+        received.ok(),
+        Some(true),
+        "state-lock contention stopped the agent reply pump"
+    );
+}
+
 fn receipt(envelopes: Vec<Envelope>, stage: OutboundStage) -> RelayOutboundAckParams<Envelope> {
     RelayOutboundAckParams {
         envelopes,
@@ -221,16 +298,18 @@ async fn relay_acks_only_durably_audited_terminal_rejections() {
 
 #[tokio::test]
 async fn cancel_escalate_and_directive_result_ids_remain_bound_to_the_original_sender() {
-    let h = Harness::new();
+    let h = signing_harness();
     let request = h.helper.submit(h.input(Tier::T1, "A")).unwrap();
-    {
-        let mut state = h.helper.lock().unwrap();
-        let mut incoming = request.clone();
-        incoming.requester.device_id = h.peer.device_id.clone();
-        state
-            .inbound_requests
-            .insert(request.approval_id.clone(), incoming);
-    }
+    let mut incoming = request.clone();
+    incoming.requester.device_id = h.peer.device_id.clone();
+    h.helper
+        .inbound(h.envelope(
+            EnvelopeType::ApprovalRequest,
+            &request.approval_id,
+            &incoming,
+        ))
+        .await
+        .unwrap();
     for (id, body_id, expected) in [
         (
             request.approval_id.as_str(),

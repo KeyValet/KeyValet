@@ -929,8 +929,9 @@ async fn sdk_retry_metadata_does_not_change_the_approval_binding() {
     }
     {
         let requests = provider.0.lock().unwrap();
-        assert_eq!(requests.len(), 2);
-        assert_eq!(requests[0].headers, requests[1].headers);
+        // Retry metadata is excluded from the binding, so both downstream requests
+        // join one pending ticket and do not race for its forwarding permit.
+        assert_eq!(requests.len(), 1);
         assert!(!requests[0].headers.contains_key("x-stainless-retry-count"));
         assert!(!requests[0].headers.contains_key("x-opaque"));
         assert_eq!(requests[0].headers["x-request-purpose"], "stable");

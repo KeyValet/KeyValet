@@ -1,0 +1,10 @@
+{
+  "prepared_utc": "2026-10-14T01:34:45.249824+00:00",
+  "checklist": "修复包、签名和四项 CI 已备好。接下来约 8–10 分钟你要做的事：\n1. 回复「开始收尾」后，我在 Mac Terminal 安装新 agent；若要求管理员密码，只在那里输入，看到 Owner IPC: True。\n2. Terminal 提示“在场恢复”时按回车开启屏保，保持 10 秒后退出；再按 Control+Command+Q 锁屏，保持 10 秒后正常解锁，回 Terminal 按回车等 presence=present。\n3. Terminal 标明“SE 取消用例”时按回车，允许普通授权框，再取消系统 Touch ID；看到 key_operation_cancelled 算成功。\n4. Terminal 提示 ndu polkit 时输入 ndu 用户 guang 的密码。\n5. Terminal 标明“待用批准”时按回车，先不操作 Mac GET 框，等“执行进程已退出”后才点击 Allow／仅本次。\n6. Terminal 标明“签发一小时 T1 Grant”时按回车，在 Mac 确认并完成第一次 Touch ID。\n7. Terminal 标明“正向吊销”时按回车，核对设备 ID 末尾为 07FC（ndu）后确认并完成第二次 Touch ID，看到批准 cancelled、Grant 吊销和秒数。\n8. Terminal 显示本段完成后保持窗口打开，我读取实际收据。\n成功 KeyValet Touch ID 签名共两次，另取消一次系统认证；Deny 和 Esc 用例已通过，本段只读核对。按你原定的 Touch ID 现场规则，等你说开始后再运行。现在开始收尾吗？",
+  "user_started": true,
+  "expected_successful_se_signatures": 2,
+  "entry": "r3a-start-se-child-remaining.py",
+  "secret_values_in_evidence": false,
+  "user_started_utc": "2026-10-14T05:14:07.416567+00:00",
+  "user_start_reply": "开始"
+}

@@ -1,0 +1,8 @@
+{
+  "observed_noninteractive": true,
+  "case": "remote_grants_after_repair",
+  "elapsed_s": 0.020809,
+  "exit": 1,
+  "ok": null,
+  "error_code": null
+}

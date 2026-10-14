@@ -255,6 +255,8 @@ impl Server {
                         &format!("等待 KeyValet 审批（已等待 {seconds} 秒）"),
                         &format!("Waiting for KeyValet approval ({seconds} s elapsed)"),
                     );
+                    #[cfg(feature = "runtime-probe")]
+                    crate::fake_helper::probe_event("progress_sent", serde_json::json!({"progress_token":token,"wait_s":seconds}));
                     let _ = context.peer.notify_progress(ProgressNotificationParam::new(token.clone().unwrap(), started.elapsed().as_secs_f64()).with_message(message)).await;
                 }
             }

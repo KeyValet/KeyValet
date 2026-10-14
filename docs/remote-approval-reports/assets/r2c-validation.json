@@ -1,0 +1,194 @@
+{
+  "recorded_at": "2026-10-13T00:18:16.535396+00:00",
+  "rust_toolchain": "1.99.0",
+  "cargo_target_dir": "/Users/guang/dev/keyvalet/rust/target-r2c",
+  "workspace": {
+    "fmt": "passed",
+    "clippy": "passed",
+    "build": "passed",
+    "test": "passed"
+  },
+  "flutter": {
+    "analyze": "passed",
+    "tests": 40
+  },
+  "focused_rust_tests": {
+    "kv-mobile-core": 37,
+    "kv-server": 98,
+    "kv-push": 8
+  },
+  "physical_signing_gate": {
+    "device": "Pixel 7",
+    "android_api": 36,
+    "tests": 2,
+    "failures": 0,
+    "skipped": 0,
+    "duration_seconds": 1.242
+  },
+  "cargo_targets": {
+    "aarch64-linux-android": "passed",
+    "aarch64-apple-ios": "passed",
+    "aarch64-apple-ios-sim": "passed"
+  },
+  "android_E_acceptance": "Pixel 7 pairing, lockscreen Quick, App biometric Strong, same-id audible escalation, settings three steps, away preference, killed-process delivery and clock warnings passed. After reboot, approval pull retries; logout local rejection passes, remote token cleanup pending. Mac real pairing/GUI awaits R2-A.",
+  "artifact_sha256": {
+    "mobile/build/app/outputs/flutter-apk/app-debug.apk": "4b3ffb3b76d4f00790017eb317cb0e4382d253224465e417bbfa0c9f4bb07834",
+    "mobile/native/android/arm64-v8a/libkv_mobile_core.so": "34ea185d637f22c6c4564673e109106336b46f0d2445a01b25c87495ae160a1c",
+    "mobile/native/ios/libkv_mobile_core.a": "3b3c7b3c9c8e4b762332d2c8bf480c1ac63a950847e981e02d1cff24221fdb0f",
+    "mobile/native/ios-sim/libkv_mobile_core.a": "1f1012521a978654ff436bd2ee8bf6d8f1d93e472fb93bb04de772af4fa815cd"
+  },
+  "deploy": {
+    "relay_active": true,
+    "health_http": 200,
+    "public_push_http": 404,
+    "dispatcher_active": true,
+    "fcm_file": "provided",
+    "kv-server_sha256": "9a889580e6aa2cb0b04868382e0d5f86f8da93cabe980350f0575bc96b418fa1",
+    "dispatcher_enabled": true,
+    "dispatcher_unit": "keyvalet-push.service",
+    "fcm_provider_status": 202,
+    "unauthenticated_provider_status": 401,
+    "listen": "127.0.0.1:8788",
+    "kv-push_sha256": "73ccc644701871f4026cac735129d7b8d698a827c2b1983cdcb0225d9f67d87d",
+    "credential_source": "systemd LoadCredential; source root:root 0600",
+    "nginx_private_deny_loaded": true,
+    "nginx_proxy_to_push_port": false,
+    "fcm_final_probe": {
+      "candidate_devices": 1,
+      "unauthenticated_status": 401,
+      "authenticated_status": 202,
+      "delivery_mode": "silent",
+      "approval_record_created": false,
+      "completed_at": "2026-10-12T16:37:06.304966+00:00"
+    },
+    "current_kv-server_sha256": "1eced902770d81e9933c204c8830ca7d2c7565e3fc0105e93aeeb44c45f9eab0",
+    "current_relay_replaced_by": "R2-A at 2026-10-12T23:33:12Z; deployment history kept"
+  },
+  "physical_background_sync": {
+    "before_pid": "20794",
+    "after_pid": "",
+    "force_stop_used": false,
+    "killed_at_unix_ms": 1791821591799,
+    "woken_pid": "20975",
+    "plans": 0,
+    "fcm_accepted_to_sync_seconds": 5.426,
+    "kill_to_sync_seconds": 6.885,
+    "fixture_approval": false
+  },
+  "target_caches_pruned_after_success": true,
+  "workspace_commands": [
+    {
+      "name": "fmt",
+      "exit_code": 0,
+      "started_at_unix": 1791849948.948986,
+      "completed_at_unix": 1791849949.916717
+    },
+    {
+      "name": "clippy",
+      "exit_code": 0,
+      "started_at_unix": 1791849949.917019,
+      "completed_at_unix": 1791849955.8298628
+    },
+    {
+      "name": "build",
+      "exit_code": 0,
+      "started_at_unix": 1791849955.830204,
+      "completed_at_unix": 1791849964.987492
+    },
+    {
+      "name": "test",
+      "exit_code": 0,
+      "started_at_unix": 1791850079.719925,
+      "completed_at_unix": 1791850350.959052,
+      "retry_reason": "kv-helper owner_workflow unknown_token under parallel suite; isolated test passed without changes"
+    }
+  ],
+  "target_builds": {
+    "android": {
+      "exit_code": 0,
+      "started_at_unix": 1791849948.9489448,
+      "finished_at_unix": 1791849953.047114
+    },
+    "ios": {
+      "exit_code": 0,
+      "started_at_unix": 1791849953.047487,
+      "finished_at_unix": 1791849959.6712582
+    },
+    "ios-sim": {
+      "exit_code": 0,
+      "started_at_unix": 1791849959.671533,
+      "finished_at_unix": 1791849968.7569878
+    }
+  },
+  "android_E_evidence": "r2c-physical-events.json",
+  "offline_one_hour": "deferred by user: phone needed for messages",
+  "reboot": "boot 37 to 38; same FCM token and native worker wake observed after Google network restoration; live approval pull still retries, not passed",
+  "artifact_packaging": {
+    "source_rust_sha256": "34ea185d637f22c6c4564673e109106336b46f0d2445a01b25c87495ae160a1c",
+    "merged_rust_sha256": "34ea185d637f22c6c4564673e109106336b46f0d2445a01b25c87495ae160a1c",
+    "stripped_rust_sha256": "ba9c70292f917c2eed5a69698c55d34c5e68df250679efa46be4f9d646e993f0",
+    "packaged_rust_sha256": "ba9c70292f917c2eed5a69698c55d34c5e68df250679efa46be4f9d646e993f0",
+    "source_matches_merged": true,
+    "stripped_matches_packaged": true,
+    "current_rust_packaged": true,
+    "apk_sha256": "4b3ffb3b76d4f00790017eb317cb0e4382d253224465e417bbfa0c9f4bb07834",
+    "note": "AGP strips symbols; compare each packaging stage rather than raw ELF to stripped APK bytes."
+  },
+  "physical_background_sync_with_approval": {
+    "at_unix_ms": 1791847266658,
+    "pid_before": "16454",
+    "pid_after": "",
+    "method": "am kill (no force-stop)",
+    "kill_attempts": 1,
+    "force_stop_used": false,
+    "pid_after_fcm": "16720",
+    "approval_id": "01M4S6QDAG740777TXRQCVYB8A",
+    "fcm_recreated_native_rust_approval_notification": true
+  },
+  "logout": "own login UI and native login_required gate verified; remote token/session cleanup still pending connectivity",
+  "flutter_checks": [
+    {
+      "name": "analyze",
+      "exit_code": 0,
+      "started_at_unix": 1791849948.948947,
+      "completed_at_unix": 1791849951.551384
+    },
+    {
+      "name": "test",
+      "exit_code": 0,
+      "started_at_unix": 1791849951.551711,
+      "completed_at_unix": 1791849957.1887841
+    }
+  ],
+  "ios_simulator": {
+    "exit_code": 0,
+    "started_at_unix": 1791850105.330007,
+    "completed_at_unix": 1791850119.0359309
+  },
+  "live_final": [
+    {
+      "at_unix_ms": 1791850405448,
+      "push_token_present": true,
+      "active_user_sessions": 1,
+      "push_jobs": 0
+    },
+    {
+      "binary": "kv-server",
+      "sha256": "1eced902770d81e9933c204c8830ca7d2c7565e3fc0105e93aeeb44c45f9eab0"
+    },
+    {
+      "binary": "kv-push",
+      "sha256": "73ccc644701871f4026cac735129d7b8d698a827c2b1983cdcb0225d9f67d87d"
+    }
+  ],
+  "fixture": "stopped gracefully; synthetic execution count 5, no real credential executed",
+  "phone_current_state": "signed out; Google re-login begin failed before provider UI because relay request could not connect",
+  "remaining_android": [
+    "restore phone relay HTTPS reachability and re-login",
+    "verify remote logout token deletion and same-token re-upload",
+    "reboot live approval recovery",
+    "continuous one-hour offline window deferred by user",
+    "real Mac pairing/desktop presence and credential execution owned by R2-A",
+    "repeat <=30-second end-to-end banner budget; measured sample about 35 seconds"
+  ]
+}

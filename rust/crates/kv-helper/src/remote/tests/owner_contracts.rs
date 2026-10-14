@@ -8,7 +8,7 @@ fn draft(h: &Harness) -> Value {
 }
 
 #[tokio::test]
-async fn owner_t2_intent_requires_strong_then_one_use_label_proof() {
+async fn owner_t2_intent_requires_strong_then_two_one_use_label_proofs() {
     let h = signing_harness();
     let mut intent = draft(&h);
     let prepared = h
@@ -20,6 +20,12 @@ async fn owner_t2_intent_requires_strong_then_one_use_label_proof() {
     assert!(h.helper.outbound_poll(0).await.unwrap().is_empty());
     intent["confirm"] = prepared["result"]["label"].clone();
     intent["confirmation_token"] = prepared["result"]["confirmation_token"].clone();
+    let second = h
+        .exchange(Caller::CliOwner, Op::GrantIssue, intent.clone())
+        .await;
+    assert_eq!(second["result"]["confirmations_left"], 1);
+    assert!(h.helper.outbound_poll(0).await.unwrap().is_empty());
+    intent["confirmation_token"] = second["result"]["confirmation_token"].clone();
     let issued = h
         .exchange(Caller::CliOwner, Op::GrantIssue, intent.clone())
         .await;

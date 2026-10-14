@@ -1,0 +1,34 @@
+{
+  "changes_installed_security": false,
+  "cases": [
+    {
+      "variant": "cmd_only_default_mask=0x00120004",
+      "exit_code": 3221225794,
+      "exit_hex": "0xc0000142",
+      "timed_out": false,
+      "error": null
+    },
+    {
+      "variant": "cmd_only_default_mask=0x00120040",
+      "exit_code": 3221225794,
+      "exit_hex": "0xc0000142",
+      "timed_out": false,
+      "error": null
+    },
+    {
+      "variant": "cmd_only_default_mask=0x00120044",
+      "exit_code": 3221225794,
+      "exit_hex": "0xc0000142",
+      "timed_out": false,
+      "error": null
+    },
+    {
+      "variant": "cmd_only_default_mask=0x00120844",
+      "exit_code": 3221225794,
+      "exit_hex": "0xc0000142",
+      "timed_out": false,
+      "error": null
+    }
+  ],
+  "application": "Windows cmd.exe exit 0"
+}

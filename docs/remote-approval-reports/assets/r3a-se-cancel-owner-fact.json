@@ -1,0 +1,13 @@
+{
+  "observed_utc": "2026-10-14T01:10:02.640326+00:00",
+  "owner_report": "先允许，再取消系统 Touch ID",
+  "native_receipt": "r3a-remaining-native-20261014T010532Z.json",
+  "cli_error_code": "key_operation_failed",
+  "cli_elapsed_s": 8.531664,
+  "remaining_unissued": [
+    "unused_approval",
+    "grant",
+    "device_revocation"
+  ],
+  "secret_values_in_evidence": false
+}

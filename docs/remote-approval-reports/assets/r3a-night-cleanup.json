@@ -1,0 +1,23 @@
+{
+  "observed_utc": "2026-10-13T06:21:24.992367Z",
+  "reason": "User going to sleep; attended window ended.",
+  "test_mcp_pid": 934583,
+  "test_parent_pid": 934580,
+  "test_mcp_alive": false,
+  "test_parent_alive": false,
+  "waiting_approvals": 0,
+  "terminal_states": {
+    "executed": 1,
+    "denied": 1
+  },
+  "remote_mode": "per_use",
+  "services": [
+    "active",
+    "active",
+    "active"
+  ],
+  "new_approval_dialogs_will_not_be_initiated": true,
+  "lid_test_started": false,
+  "lid_test_duration_s": 0,
+  "secret_values_in_evidence": false
+}

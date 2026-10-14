@@ -1,0 +1,81 @@
+{
+  "inventory": [
+    {
+      "destination": "vault",
+      "source": "C:\\ProgramData\\KeyValet",
+      "backed_up": false,
+      "existed": false
+    },
+    {
+      "destination": "installation",
+      "source": "C:\\Program Files\\KeyValet",
+      "backed_up": false,
+      "existed": false
+    },
+    {
+      "destination": "user-keyvalet",
+      "source": "C:\\Users\\11516\\.keyvalet",
+      "backed_up": false,
+      "existed": false
+    },
+    {
+      "destination": "claude.json",
+      "source": "C:\\Users\\11516\\.claude.json",
+      "backed_up": false,
+      "existed": false
+    },
+    {
+      "destination": "claude-settings.json",
+      "source": "C:\\Users\\11516\\.claude\\settings.json",
+      "backed_up": false,
+      "existed": false
+    },
+    {
+      "destination": "codex-config.toml",
+      "source": "C:\\Users\\11516\\.codex\\config.toml",
+      "backed_up": false,
+      "existed": false
+    },
+    {
+      "destination": "codex-hooks.json",
+      "source": "C:\\Users\\11516\\.codex\\hooks.json",
+      "backed_up": false,
+      "existed": false
+    },
+    {
+      "destination": "cursor-mcp.json",
+      "source": "C:\\Users\\11516\\.cursor\\mcp.json",
+      "backed_up": false,
+      "existed": false
+    },
+    {
+      "destination": "cursor-hooks.json",
+      "source": "C:\\Users\\11516\\.cursor\\hooks.json",
+      "backed_up": false,
+      "existed": false
+    },
+    {
+      "destination": "gemini-settings.json",
+      "source": "C:\\Users\\11516\\.gemini\\settings.json",
+      "backed_up": false,
+      "existed": false
+    },
+    {
+      "destination": "grok-config.toml",
+      "source": "C:\\Users\\11516\\.grok\\config.toml",
+      "backed_up": false,
+      "existed": false
+    },
+    {
+      "destination": "devin-config.json",
+      "source": "C:\\Users\\11516\\.config\\devin\\config.json",
+      "backed_up": false,
+      "existed": false
+    }
+  ],
+  "owner_sid": "S-1-5-21-3389053113-2113560702-4064643913-1001",
+  "user_path": "C:\\Users\\11516\\AppData\\Local\\Microsoft\\WindowsApps;",
+  "created_utc": "2026-10-13T03:17:15.4610151Z",
+  "work": "C:\\Users\\11516\\KeyValet-Test-20261013",
+  "backup": "C:\\ProgramData\\KeyValet-Backups\\pre-install-20261013T031715Z"
+}

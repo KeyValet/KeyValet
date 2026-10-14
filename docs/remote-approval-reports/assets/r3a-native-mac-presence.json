@@ -1,0 +1,12 @@
+{
+  "observed_utc": "2026-10-13T03:37:05.484630+00:00",
+  "console_uid": 501,
+  "session_dictionary_available": true,
+  "boolean_signals": {
+    "kCGSessionOnConsoleKey": null,
+    "kCGSessionLoginDoneKey": true,
+    "CGSSessionScreenIsLocked": null,
+    "CGSSessionScreenSaverIsRunning": null
+  },
+  "idle_seconds": 75.694440917
+}

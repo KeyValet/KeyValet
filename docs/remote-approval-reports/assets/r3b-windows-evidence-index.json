@@ -1,0 +1,969 @@
+{
+  "utc": "2026-10-13T23:27:13.693586+00:00",
+  "source_fingerprint": "fbf22e994313d82d246b96ccc8e480441f4c048b4ad715f8f8c5bd828f87bf0b",
+  "source_files": 610,
+  "package_sha256": "aaf1f851dcdd5d54bea8c7480049db71b6808b10e9e36a9b6977aa1ae163fbfc",
+  "unsigned_release_preview_sha256": "3cd969a332bb6eb1678ac48fb0e4d300bb12075e104c4bc13b0e0651acf344aa",
+  "production_readiness": "r3b-production-readiness-summary.json",
+  "production_signed": false,
+  "public_windows_approval_passed": false,
+  "parts_summary": "r3b-windows-native-closure-summary.json",
+  "integrated_round6_passed": false,
+  "independent_current_code_cancellation_passed": true,
+  "documents": [
+    {
+      "path": "docs/windows.md",
+      "sha256": "f05dc18362300b13f2d200813317a7b25d4499b0af12843922b6d33d96e19d47"
+    },
+    {
+      "path": "docs/windows-native-acceptance-2026-10-12.zh-CN.md",
+      "sha256": "59f04fb60e757f255ebfb8b626f970f05c5f9237c1e7c4da3b3c79e504b4f79c"
+    },
+    {
+      "path": "docs/remote-approval-reports/R3-B-security-closure.md",
+      "sha256": "5d96a3e77d5977770880209693d0667a9bc6418431054a49ce19666f4bcf97ff"
+    }
+  ],
+  "files": [
+    {
+      "name": "r3b-production-WINDOWS-PREVIEW.txt",
+      "bytes": 1241,
+      "sha256": "f6c302b7d448ed91f221333acf216dc2d7eb327dddb58545ce123c4be562a72b"
+    },
+    {
+      "name": "r3b-production-github-signing-availability.json",
+      "bytes": 495,
+      "sha256": "8361169e803379dd044c4d25cdf7477c9665fa42aa371804962eb207bb8c4b19"
+    },
+    {
+      "name": "r3b-production-local-archive-verification.json",
+      "bytes": 550,
+      "sha256": "d56fa433955af9be0bffc720521c7cdec5313299859f0596ed5be1ed2a141114"
+    },
+    {
+      "name": "r3b-production-physical-own-transfer-cleanup.json",
+      "bytes": 238,
+      "sha256": "e91b013846d8312e32284ca5c6c0d5b6d2a75ed614f9a3c3af0a6537373a825a"
+    },
+    {
+      "name": "r3b-production-physical-preview-download.json",
+      "bytes": 526,
+      "sha256": "3b48c2120f597860193bcc904ddd741616f087824c77c9e09bd936bc235e6daa"
+    },
+    {
+      "name": "r3b-production-physical-public-relay-probe.json",
+      "bytes": 4370,
+      "sha256": "19db12eb240144d30ee4b44594ea5e4398cf65b43b5b583ece7349459cc508a0"
+    },
+    {
+      "name": "r3b-production-physical-signing-inventory.json",
+      "bytes": 388,
+      "sha256": "2766a2127d791166ab5f2c14b0c784cf3e42ce99269a8518b8c050e9c5654f72"
+    },
+    {
+      "name": "r3b-production-production-release-prepare.log",
+      "bytes": 10300,
+      "sha256": "f24e1f41dab573c012e5910269fe8eb3554fedfe76c028103054d91897591968"
+    },
+    {
+      "name": "r3b-production-production-release-ready.json",
+      "bytes": 1579,
+      "sha256": "3c5de48c892d6c20b8dc16bdc3b460a2a275ec1fffcd30918e658a5a30ead1ec"
+    },
+    {
+      "name": "r3b-production-production-release-verification.json",
+      "bytes": 1966,
+      "sha256": "0d70c0bd43b1deb4e0e461253cb6c2e7a6d4e5515b838fd943e8643c0c0006f3"
+    },
+    {
+      "name": "r3b-production-production-signing-preflight.json",
+      "bytes": 1727,
+      "sha256": "8454e793f5123a811b8ee62a68d5924b7ee3e3702255d6e0ca3d8c768ede7ba8"
+    },
+    {
+      "name": "r3b-production-readiness-summary.json",
+      "bytes": 4129,
+      "sha256": "4af1f65a6e1f7f269dd2eb630bc67e516f3df9f66196ee7160eecc5a47cccc85"
+    },
+    {
+      "name": "r3b-production-unsigned-preview-help.log",
+      "bytes": 3034,
+      "sha256": "ba9cd5a405135e3fc81068ff8aa230d629f26d348430b3297912c98d9c18fe4f"
+    },
+    {
+      "name": "r3b-production-unsigned-preview-install-console.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "r3b-production-unsigned-preview-install.log",
+      "bytes": 101,
+      "sha256": "c69c270c925444c733d9a526229c0499f20c77785770b8f39bc99b611deff4d0"
+    },
+    {
+      "name": "r3b-production-unsigned-preview-package-console.log",
+      "bytes": 101,
+      "sha256": "d49ba547620891087082883669cce50fc1ddfc6319a22f5f37c4315dd591e846"
+    },
+    {
+      "name": "r3b-production-unsigned-preview-package.json",
+      "bytes": 2977,
+      "sha256": "f5a6567a5487706db6d5dfe2286716d61f8f4adaa9c27e2a1f983f60767ee780"
+    },
+    {
+      "name": "r3b-production-unsigned-preview-portable-status.log",
+      "bytes": 479,
+      "sha256": "12e797b0384c79d6d6ca6e7f518cd11f6a33ffdb2b9dbed7ddb44e8a3da390ce"
+    },
+    {
+      "name": "r3b-production-unsigned-preview-status.log",
+      "bytes": 571,
+      "sha256": "8d63f7f6727eba1860440db87ea52cdfa9b005517a86c03ce53808bca8b1bd05"
+    },
+    {
+      "name": "r3b-production-vm-signing-inventory.json",
+      "bytes": 374,
+      "sha256": "e05b6e81d028d1e81b625d05464d9b47f09c463d9d151a7517c9275a06c62ae6"
+    },
+    {
+      "name": "r3b-windows-before-callback-hello-bundle.json",
+      "bytes": 611,
+      "sha256": "6794a126b57c60f701f9400293be7ebe46708e89cb22969508f7bcf04bf31448"
+    },
+    {
+      "name": "r3b-windows-before-callback-mac-ci-result.json",
+      "bytes": 1084,
+      "sha256": "986febd80fd7fd61e2199aeb2f21db8e837fff3e27290d1baf5da39e7e2704da"
+    },
+    {
+      "name": "r3b-windows-before-callback-mac-test-counts.json",
+      "bytes": 92,
+      "sha256": "c1af5fe4bdf5b1fd753c3ff2abf52e77e934101ac2e9734c51f169d065175cd1"
+    },
+    {
+      "name": "r3b-windows-before-callback-package-result.json",
+      "bytes": 2214,
+      "sha256": "63ff1d5987a8257e88d660bac95908722d9e927ad8b5dc05f1df77790462f5d6"
+    },
+    {
+      "name": "r3b-windows-before-callback-source-closure-manifest.json",
+      "bytes": 97136,
+      "sha256": "297b88f5de7c217a02d035b50209732f3a38c9f683da1af98b41d8b2682fd7c6"
+    },
+    {
+      "name": "r3b-windows-before-callback-windows-ci-result.json",
+      "bytes": 1540,
+      "sha256": "3a2ce357713ae83806e0466cf7090966d96cb0a9e74f4b62c51257fdd5943132"
+    },
+    {
+      "name": "r3b-windows-before-callback-windows-test-counts.json",
+      "bytes": 94,
+      "sha256": "47c4a9df6213e5ed945cf19dfd8b3a0826626721a8685ffb7b8055e2249effe5"
+    },
+    {
+      "name": "r3b-windows-build-cancel-only-diagnostic.ps1",
+      "bytes": 3455,
+      "sha256": "e2820ce500db07c5ae0a4b9f745ee53cdbbbe730737888c2c882d3fca453f4e7"
+    },
+    {
+      "name": "r3b-windows-callback-first-failed-windows-ci-4.log",
+      "bytes": 23536,
+      "sha256": "01cee2a81d45042f83399c5dfd667c0d6f7af2366509423b7f59be63edec9f4c"
+    },
+    {
+      "name": "r3b-windows-callback-first-failed-windows-ci-result.json",
+      "bytes": 1433,
+      "sha256": "1ad1bbbd403b210765bca1bac6d48410f4365784bfa422058bac9fe7a286b7a2"
+    },
+    {
+      "name": "r3b-windows-callback-status-after.log",
+      "bytes": 2562,
+      "sha256": "964a4d21e13d4adedb97ab96c6f967b252e3dd1966bfb8b79bda1178f693ce98"
+    },
+    {
+      "name": "r3b-windows-callback-status-before.log",
+      "bytes": 1796,
+      "sha256": "bb637de040cd68670d79177803954a1a59c68fd5d38aad472d2e93419514d1ab"
+    },
+    {
+      "name": "r3b-windows-cancel-only-build-console.log",
+      "bytes": 702,
+      "sha256": "230452b3905d55d9d968c01001b78cdce736b2d234f3f9985a6f06c8af04cf43"
+    },
+    {
+      "name": "r3b-windows-cancel-only-cleanup.json",
+      "bytes": 588,
+      "sha256": "4101b3d853dc8072c7ee9216051419c548afb56f30c051a6a2e69c05c459fc0a"
+    },
+    {
+      "name": "r3b-windows-cancel-only-diagnostic.rs",
+      "bytes": 3533,
+      "sha256": "c4c7ea7f3e95ac9043ee05454accab0f2e279e651dfc8709a1ac34f640fd61c4"
+    },
+    {
+      "name": "r3b-windows-cancel-only-launch.json",
+      "bytes": 624,
+      "sha256": "1e1782d0464832d3eb553fa034d423f739a5b7858df78cde28d1d6898fb1274a"
+    },
+    {
+      "name": "r3b-windows-cancel-only-owner-cleanup-result.json",
+      "bytes": 59,
+      "sha256": "84bda46ec2e1cb55667e498211bdcdf3337815e7347a683399d689ab850f7310"
+    },
+    {
+      "name": "r3b-windows-cancel-only-owner-identity.json",
+      "bytes": 112,
+      "sha256": "4f9f4bf8632276ac6c3face556cb38e2f7badb2522f657c4fb1c1da39a377cd1"
+    },
+    {
+      "name": "r3b-windows-cancel-only-owner-key-metadata.json",
+      "bytes": 512,
+      "sha256": "b2da24089f77a5d2dff4d74bc2612473d2139656e5a32af7c4b7266eb997caf2"
+    },
+    {
+      "name": "r3b-windows-cancel-only-owner-owner.log",
+      "bytes": 1042,
+      "sha256": "c40de0fbc1bafc5e28536de3176d2699d291ddbbd41d09885df0864e04eb0f58"
+    },
+    {
+      "name": "r3b-windows-cancel-only-owner-progress.json",
+      "bytes": 34,
+      "sha256": "51661ae4b46eb03c6f270a1b58a00ed77f338fd028aaf315d0bb4baa35b93cfa"
+    },
+    {
+      "name": "r3b-windows-cancel-only-owner-sign-result.json",
+      "bytes": 129,
+      "sha256": "22c526072a831aa4521f7940f53de61f67747487a6aaa7be1e56e25d65a2091e"
+    },
+    {
+      "name": "r3b-windows-cancel-only-owner-task-result.json",
+      "bytes": 77,
+      "sha256": "50196a72eea5d41a021853025c74cd3932979463a9b1f3c27d3c33ae51a7376c"
+    },
+    {
+      "name": "r3b-windows-certificate-cleanup.json",
+      "bytes": 82,
+      "sha256": "a243c2593b3f331122a866aefdfe2e9aec6f9c5ce0358fd0ea8a04100298ee77"
+    },
+    {
+      "name": "r3b-windows-cleanup-physical-round3.ps1",
+      "bytes": 4107,
+      "sha256": "11e16b7aabdf1196071eee19246ab099b2d4692a229973d6ad2a30a6b05480dc"
+    },
+    {
+      "name": "r3b-windows-cleanup-round4-6-hello-artifacts.ps1",
+      "bytes": 5208,
+      "sha256": "da996743b0c630503c865fb82f11bfa2be85f2e982bc35c4e097040ed1fbce0c"
+    },
+    {
+      "name": "r3b-windows-cleanup-unenrolled-hello-artifacts.ps1",
+      "bytes": 4968,
+      "sha256": "0f0fd960903e6a4236ab957f3f5e09a3cab2d308ecd8de905bb96ed23d887ed8"
+    },
+    {
+      "name": "r3b-windows-development-restore-result.json",
+      "bytes": 515,
+      "sha256": "f5eaaf7713c66c8750d44562587a81554617d95890b41d536789a2bc14f67385"
+    },
+    {
+      "name": "r3b-windows-doc-validation.json",
+      "bytes": 430,
+      "sha256": "9e9858bd5d4ed709080d24fb94a83842df7af600c4bec49f7f33c6f1f3550092"
+    },
+    {
+      "name": "r3b-windows-evidence-redaction-check.json",
+      "bytes": 397,
+      "sha256": "bfc4f37ada30d9040f624b4cba101904e2e3269161ee58b943333ef3c80eac91"
+    },
+    {
+      "name": "r3b-windows-evidence-retrieval.json",
+      "bytes": 1093,
+      "sha256": "4b244b3d243591054d3d587563811cc1c6214a90251d75e0ed6ed39e1749819f"
+    },
+    {
+      "name": "r3b-windows-final-evidence-transfer.json",
+      "bytes": 512,
+      "sha256": "c9c1494790535015be049a740018d8290dcda692411dfe07915f410a6aaff88a"
+    },
+    {
+      "name": "r3b-windows-hello-bundle.json",
+      "bytes": 602,
+      "sha256": "ff00f93bb100ace1b68463f194e3c8d5a3b9b87a007d58a082e8914013e44750"
+    },
+    {
+      "name": "r3b-windows-hello-round3-bundle.json",
+      "bytes": 559,
+      "sha256": "bba2d581037e3b6b5697fb9d66ee7bfde575fb474d0cadeb9920ecf8134af3ee"
+    },
+    {
+      "name": "r3b-windows-launch-cancel-only-diagnostic.ps1",
+      "bytes": 4664,
+      "sha256": "98ee0eddcaa9187b934dd99c650e209bf56c655fda76c347c135d6ca5aea7af1"
+    },
+    {
+      "name": "r3b-windows-mac-05043-failed-ci-4.log",
+      "bytes": 82771,
+      "sha256": "9e251f062a71d721e4accd5072eb86df5cbd3ccf3e7a630332247f93d2537fdf"
+    },
+    {
+      "name": "r3b-windows-mac-05043-failed-result.json",
+      "bytes": 1016,
+      "sha256": "21a35bef885476bad12788dd51355110671be8fe5e1b4e5682527bed9c02818d"
+    },
+    {
+      "name": "r3b-windows-mac-ci-1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "r3b-windows-mac-ci-2.log",
+      "bytes": 182,
+      "sha256": "32708601a7be0a856b9288c80c1636d263a9ab82ab5dc745bdca8db00d4aee2e"
+    },
+    {
+      "name": "r3b-windows-mac-ci-3.log",
+      "bytes": 198,
+      "sha256": "9412a2e5f67a57fe0a270d1f91290cbb76095472c7edfd530fc2bec8101acaa5"
+    },
+    {
+      "name": "r3b-windows-mac-ci-4.log",
+      "bytes": 142029,
+      "sha256": "98995950539f611b1f648ed1cbfebb17b9c28109f24cc464ff78409b575a76c6"
+    },
+    {
+      "name": "r3b-windows-mac-ci-result.json",
+      "bytes": 1086,
+      "sha256": "ee0e27a04d7e8ccf93e0cc22a09b6e907122f45bc9948cfd2b10d38ad28cefef"
+    },
+    {
+      "name": "r3b-windows-mac-test-counts.json",
+      "bytes": 69,
+      "sha256": "61b7bf4da0eb49cbb0163dcda49a290595e6454e01f5bae015bf75c294878c41"
+    },
+    {
+      "name": "r3b-windows-metadata-rights-test.log",
+      "bytes": 1549,
+      "sha256": "6331dd8cbb282df6e91409a5782d277e8496ad91acfee3e00cae4dc05825e489"
+    },
+    {
+      "name": "r3b-windows-mobile-pairing-expiry-after.log",
+      "bytes": 527,
+      "sha256": "1614f8d7a03e90634c3cdc4730e1f934077b878d298c53a9647a2d68c6f27ce9"
+    },
+    {
+      "name": "r3b-windows-mobile-pairing-expiry-before.log",
+      "bytes": 993,
+      "sha256": "d972e509690f44b4ea790eee5d71be0dac638fe2c4cf22b3d954ffb4d4d5f802"
+    },
+    {
+      "name": "r3b-windows-native-closure-summary.json",
+      "bytes": 1616,
+      "sha256": "74627027fd99cc07c8e83aa3b16d7ed11541c143ecc978e1ce98352547c451f9"
+    },
+    {
+      "name": "r3b-windows-package-result.json",
+      "bytes": 2169,
+      "sha256": "bb4b3dc844eae4e66fc9340b6f0aa4a662d17a002827a18315f4fdba215e9ecf"
+    },
+    {
+      "name": "r3b-windows-pcp-native-keys.json",
+      "bytes": 1219,
+      "sha256": "99328498d26d549110169d904fb000ee4563b3651dfcb5d6fad87693a72ca0b7"
+    },
+    {
+      "name": "r3b-windows-pcp-system-result.json",
+      "bytes": 1116,
+      "sha256": "8a8beb0215748c6546b0f126b98627d5c0b48454c6c27da0a89c37031f435466"
+    },
+    {
+      "name": "r3b-windows-physical-after-sleep.log",
+      "bytes": 1924,
+      "sha256": "19d630b9e7615bc4c8b071816d110cf6978e00984407df7ff3383f66fd4321df"
+    },
+    {
+      "name": "r3b-windows-physical-cancel-only-finish.log",
+      "bytes": 674,
+      "sha256": "edbccd387c9d112838a105ea9686aac028c9bd32a74428b8f740d026b72f3c48"
+    },
+    {
+      "name": "r3b-windows-physical-cancel-only-progress.log",
+      "bytes": 2094,
+      "sha256": "9b87de166ec4ff0749041e05446a35d0bdaad2895e639547477326dcc2ec7295"
+    },
+    {
+      "name": "r3b-windows-physical-final-export.log",
+      "bytes": 87,
+      "sha256": "94664514a20567ece814adecedec674b7eeda7a7add45de11736c548de9acee5"
+    },
+    {
+      "name": "r3b-windows-physical-hello-artifact-cleanup.log",
+      "bytes": 792,
+      "sha256": "6caff07416c8ac0464708a85da52824ca7a07a10a4e2079adb2ecb031cd407ce"
+    },
+    {
+      "name": "r3b-windows-physical-hello-connectivity.json",
+      "bytes": 412,
+      "sha256": "9efbc974d412ee9267b7fead77dfdfda6a6bf0f9f6b6470d2033c71b23f32729"
+    },
+    {
+      "name": "r3b-windows-physical-hello-launch.log",
+      "bytes": 1029,
+      "sha256": "bf44d95b760dd6e69f99f70e14607b7f55fefa1a8c4e2f43f972568924398635"
+    },
+    {
+      "name": "r3b-windows-physical-hello-round2-launch.log",
+      "bytes": 1036,
+      "sha256": "b08736ec25b36db58e293d2839a96f98af110aa337002195e712ea22de141641"
+    },
+    {
+      "name": "r3b-windows-physical-hello-round2-progress.log",
+      "bytes": 1387,
+      "sha256": "d255016c7d0e5df202cebf969eb83c3601be363af3aec36d137bee707b15a844"
+    },
+    {
+      "name": "r3b-windows-physical-hello-round3-debug.log",
+      "bytes": 753,
+      "sha256": "a4e4c3a0ee229e51ca5e44607e61284e619269e09bde5a3329f9d86519e1c80f"
+    },
+    {
+      "name": "r3b-windows-physical-hello-round3-launch.log",
+      "bytes": 1036,
+      "sha256": "5ccc793ff1917ff04adf45ba2ba95fc4d0d26289bfb455d0dd44b6a7697388c6"
+    },
+    {
+      "name": "r3b-windows-physical-hello-round3-progress.log",
+      "bytes": 200,
+      "sha256": "eb0e17f71e34ab4d0bddf3de66402fd5cbb630709a059de5aa7fb768e679b623"
+    },
+    {
+      "name": "r3b-windows-physical-post-closure.log",
+      "bytes": 3857,
+      "sha256": "2b6cde607c34c565eaa858b72be8e71dd9051360ba82893b93dda280e5a22022"
+    },
+    {
+      "name": "r3b-windows-physical-pre-callback-backup.log",
+      "bytes": 2230,
+      "sha256": "2223631202459add921d8c2f51577c96a184765d2794383968d68e9333a4a15b"
+    },
+    {
+      "name": "r3b-windows-physical-remote-binding.log",
+      "bytes": 632,
+      "sha256": "3fe436fea950d3eaa56d79cc568c11a362c94a62f61db7ff6cbd5b9751c7ddf8"
+    },
+    {
+      "name": "r3b-windows-physical-round1-cleanup.log",
+      "bytes": 350,
+      "sha256": "e4eeed0ace70e88063c7fbaf2a12370184f6aef4bff7f7883da83e9cd2e7fe70"
+    },
+    {
+      "name": "r3b-windows-physical-round2-cleanup.log",
+      "bytes": 350,
+      "sha256": "86d6bb212fb0e26a4808559e421f97da4f99b160a87b122af31e2a9abace45f6"
+    },
+    {
+      "name": "r3b-windows-physical-round2-collector-correction.log",
+      "bytes": 555,
+      "sha256": "67d1c0d78d7d46d37cc823b629ba22f19b8891b5d7aa2b959cf63c8365ad355b"
+    },
+    {
+      "name": "r3b-windows-physical-round3-abort.log",
+      "bytes": 102,
+      "sha256": "3a358a469cf193855a066c9868fdd6db5cbb8a06735bba1b567a84607008e568"
+    },
+    {
+      "name": "r3b-windows-physical-round3-cleanup.log",
+      "bytes": 519,
+      "sha256": "fee0f8afe5b5de2b6ee7706abb9bc50bde93c2ceb8b43c61bde59065c2c5166f"
+    },
+    {
+      "name": "r3b-windows-physical-round4-6-hello-artifact-cleanup.log",
+      "bytes": 952,
+      "sha256": "ffedabb9f17a383bd7c37c532e43ecea78376a58b3d1d89cd38fa520cfc9befb"
+    },
+    {
+      "name": "r3b-windows-physical-round4-timing.log",
+      "bytes": 727,
+      "sha256": "c66ae3a2823547f59bb545821c7483a17f3d810e5a174efb113f30d5c07d609f"
+    },
+    {
+      "name": "r3b-windows-physical-upgrade-callback-final.log",
+      "bytes": 1864,
+      "sha256": "caa16348880c46189f786125f7e2235db1a986d7f4c7019f604fcafa4e91745d"
+    },
+    {
+      "name": "r3b-windows-physical-upgrade-final.log",
+      "bytes": 1888,
+      "sha256": "8ddfd1fe70e4269bd950940b8a54caf7a4580ebff2af9409057ae6da3de4a7d6"
+    },
+    {
+      "name": "r3b-windows-physical-upgrade.log",
+      "bytes": 1888,
+      "sha256": "e76d462bd72529e3ee1820b09df46cbe1bd2d0a5540c06af664867c7c1a3ea0d"
+    },
+    {
+      "name": "r3b-windows-powershell-offline.log",
+      "bytes": 180,
+      "sha256": "76702103c2fcb650e38017c65cf692400be65de77b5477a67c90484e919fcd4e"
+    },
+    {
+      "name": "r3b-windows-pre-watch-fix-windows-ci-4.log",
+      "bytes": 23761,
+      "sha256": "3c3a8729c4a7d70032e7fe76a8eca9b55527f6a8d3b7b8c978125aba9719497f"
+    },
+    {
+      "name": "r3b-windows-prior-evidence-recovered.json",
+      "bytes": 315,
+      "sha256": "221d9301d919351d57c90ae28ad16d566d45cad3bf221b17774f741ede4062f2"
+    },
+    {
+      "name": "r3b-windows-prior-physical-final-state.json",
+      "bytes": 374,
+      "sha256": "cc08e516d89a5a00a21b4b48a4a3dac8382ee986351e2f861c448c4d7b672d56"
+    },
+    {
+      "name": "r3b-windows-prior-physical-hello-artifact-cleanup.json",
+      "bytes": 792,
+      "sha256": "6caff07416c8ac0464708a85da52824ca7a07a10a4e2079adb2ecb031cd407ce"
+    },
+    {
+      "name": "r3b-windows-prior-physical-hello-cleanup-inventory.json",
+      "bytes": 58,
+      "sha256": "eb312965136ffda44967a44632924d012ca2f0aec6fda85c3fc07c0f1f3bf8a7"
+    },
+    {
+      "name": "r3b-windows-prior-physical-hello-cleanup.json",
+      "bytes": 350,
+      "sha256": "e4eeed0ace70e88063c7fbaf2a12370184f6aef4bff7f7883da83e9cd2e7fe70"
+    },
+    {
+      "name": "r3b-windows-prior-physical-hello-launch.json",
+      "bytes": 761,
+      "sha256": "4d79de14bf73cd0755b49a101c306f6a5288d59a4f277fb187d7153ee2a5f977"
+    },
+    {
+      "name": "r3b-windows-prior-physical-hello-owner-output-owner-progress.json",
+      "bytes": 25,
+      "sha256": "85d684ebaa52d2a744b3253332b69b73b4c8cc3e0b7ad68c266630d4cdc75708"
+    },
+    {
+      "name": "r3b-windows-prior-physical-hello-owner-output-owner-task-result.json",
+      "bytes": 92,
+      "sha256": "52d46bb413f48f2d9c25225b05a9c8be25e863029a8ba832b692eedddc05749a"
+    },
+    {
+      "name": "r3b-windows-prior-physical-hello-owner-output-owner.log",
+      "bytes": 1127,
+      "sha256": "566e069cfb567839ecbad8f24c2fd46cf598dccee9c447a4ffa077a43e1d76d7"
+    },
+    {
+      "name": "r3b-windows-prior-physical-hello-round2-cleanup-before-correction.json",
+      "bytes": 350,
+      "sha256": "86d6bb212fb0e26a4808559e421f97da4f99b160a87b122af31e2a9abace45f6"
+    },
+    {
+      "name": "r3b-windows-prior-physical-hello-round2-cleanup-inventory.json",
+      "bytes": 58,
+      "sha256": "eb312965136ffda44967a44632924d012ca2f0aec6fda85c3fc07c0f1f3bf8a7"
+    },
+    {
+      "name": "r3b-windows-prior-physical-hello-round2-cleanup.json",
+      "bytes": 555,
+      "sha256": "67d1c0d78d7d46d37cc823b629ba22f19b8891b5d7aa2b959cf63c8365ad355b"
+    },
+    {
+      "name": "r3b-windows-prior-physical-hello-round2-launch.json",
+      "bytes": 768,
+      "sha256": "9b0406c8dafbb319f77a4773dea7cb8745bf39f40a307ae6a012c32ab30aeea6"
+    },
+    {
+      "name": "r3b-windows-prior-physical-hello-round2-owner-output-owner-progress.json",
+      "bytes": 30,
+      "sha256": "ba0acd25562973c8dccc7af72b0d944c25e88bd1132bb9bfa447c59c2c25d020"
+    },
+    {
+      "name": "r3b-windows-prior-physical-hello-round2-owner-output-owner-result.json",
+      "bytes": 39,
+      "sha256": "7e22025a6908ac1789cb6dd93f8fd9b24eb0d0ed967346550a9179c1daaf3416"
+    },
+    {
+      "name": "r3b-windows-prior-physical-hello-round2-owner-output-owner-task-result.json",
+      "bytes": 92,
+      "sha256": "52d46bb413f48f2d9c25225b05a9c8be25e863029a8ba832b692eedddc05749a"
+    },
+    {
+      "name": "r3b-windows-prior-physical-hello-round2-owner-output-owner.log",
+      "bytes": 1015,
+      "sha256": "541d940be698d83ac06b3104fdde0c31739f017f56367424648cda7ead8a1c0e"
+    },
+    {
+      "name": "r3b-windows-prior-physical-hello-round2-system-result.json",
+      "bytes": 54,
+      "sha256": "04394c64a92f76e2ac75bb20404a37bf77b32702367701895b6c4bdc8a533ec0"
+    },
+    {
+      "name": "r3b-windows-prior-physical-hello-round2-system.log",
+      "bytes": 1129,
+      "sha256": "b1dabcdf70da45148275cba23a46e69b2e007890012b738deadb8b4af451f798"
+    },
+    {
+      "name": "r3b-windows-prior-physical-hello-round3-cleanup-inventory.json",
+      "bytes": 58,
+      "sha256": "eb312965136ffda44967a44632924d012ca2f0aec6fda85c3fc07c0f1f3bf8a7"
+    },
+    {
+      "name": "r3b-windows-prior-physical-hello-round3-cleanup.json",
+      "bytes": 519,
+      "sha256": "fee0f8afe5b5de2b6ee7706abb9bc50bde93c2ceb8b43c61bde59065c2c5166f"
+    },
+    {
+      "name": "r3b-windows-prior-physical-hello-round3-launch.json",
+      "bytes": 768,
+      "sha256": "35990fedffc291c60e1f71d3c9c2ff081ac02b09f1fd0fd12ccbd0b00cfe31b2"
+    },
+    {
+      "name": "r3b-windows-prior-physical-hello-round3-owner-output-owner-progress.json",
+      "bytes": 23,
+      "sha256": "7bf839dfc97069518654c81a0884afa7905d988d90a94c75e77068d756602ca8"
+    },
+    {
+      "name": "r3b-windows-prior-physical-hello-round3-owner-output-owner-result.json",
+      "bytes": 39,
+      "sha256": "7e22025a6908ac1789cb6dd93f8fd9b24eb0d0ed967346550a9179c1daaf3416"
+    },
+    {
+      "name": "r3b-windows-prior-physical-hello-round3-owner-output-owner.log",
+      "bytes": 179,
+      "sha256": "eefe06483375eb29babaecc6f3ba5a56fde9d50804a8910e1989cdc70ee78e15"
+    },
+    {
+      "name": "r3b-windows-prior-physical-hello-round3-system-result.json",
+      "bytes": 54,
+      "sha256": "04394c64a92f76e2ac75bb20404a37bf77b32702367701895b6c4bdc8a533ec0"
+    },
+    {
+      "name": "r3b-windows-prior-physical-hello-round3-system.log",
+      "bytes": 1129,
+      "sha256": "65f05d0dbe04535062db9447a3a47f17868411da74ca9f800d07eb24f63044d1"
+    },
+    {
+      "name": "r3b-windows-prior-physical-hello-system-result.json",
+      "bytes": 54,
+      "sha256": "04394c64a92f76e2ac75bb20404a37bf77b32702367701895b6c4bdc8a533ec0"
+    },
+    {
+      "name": "r3b-windows-prior-physical-hello-system.log",
+      "bytes": 1120,
+      "sha256": "2553af73b577652838131db78b3ccbefb7608bf078894ada2a9205df3007c423"
+    },
+    {
+      "name": "r3b-windows-prior-physical-upgrade-final-result.json",
+      "bytes": 1203,
+      "sha256": "a67844075cb8f1174f57443b3189542e62a44786f4075d3d644b1c677675783f"
+    },
+    {
+      "name": "r3b-windows-round4-launch.json",
+      "bytes": 757,
+      "sha256": "633c7daefdd35667d22ebaea01f9038265338f2ea2a612e8708ad706a708b83b"
+    },
+    {
+      "name": "r3b-windows-round4-owner-output-owner-key-metadata.json",
+      "bytes": 512,
+      "sha256": "16d87c41773476f3cc10f0dc1879fe8dd0055019d5e0fcba7bfeb88f3822821c"
+    },
+    {
+      "name": "r3b-windows-round4-owner-output-owner-progress.json",
+      "bytes": 23,
+      "sha256": "7ee81bfbe050f72196ba461ef1fc82549968581aadaefce16ab5f71d3103818b"
+    },
+    {
+      "name": "r3b-windows-round4-owner-output-owner-result.json",
+      "bytes": 39,
+      "sha256": "7e22025a6908ac1789cb6dd93f8fd9b24eb0d0ed967346550a9179c1daaf3416"
+    },
+    {
+      "name": "r3b-windows-round4-owner-output-owner-task-result.json",
+      "bytes": 88,
+      "sha256": "1ed2a64a97bd5f902aae2fbb5fb5d50148aa05ace3768fc260ad3cab4c4750ad"
+    },
+    {
+      "name": "r3b-windows-round4-owner-output-owner.log",
+      "bytes": 1157,
+      "sha256": "b8f98e47ab95a41662135f8514134c999b214484bacf9fa619fa05af4cb14a11"
+    },
+    {
+      "name": "r3b-windows-round4-system-result.json",
+      "bytes": 50,
+      "sha256": "c0a91c52311e1ca887100f15040f350e3fe150ec8d6eb1f7efa4f1674e776a53"
+    },
+    {
+      "name": "r3b-windows-round4-system.log",
+      "bytes": 1105,
+      "sha256": "196e776103d9bd0aba8a7464a6da686fcd1bc557352f722f6eea8548496b9f20"
+    },
+    {
+      "name": "r3b-windows-round5-input-input.json",
+      "bytes": 2570,
+      "sha256": "995eaaadb5b82f83b85b8162f35106fe853c5a3df54267e264a94da9b255aa92"
+    },
+    {
+      "name": "r3b-windows-round5-launch.json",
+      "bytes": 757,
+      "sha256": "0804db5c728997f26c2a351f6137e9ab6bd929d1ac12e1995b2c16aa59fb3b53"
+    },
+    {
+      "name": "r3b-windows-round5-owner-output-owner-create-result.json",
+      "bytes": 49,
+      "sha256": "a7b1106122a48be1c2a24da2eaf3ffdc76ce4bb314f4729c02d77a640cef6f21"
+    },
+    {
+      "name": "r3b-windows-round5-owner-output-owner-dialog-result.json",
+      "bytes": 71,
+      "sha256": "be118ba403d0b694b55e64ed018e6cee660222c5291061f7ca290f2466026c28"
+    },
+    {
+      "name": "r3b-windows-round5-owner-output-owner-key-metadata.json",
+      "bytes": 512,
+      "sha256": "fe7da27720623f716c6169effc08d66f4648e24319973b5c7c775a5d4657965e"
+    },
+    {
+      "name": "r3b-windows-round5-owner-output-owner-progress.json",
+      "bytes": 48,
+      "sha256": "58465d004c7b0c3b34bfc5dbde5370f0e11acb8c5d4a57c04ca239294e2d7b57"
+    },
+    {
+      "name": "r3b-windows-round5-owner-output-owner-repeat-result.json",
+      "bytes": 767,
+      "sha256": "ba5e897ca61212d3ed0fae1d439a7ffc1a14c86726e57a67d206d91cd8185de6"
+    },
+    {
+      "name": "r3b-windows-round5-owner-output-owner-result.json",
+      "bytes": 39,
+      "sha256": "7e22025a6908ac1789cb6dd93f8fd9b24eb0d0ed967346550a9179c1daaf3416"
+    },
+    {
+      "name": "r3b-windows-round5-owner-output-owner-strong-result.json",
+      "bytes": 1170,
+      "sha256": "2b8dcd00b97eed4c920ca2b1f0dfbf32cca67fb1240a25602957e478df145fb3"
+    },
+    {
+      "name": "r3b-windows-round5-owner-output-owner-support-result.json",
+      "bytes": 41,
+      "sha256": "830515252c7d470983635500da8283dee1ca993afd10fa01180afbc5a2e4c47f"
+    },
+    {
+      "name": "r3b-windows-round5-owner-output-owner-task-result.json",
+      "bytes": 88,
+      "sha256": "1ed2a64a97bd5f902aae2fbb5fb5d50148aa05ace3768fc260ad3cab4c4750ad"
+    },
+    {
+      "name": "r3b-windows-round5-owner-output-owner.log",
+      "bytes": 1235,
+      "sha256": "8018e1b260b73ac2348ac3b7ee1fd2331ab5bdcef01d7f13392935946685ede5"
+    },
+    {
+      "name": "r3b-windows-round5-system-result.json",
+      "bytes": 50,
+      "sha256": "c0a91c52311e1ca887100f15040f350e3fe150ec8d6eb1f7efa4f1674e776a53"
+    },
+    {
+      "name": "r3b-windows-round5-system.log",
+      "bytes": 1104,
+      "sha256": "a7856231cd6fe53131e502313acb2af522dff05752e5165cd07cc219b9ef7360"
+    },
+    {
+      "name": "r3b-windows-round6-cleanup-inventory.json",
+      "bytes": 54,
+      "sha256": "9245ab613e1835d91eb027c8152e53247672f7e8be1fcd91119702c1ec388b0c"
+    },
+    {
+      "name": "r3b-windows-round6-cleanup.json",
+      "bytes": 656,
+      "sha256": "f8d2e15039b392216bb293de3528021c2dc76f7c3f7178190a1ed7922b3e2a43"
+    },
+    {
+      "name": "r3b-windows-round6-input-input.json",
+      "bytes": 2570,
+      "sha256": "29c126c29114bab91439ba783f39324893036aaf07f22e2083b33c628adfcabf"
+    },
+    {
+      "name": "r3b-windows-round6-input-strong-verified.json",
+      "bytes": 274,
+      "sha256": "ed9c494824b4ff10a20e2573243106c313a82623693b6be3abc4ab3163d99201"
+    },
+    {
+      "name": "r3b-windows-round6-launch.json",
+      "bytes": 757,
+      "sha256": "04a4b687661ab92765c1bf55d1ed7e6eee7e0bc45b654723a876fba79728e682"
+    },
+    {
+      "name": "r3b-windows-round6-owner-output-owner-cancel-attempts.json",
+      "bytes": 157,
+      "sha256": "247a975b30d6bb779effa8d77b834ebf9fffcc43fadd9175ba6c6ec92a7ac791"
+    },
+    {
+      "name": "r3b-windows-round6-owner-output-owner-create-result.json",
+      "bytes": 38,
+      "sha256": "e8f7d9cdfbbb80f803f3fdd5522babeaae985adb711d7c305a455c39876ee69e"
+    },
+    {
+      "name": "r3b-windows-round6-owner-output-owner-dialog-result.json",
+      "bytes": 63,
+      "sha256": "47dc9d14d7f6e678fbe18adc4e4c69ce72238353115890a3924ca2d22f5bc7b8"
+    },
+    {
+      "name": "r3b-windows-round6-owner-output-owner-key-metadata.json",
+      "bytes": 512,
+      "sha256": "de9f7128029e654ae193f32dd161e076d37e9899b46abb14a424ee6ac7e1e3f9"
+    },
+    {
+      "name": "r3b-windows-round6-owner-output-owner-progress.json",
+      "bytes": 47,
+      "sha256": "e8989435ec3ca0e447cc062d82379bd5a268d0d7b0c0cfe57147b7e652eaeddd"
+    },
+    {
+      "name": "r3b-windows-round6-owner-output-owner-repeat-result.json",
+      "bytes": 783,
+      "sha256": "e87a4fa7c93164ee40fce852fc5faa25e7615ba80ae69368a29129ee61d76d7c"
+    },
+    {
+      "name": "r3b-windows-round6-owner-output-owner-result.json",
+      "bytes": 39,
+      "sha256": "7e22025a6908ac1789cb6dd93f8fd9b24eb0d0ed967346550a9179c1daaf3416"
+    },
+    {
+      "name": "r3b-windows-round6-owner-output-owner-strong-result.json",
+      "bytes": 1170,
+      "sha256": "8b986285d994ad03dbadc851303c53cd7f8cc1351d95699f0f4c77ef1a428ddf"
+    },
+    {
+      "name": "r3b-windows-round6-owner-output-owner-support-result.json",
+      "bytes": 42,
+      "sha256": "7251efefe7d85b82b3af24912b2a29d9c22cfe7b68632b8b3138e5fe68c8facd"
+    },
+    {
+      "name": "r3b-windows-round6-owner-output-owner-task-result.json",
+      "bytes": 88,
+      "sha256": "1ed2a64a97bd5f902aae2fbb5fb5d50148aa05ace3768fc260ad3cab4c4750ad"
+    },
+    {
+      "name": "r3b-windows-round6-owner-output-owner.log",
+      "bytes": 1295,
+      "sha256": "787778b53d0311ba2d0125061535269e8378440c37ab9c4e56eb2a862980940e"
+    },
+    {
+      "name": "r3b-windows-round6-system-result.json",
+      "bytes": 50,
+      "sha256": "c0a91c52311e1ca887100f15040f350e3fe150ec8d6eb1f7efa4f1674e776a53"
+    },
+    {
+      "name": "r3b-windows-round6-system.log",
+      "bytes": 1105,
+      "sha256": "c099a99c16f727138656b53689860636168e887f2a358ea2df2b1fc1957f388c"
+    },
+    {
+      "name": "r3b-windows-signed-relay-fixture.json",
+      "bytes": 455,
+      "sha256": "0646ef0ed3701cc7c22e6daaed698e5d454c4580cd9fef51de420476beeecfca"
+    },
+    {
+      "name": "r3b-windows-source-callback-first-manifest.json",
+      "bytes": 96939,
+      "sha256": "bf6c21e5eb741ede6f14321d09d18f8d55d99b2935c953c454aab2a51ea15192"
+    },
+    {
+      "name": "r3b-windows-source-closure-manifest.json",
+      "bytes": 97002,
+      "sha256": "e2a82d86a5c5adb7d55a2f7d2b3b787c83c34efbc5dfc1f8892c0c867cfbf001"
+    },
+    {
+      "name": "r3b-windows-source-native-manifest.json",
+      "bytes": 96861,
+      "sha256": "386bb0389aa36b117d77e018d6ae962ff99efca472aa0a6b698fbbabdf06aed3"
+    },
+    {
+      "name": "r3b-windows-source-t11-ci-manifest.json",
+      "bytes": 96861,
+      "sha256": "382db0b1930a2d114acc57daf90639e355088380c18e74933d5ec9698d27cb94"
+    },
+    {
+      "name": "r3b-windows-t11-after.log",
+      "bytes": 42349,
+      "sha256": "be820bb97336a18543432646d1c18534453381b6b5255e2c26785e03a84cb57c"
+    },
+    {
+      "name": "r3b-windows-t11-before.log",
+      "bytes": 2392,
+      "sha256": "5369689e899990776d4cce4f8fda621ad4c306d8cf078a3a5ab94bc5fe29377a"
+    },
+    {
+      "name": "r3b-windows-t11-negative-native.json",
+      "bytes": 170,
+      "sha256": "384e4720b9c9e7147dc8c0d06e072e6121b4c3a2c61008597c66a25018efd56b"
+    },
+    {
+      "name": "r3b-windows-t2-fixture-after.log",
+      "bytes": 2036,
+      "sha256": "119788c9a0879536c85fa4b15c3a707f8e8bba1f40a631b7d7d737987d339cfa"
+    },
+    {
+      "name": "r3b-windows-t2-fixture-before.log",
+      "bytes": 961,
+      "sha256": "0873ecd24a18dce9598b4b474e176a03b6ed72bf9333cf998af6d33e5ea602df"
+    },
+    {
+      "name": "r3b-windows-vm-callback-upgrade-console.log",
+      "bytes": 674,
+      "sha256": "61ddebcdcebf095789c854d6cb8c95db103930468d82054a62fd4995eac379e6"
+    },
+    {
+      "name": "r3b-windows-vm-signed-upgrade-result.json",
+      "bytes": 757,
+      "sha256": "cb6475fdc28e09f2fe99e850e7c2bbeb8bdc4a2642dda76f1f68a3a10773ee25"
+    },
+    {
+      "name": "r3b-windows-vm-upgrade-before.json",
+      "bytes": 809,
+      "sha256": "c3cab757080e707ec8a14f3b4513ac688e355c6c9d9a3ba8e8090bd4dc8600c5"
+    },
+    {
+      "name": "r3b-windows-watch-fix-targeted.log",
+      "bytes": 3409,
+      "sha256": "1f473ec015ffbbc632643c3b98ff30a28eccaa97beee65d7d91b7146e8a5e747"
+    },
+    {
+      "name": "r3b-windows-windows-05043-result.log",
+      "bytes": 1363,
+      "sha256": "4277330f69be49394277e4448c8ac37e35a4008e06e4c7c8800285bdce44ce03"
+    },
+    {
+      "name": "r3b-windows-windows-ci-1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "r3b-windows-windows-ci-2.log",
+      "bytes": 550,
+      "sha256": "196dcf732912c43197858155963c827369dd558e4aa5f7e016627334247f7931"
+    },
+    {
+      "name": "r3b-windows-windows-ci-3.log",
+      "bytes": 902,
+      "sha256": "854659ac67c209f5b8acbe34b8c0f4d69427642eedbf40d1675a77749aa57b02"
+    },
+    {
+      "name": "r3b-windows-windows-ci-4.log",
+      "bytes": 123440,
+      "sha256": "1eea6bbb66758ffc2e361b7c8683cfdaaa8e8aad19d429a27d4c053412a53dec"
+    },
+    {
+      "name": "r3b-windows-windows-ci-result.json",
+      "bytes": 1497,
+      "sha256": "68bfaa528cfa2e0d9ea072ad910cbd235ec8fc420df04a22ff91e0e3aa69cea8"
+    },
+    {
+      "name": "r3b-windows-windows-test-counts.json",
+      "bytes": 69,
+      "sha256": "e5dfdce0643a8565134b5ebe7966f6aefb04e189cb0cf75e80d693d506438b44"
+    }
+  ]
+}

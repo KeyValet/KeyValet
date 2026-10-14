@@ -1,0 +1,20 @@
+{
+  "observed_utc": "2026-10-13T02:35:32.341307+00:00",
+  "services": {
+    "system/dev.keyvalet.helper": {
+      "exit": 113,
+      "fields": [],
+      "lookup_error": "Bad request.\nCould not find service \"dev.keyvalet.helper\" in domain for system\n"
+    },
+    "gui/501/dev.keyvalet.agent": {
+      "exit": 113,
+      "fields": [],
+      "lookup_error": "Bad request.\nCould not find service \"dev.keyvalet.agent\" in domain for user gui: 501\n"
+    },
+    "gui/501/dev.keyvalet.relay": {
+      "exit": 113,
+      "fields": [],
+      "lookup_error": "Bad request.\nCould not find service \"dev.keyvalet.relay\" in domain for user gui: 501\n"
+    }
+  }
+}

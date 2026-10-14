@@ -1,0 +1,14 @@
+{
+  "evidence_origin": "verbatim JSON captured from remote read tool output; shared result filename was subsequently overwritten by the next harness",
+  "result": {
+    "vault_present": true,
+    "credential_values_requested": false,
+    "passed": false,
+    "started_utc": "2026-10-13T09:58:49.8639068Z",
+    "session_id": 13,
+    "finished_utc": "2026-10-13T09:59:06.0598903Z",
+    "exit_code": 1,
+    "master_key_present": false,
+    "operation": "installed_cli_list_unlock"
+  }
+}

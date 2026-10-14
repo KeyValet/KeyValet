@@ -1,0 +1,9 @@
+{
+    "interactive_run_performed":  false,
+    "owner_sha256":  "6b50f5aa1e355746cb31a7e563113e0fc45ab5594c9dd62bf7db0b4364102cc9",
+    "system_sha256":  "70c2f9498e9ff7dce13022b0a1b5de372f5646d42bb5667b4a544838b53bd6ef",
+    "system_binary":  "C:\\kv-r2b-20261012\\target\\debug\\deps\\kv_agent-c9e8d6dcfd24fdbf.exe",
+    "source_fingerprint":  "fbf22e994313d82d246b96ccc8e480441f4c048b4ad715f8f8c5bd828f87bf0b",
+    "archive_sha256":  "e16c3e569ec70a968f374e9c5a97b3ec40e278658ccf13b4dfc2d528b66ef22c",
+    "owner_binary":  "C:\\kv-r2b-20261012\\target\\debug\\deps\\kv_agent-25bee83b8a8aee8c.exe"
+}

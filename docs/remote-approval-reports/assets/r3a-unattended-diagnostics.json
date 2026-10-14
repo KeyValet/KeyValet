@@ -1,0 +1,91 @@
+{
+  "observed_utc": "2026-10-13T01:42:01.243396+00:00",
+  "uid": 501,
+  "touch_id_requests": 0,
+  "services": {
+    "helper": {
+      "exit": 0,
+      "elapsed_s": 0.006,
+      "fields": [
+        "state = running",
+        "program = /usr/local/lib/keyvalet/bin/kv-helper",
+        "runs = 1",
+        "pid = 89023",
+        "last exit code = (never exited)",
+        "state = active",
+        "state = active"
+      ],
+      "gui_session": null,
+      "stderr_path": null
+    },
+    "agent": {
+      "exit": 0,
+      "elapsed_s": 0.005,
+      "fields": [
+        "state = running",
+        "program = /usr/local/lib/keyvalet/bin/kv-touchid",
+        "runs = 1",
+        "pid = 89025",
+        "last exit code = (never exited)",
+        "state = active",
+        "state = active"
+      ],
+      "gui_session": "Aqua",
+      "stderr_path": null
+    },
+    "relay": {
+      "exit": 0,
+      "elapsed_s": 0.004,
+      "fields": [
+        "state = running",
+        "program = /usr/local/lib/keyvalet/bin/kv-relay-client",
+        "runs = 1",
+        "pid = 89031",
+        "last exit code = (never exited)",
+        "state = active",
+        "state = active"
+      ],
+      "gui_session": "Aqua",
+      "stderr_path": null
+    }
+  },
+  "signatures": {
+    "kv-cli": {
+      "exit": 0,
+      "sha256": "3a3943420470840d8330960477726e6e9cff81814084610d43e315d28a16ffa0",
+      "elapsed_s": 0.081
+    },
+    "kv-helper": {
+      "exit": 0,
+      "sha256": "007b61e83a3d2f1394a66c2b0b7528541530d8e6c5910193db7854d8cefb1a8b",
+      "elapsed_s": 0.119
+    },
+    "kv-touchid": {
+      "exit": 0,
+      "sha256": "5d733be9149d820f74879e9b4192a9fd04fceddb0946575d0fa3ae7857e7acea",
+      "elapsed_s": 0.022
+    },
+    "kv-relay-client": {
+      "exit": 0,
+      "sha256": "8e99fb2fde31a3ff1c4a0e0814ef6c3524f29347742d1c847a467d435c4cf86a",
+      "elapsed_s": 0.056
+    }
+  },
+  "audit": {
+    "/var/db/keyvalet/audit.log": {
+      "error_kind": "PermissionError"
+    },
+    "/var/db/keyvalet/remote/audit.log": {
+      "error_kind": "PermissionError"
+    }
+  },
+  "cli": {
+    "skip": "root_required_by_installed_cli"
+  },
+  "unified_log": {
+    "exit": 0,
+    "elapsed_s": 2.742,
+    "events_n": 0,
+    "lifecycle_events": []
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "observed_utc": "2026-10-13T15:10:25.306574+00:00",
+  "source_log": "r3a-owner-ui-ci2-test.log",
+  "owner_regressions": {
+    "remote::tests::owner::r3a_owner_control_confirmation_does_not_run_a_second_biometric_policy": "ok",
+    "remote::tests::owner::r3a_owner_control_confirmation_preserves_legacy_raw_directive_authentication": "ok",
+    "remote::tests::owner::r3a_owner_control_confirmation_requires_literal_true": "ok",
+    "remote::tests::owner::r3a_owner_control_confirmation_cannot_issue_without_the_strong_key": "ok",
+    "remote::tests::owner::r3a_owner_metadata_queries_do_not_prompt_but_still_require_the_quick_key": "ok"
+  },
+  "owner_passed": 5,
+  "whole_workspace_exit": 101,
+  "outside_ownership_failure": "kv-proxy::gateway_flow::a_chunked_upload_is_limited_before_the_sender_finishes",
+  "secret_values_in_evidence": false
+}

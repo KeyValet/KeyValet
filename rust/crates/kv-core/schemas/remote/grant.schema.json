@@ -121,32 +121,32 @@
         }
       },
       "then": {
+        "required": [
+          "confirm"
+        ],
         "properties": {
           "origin": {
             "const": "settings"
-          }
-        },
-        "anyOf": [
-          {
-            "properties": {
-              "exp": {
-                "type": "integer",
-                "minimum": -9007199254740991,
-                "maximum": 9007199254740991
-              }
+          },
+          "confirm": {
+            "type": "string"
+          },
+          "aud": {
+            "not": {
+              "const": "*"
             }
           },
-          {
-            "required": [
-              "confirm"
-            ],
+          "scope": {
             "properties": {
-              "confirm": {
-                "type": "string"
+              "level": {
+                "enum": [
+                  "credential",
+                  "device"
+                ]
               }
             }
           }
-        ]
+        }
       }
     }
   ],

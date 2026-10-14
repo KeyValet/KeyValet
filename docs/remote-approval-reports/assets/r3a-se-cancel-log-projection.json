@@ -1,0 +1,14 @@
+{
+  "observed_utc": "2026-10-14T01:07:10.421145+00:00",
+  "log_exit": 0,
+  "events_scanned": 4155,
+  "fixed_marker_counts": {
+    "user_cancel": 0,
+    "errSecUserCanceled": 0,
+    "authentication_failed": 0,
+    "key_operation_cancelled": 0,
+    "key_operation_failed": 0
+  },
+  "raw_messages_saved": false,
+  "secret_values_in_evidence": false
+}

@@ -1,0 +1,124 @@
+{
+  "started_utc": "2026-10-13T02:36:43.503103+00:00",
+  "touch_id_requests": 0,
+  "bootstrap": {
+    "system/dev.keyvalet.helper": {
+      "exit": 0,
+      "error": ""
+    },
+    "gui/501/dev.keyvalet.agent": {
+      "exit": 0,
+      "error": ""
+    },
+    "gui/501/dev.keyvalet.relay": {
+      "exit": 0,
+      "error": ""
+    }
+  },
+  "probes": [
+    {
+      "command": [
+        "devices",
+        "list"
+      ],
+      "exit": 0,
+      "elapsed_s": 0.032491,
+      "ok": true,
+      "error_code": null,
+      "device_count": 1,
+      "state": {}
+    },
+    {
+      "command": [
+        "devices",
+        "list"
+      ],
+      "exit": 0,
+      "elapsed_s": 0.01985,
+      "ok": true,
+      "error_code": null,
+      "device_count": 1,
+      "state": {}
+    },
+    {
+      "command": [
+        "devices",
+        "list"
+      ],
+      "exit": 0,
+      "elapsed_s": 0.019793,
+      "ok": true,
+      "error_code": null,
+      "device_count": 1,
+      "state": {}
+    },
+    {
+      "command": [
+        "devices",
+        "list"
+      ],
+      "exit": 0,
+      "elapsed_s": 0.017006,
+      "ok": true,
+      "error_code": null,
+      "device_count": 1,
+      "state": {}
+    },
+    {
+      "command": [
+        "devices",
+        "list"
+      ],
+      "exit": 0,
+      "elapsed_s": 0.016626,
+      "ok": true,
+      "error_code": null,
+      "device_count": 1,
+      "state": {}
+    },
+    {
+      "command": [
+        "status"
+      ],
+      "exit": 0,
+      "elapsed_s": 0.219816,
+      "ok": true,
+      "error_code": null,
+      "device_count": 0,
+      "state": {}
+    }
+  ],
+  "before": {
+    "kv-helper": "007b61e83a3d2f1394a66c2b0b7528541530d8e6c5910193db7854d8cefb1a8b",
+    "kv-cli": "3a3943420470840d8330960477726e6e9cff81814084610d43e315d28a16ffa0",
+    "kv-touchid": "5d733be9149d820f74879e9b4192a9fd04fceddb0946575d0fa3ae7857e7acea",
+    "kv-relay-client": "8e99fb2fde31a3ff1c4a0e0814ef6c3524f29347742d1c847a467d435c4cf86a"
+  },
+  "after": {
+    "kv-helper": "cd6bd265a33f24ee40e83c8f8980d15669126db28a5783b5d9571e602e2f1250",
+    "kv-cli": "276869a2d9ee84960f2671951b731c68210ae5bdcb7f8845b8d5e47b9fb16292",
+    "kv-touchid": "303af07b684ce5c67f09a7edba9133b363a01effa8941d9b8a1170e8d493278f",
+    "kv-relay-client": "accc5f6a0cff09b049a0697f4c048eeebd13f495749e6703b68926f18c4ab91c"
+  },
+  "backup": "/private/var/backups/keyvalet-r3a-20261013T023446Z",
+  "backup_sha256": "53de48f16f0168725b3080d5fe638747978ca2e32aab6cdf35b0889848ee607c",
+  "services_after": {
+    "system/dev.keyvalet.helper": {
+      "exit": 0,
+      "pid": 40325,
+      "running": true
+    },
+    "gui/501/dev.keyvalet.agent": {
+      "exit": 0,
+      "pid": 40328,
+      "running": true
+    },
+    "gui/501/dev.keyvalet.relay": {
+      "exit": 0,
+      "pid": 40331,
+      "running": true
+    }
+  },
+  "owner_ipc_ok": true,
+  "finished_utc": "2026-10-13T02:36:45.966552+00:00"
+}

@@ -1,0 +1,17 @@
+{
+  "utc": "2026-10-14T00:06:59.117800+00:00",
+  "zola_version": "0.23.6",
+  "build_exit": 0,
+  "html_files_checked": 20,
+  "local_links_checked": 410,
+  "markdown_table_rows_checked": 150,
+  "new_pages_checked": 6,
+  "pricing_pages_and_navigation_removed": true,
+  "free_claim_on_both_homepages": true,
+  "commercial_price_or_upgrade_copy_remaining": false,
+  "contact": "support@simvito.com",
+  "site_fingerprint": "8fed8ed8e1006f85d3787513f7ed1c288410ffbbc1e2e67537f0adeeeedfd339",
+  "issues": [],
+  "passed": true,
+  "old_pricing_url_redirects": 6
+}

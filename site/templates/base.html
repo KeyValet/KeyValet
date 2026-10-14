@@ -55,15 +55,15 @@
     </a>
     <span class="spacer"></span>
     {% if lang == "zh-CN" -%}
+    <a class="navlink" href="/zh-CN/download/">下载</a>
     <a class="navlink" href="/zh-CN/guide/">使用指南</a>
     <a class="navlink" href="/zh-CN/compare/">对比</a>
-    <a class="navlink" href="/zh-CN/pricing/">定价</a>
     <a class="navlink" href="/zh-CN/security/">安全</a>
     <a class="navlink" href="/zh-CN/blog/">博客</a>
     {%- else -%}
+    <a class="navlink" href="/download/">Download</a>
     <a class="navlink" href="/guide/">Guide</a>
     <a class="navlink" href="/compare/">Compare</a>
-    <a class="navlink" href="/pricing/">Pricing</a>
     <a class="navlink" href="/security/">Security</a>
     <a class="navlink" href="/blog/">Blog</a>
     {%- endif %}
@@ -91,9 +91,11 @@
       <a href="{{ config.extra.repo }}">GitHub</a> ·
       {% if lang == "zh-CN" -%}
       <a href="/zh-CN/security/">安全</a> · <a href="/zh-CN/guide/">使用指南</a> ·
+      <a href="/zh-CN/privacy/">隐私</a> · <a href="/zh-CN/code-signing/">Code signing policy</a> ·
       <a hreflang="en" href="{% if other_link != "" %}{{ other_link }}{% else %}/{% endif %}">English</a>
       {%- else -%}
       <a href="/security/">Security</a> · <a href="/guide/">Guide</a> ·
+      <a href="/privacy/">Privacy</a> · <a href="/code-signing/">Code signing policy</a> ·
       <a hreflang="zh-CN" href="{% if other_link != "" %}{{ other_link }}{% else %}/zh-CN/{% endif %}">中文</a>
       {%- endif %}
     </span>

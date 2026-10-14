@@ -1,0 +1,16 @@
+{
+  "observed_utc": "2026-10-13T22:04:53.284798+00:00",
+  "owner_authorization": "允许清理这两处构建产物后继续",
+  "paths": [
+    "rust/target-r2a/release/deps",
+    "rust/target-r2a/release/build"
+  ],
+  "before_free_bytes": 14296293376,
+  "cargo_target_lock_held": true,
+  "signed_packages_and_installed_runtime_preserved": true,
+  "after_free_bytes": 15609679872,
+  "after_free_gb_decimal": 15.61,
+  "freed_bytes": 1313386496,
+  "meets_15_gb": true,
+  "secret_values_in_evidence": false
+}

@@ -1,0 +1,9 @@
+{
+  "state": 3,
+  "result": {
+    "test": 0,
+    "build": 0,
+    "clippy": 0
+  },
+  "ssh_exit": 0
+}

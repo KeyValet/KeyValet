@@ -12,6 +12,215 @@ use kv_vault::Vault;
 use std::time::Duration;
 
 #[test]
+fn r3a_rejoin_creates_fresh_keys_without_erasing_the_revoked_ledger() {
+    let fixture = Harness::new();
+    let directory = tempfile::tempdir().unwrap();
+    let path = directory.path().join("remote");
+    let keys = crate::remote::platform_keys::SoftwareKeys;
+    let master = crate::remote::metadata_master::IdentityMaster { keys: &keys };
+    let environment = || Environment {
+        master: &master,
+        factory: &keys,
+        runner: fixture.runner.clone(),
+        presence: fixture.presence.clone(),
+        clock: fixture.clock.clone(),
+    };
+    let backend = crate::remote::bootstrap::open(
+        Options {
+            path: &path,
+            initialize: Some((
+                "account",
+                "CI executor",
+                "synthetic-test-passphrase-42",
+                Os::Linux,
+            )),
+            config: ApprovalConfig::default(),
+        },
+        environment(),
+    )
+    .unwrap();
+    assert_eq!(
+        crate::remote::rejoin::create(&path, &backend.metadata, &backend.helper, environment())
+            .err()
+            .unwrap()
+            .code(),
+        "rejoin_requires_revoked_device"
+    );
+    let old_id = backend.helper.local.device_id.clone();
+    backend
+        .helper
+        .revoke_device(&old_id, "CI verified revocation")
+        .unwrap();
+    let old_head = backend.helper.lock().unwrap().store.audit_head().unwrap();
+    let old_directory = backend
+        .metadata
+        .authenticated_metadata("remote_directory")
+        .unwrap();
+    let next =
+        crate::remote::rejoin::create(&path, &backend.metadata, &backend.helper, environment())
+            .unwrap();
+    assert_ne!(next.helper.local.device_id, old_id);
+    assert_ne!(next.helper.local.dk_pub, backend.helper.local.dk_pub);
+    assert_eq!(next.helper.account, backend.helper.account);
+    assert_eq!(
+        crate::remote::engine::blocking_lock(&backend.helper.state)
+            .unwrap()
+            .store
+            .audit_head()
+            .unwrap(),
+        old_head
+    );
+    assert_eq!(
+        backend
+            .metadata
+            .authenticated_metadata("remote_directory")
+            .unwrap(),
+        old_directory
+    );
+    assert_eq!(
+        next.helper
+            .lock()
+            .unwrap()
+            .store
+            .setting::<String>("mode")
+            .unwrap()
+            .as_deref(),
+        Some("per_use")
+    );
+    assert!(crate::remote::engine::blocking_lock(&backend.helper.state)
+        .unwrap()
+        .store
+        .device(&old_id, "account")
+        .is_err());
+    let next_path = crate::remote::rejoin::active_path(&path, &backend.metadata).unwrap();
+    assert!(next_path.starts_with(path.join("generations")));
+    crate::remote::rejoin::attach(&path, backend.metadata.clone(), &next.helper, &master).unwrap();
+    let state = next.helper.lock().unwrap();
+    let args =
+        serde_json::from_value(json!({"since":0,"limit":200,"history_device":old_id})).unwrap();
+    let page = crate::remote::rejoin::audit_page(&next.helper, &state, &args).unwrap();
+    assert_eq!(page["device_id"], old_id);
+    assert_eq!(page["head"], json!(old_head));
+    drop(state);
+    let reopened = crate::remote::bootstrap::open(
+        Options {
+            path: &next_path,
+            initialize: None,
+            config: ApprovalConfig::default(),
+        },
+        environment(),
+    )
+    .unwrap();
+    crate::remote::rejoin::attach(&path, backend.metadata.clone(), &reopened.helper, &master)
+        .unwrap();
+    assert_eq!(reopened.helper.local.device_id, next.helper.local.device_id);
+    let catalog = backend
+        .metadata
+        .authenticated_metadata("remote_generations")
+        .unwrap()
+        .unwrap();
+    for tamper in ["path", "head", "successor"] {
+        let mut bad = catalog.clone();
+        match tamper {
+            "path" => bad["active"] = json!("../../outside"),
+            "head" => bad["archives"][0]["head"]["hash"] = json!("f".repeat(64)),
+            "successor" => {
+                bad["archives"][0]["proof"]["successor"]["device_id"] = json!("foreign-identity")
+            }
+            _ => unreachable!(),
+        }
+        backend
+            .metadata
+            .replace_authenticated_metadata("remote_generations", Some(&catalog), bad.clone())
+            .unwrap();
+        assert!(crate::remote::rejoin::attach(
+            &path,
+            backend.metadata.clone(),
+            &reopened.helper,
+            &master
+        )
+        .is_err());
+        backend
+            .metadata
+            .replace_authenticated_metadata("remote_generations", Some(&bad), catalog.clone())
+            .unwrap();
+    }
+}
+
+#[tokio::test]
+async fn r3a_revoked_management_backend_never_restores_authority() {
+    let fixture = Harness::new();
+    let directory = tempfile::tempdir().unwrap();
+    let path = directory.path().join("remote");
+    let keys = crate::remote::platform_keys::SoftwareKeys;
+    let master = crate::remote::metadata_master::IdentityMaster { keys: &keys };
+    let environment = || Environment {
+        master: &master,
+        factory: &keys,
+        runner: fixture.runner.clone(),
+        presence: fixture.presence.clone(),
+        clock: fixture.clock.clone(),
+    };
+    let backend = crate::remote::bootstrap::open(
+        Options {
+            path: &path,
+            initialize: Some((
+                "account",
+                "CI executor",
+                "synthetic-test-passphrase-42",
+                Os::Linux,
+            )),
+            config: ApprovalConfig::default(),
+        },
+        environment(),
+    )
+    .unwrap();
+    backend
+        .helper
+        .revoke_device(&backend.helper.local.device_id, "CI verified revocation")
+        .unwrap();
+    assert!(crate::remote::bootstrap::open(
+        Options {
+            path: &path,
+            initialize: None,
+            config: ApprovalConfig::default()
+        },
+        environment()
+    )
+    .is_err());
+    let reopened = crate::remote::bootstrap::open_for_management(
+        Options {
+            path: &path,
+            initialize: None,
+            config: ApprovalConfig::default(),
+        },
+        environment(),
+    )
+    .unwrap();
+    for (role, op, expected) in [
+        (Caller::CliOwner, Op::DevicesList, true),
+        (Caller::CliOwner, Op::GrantIssue, false),
+        (Caller::CliOwner, Op::DevicesRevoke, false),
+        (Caller::ApprovalAgent, Op::Decide, false),
+        (Caller::RelayClient, Op::RelayInbound, false),
+    ] {
+        let response = reopened
+            .helper
+            .handle(
+                CallerContext::authenticated(role, 501, 4242, 30),
+                Request {
+                    op,
+                    params: json!({}),
+                    extra: Extra::new(),
+                },
+            )
+            .await;
+        assert_eq!(json!(response)["ok"], expected, "{role:?}/{op:?}");
+    }
+    assert_eq!(fixture.runner.calls.load(Ordering::SeqCst), 0);
+}
+
+#[test]
 fn authenticated_bootstrap_reopens_the_same_identity_and_rejects_metadata_rollback() {
     let fixture = Harness::new();
     let directory = tempfile::tempdir().unwrap();
@@ -415,7 +624,8 @@ async fn a_signed_remote_decision_releases_the_real_gateway_binary_request_once(
     }
     kv_proxy::allow_insecure_loopback_for_tests(true);
     let _loopback = Loopback;
-    let mut h = Harness::new();
+    // The real gateway checks absolute expiration against the system clock.
+    let mut h = Harness::with(Store::memory().unwrap(), SystemClock.now(), true);
     let upstream = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
     let address = upstream.local_addr().unwrap();
     let upstream_task = tokio::spawn(async move {
@@ -607,6 +817,8 @@ async fn local_timeout_and_unavailable_prompts_remain_pending_not_denied() {
     }
     for (error, expected) in [
         (Some(Error("local_approval_denied")), "approval_denied"),
+        (Some(Error("local_approval_cancelled")), "approval_expired"),
+        (Some(Error("local_approval_failed")), "approval_pending"),
         (Some(Error("local_approval_timeout")), "approval_pending"),
         (
             Some(Error("local_approval_unavailable")),
@@ -648,6 +860,17 @@ async fn local_timeout_and_unavailable_prompts_remain_pending_not_denied() {
             .unwrap();
         let result = serde_json::to_value(result).unwrap();
         assert_eq!(result["status"], expected);
+        if expected == "approval_expired" {
+            assert_eq!(result["reason"], "cancelled");
+            assert!(h
+                .helper
+                .lock()
+                .unwrap()
+                .store
+                .pending_ids()
+                .unwrap()
+                .is_empty());
+        }
         assert_eq!(
             result["approval_id"].is_string(),
             expected == "approval_pending"

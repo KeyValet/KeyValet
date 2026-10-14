@@ -1,0 +1,14 @@
+{
+  "original_receipt": "r3a-refresh-first-054007.json",
+  "source_refresh_completed": true,
+  "ndu_write_completed": false,
+  "get_rerun": false,
+  "source_expires_at": "2026-10-13T06:40:05.179Z",
+  "caller_error": "MCP template credential_set rejects attributes before helper authentication; the acceptance driver supplied this unsupported argument.",
+  "audit_collection_error": "audit --remote returns an aggregate authenticated comparison. It does not expose raw entries; the collector erroneously inferred matched=0/differences=2 from their absence. Those values are not native audit findings.",
+  "native_audit_cli_exit": 0,
+  "native_audit_summary_saved_at_the_time": false,
+  "native_summary_requires_readback": true,
+  "changes": "Driver parameter construction and audit projection corrected; no product code or authorization policy changed.",
+  "secret_values_in_evidence": false
+}

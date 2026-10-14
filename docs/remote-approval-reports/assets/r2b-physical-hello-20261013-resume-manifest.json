@@ -1,0 +1,141 @@
+{
+  "retrieved_after_charge": true,
+  "files": [
+    {
+      "source_windows_name": "attempt1-diagnostic-cancel-result.json",
+      "original_sha256": "3ba33edc609b5a3ace47e0f798d54a3b8c1d64b67fad1cc81a4d08f1a7a2c9fc",
+      "original_encoding": "utf-8-sig",
+      "evidence_file": "r2b-physical-hello-20261013-attempt1-diagnostic-cancel-result.json",
+      "evidence_sha256": "fbe22d64da521d61a1d9f769f52547d9da6c4be3f342620fd9918ff4dec07918",
+      "normalization": "Encoding/newlines only"
+    },
+    {
+      "source_windows_name": "attempt1-diagnostic-cancel.stderr.log",
+      "original_sha256": "d4e4547ef8fdc645f72e9dda59194b5a774b81c7feb78b41837fe95a24b1ddd7",
+      "original_encoding": "utf-8-sig",
+      "evidence_file": "r2b-physical-hello-20261013-attempt1-diagnostic-cancel.stderr.log",
+      "evidence_sha256": "d4e4547ef8fdc645f72e9dda59194b5a774b81c7feb78b41837fe95a24b1ddd7",
+      "normalization": "Encoding/newlines only"
+    },
+    {
+      "source_windows_name": "attempt1-diagnostic-cancel.stdout.log",
+      "original_sha256": "57c55f6ec0c6d96021ff0b63a9ee1ed692ece473eecbfa7905f68919bbb5b76b",
+      "original_encoding": "utf-8-sig",
+      "evidence_file": "r2b-physical-hello-20261013-attempt1-diagnostic-cancel.stdout.log",
+      "evidence_sha256": "57c55f6ec0c6d96021ff0b63a9ee1ed692ece473eecbfa7905f68919bbb5b76b",
+      "normalization": "Encoding/newlines only"
+    },
+    {
+      "source_windows_name": "cleanup-after-resume-result.json",
+      "original_sha256": "945c8acc248e1d97e53bf1d72ebb1ee69dcf6ac857169fb311ad544fbcf1eeb8",
+      "original_encoding": "utf-8-sig",
+      "evidence_file": "r2b-physical-hello-20261013-cleanup-after-resume-result.json",
+      "evidence_sha256": "10d55a7571bae205ef55041acd81f82fdf81459994cb328b0e755ac9a1f6a1a2",
+      "normalization": "Encoding/newlines only"
+    },
+    {
+      "source_windows_name": "diagnostic-build.json",
+      "original_sha256": "d6386d43293d961c778f568b83ca0b5b0c28a3f3847f8f74ea5668db11b4dd42",
+      "original_encoding": "utf-8-sig",
+      "evidence_file": "r2b-physical-hello-20261013-diagnostic-build.json",
+      "evidence_sha256": "f3fe07ebbfdf1bcc6e8bcde52e0c5048105a96a92333625359ef9e6534008e2b",
+      "normalization": "Encoding/newlines only"
+    },
+    {
+      "source_windows_name": "diagnostic-callback-result.json",
+      "original_sha256": "fd1811610d7ac772250c4988576362d42b4729e79d6f828eef38cc75d1895131",
+      "original_encoding": "utf-8-sig",
+      "evidence_file": "r2b-physical-hello-20261013-diagnostic-callback-result.json",
+      "evidence_sha256": "4fa3ea9244a50ed37f7d6c3f6f8187098b16aa7ea372b03b8a6beb4bd00ceb21",
+      "normalization": "Encoding/newlines only"
+    },
+    {
+      "source_windows_name": "diagnostic-callback.stderr.log",
+      "original_sha256": "c6f6de47cf4e6bad4388520b0ef93cabbd85740df7ecf88f6c64c6122fe9a15d",
+      "original_encoding": "utf-8-sig",
+      "evidence_file": "r2b-physical-hello-20261013-diagnostic-callback.stderr.log",
+      "evidence_sha256": "c6f6de47cf4e6bad4388520b0ef93cabbd85740df7ecf88f6c64c6122fe9a15d",
+      "normalization": "Encoding/newlines only"
+    },
+    {
+      "source_windows_name": "diagnostic-callback.stdout.log",
+      "original_sha256": "c22da62f6fb0ea9d81e07e9526a1f4f2a5d73ad3499f4f350ca0cf845f26a680",
+      "original_encoding": "utf-8-sig",
+      "evidence_file": "r2b-physical-hello-20261013-diagnostic-callback.stdout.log",
+      "evidence_sha256": "c22da62f6fb0ea9d81e07e9526a1f4f2a5d73ad3499f4f350ca0cf845f26a680",
+      "normalization": "Encoding/newlines only"
+    },
+    {
+      "source_windows_name": "diagnostic-cancel-result.json",
+      "original_sha256": "a0580b863789f17f70a653b1ee7accefd82500e8e8985b05bca1fcd6076558ec",
+      "original_encoding": "utf-8-sig",
+      "evidence_file": "r2b-physical-hello-20261013-diagnostic-cancel-result.json",
+      "evidence_sha256": "ef150c413f714b09ee90ad591671a46a766299712b87f11c8458952ec956e9d9",
+      "normalization": "Encoding/newlines only"
+    },
+    {
+      "source_windows_name": "diagnostic-cancel.stderr.log",
+      "original_sha256": "e6396c4b065e8a6289a587e4f5dca8e9cd5508b46bc9fe869f65e320fca32adb",
+      "original_encoding": "utf-8-sig",
+      "evidence_file": "r2b-physical-hello-20261013-diagnostic-cancel.stderr.log",
+      "evidence_sha256": "e6396c4b065e8a6289a587e4f5dca8e9cd5508b46bc9fe869f65e320fca32adb",
+      "normalization": "Encoding/newlines only"
+    },
+    {
+      "source_windows_name": "diagnostic-cancel.stdout.log",
+      "original_sha256": "e1ade27603d484b17b4e0403e09e19720871a57ebf66ba62b66eba06a7ccc01a",
+      "original_encoding": "utf-8-sig",
+      "evidence_file": "r2b-physical-hello-20261013-diagnostic-cancel.stdout.log",
+      "evidence_sha256": "e1ade27603d484b17b4e0403e09e19720871a57ebf66ba62b66eba06a7ccc01a",
+      "normalization": "Encoding/newlines only"
+    },
+    {
+      "source_windows_name": "diagnostic-repeat-result.json",
+      "original_sha256": "937a62ba9c284f1dd41b2600a768f41514e621791d617e2aab0ebf5928cc9bbc",
+      "original_encoding": "utf-8-sig",
+      "evidence_file": "r2b-physical-hello-20261013-diagnostic-repeat-result.json",
+      "evidence_sha256": "27467c8275569a2a1783a37954fe9f1b3f00d574a99b8af45861c23bd4b4ff6f",
+      "normalization": "Encoding/newlines only"
+    },
+    {
+      "source_windows_name": "diagnostic-repeat.stderr.log",
+      "original_sha256": "ad5ded352031a1189fceba47a7a06f62a3409c46817c2cff6dbf577932e5403b",
+      "original_encoding": "utf-8-sig",
+      "evidence_file": "r2b-physical-hello-20261013-diagnostic-repeat.stderr.log",
+      "evidence_sha256": "ad5ded352031a1189fceba47a7a06f62a3409c46817c2cff6dbf577932e5403b",
+      "normalization": "Encoding/newlines only"
+    },
+    {
+      "source_windows_name": "diagnostic-repeat.stdout.log",
+      "original_sha256": "63a23bde3818823aa3f6b52d1491b4ec05341ead639f3c5d21c05a6c4e525fb5",
+      "original_encoding": "utf-8-sig",
+      "evidence_file": "r2b-physical-hello-20261013-diagnostic-repeat.stdout.log",
+      "evidence_sha256": "63a23bde3818823aa3f6b52d1491b4ec05341ead639f3c5d21c05a6c4e525fb5",
+      "normalization": "Encoding/newlines only"
+    },
+    {
+      "source_windows_name": "diagnostic-vault-result.json",
+      "original_sha256": "a0972c344eede178e893aff5ba2c8c42798a055279adb8dfba0af8021622458c",
+      "original_encoding": "utf-8-sig",
+      "evidence_file": "r2b-physical-hello-20261013-diagnostic-vault-result.json",
+      "evidence_sha256": "b2d348a0c16e89b7ce5539b13ab401f6087c4be7a07cf12846b4529b8b895d2b",
+      "normalization": "PowerShell attached provider/type metadata removed from stderr; result fields unchanged"
+    },
+    {
+      "source_windows_name": "diagnostic-vault.stderr.log",
+      "original_sha256": "c8511008395d39aa25d9f0db0a189c5418fe75d40232b3b9caf72371d01773fe",
+      "original_encoding": "utf-8-sig",
+      "evidence_file": "r2b-physical-hello-20261013-diagnostic-vault.stderr.log",
+      "evidence_sha256": "c8511008395d39aa25d9f0db0a189c5418fe75d40232b3b9caf72371d01773fe",
+      "normalization": "Encoding/newlines only"
+    },
+    {
+      "source_windows_name": "diagnostic-vault.stdout.log",
+      "original_sha256": "0443337b3893c31c3dbb763b0fc36aca22f570131cc1931662932cdef6e0240f",
+      "original_encoding": "utf-8-sig",
+      "evidence_file": "r2b-physical-hello-20261013-diagnostic-vault.stdout.log",
+      "evidence_sha256": "0443337b3893c31c3dbb763b0fc36aca22f570131cc1931662932cdef6e0240f",
+      "normalization": "Encoding/newlines only"
+    }
+  ]
+}

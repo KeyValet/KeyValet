@@ -1,0 +1,15 @@
+{
+  "files_checked": 62,
+  "checks": [
+    "unredacted_pair_uri",
+    "session_token_value",
+    "recovery_code_value",
+    "private_key_or_raw_secret",
+    "pem_private_key"
+  ],
+  "violations": [],
+  "converted_to_utf8": [
+    "r3b-windows-physical-upgrade.log"
+  ],
+  "note": "Public aliases/JWKs, synthetic signatures, encrypted-vault hashes and manifest hashes are intentionally retained."
+}

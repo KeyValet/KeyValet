@@ -20,6 +20,7 @@ kv-vault = { path = "../kv-vault" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 rpassword = "7"
+qrcode = { version = "=0.14.1", default-features = false }
 libc = "0.2"
 zeroize = "1"
 tokio = { version = "1", features = ["rt-multi-thread", "net", "io-util", "time", "process", "sync"] }

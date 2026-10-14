@@ -1,0 +1,21 @@
+{
+  "started_utc": "2026-10-13T15:26:06.224895+00:00",
+  "commands": [
+    {
+      "case": "unattended_1h_two_labels",
+      "elapsed_s": 190.074093,
+      "exit": 3,
+      "public_result": {
+        "ok": false,
+        "command": null,
+        "error_code": "label_command_timeout"
+      }
+    }
+  ],
+  "secret_values_in_evidence": false,
+  "resume_after_verified_mode": false,
+  "resume_unattended_only": true,
+  "completed_controls_receipt": "r3a-controls-143754.json",
+  "fixed_error": "control_command_not_applied",
+  "finished_utc": "2026-10-13T15:29:17.668468+00:00"
+}

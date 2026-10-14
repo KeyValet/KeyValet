@@ -425,11 +425,12 @@ mod windows_impl {
         })
     }
 
-    /// Authenticode check: the file's signature must chain to a trusted root
+    /// Optional Authenticode verification for signed-file diagnostics. Installed Windows
+    /// process authentication uses account, file identity and protected-path checks instead.
+    /// The file's signature must chain to a trusted root
     /// (`WINTRUST_ACTION_GENERIC_VERIFY_V2`, including whole-chain revocation) and its *leaf*
     /// certificate's CN must equal
-    /// `publisher_cn` exactly. This is the Windows counterpart to `verify_peer_code`'s
-    /// designated-requirement check on macOS.
+    /// `publisher_cn` exactly.
     pub fn verify_publisher(path: &Path, publisher_cn: &str) -> Result<(), String> {
         use std::os::windows::ffi::OsStrExt;
         use windows::Win32::Security::Cryptography::{
@@ -523,12 +524,6 @@ mod windows_impl {
             .map_err(|e| format!("cannot read {}: {e}", path.display()))?;
         crate::peer::sid_from_string(text.trim())
             .ok_or_else(|| format!("{} does not contain a valid SID", path.display()))
-    }
-
-    /// The unsigned-agent escape hatch exists and is ACL-trusted (a user-writable marker would
-    /// defeat the signature check for anyone).
-    pub fn allow_unsigned_agent(marker: &Path) -> bool {
-        marker.exists() && untrusted_reason(marker).is_none()
     }
 
     /// Whether the current process token is elevated (UAC) — the Windows analogue of `getuid()==0`.
@@ -640,7 +635,6 @@ mod windows_impl {
             let binary = temp.path().join("unsigned.exe");
             std::fs::write(&binary, b"MZ unsigned synthetic fixture").unwrap();
             assert!(verify_publisher(&binary, "Simvito Limited").is_err());
-            assert!(!allow_unsigned_agent(&temp.path().join("missing-marker")));
         }
 
         #[test]
@@ -686,6 +680,6 @@ mod windows_impl {
 
 #[cfg(windows)]
 pub use windows_impl::{
-    allow_unsigned_agent, load_owner_sid, same_file_path, trusted_path, untrusted_reason,
-    verify_publisher, verify_root_environment,
+    load_owner_sid, same_file_path, trusted_path, untrusted_reason, verify_publisher,
+    verify_root_environment,
 };

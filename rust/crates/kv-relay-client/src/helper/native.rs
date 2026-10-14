@@ -40,5 +40,8 @@ pub(super) async fn connect(
     kv_platform::pipe::connect_service(name)
         .await
         .map(|pipe| Box::new(pipe) as Box<dyn Stream>)
-        .map_err(|_| Error::HelperUntrusted)
+        .map_err(|error| {
+            crate::windows::report_helper_error(&error);
+            Error::HelperUntrusted
+        })
 }

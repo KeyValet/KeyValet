@@ -1,0 +1,32 @@
+{
+  "observed_utc": "2026-10-13T21:35:52.698569+00:00",
+  "read_only": true,
+  "touch_id_requests": 0,
+  "password_prompts": 0,
+  "secret_values_in_evidence": false,
+  "exit": 0,
+  "mac": {
+    "directive_id": "01M4TNJG10T64E6D72NQ0VMM7A",
+    "issued": [
+      {
+        "op": "query_grants",
+        "id": "01M4TNJG10T64E6D72NQ0VMM7A",
+        "peer": "01M4S8KJ48BSMNK1S4BEGT07FC",
+        "issued_at": 1791896405,
+        "result_ok": null
+      }
+    ],
+    "received": [],
+    "audit": [
+      {
+        "op": "directive_issued",
+        "id": "01M4TNJG10T64E6D72NQ0VMM7A",
+        "peer": "01M4S8KJ48BSMNK1S4BEGT07FC",
+        "directive_op": "query_grants",
+        "ts_unix": 1791896405,
+        "directive_hash": "2f747eb49e4a8663b0ec10903319182943ff5c675a14a11456cd1c3b3135192c",
+        "audit_seq": 3219
+      }
+    ]
+  }
+}

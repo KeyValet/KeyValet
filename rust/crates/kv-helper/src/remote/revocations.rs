@@ -28,6 +28,10 @@ impl RemoteHelper {
         if done == Some(true) {
             return Ok(());
         }
+        // Execution-only identities cannot supply an AK_s proof. Fail before
+        // asking the owner to authenticate or creating a relay session.
+        let signer = self.approval_provider(ApprovalLevel::Strong)?;
+        let key = remote::validation::approval_key(&self.local, ApprovalLevel::Strong)?;
         let token = relay
             .authenticate(&self.local, self.services.identity.clone())
             .await?;
@@ -40,7 +44,7 @@ impl RemoteHelper {
                 .find(|(record, _)| record.device_id == id)
                 .ok_or(Error("unknown_device"))?;
             self.authorize_strong(
-                "revoke_device",
+                "revoke_device_proof",
                 json!({"device_id":id,"label":target.0.label}),
             )
             .await?;
@@ -67,12 +71,7 @@ impl RemoteHelper {
                 challenge: challenge.challenge,
                 extra: Extra::new(),
             };
-            let key = remote::validation::approval_key(&self.local, ApprovalLevel::Strong)?;
-            let sig = encode_b64(
-                &self
-                    .approval_provider(ApprovalLevel::Strong)?
-                    .sign(key.alg, &remote::canonical::jcs(&body)?)?,
-            );
+            let sig = encode_b64(&signer.sign(key.alg, &remote::canonical::jcs(&body)?)?);
             let revoke = DeviceRevoke {
                 device_id: id.into(),
                 extra: json!({"proof":body,"sig":sig}).as_object().unwrap().clone(),
@@ -87,9 +86,7 @@ impl RemoteHelper {
                 )?;
                 for peer in records
                     .iter()
-                    .filter(|(peer, revoked)| {
-                        !revoked && peer.device_id != self.local.device_id && peer.device_id != id
-                    })
+                    .filter(|(peer, revoked)| !revoked && peer.device_id != self.local.device_id)
                     .map(|(peer, _)| peer)
                 {
                     // Revocations only tighten authority and remain deliverable to offline peers.
@@ -128,7 +125,16 @@ impl RemoteHelper {
                 .map(|value| decode::<Envelope>(value))
                 .collect::<Result<Vec<_>>>()?
                 .into_iter()
-                .filter(|envelope| state.store.device(&envelope.to, &self.account).is_ok())
+                .filter(|envelope| {
+                    // The removed device also needs the Strong proof before relay DELETE
+                    // closes its online session. Only this persisted revocation ciphertext
+                    // may be sent to it; normal authority still requires an active peer.
+                    envelope.r#type == EnvelopeType::DeviceRevoke
+                        && envelope.from == self.local.device_id
+                        && envelope.account == self.account
+                        && (envelope.to == id
+                            || state.store.device(&envelope.to, &self.account).is_ok())
+                })
                 .collect::<Vec<_>>()
         };
         for batch in envelopes.chunks(64) {

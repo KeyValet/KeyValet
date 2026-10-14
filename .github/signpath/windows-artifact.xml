@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<artifact-configuration xmlns="http://signpath.io/artifact-configuration/v1">
+  <zip-file>
+    <pe-file path="bin/kv-helper.exe" product-name="KeyValet"><authenticode-sign /></pe-file>
+    <pe-file path="bin/kv-agent.exe" product-name="KeyValet"><authenticode-sign /></pe-file>
+    <pe-file path="bin/kv-cli.exe" product-name="KeyValet"><authenticode-sign /></pe-file>
+    <pe-file path="bin/kv-mcp.exe" product-name="KeyValet"><authenticode-sign /></pe-file>
+    <pe-file path="bin/kv-hook.exe" product-name="KeyValet"><authenticode-sign /></pe-file>
+    <pe-file path="bin/kv-server.exe" product-name="KeyValet"><authenticode-sign /></pe-file>
+    <pe-file path="bin/kv-relay-client.exe" product-name="KeyValet"><authenticode-sign /></pe-file>
+  </zip-file>
+</artifact-configuration>

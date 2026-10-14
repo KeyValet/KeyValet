@@ -1,0 +1,9 @@
+{
+  "started_utc": "2026-10-13T15:47:10.842411+00:00",
+  "driver": "r3a-label-input-diagnose.py",
+  "window": 22681,
+  "terminal_started": true,
+  "keyvalet_calls": 0,
+  "touch_id_requests": 0,
+  "secret_values_in_evidence": false
+}

@@ -1,0 +1,12 @@
+{
+  "confirmed_at_unix_ms": 1791850189464,
+  "confirmation": "KeyValet own logout dialog",
+  "remote_delete": "queued; live relay still retains token/session",
+  "own_login_page_at_unix_ms": 1791850190594,
+  "native_worker_refused_login_required": true,
+  "post_logout_notifications_observed": 0,
+  "remote_token_deleted": false,
+  "remote_session_removed": false,
+  "screenshot": "r2c-logout-final.png",
+  "background_log": "r2c-reboot-background.log"
+}

@@ -97,9 +97,18 @@ enum NativeCommand {
     Snapshot,
     Notifications,
     Sync,
+    BackgroundSync,
     Diagnostics,
-    PushToken { platform: String, token: String },
-    QuickDecision { approval_id: String, allow: bool },
+    PushToken {
+        platform: String,
+        token: String,
+        #[serde(default)]
+        force_upload: bool,
+    },
+    QuickDecision {
+        approval_id: String,
+        allow: bool,
+    },
 }
 
 /// # Safety
@@ -112,7 +121,11 @@ pub unsafe extern "C" fn kv_mobile_call(command: *const c_char) -> *mut c_char {
         let command: NativeCommand = from_json(unsafe { input(command, 16 * 1024)? }.as_bytes())?;
         match command {
             NativeCommand::AccountStatus => Ok(serde_json::to_value(core()?.account_view()?)?),
-            NativeCommand::PushToken { platform, token } => {
+            NativeCommand::PushToken {
+                platform,
+                token,
+                force_upload,
+            } => {
                 if !matches!(platform.as_str(), "apns" | "fcm")
                     || token.is_empty()
                     || token.len() > 4096
@@ -122,7 +135,16 @@ pub unsafe extern "C" fn kv_mobile_call(command: *const c_char) -> *mut c_char {
                 }
                 let core = core()?;
                 core.store.transaction(|db| {
-                    crate::Store::delete(db, "meta", "uploaded_push_token")?;
+                    let next = serde_json::json!({"platform":platform,"token":token});
+                    if force_upload
+                        || core
+                            .store
+                            .get::<serde_json::Value>(db, "meta", "push_token")?
+                            .as_ref()
+                            != Some(&next)
+                    {
+                        crate::Store::delete(db, "meta", "uploaded_push_token")?;
+                    }
                     core.store.put(
                         db,
                         "meta",
@@ -140,9 +162,11 @@ pub unsafe extern "C" fn kv_mobile_call(command: *const c_char) -> *mut c_char {
             NativeCommand::Snapshot => Ok(serde_json::to_value(core()?.snapshot()?)?),
             NativeCommand::Notifications => Ok(serde_json::to_value(core()?.notifications()?)?),
             NativeCommand::Diagnostics => Ok(core()?.diagnostic()?.into()),
-            NativeCommand::Sync => Ok(serde_json::to_value(
-                runtime()?.block_on(relay()?.sync_background())?,
-            )?),
+            NativeCommand::Sync => Ok(serde_json::to_value(background_sync()?.0)?),
+            NativeCommand::BackgroundSync => {
+                let (notifications, retry) = background_sync()?;
+                Ok(serde_json::json!({"notifications":notifications,"retry":retry}))
+            }
             NativeCommand::QuickDecision { approval_id, allow } => {
                 core()?.decide(&approval_id, "per_use", allow, "", true)?;
                 let _ = runtime()?.block_on(relay()?.flush());
@@ -150,6 +174,23 @@ pub unsafe extern "C" fn kv_mobile_call(command: *const c_char) -> *mut c_char {
             }
         }
     })
+}
+
+fn background_sync() -> Result<(Vec<crate::view::NotificationView>, bool)> {
+    let relay = relay()?;
+    let result = runtime()?.block_on(async {
+        tokio::time::timeout(
+            std::time::Duration::from_secs(20),
+            relay.sync_background_status(),
+        )
+        .await
+    });
+    match result {
+        Ok(result) => result,
+        // Cached plans still require a live locally verified human session.
+        // Timeout is retried natively and never presented as successful synchronization.
+        Err(_) => Ok((core()?.notifications()?, true)),
+    }
 }
 
 /// # Safety

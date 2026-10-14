@@ -1,0 +1,38 @@
+{
+  "verified_utc": "2026-10-14T05:24:20.310501+00:00",
+  "native_receipt": "r3a-remaining-native-20261014T051814Z.json",
+  "install_receipt": "r3a-se-child-mac-install-20261014T051422Z.json",
+  "native_se_cancel": {
+    "error_code": "key_operation_cancelled",
+    "elapsed_s": 10.485434,
+    "new_grants_after_cancel": 0
+  },
+  "unused_approval": {
+    "id": "01M4WDEFV8J4NMV0MSMEF5DXCE",
+    "before_state": "approved_unused",
+    "after_state": "cancelled",
+    "execution_started_n": 0,
+    "execution_completed_n": 0
+  },
+  "grant": {
+    "ids": [
+      "01M4WDGQ4G1Y5X2WSA6N33F4NC"
+    ],
+    "installed_before_revoke": true,
+    "revoked_after_revoke": true,
+    "signed_elapsed_s": 6.162329
+  },
+  "forward_revocation": {
+    "command_elapsed_s": 9.100511,
+    "observed_invalidated_s": 10.583576,
+    "within_60_s": true,
+    "completed_n": 1
+  },
+  "successful_se_signatures": 2,
+  "cancelled_se_attempts": 1,
+  "active_phone_n": 0,
+  "reverse_revocation_completed_n": 0,
+  "auto_repaired_or_reset_identity": false,
+  "two_hour_lid_test_seconds": 0,
+  "secret_values_in_evidence": false
+}

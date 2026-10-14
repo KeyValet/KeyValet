@@ -1,0 +1,27 @@
+[
+  {
+    "name": "fmt",
+    "exit_code": 0,
+    "started_at_unix": 1791849948.948986,
+    "completed_at_unix": 1791849949.916717
+  },
+  {
+    "name": "clippy",
+    "exit_code": 0,
+    "started_at_unix": 1791849949.917019,
+    "completed_at_unix": 1791849955.8298628
+  },
+  {
+    "name": "build",
+    "exit_code": 0,
+    "started_at_unix": 1791849955.830204,
+    "completed_at_unix": 1791849964.987492
+  },
+  {
+    "name": "test",
+    "exit_code": 0,
+    "started_at_unix": 1791850079.719925,
+    "completed_at_unix": 1791850350.959052,
+    "retry_reason": "kv-helper owner_workflow unknown_token under parallel suite; isolated test passed without changes"
+  }
+]

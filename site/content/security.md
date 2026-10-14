@@ -22,7 +22,7 @@ approval alone is not a TPM PIN or boot-state policy. See the
 
 ## The trust boundary
 
-The AI agent or MCP client is *semi-trusted*: it may be prompt-injected, may speak MCP to the KeyValet server, and may run arbitrary commands as your user. The KeyValet MCP server is a convenience layer — **security checks never rely on it alone**. Every enforcement decision is made by the privileged helper — the root `dev.keyvalet.helper` launchd daemon on macOS, the `keyvalet` systemd service user on Linux, the LocalSystem service in the Windows preview — which holds no vault key while idle. Touch ID and Secure Enclave work happens in the per-user agent `dev.keyvalet.agent`, which the daemon only accepts after verifying its peer uid and its code signature (`dev.keyvalet.touchid`, team `PWCRJPY7YC`, exact installed path) — so a same-user process can't impersonate it and approve prompts for you.
+The AI agent or MCP client is *semi-trusted*: it may be prompt-injected, may speak MCP to the KeyValet server, and may run arbitrary commands as your user. The KeyValet MCP server is a convenience layer — **security checks never rely on it alone**. Every enforcement decision is made by the privileged helper — the root `dev.keyvalet.helper` launchd daemon on macOS, the `keyvalet` systemd service user on Linux, the LocalSystem service on Windows — which holds no vault key while idle. Touch ID and Secure Enclave work happens in the per-user agent `dev.keyvalet.agent`, which the daemon only accepts after verifying its peer uid and its code signature (`dev.keyvalet.touchid`, team `PWCRJPY7YC`, exact installed path) — so a same-user process can't impersonate it and approve prompts for you.
 
 ## What KeyValet guarantees
 
@@ -58,7 +58,7 @@ Assuming macOS and the installed files are not compromised:
 
 ## Release integrity
 
-Release archives are built by GitHub Actions from the tagged commit. Every binary in a workflow-built package is codesigned with the Simvito Limited Developer ID (team `PWCRJPY7YC`, hardened runtime, timestamped); the installer verifies that signature — and the published `SHA256SUMS` — before enabling daemon mode. The build-from-source path (Intel Macs, or releases without assets) has neither signature nor checksum on the downloaded source — audit the release or the source yourself if that matters to you.
+Published macOS and Linux release archives are built by GitHub Actions from the tagged commit. macOS workflow packages use the Simvito Limited Developer ID (team `PWCRJPY7YC`, hardened runtime, timestamped) and Apple notarization; the macOS installer verifies the publisher signature before enabling daemon mode. Linux archives have published SHA256 checksums. Windows release packages are unsigned. Local and remote features authenticate the actual service/owner SID, fixed installed file identity, privileged ownership/ACLs and service-created workers without requiring Authenticode. See [downloads](/download/) and the [Code signing policy](/code-signing/) for each artifact's status. Checksums verify integrity, not publisher authenticity. The build-from-source path has no publisher signature on downloaded source; audit it if that matters to you.
 
 ## Reporting a vulnerability
 

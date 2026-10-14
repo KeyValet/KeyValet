@@ -58,7 +58,9 @@ Play Console 管理安装包和测试名单；登录配置在 Google Cloud，FCM
 
 本轮提供的 Firebase 项目是 `simvito`，项目编号 `527578968067`，与登录项目 `keyvalet-511408` 分开。Android 配置只保留 `dev.keyvalet.mobile` 条目，已放在 `mobile/android/app/google-services.json`；Debug 和 Release 的 Google Services 任务通过，生成的 Firebase 项目、sender ID 和 Android App ID 均匹配。该文件由现有 Gradle 插件加载并被 gitignore 忽略。iOS Firebase plist 的 Bundle ID 同样是 `dev.keyvalet.mobile`；当前 iOS 推送直接使用 APNs，继续准备 Apple APNs 密钥。
 
-FCM 现有服务账号 JSON 已找到，位于本机 `/Users/guang/Documents/Simvito资料/simvito-5e0a66149f10.json`。项目为 `simvito`，账号为 `firebase-adminsdk-fbsvc@simvito.iam.gserviceaccount.com`，项目、账号和密钥均与 Simvito 后端现有 `FCM_PROJECT_ID`、`FCM_CLIENT_EMAIL`、`FCM_PRIVATE_KEY` 配置匹配。KeyValet 推送复用这份凭据，原文件保留在仓库外；部署时让 `KV_FCM_SERVICE_ACCOUNT_FILE` 指向部署机上的受限文件路径。无需重新生成密钥，实际 FCM 投递仍需接通 relay 调度后验收。
+FCM 现有服务账号 JSON 已找到，位于本机 `/Users/guang/Documents/Simvito资料/simvito-5e0a66149f10.json`。项目为 `simvito`，账号为 `firebase-adminsdk-fbsvc@simvito.iam.gserviceaccount.com`，项目、账号和密钥均与 Simvito 后端现有 `FCM_PROJECT_ID`、`FCM_CLIENT_EMAIL`、`FCM_PRIVATE_KEY` 配置匹配。原文件保留在仓库外，本轮不搬运私钥。2026-10-13 用户已在 simvito 提供 `/etc/keyvalet-push/fcm-service-account.json`（`root:keyvalet-push`、`0640`），服务读取此路径。`keyvalet-push.service` 已启动并启用，只监听 `127.0.0.1:8788`；提供商环境文件 root:root、0600，shared bearer 通过 systemd LoadCredential 加载。
+
+R2-C 已接通元数据调度、失败重试和失效 token 清理；nginx 不代理推送端口。真实 FCM 元数据投递返回 202，Pixel 7 的 KeyValet 后台进程被结束后再次唤起并完成原生/Rust 同步，未启动 Flutter UI。该空队列探测不等于锁屏审批通过；扫码、Quick/Strong、升级与设置三步仍需真机继续。配置说明见 [push-deployment.md](../mobile/docs/push-deployment.md)，证据见 [R2-C 报告](remote-approval-reports/R2-C-mobile.md)。
 
 ## Apple 登录和 iOS 推送
 
@@ -93,7 +95,7 @@ FCM 现有服务账号 JSON 已找到，位于本机 `/Users/guang/Documents/Sim
 
 依次验收真实登录、退出、同一身份重新登录；再验收后台和锁屏通知、Quick 解锁后批准、Strong 打开 App 后生物识别批准、30 秒升级和完成后的通知取消。30 秒升级由执行端驱动，手机显示内容与审批强度来自校验后的加密信封。
 
-推送凭据配置完成后，工程侧仍需接通 relay 到 `kv-push` 的调度，并补齐失效 token 清理和重试。控制台创建成功、服务接受推送请求和完整手机审批验收分别记录。
+推送凭据配置完成后，工程侧启动 `kv-push`，检查提供商发送权限并进行实际锁屏投递。控制台创建成功、服务接受推送请求和完整手机审批验收分别记录；单元测试或前台 WebSocket 成功不计作锁屏推送通过。
 
 ## Android Google 登录实机记录（2026-10-12）
 

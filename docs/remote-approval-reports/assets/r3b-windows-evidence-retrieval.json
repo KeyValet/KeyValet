@@ -1,0 +1,36 @@
+{
+  "all_required_archives_retrieved": true,
+  "raw_originals_preserved": true,
+  "archives": [
+    {
+      "name": "physical-evidence-final-retrieved.zip",
+      "sha256": "7b784e5287f43c5c19bd3856105405013fe5d67c39acfc26aabb5c483fee191e",
+      "bytes": 11672
+    },
+    {
+      "name": "physical-round4-evidence.zip",
+      "sha256": "8a88dbeb2ea1e8bce6ba4f1167c9b9cacdbc7554434ab4972af19e8e1e3440f8",
+      "bytes": 3495
+    },
+    {
+      "name": "physical-round5-evidence.zip",
+      "sha256": "3d6526883cc70db6a5f40d74f98a92d4b6c186b1b1a63f4b115b3722a7e0129a",
+      "bytes": 7378
+    },
+    {
+      "name": "physical-round6-evidence.zip",
+      "sha256": "50873759e2ad04672f09ba470ec0dab6c33b8725f6c8444b8745c7cbd39f1111",
+      "bytes": 8631
+    },
+    {
+      "name": "physical-cancel-only-evidence.zip",
+      "sha256": "cc83d6f1053ab6516a6305daf05446bfafc602a423581c9a3d88058beedfc333",
+      "bytes": 3113
+    },
+    {
+      "name": "windows-final-evidence.zip",
+      "sha256": "a0b4ad1e191d50a49b278a608c9fd74287fa2dfb114844220eb7f9a2056512f4",
+      "bytes": 92149
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "observed_utc": "2026-10-13T16:51:19.608170+00:00",
+  "regressions_passed": 5,
+  "tests": [
+    "remote::tests::revocations::executor_revocation_cancels_unused_approval_and_tombstones_all_grants",
+    "remote::tests::revocations::executor_revocation_of_one_issuer_preserves_other_issuers_authority",
+    "remote::tests::revocations::executor_revocation_prevents_late_grant_use_and_new_remote_requests",
+    "remote::tests::revocations::executor_revocation_rejects_quick_proof_without_invalidating_existing_authority",
+    "remote::tests::owner_workflow::executor_revocation_delivers_strong_proof_before_closing_its_online_relay_session"
+  ],
+  "ci_receipt": "r3a-executor-revocation-ci-retry-summary.json",
+  "gui_required": false,
+  "installed_services_used": false,
+  "native_revocations": 0,
+  "security_relaxation": false,
+  "source_sha256": {
+    "rust/crates/kv-helper/src/remote/engine.rs": "014ea53c84460d4b7488e565a2a11436bfc902a73bafc08f37e85fe105fce2d6",
+    "rust/crates/kv-helper/src/remote/directives.rs": "167aad61874f92c7f03d4e54f425d10d7176313e941e9196fe2c03d5efc34633",
+    "rust/crates/kv-helper/src/remote/revocations.rs": "d46658b1eda2aa3f57b10b7960f545925c27f9f1979321c8a9e65d87ff595198",
+    "rust/crates/kv-helper/src/remote/grants.rs": "af1003767506f29350e788edd6cdd149aed630c5471b83bb5a5ecbc199cd3c1f",
+    "rust/crates/kv-helper/src/remote/tests/revocations.rs": "8af87b0161d41a89a3b0932618297c2edb31385ccbecc11e2d52e7100fd5227b",
+    "rust/crates/kv-helper/src/remote/tests/owner_workflow.rs": "0dfd91fb7f43254f9fa842b93458a9b254bed879dc0193ed16856041bc2b55b3"
+  }
+}

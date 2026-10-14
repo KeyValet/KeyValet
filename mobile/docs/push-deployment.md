@@ -6,30 +6,36 @@ and `delivery.mode` cross this boundary. Configure a shared random bearer throug
 `KV_PUSH_RELAY_BEARER_FILE`. Both clients forbid redirects; relay disables proxies
 and rejects non-loopback dispatcher URLs. No nginx route proxies port 8788.
 
-Install [kv-push.service](../../deploy/relay/kv-push.service) and the relay
+Install [keyvalet-push.service](../../deploy/relay/keyvalet-push.service) and the relay
 [push.conf](../../deploy/relay/push.conf) drop-in. The environment files are
 `root:root` mode `0600`; systemd reads them before changing service users.
 
-`/etc/keyvalet-push/push.env` uses these real server paths:
+`/etc/keyvalet-push/provider.env` uses these real server paths:
 
 ```sh
 KV_PUSH_PORT=8788
-KV_PUSH_RELAY_BEARER_FILE=/etc/keyvalet-push/relay-bearer
 KV_FCM_SERVICE_ACCOUNT_FILE=/etc/keyvalet-push/fcm-service-account.json
 ```
 
 The user supplies the FCM file, owned `root:keyvalet-push` mode `0640`.
 The service directory is `root:keyvalet-push` mode `0750`. The relay credential
-file is `root:keyvalet-push` mode `0640`; the relay server service user is also
-a member of that group. The bearer is generated on the server and never copied
-to the repository or printed.
+file is `root:root` mode `0600`. Both units use systemd `LoadCredential` to
+read it as root and provide a private runtime credential file to their service
+user. `KV_PUSH_RELAY_BEARER_FILE` is set by the unit to `%d/relay-bearer` (push)
+or `%d/push-relay-bearer` (relay). Do not override this path in EnvironmentFile.
+The bearer is generated on the server and never copied to the repository or printed.
 
-`/etc/keyvalet-relay/push.env`:
+The relay drop-in configures:
 
-```sh
-KEYVALET_PUSH_URL=http://127.0.0.1:8788/v1/push
-KV_PUSH_RELAY_BEARER_FILE=/etc/keyvalet-push/relay-bearer
+```ini
+Environment=KEYVALET_PUSH_URL=http://127.0.0.1:8788/v1/push
+LoadCredential=push-relay-bearer:/etc/keyvalet-push/relay-bearer
+Environment=KV_PUSH_RELAY_BEARER_FILE=%d/push-relay-bearer
 ```
+
+The runtime path is assigned by systemd, not a literal value to paste into
+an environment file. The installed service is `keyvalet-push.service`; the
+earlier `kv-push.service` unit has been removed. Only port 8788 is used.
 
 When iOS resources are ready, add the actual APNs key file path, Key ID, team
 `PWCRJPY7YC`, topic `dev.keyvalet.mobile` and environment via `KV_APNS_KEY_FILE`,
@@ -62,9 +68,23 @@ revocation and expired human sessions are pruned before dispatch and by cleanup.
 An already accepted provider push cannot be recalled; signed-out Rust refuses
 to decrypt/display it and native code clears approval notifications.
 
+Device revocation and deletion of the last human session also clear tokens and
+queued wakes in SQLite triggers, atomically with those existing transactions.
+Deleting an older session preserves a newer live session's token. An expired
+session is pruned before dispatch even when its row has not yet been deleted.
+An upload is marked successful locally only if both the token and the human
+session still match; a delayed response from before logout cannot suppress the
+same token's upload after login.
+
 Android's native JobScheduler persists regular sync jobs across reboot and uses
 expedited work for high-priority FCM. No Flutter background isolate runs. Tokens
 are re-uploaded on login, cold launch and rotation, with offline retry and an
 encrypted remote-logout outbox. Hardware keys require first device unlock after
 reboot. User force-stop suppresses delivery until the app is opened again; this
 is different from system process eviction.
+
+Native background synchronization has a 20-second total budget. If it expires,
+Rust returns only previously authenticated cached plans and requests a native
+retry. Signing out or an invalid session never allows that cache to be displayed.
+
+2026-10-13: the official origin runs both loopback services; nginx syntax, public health 200 and a direct-origin request with a spoofed CF header returning 403 passed. A real FCM HTTP v1 send returned 202. Provider acceptance does not establish phone background processing or approval.

@@ -1,0 +1,25 @@
+{
+  "observed_utc": "2026-10-14T05:41:07.070387+00:00",
+  "authorization": "User previously allowed release deps/build cleanup and later requested autonomous space recovery.",
+  "free_before_bytes": 15129886720,
+  "removed_paths": [
+    {
+      "path": "rust/target-r2a/release/deps",
+      "rebuildable_file_bytes": 584402572
+    },
+    {
+      "path": "rust/target-r2a/release/build",
+      "rebuildable_file_bytes": 36823735
+    }
+  ],
+  "preserved_staging_sha256": {
+    "rust/target-r2a/r3a-se-child-staging/bin/kv-touchid": "38ec772533f9a9efecd48fb7e033042ceecce9722eaae4c6f39c340e22d60a8b",
+    "rust/target-r2a/r3a-se-child-staging/bin/kv-helper": "abfcb9a65eba7e71fa1f5a2d8a1e2b7a599c7846e3f7d07389ec86e6df73486d",
+    "rust/target-r2a/r3a-se-child-staging/bin/kv-cli": "6ae38019591ed7ab47c965ff1b1b7227080284251e58c64d422da11455a7cc6d",
+    "rust/target-r2a/r3a-se-child-staging/bin/kv-relay-client": "accc5f6a0cff09b049a0697f4c048eeebd13f495749e6703b68926f18c4ab91c"
+  },
+  "secret_values_in_evidence": false,
+  "free_after_bytes": 15711784960,
+  "released_bytes": 581898240,
+  "staging_unchanged": true
+}

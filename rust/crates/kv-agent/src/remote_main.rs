@@ -15,12 +15,27 @@ mod remote_agent;
 
 fn main() {
     #[cfg(windows)]
+    if std::env::args().nth(1).as_deref() == Some("--remote-window") {
+        if let Err(error) = kv_agent::remote::windows::run_window() {
+            eprintln!("{error}");
+            std::process::exit(1);
+        }
+        return;
+    }
+    #[cfg(windows)]
     if std::env::args().nth(1).as_deref() == Some("--serve") {
         let runtime = tokio::runtime::Builder::new_multi_thread()
             .enable_all()
             .build()
             .expect("agent runtime unavailable");
-        runtime.block_on(remote_agent::run());
+        // Keep the process MTA alive across blocking-worker replacement. SDK factory
+        // caches outlive any one Hello request or Tokio pool worker.
+        if let Err(error) =
+            kv_agent::presence::windows::with_winrt(|| runtime.block_on(remote_agent::run()))
+        {
+            eprintln!("Windows Runtime initialization failed: {error}");
+            std::process::exit(1);
+        }
         return;
     }
     existing::run_existing();

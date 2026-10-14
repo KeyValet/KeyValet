@@ -135,8 +135,25 @@ impl RemoteHelper {
                         return serde_json::from_value(json!({"status":"approval_denied"}))
                             .map_err(Into::into);
                     }
+                    Ok(Err(Error("local_approval_cancelled"))) => {
+                        self.audit(
+                            &*self.lock()?,
+                            "local_approval_cancelled",
+                            json!({"session":input.session_id}),
+                        )?;
+                        // Preserve the existing expired-with-reason cancellation contract,
+                        // which the MCP/HTTP adapters already decode as cancelled.
+                        return serde_json::from_value(
+                            json!({"status":"approval_expired","reason":"cancelled"}),
+                        )
+                        .map_err(Into::into);
+                    }
                     Err(_)
-                    | Ok(Err(Error("local_approval_timeout" | "local_approval_unavailable"))) => {
+                    | Ok(Err(Error(
+                        "local_approval_timeout"
+                        | "local_approval_unavailable"
+                        | "local_approval_failed",
+                    ))) => {
                         let uid = input.canonical.agent.uid;
                         let pid = input.canonical.agent.pid;
                         let request = match self.submit(input) {

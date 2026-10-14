@@ -35,7 +35,9 @@ pub(super) enum Command {
     },
     Pair {
         uri: Option<String>,
+        rejoin: bool,
     },
+    PairResume,
     DevicesList,
     DevicesRevoke {
         id: String,
@@ -253,15 +255,33 @@ impl Invocation {
             }
             "relay" => parse_relay(rest)?,
             "pair" => {
-                let options = Options::parse(rest, &[], &["--new"])?;
-                if options.flag("--new") {
+                let options = Options::parse(rest, &[], &["--new", "--resume", "--rejoin"])?;
+                if ["--new", "--resume", "--rejoin"]
+                    .iter()
+                    .filter(|flag| options.flag(flag))
+                    .count()
+                    > 1
+                {
+                    return Err(Error::argument(
+                        "请选择新配对或继续配对",
+                        "Choose a new pairing or resume",
+                    ));
+                }
+                if options.flag("--resume") {
                     options.count(0)?;
-                    Command::Pair { uri: None }
+                    Command::PairResume
+                } else if options.flag("--new") {
+                    options.count(0)?;
+                    Command::Pair {
+                        uri: None,
+                        rejoin: false,
+                    }
                 } else {
                     options.count(1)?;
                     pair_uri(&options.positional[0])?;
                     Command::Pair {
                         uri: Some(options.positional[0].clone()),
+                        rejoin: options.flag("--rejoin"),
                     }
                 }
             }
@@ -346,8 +366,8 @@ impl Invocation {
 fn parse_relay(args: &[String]) -> Result<Command> {
     let Some(action) = args.first() else {
         return Err(Error::argument(
-            "用法：relay install|status|set-url",
-            "Usage: relay install|status|set-url",
+            "用法：relay install|status|set-url|recover",
+            "Usage: relay install|status|set-url|recover",
         ));
     };
     match action.as_str() {
@@ -766,11 +786,11 @@ fn parse_remote(args: &[String]) -> Result<Command> {
                 .unwrap_or_else(|| "100".into())
                 .parse::<u32>()
                 .ok()
-                .filter(|n| (1..=1000).contains(n))
+                .filter(|n| (1..=200).contains(n))
                 .ok_or_else(|| {
                     Error::argument(
-                        "--limit 必须为 1 到 1000",
-                        "--limit must be between 1 and 1000",
+                        "--limit 必须为 1 到 200",
+                        "--limit must be between 1 and 200",
                     )
                 })?;
             (
@@ -779,14 +799,18 @@ fn parse_remote(args: &[String]) -> Result<Command> {
             )
         }
         "grant" => {
-            if rest.len() != 2 || rest[0] != "revoke" {
-                return Err(Error::argument(
-                    "用法：remote <device> grant revoke <jti>",
-                    "Usage: remote <device> grant revoke <jti>",
-                ));
+            if rest.len() == 1 && rest[0] == "revoke-all" {
+                (DirectiveOp::RevokeAllGrants, json!({}))
+            } else {
+                if rest.len() != 2 || rest[0] != "revoke" {
+                    return Err(Error::argument(
+                        "用法：remote <device> grant revoke <jti> | revoke-all",
+                        "Usage: remote <device> grant revoke <jti> | revoke-all",
+                    ));
+                }
+                identifier(&rest[1])?;
+                (DirectiveOp::RevokeGrant, json!({"jti":rest[1]}))
             }
-            identifier(&rest[1])?;
-            (DirectiveOp::RevokeGrant, json!({"jti":rest[1]}))
         }
         _ => {
             return Err(Error::argument(
@@ -1036,7 +1060,7 @@ pub(super) fn scope(value: &str, now: i64) -> Result<DecisionScope> {
 pub(super) fn help(topic: &str) -> String {
     let commands = match topic {
         "relay" => "relay install [--listen 127.0.0.1:8787] [--data /var/lib/keyvalet-relay-server] --public-url https://relay.example.com [--root /staging]\nrelay status [--public-url URL]\nrelay set-url <URL>\nrelay recover <account-id> [--public-url URL] [--software] (recovery code from hidden input or stdin)",
-        "pair" => "pair --new\npair <kv-pair://host/base32-token>",
+        "pair" => "pair --new\npair <kv-pair://host/base32-token>\npair --resume",
         "devices" => "devices list\ndevices revoke <id>\ndevices rename <id> <label>",
         "approvals" => "approvals [--watch] [--on-approve <cmd>]\napprove <id> [--scope per_use|per_credential|per_session|remember:1h|remember:8h|remember:24h|standing:credential|standing:device]\ndeny <id> [--reason <text>]",
         "approve" => "approve <id> [--scope ...]\napprove <pid> (Linux polkit)",
@@ -1044,7 +1068,7 @@ pub(super) fn help(topic: &str) -> String {
         "grant" => "grant --to <device|label|*> --credential type/name [--hosts host,...] [--methods GET,POST] [--paths /path,...] [--budget calls/1h|24h|7d] --until <duration|RFC3339> [--agent identity]\ngrant list\ngrant revoke <jti>\ngrant revoke-all",
         "status" | "protection" => "status [--summary]",
         "audit" => "audit --remote [--device <device|label>] [--since duration|RFC3339] [--limit 1..200] [--json]",
-        _ => "relay install|status|set-url|recover\npair --new | pair <kv-pair://...>\ndevices list|revoke <id>|rename <id> <label>\napprovals [--watch] [--on-approve <cmd>] | approve <id> [--scope ...] | deny <id> [--reason ...]\ngrant ...|list|revoke <jti>|revoke-all\nremote <device|label|*> mode <per_use|per_credential|per_session|remember:Nh>\nremote <device|label|*> allow <--credential type/name|--all> [--hosts ...] [--methods ...] [--paths ...] [--agent ...] [--until duration|RFC3339|--standing]\nremote <device|label|*> unattended --include-sensitive --until <duration|RFC3339>\nremote <device|label|*> lock\nremote <device|label|*> unlock-ttl <hours|duration>\nremote <device|label|*> class <name> [--credential pattern] [--host pattern] --exp <duration>\nremote <device|label|*> label <label>\nremote <device|label|*> notify <prefer-local|always-phone|both>\nremote <device|label|*> status|pending|grants\nremote <device|label|*> audit [--since duration|RFC3339] [--limit 1..1000]\nremote <device|label|*> grant revoke <jti> | revoke-all\nstatus [--summary]",
+        _ => "relay install|status|set-url|recover\npair --new | pair <kv-pair://...>\ndevices list|revoke <id>|rename <id> <label>\napprovals [--watch] [--on-approve <cmd>] | approve <id> [--scope ...] | deny <id> [--reason ...]\ngrant ...|list|revoke <jti>|revoke-all\nremote <device|label|*> mode <per_use|per_credential|per_session|remember:Nh>\nremote <device|label|*> allow <--credential type/name|--all> [--hosts ...] [--methods ...] [--paths ...] [--agent ...] [--until duration|RFC3339|--standing]\nremote <device|label|*> unattended --include-sensitive --until <duration|RFC3339>\nremote <device|label|*> lock\nremote <device|label|*> unlock-ttl <hours|duration>\nremote <device|label|*> class <name> [--credential pattern] [--host pattern] --exp <duration>\nremote <device|label|*> label <label>\nremote <device|label|*> notify <prefer-local|always-phone|both>\nremote <device|label|*> status|pending|grants\nremote <device|label|*> audit [--since duration|RFC3339] [--limit 1..200]\nremote <device|label|*> grant revoke <jti> | revoke-all\nstatus [--summary]",
     };
     format!("{}\n\n{}\n\n{}", kv_i18n::t("用法：keyvalet <命令> [--json]", "Usage: keyvalet <command> [--json]"), commands, kv_i18n::t("设备可使用 id、标签或 *。密钥、签名及认证由 helper 处理。无人值守必须在终端输入执行端标签。", "Devices accept an id, label or *. The helper owns keys, signatures and authentication. Unattended mode requires typing the executor label in a terminal."))
 }

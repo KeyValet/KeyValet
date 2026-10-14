@@ -1,0 +1,25 @@
+{
+  "started_utc": "2026-10-14T05:51:58.462910+00:00",
+  "rust": "1.99.0",
+  "checks": {
+    "fmt": 0,
+    "clippy": 101
+  },
+  "space_checks": [
+    {
+      "check": "fmt",
+      "free_bytes": 15593062400
+    },
+    {
+      "check": "clippy",
+      "free_bytes": 15593029632
+    }
+  ],
+  "source_files": 526,
+  "minimum_free_bytes": 15000000000,
+  "secret_values_in_evidence": false,
+  "dependency_guard": "clippy --locked and CARGO_NET_OFFLINE=true prevent adding foreign dependencies or changing the lockfile",
+  "source_unchanged_during_checks": true,
+  "changed_source_files": [],
+  "finished_utc": "2026-10-14T05:51:59.935140+00:00"
+}

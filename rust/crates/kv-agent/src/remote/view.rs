@@ -65,10 +65,11 @@ pub struct Row {
     pub value: String,
     pub red: bool,
     pub secondary: bool,
+    pub detail: bool,
 }
 impl Row {
     fn json(&self) -> Value {
-        json!({"label":self.label,"value":self.value,"red":self.red,"secondary":self.secondary})
+        json!({"label":self.label,"value":self.value,"red":self.red,"secondary":self.secondary,"detail":self.detail})
     }
 }
 
@@ -83,6 +84,11 @@ pub struct ScopeChoice {
 // No Debug: the original request contains audit-only hashes and opaque extensions.
 #[derive(Clone)]
 pub struct ApprovalView {
+    pub heading: String,
+    pub subtitle: String,
+    pub request_target: Option<String>,
+    pub details_label: String,
+    pub reason_label: String,
     pub title: String,
     pub summary: String,
     pub rows: Vec<Row>,
@@ -145,6 +151,9 @@ impl ApprovalView {
                 value,
                 red,
                 secondary,
+                // Keep identity, risk and all warnings visible. Collapse duplicate HTTP
+                // metadata and process details using the fixed, untranslated row kind.
+                detail: matches!(en, "Method / host" | "Path / size" | "Agent"),
             });
         };
         let credential = &input["credential"];
@@ -179,6 +188,7 @@ impl ApprovalView {
             );
             name
         };
+        let mut request_target = None;
         let summary = if kind == "unlock" {
             add(
                 "有效期",
@@ -191,6 +201,12 @@ impl ApprovalView {
                 false,
             );
             t("开始使用凭证库", "Start using the credential vault")
+        } else if kind == "use" && operation.is_null() {
+            // Non-HTTP uses (read/derive a token, TOTP or AWS credentials) carry no
+            // HTTP Operation. Preserve the original signed request and its tier/scopes.
+            let summary = t("直接使用或派生凭证", "Read or derive a credential");
+            add("操作", "Operation", summary.clone(), false, false);
+            summary
         } else {
             let method = display_text(text(operation, "method")?)?;
             let host = display_text(text(operation, "host")?)?;
@@ -202,6 +218,7 @@ impl ApprovalView {
             let bytes = operation["body_bytes"]
                 .as_u64()
                 .ok_or(Error::InvalidRequest)?;
+            request_target = Some(format!("{method} {host}{path}"));
             let summary = display_text(text(operation, "summary")?)?;
             add(
                 "方法 / 主机",
@@ -398,6 +415,25 @@ impl ApprovalView {
             title
         };
         Ok(Self {
+            heading: if context.unattended {
+                t(
+                    "无人值守（含敏感操作）",
+                    "Unattended (includes sensitive operations)",
+                )
+            } else {
+                match kind {
+                    "unlock" => t("凭据库解锁请求", "Vault unlock request"),
+                    "admin" => t("设置变更请求", "Settings change request"),
+                    _ => t("凭据使用请求", "Credential access request"),
+                }
+            },
+            subtitle: t(
+                &format!("{runtime} 请求"),
+                &format!("Requested by {runtime}"),
+            ),
+            request_target,
+            details_label: t("请求详情", "Request details"),
+            reason_label: t("添加拒绝原因", "Add a reason for denial"),
             title,
             summary,
             rows,
@@ -416,6 +452,8 @@ impl ApprovalView {
 
     pub fn payload(&self) -> Value {
         json!({"kind":"approval","title":self.title,"summary":self.summary,
+            "heading":self.heading,"subtitle":self.subtitle,"request_target":self.request_target,
+            "details_label":self.details_label,"reason_label":self.reason_label,
             "rows":self.rows.iter().map(Row::json).collect::<Vec<_>>(),
             "scopes":self.scopes.iter().map(|scope|json!({"value":scope.value,"label":scope.label,"allow_label":scope.allow_label})).collect::<Vec<_>>(),
             "selected":self.selected,"scope_label":self.scope_label,"deny_label":self.deny_label,
@@ -475,12 +513,14 @@ impl PairingView {
                     value: format!("{label} · {os} · {key_kind}"),
                     red: key_kind == "software",
                     secondary: false,
+                    detail: false,
                 },
                 Row {
                     label: kv_i18n::t("能力", "Capabilities"),
                     value: caps.join(", "),
                     red: false,
                     secondary: false,
+                    detail: false,
                 },
                 Row {
                     label: kv_i18n::t("核对", "Compare"),
@@ -490,6 +530,7 @@ impl PairingView {
                     ),
                     red: false,
                     secondary: false,
+                    detail: false,
                 },
             ],
             allow_label: kv_i18n::t(

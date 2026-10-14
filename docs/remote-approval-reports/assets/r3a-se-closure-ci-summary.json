@@ -1,0 +1,24 @@
+{
+  "started_utc": "2026-10-14T00:31:06.462340+00:00",
+  "rust": "1.99.0",
+  "checks": {
+    "fmt": 0,
+    "clippy": 101
+  },
+  "space_checks": [
+    {
+      "check": "fmt",
+      "free_bytes": 15616507904
+    },
+    {
+      "check": "clippy",
+      "free_bytes": 15616491520
+    }
+  ],
+  "source_files": 516,
+  "minimum_free_bytes": 15000000000,
+  "secret_values_in_evidence": false,
+  "source_unchanged_during_checks": true,
+  "changed_source_files": [],
+  "finished_utc": "2026-10-14T00:31:32.271857+00:00"
+}

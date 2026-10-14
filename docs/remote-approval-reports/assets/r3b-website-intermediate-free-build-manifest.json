@@ -1,0 +1,185 @@
+{
+  "site_fingerprint": "b64bc4c68d2c6facd8f43573986c0bbee01257420230bf0ec5b54001bce7da15",
+  "files": [
+    {
+      "path": "404.html",
+      "bytes": 2565,
+      "sha256": "0909c10e702c08281cb955065eac656d140c6470ffffa547b1d7e0cd22116b96"
+    },
+    {
+      "path": "_headers",
+      "bytes": 413,
+      "sha256": "145e2f5073348d0a6aba1b0f6ac2b8ab363840ac75f148039e8d521ba0a73499"
+    },
+    {
+      "path": "atom.xml",
+      "bytes": 10303,
+      "sha256": "b55efb8184b72f1502c985a2e65d3f6578ff049a0dc41939dc47677bc82f3778"
+    },
+    {
+      "path": "blog/index.html",
+      "bytes": 2995,
+      "sha256": "bbf54954ba79e81b382e70614aa39f378403703e3c0b885d512b2f35da898192"
+    },
+    {
+      "path": "blog/s1ngularity/index.html",
+      "bytes": 11072,
+      "sha256": "8080baddebaf5f5d704f73caa9f8c42278d291302e936675621f12e6774cbcd5"
+    },
+    {
+      "path": "code-signing/index.html",
+      "bytes": 7241,
+      "sha256": "0ce65258393cb53ee2b8ae7c2bbc9d5d58e33dc4cef9d8ddd00636a085c921d2"
+    },
+    {
+      "path": "compare/1password/index.html",
+      "bytes": 10794,
+      "sha256": "0134f42a4d1acc15eef05b9899557b01e21c0b00a610b4347f935eb3598878d3"
+    },
+    {
+      "path": "compare/index.html",
+      "bytes": 3713,
+      "sha256": "08f44a370e511b319241bdeeb86df0287eff7666a45690dfaaf62df07ab2dac7"
+    },
+    {
+      "path": "css/site.css",
+      "bytes": 11332,
+      "sha256": "fdacfd079c511a5e0e7207409908a69e98e72cecb0b093789d2ff47f160e81b5"
+    },
+    {
+      "path": "download/index.html",
+      "bytes": 7267,
+      "sha256": "68c4ca91332238182a0feb3a1b83a7774a77197ad1c6bbff31ebc73ed18f148a"
+    },
+    {
+      "path": "downloads/windows/SHA256SUMS",
+      "bytes": 317,
+      "sha256": "15620908dd3fd303897d7de9d9506cc893808a2b01abbf3c283dd4afcd11240c"
+    },
+    {
+      "path": "downloads/windows/keyvalet-v0.3.0-windows-x64-unsigned-preview.zip",
+      "bytes": 22168175,
+      "sha256": "3cd969a332bb6eb1678ac48fb0e4d300bb12075e104c4bc13b0e0651acf344aa"
+    },
+    {
+      "path": "downloads/windows/keyvalet-windows-preview-source-20261014.tar.gz",
+      "bytes": 1481107,
+      "sha256": "28835465cc41383311f7d41476393f6202de6e2852ea8cfae866547c0f834872"
+    },
+    {
+      "path": "downloads/windows/preview-manifest.json",
+      "bytes": 3204,
+      "sha256": "59e9a34313e6217328619a33093b1cad5930ce7e1867a668391024b9a74cda6c"
+    },
+    {
+      "path": "favicon.svg",
+      "bytes": 334,
+      "sha256": "186381b314b8450b5bfa4f7cf3291f5be8ed61862eb0867e74c5487e364644b4"
+    },
+    {
+      "path": "guide/index.html",
+      "bytes": 38877,
+      "sha256": "35192c25369f84eb5154b1d4de30bd5f1f74cd9c7efd93cff1c0c59777e171d6"
+    },
+    {
+      "path": "index.html",
+      "bytes": 13957,
+      "sha256": "2b59ac5d3bc30f9b044a5b8d81bf3a5cb548166246dd98397c549d2a9e9f984c"
+    },
+    {
+      "path": "install.ps1",
+      "bytes": 698,
+      "sha256": "736325c0db7e57b4a9912b308c4eb00398ff6aa778f42d5a57bd0ab35aaed752"
+    },
+    {
+      "path": "install.sh",
+      "bytes": 8029,
+      "sha256": "214b43c245bffbc6df2fc55169f8e4f671693657c96a96fc82707fb3ff52eb07"
+    },
+    {
+      "path": "og.png",
+      "bytes": 35939,
+      "sha256": "97817fbc6a8f146f7b0679855ad681e65599920b554d93f85956962ec25a959f"
+    },
+    {
+      "path": "pricing/index.html",
+      "bytes": 5493,
+      "sha256": "aea681b3a79283590a299934026746a366b56f0e2040a15c9cacdcccb725a579"
+    },
+    {
+      "path": "privacy/index.html",
+      "bytes": 9890,
+      "sha256": "942fcb05e24471c2acad5c91bc7de15bcfc692840b1dfb8a55eb50e4e21d8411"
+    },
+    {
+      "path": "robots.txt",
+      "bytes": 65,
+      "sha256": "b3baa919325193bacb4ccf54a7741557489b5def9437a1bf8a4f132fc5de3aba"
+    },
+    {
+      "path": "security/index.html",
+      "bytes": 11549,
+      "sha256": "226ffaa5d4a57f606d9b048f04466aca90550059f24cd12b36fe191955bdab9d"
+    },
+    {
+      "path": "sitemap.xml",
+      "bytes": 1695,
+      "sha256": "c8113d2217e9750027c3abeb1e4b49152eb22a29abaf5cf15c0dddaee4c8f8eb"
+    },
+    {
+      "path": "zh-CN/atom.xml",
+      "bytes": 572,
+      "sha256": "090cc64cb1b458530647da82a22ff3ed83a81ca26085db487b6bf118e9b7489a"
+    },
+    {
+      "path": "zh-CN/blog/index.html",
+      "bytes": 2826,
+      "sha256": "c988c2b254bbd91e9594feaeca0ef329e3503537730655f9c95ce07f3cfffc05"
+    },
+    {
+      "path": "zh-CN/code-signing/index.html",
+      "bytes": 6762,
+      "sha256": "e8ff762dc3170246d4a1ce159161893f63924349bf0bef2aa87df7bc8bbc2abd"
+    },
+    {
+      "path": "zh-CN/compare/1password/index.html",
+      "bytes": 10575,
+      "sha256": "4f1b0170f1ccee945838319225ece12fb4712720d6b78835cbb833613e47b7cb"
+    },
+    {
+      "path": "zh-CN/compare/index.html",
+      "bytes": 3768,
+      "sha256": "6bfd6b4f10596eb0a8f3ad4aef1642560181d8d84fc59ffaff666f513284d0fe"
+    },
+    {
+      "path": "zh-CN/download/index.html",
+      "bytes": 6854,
+      "sha256": "878f0a47f75fd6ff006c17ba938a549b90412c47016f6b5d74ad78f7662f5dc1"
+    },
+    {
+      "path": "zh-CN/guide/index.html",
+      "bytes": 47208,
+      "sha256": "2bbc3d7e8bf56b4b3eb90d261a23f5b6e9c0cff4516d8d6371918e72da494ae7"
+    },
+    {
+      "path": "zh-CN/index.html",
+      "bytes": 13657,
+      "sha256": "9b8098a5c4de23332645701c528c132b547f44aa5dbfc8d3b676f2133dc34bd3"
+    },
+    {
+      "path": "zh-CN/pricing/index.html",
+      "bytes": 5320,
+      "sha256": "76d87cd8a8db9164b3ca1291a7ea8507769eead8daab8ab684bc7dbc330b5e1a"
+    },
+    {
+      "path": "zh-CN/privacy/index.html",
+      "bytes": 8842,
+      "sha256": "7e3bd1b5285c8931bbfff32d3adee373300046b46fa92fbb6adfca2b3b7e54cf"
+    },
+    {
+      "path": "zh-CN/security/index.html",
+      "bytes": 11060,
+      "sha256": "9df2252a2f834fb46d93ff6f223a29d470747a89b2bb3fee28a29e052eb9a256"
+    }
+  ]
+}

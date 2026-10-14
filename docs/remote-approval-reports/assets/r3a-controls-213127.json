@@ -1,0 +1,246 @@
+{
+  "started_utc": "2026-10-13T21:30:28.665259+00:00",
+  "commands": [
+    {
+      "case": "unattended_1h_two_labels",
+      "elapsed_s": 16.629137,
+      "exit": 0,
+      "public_result": {
+        "ok": true,
+        "command": "grants_issued",
+        "grants": [
+          {
+            "jti": "01M4VJS388MBYCZG5PN1THWWX9",
+            "aud": "01M4S8KJ48BSMNK1S4BEGT07FC",
+            "exp": 1791930629,
+            "nbf": 1791927029,
+            "origin": "settings",
+            "scope": {
+              "level": "device",
+              "max_tier": "T2"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "case": "unattended_grants",
+      "elapsed_s": 2.499941,
+      "exit": 0,
+      "public_result": {
+        "ok": true,
+        "command": "remote",
+        "results": [
+          {
+            "device_id": "01M4S8KJ48BSMNK1S4BEGT07FC",
+            "id": "01M4VJSKVG51BCWXSYY1TX2F76",
+            "ok": true,
+            "state": {
+              "grants": [
+                {
+                  "jti": "01M4TNJD387H1KZXETKHSYVGRK",
+                  "aud": "01M4S8KJ48BSMNK1S4BEGT07FC",
+                  "exp": 1791900001,
+                  "nbf": 1791896401,
+                  "revoked_at": 1791902225,
+                  "origin": "settings",
+                  "scope": {
+                    "level": "credential",
+                    "credential": "api_key/r3a-graph-readonly",
+                    "max_tier": "T1"
+                  }
+                },
+                {
+                  "jti": "01M4TV4S3G3V4JQJKS47GWPP8Y",
+                  "aud": "01M4S8KJ48BSMNK1S4BEGT07FC",
+                  "exp": 1791905846,
+                  "nbf": 1791902246,
+                  "revoked_at": 1791902254,
+                  "origin": "settings",
+                  "scope": {
+                    "level": "credential",
+                    "credential": "api_key/r3a-graph-readonly",
+                    "max_tier": "T1"
+                  }
+                },
+                {
+                  "jti": "01M4VJS388MBYCZG5PN1THWWX9",
+                  "aud": "01M4S8KJ48BSMNK1S4BEGT07FC",
+                  "exp": 1791930629,
+                  "nbf": 1791927029,
+                  "revoked_at": null,
+                  "origin": "settings",
+                  "scope": {
+                    "level": "device",
+                    "max_tier": "T2"
+                  }
+                },
+                {
+                  "jti": "approval:01M4SVNXC88217RE2V2HSTCXGS",
+                  "aud": "01M4S8KJ48BSMNK1S4BEGT07FC",
+                  "exp": 1791912459,
+                  "nbf": 1791869259,
+                  "revoked_at": 1791902225,
+                  "origin": "approval:01M4SVNXC88217RE2V2HSTCXGS",
+                  "scope": {
+                    "level": "credential",
+                    "credential": "api_key/r3a-graph-readonly",
+                    "hosts": [
+                      "graph.microsoft.com"
+                    ],
+                    "methods": [
+                      "GET"
+                    ],
+                    "max_tier": "T1"
+                  }
+                },
+                {
+                  "jti": "approval:01M4SXBYW00A03JAPMA6ND3B5N",
+                  "aud": "01M4S8KJ48BSMNK1S4BEGT07FC",
+                  "exp": 1791914229,
+                  "nbf": 1791871029,
+                  "revoked_at": 1791902225,
+                  "origin": "approval:01M4SXBYW00A03JAPMA6ND3B5N",
+                  "scope": {
+                    "level": "credential",
+                    "credential": "api_key/r3a-graph-readonly",
+                    "hosts": [
+                      "graph.microsoft.com"
+                    ],
+                    "methods": [
+                      "GET"
+                    ],
+                    "max_tier": "T1"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "case": "unattended_status",
+      "elapsed_s": 1.81587,
+      "exit": 0,
+      "public_result": {
+        "ok": true,
+        "command": "remote",
+        "results": [
+          {
+            "device_id": "01M4S8KJ48BSMNK1S4BEGT07FC",
+            "id": "01M4VJSNT0YC42F0DWXQZK289G",
+            "ok": true,
+            "state": {
+              "mode": "per_use",
+              "pending_n": 0,
+              "grants_n": 1,
+              "unattended": true,
+              "label": "keyvalet",
+              "unlock_ttl_s": 43200,
+              "device_revocations_pending": 0,
+              "approvers": [
+                {
+                  "device_id": "01M4SM5QTRQKNQE1TD6FBJTG79",
+                  "label": "keyvalet",
+                  "online": true,
+                  "presence": "away"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "case": "cleanup_unattended",
+      "elapsed_s": 4.992178,
+      "exit": 0,
+      "public_result": {
+        "ok": true,
+        "command": "remote",
+        "results": [
+          {
+            "device_id": "01M4S8KJ48BSMNK1S4BEGT07FC",
+            "id": "01M4VJSQRG5CSSEVFDSJ0YMKK9",
+            "ok": true,
+            "state": {
+              "grants_n": 0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "case": "final_status",
+      "elapsed_s": 1.747301,
+      "exit": 0,
+      "public_result": {
+        "ok": true,
+        "command": "remote",
+        "results": [
+          {
+            "device_id": "01M4S8KJ48BSMNK1S4BEGT07FC",
+            "id": "01M4VJSWMREM8CFK0NJEWP45CC",
+            "ok": true,
+            "state": {
+              "mode": "per_use",
+              "pending_n": 0,
+              "grants_n": 0,
+              "unattended": false,
+              "label": "keyvalet",
+              "unlock_ttl_s": 43200,
+              "device_revocations_pending": 0,
+              "approvers": [
+                {
+                  "device_id": "01M4SM5QTRQKNQE1TD6FBJTG79",
+                  "label": "keyvalet",
+                  "online": true,
+                  "presence": "away"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "secret_values_in_evidence": false,
+  "resume_after_verified_mode": false,
+  "resume_unattended_only": true,
+  "completed_controls_receipt": "r3a-controls-143754.json",
+  "unattended_observed": true,
+  "final_unattended": false,
+  "final_mode": "per_use",
+  "audit_after_controls": {
+    "cli_exit": 3,
+    "report": {
+      "matched": 52,
+      "consistent": false,
+      "findings_count": 1,
+      "unavailable_count": 0,
+      "endpoints": [
+        {
+          "device_id": "01M4SM5QTRQKNQE1TD6FBJTG79",
+          "checkpoint": "vault_authenticated_metadata",
+          "head": {
+            "seq": 5888,
+            "hash": "03da609bd3e546f086adc6f88a3a4c8f7c716cb0c318cf70c6c266ea82702859"
+          },
+          "entries": 5198
+        },
+        {
+          "device_id": "01M4S8KJ48BSMNK1S4BEGT07FC",
+          "checkpoint": "vault_authenticated_metadata",
+          "head": {
+            "seq": 2975,
+            "hash": "0cc75f949b2bc5dbd2df0d24964fc4a445ac4c81039f557ada8e3faf0b9885e9"
+          },
+          "entries": 2292
+        }
+      ],
+      "two_endpoint_snapshots": true
+    }
+  },
+  "finished_utc": "2026-10-13T21:31:27.819603+00:00"
+}

@@ -1,0 +1,8 @@
+﻿{
+    "passed":  true,
+    "helper":  "Running",
+    "system_phase":  true,
+    "dacl_unchanged":  true,
+    "relay":  "Stopped",
+    "owner_unchanged":  true
+}

@@ -1,0 +1,51 @@
+{
+  "api_probe_without_mcp": true,
+  "credential_requests": 0,
+  "settings": {
+    "ANTHROPIC_AUTH_TOKEN": {
+      "present": true
+    },
+    "ANTHROPIC_BASE_URL": {
+      "present": true,
+      "host": "api.z.ai"
+    }
+  },
+  "events": [
+    {
+      "type": "system",
+      "subtype": "init"
+    },
+    {
+      "type": "system",
+      "subtype": "api_retry",
+      "error": "authentication_failed"
+    },
+    {
+      "type": "system",
+      "subtype": "api_retry",
+      "error": "authentication_failed"
+    },
+    {
+      "type": "system",
+      "subtype": "api_retry",
+      "error": "authentication_failed"
+    },
+    {
+      "type": "system",
+      "subtype": "api_retry",
+      "error": "authentication_failed"
+    },
+    {
+      "type": "system",
+      "subtype": "api_retry",
+      "error": "authentication_failed"
+    },
+    {
+      "type": "system",
+      "subtype": "api_retry",
+      "error": "authentication_failed"
+    }
+  ],
+  "exit": 143,
+  "elapsed_s": 30.229215
+}

@@ -1,0 +1,23 @@
+{
+  "sources": [
+    {
+      "url": "https://developer.apple.com/documentation/security/errsecusercanceled.md",
+      "retrieved": true,
+      "has_cancelled": true,
+      "has_failed": false
+    },
+    {
+      "url": "https://developer.apple.com/documentation/security/errsecauthfailed.md",
+      "retrieved": true,
+      "has_cancelled": false,
+      "has_failed": true
+    },
+    {
+      "url": "https://developer.apple.com/documentation/localauthentication/laerror-swift.struct/code/usercancel.md",
+      "retrieved": true,
+      "has_cancelled": true,
+      "has_failed": false
+    }
+  ],
+  "native_sdk_typecheck_exit": 0
+}

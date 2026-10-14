@@ -8,6 +8,11 @@ use serde_json::{json, Value};
 use std::time::{Duration, Instant};
 use zeroize::Zeroizing;
 
+// Exercise the Windows completion policy on CI hosts without a Windows desktop or service.
+#[cfg(all(test, not(windows)))]
+#[path = "hello/async_wait.rs"]
+mod async_wait;
+
 pub type Result<T> = std::result::Result<T, String>;
 pub type Reply = (
     Value,

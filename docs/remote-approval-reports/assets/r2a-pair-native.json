@@ -1,0 +1,21 @@
+{
+  "started_utc": "2026-10-13T00:26:03.946370+00:00",
+  "stage": "failed",
+  "recovery_code": "not_yet_displayed",
+  "errors": [
+    {
+      "node": "mac",
+      "code": "ipc_unavailable"
+    }
+  ],
+  "nodes": {
+    "ndu": {
+      "started": true
+    },
+    "mac": {
+      "started": true
+    }
+  },
+  "elapsed_s": 4.161,
+  "failure_code": "ipc_unavailable"
+}

@@ -1,0 +1,52 @@
+{
+  "bytes": 63096835,
+  "sdk_version": "2.5.1",
+  "passed": true,
+  "runtime_files": 205,
+  "sha256": "221ffd64c5ca2ee2c0ecd2aa18711f5c297fbf17dae103c22ab1ba0385483e29",
+  "archive": "C:\\kv-r3b-unsigned-20261014\\repo\\dist\\keyvalet-v0.3.0-windows-x64.zip",
+  "executables": [
+    {
+      "sha256": "48ab3a0bbf5ad1098952fd9fc979845fbf6f9c36566b57db563049ec2ccf41f4",
+      "version": "0.3.0",
+      "name": "kv-agent.exe",
+      "signature": "NotSigned"
+    },
+    {
+      "sha256": "7bd9af6c61b0f78242b6c72dd67694d22d9ae51f85d5a8521f717fd1d24d5e90",
+      "version": "0.3.0",
+      "name": "kv-cli.exe",
+      "signature": "NotSigned"
+    },
+    {
+      "sha256": "ad1b6417334f4b43045f2932d2c1fca30a770d42a157f4dff8d073f45f72bd9c",
+      "version": "0.3.0",
+      "name": "kv-helper.exe",
+      "signature": "NotSigned"
+    },
+    {
+      "sha256": "5c5cf596a2a650ded8fcbfc1b434e2425e7594f77ff493405556fb4a1f178c60",
+      "version": "0.3.0",
+      "name": "kv-hook.exe",
+      "signature": "NotSigned"
+    },
+    {
+      "sha256": "4f82b0b121c5d77273b698f50af14b3ca1b2c503574d55b581d2ce6df751cde4",
+      "version": "0.3.0",
+      "name": "kv-mcp.exe",
+      "signature": "NotSigned"
+    },
+    {
+      "sha256": "0c93a3ece9f5a352d62e3c63b322e9261fd66b71f5a15038e1252c6f45122dbf",
+      "version": "0.3.0",
+      "name": "kv-relay-client.exe",
+      "signature": "NotSigned"
+    },
+    {
+      "sha256": "eb08cde74c59f92219af8d77265867a0f0ff7ddd3404499f2fae3b2fd66738f8",
+      "version": "0.3.0",
+      "name": "kv-server.exe",
+      "signature": "NotSigned"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "ci-integrated4-progress.json": {
+    "utc": "2026-10-14T07:50:08.4196996Z",
+    "command": 4,
+    "phase": "ci"
+  },
+  "ci-integrated4-result.json": {
+    "failure": "CI command 4 failed.",
+    "commands": [
+      {
+        "exit_code": 0,
+        "command": "cargo fmt --all -- --check",
+        "seconds": 1.2652136
+      },
+      {
+        "exit_code": 0,
+        "command": "cargo clippy --workspace --all-targets -- -D warnings",
+        "seconds": 13.4555423
+      },
+      {
+        "exit_code": 0,
+        "command": "cargo build --workspace --locked",
+        "seconds": 27.712505
+      },
+      {
+        "exit_code": 101,
+        "command": "cargo test --workspace --locked",
+        "seconds": 68.9799384
+      }
+    ],
+    "passed": false,
+    "finished_utc": "2026-10-14T07:51:17.4053575Z"
+  },
+  "ssh_exit": 0
+}

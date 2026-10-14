@@ -11,7 +11,7 @@ KeyValet is a credential runtime for AI agents on macOS, Linux and Windows. It l
 
 [Security model](https://github.com/KeyValet/KeyValet/blob/main/SECURITY.md)
 
-> **Status:** macOS releases are available. Windows 11 is a development preview; Hello, service and installer code are implemented, with signed packages and native verification pending. See the [Windows support record](https://github.com/KeyValet/KeyValet/blob/main/docs/windows.md). This guide covers the macOS release. UI in English and 简体中文; override with `KEYVALET_LANG=en|zh`.
+> **Status:** Windows release packages are unsigned; local and remote features do not require Authenticode. See [downloads](/download/) and the [Windows support record](https://github.com/KeyValet/KeyValet/blob/main/docs/windows.md) for publication and acceptance. This guide covers the macOS release. UI in English and 简体中文; override with `KEYVALET_LANG=en|zh`.
 
 Linux local support is implemented with systemd, polkit and TPM 2.0, with explicit software
 protection for machines without TPM. Install the source checkout with `sh scripts/install.sh`;
@@ -317,11 +317,11 @@ Layout: `rust/crates/kv-mcp` (MCP server, runs as you) · `kv-helper` (root help
 
 Source installs: `sh scripts/install.sh` on macOS and Linux (add `--software` on a Linux host without a TPM) uses `CARGO_TARGET_DIR` when set — relative paths are resolved from `rust/` — and otherwise builds into `rust/target`. The installer passes this directory explicitly, overriding Cargo's configured `build.target-dir`, so it always installs the output of the current build.
 
-See [CONTRIBUTING.md](../CONTRIBUTING.md).
+See [CONTRIBUTING.md](https://github.com/KeyValet/KeyValet/blob/main/CONTRIBUTING.md).
 
 ## License
 
-[Apache-2.0](../LICENSE). The optional n8n-derived catalog you may generate locally is subject to n8n's license and is not part of this project.
+[Apache-2.0](https://github.com/KeyValet/KeyValet/blob/main/LICENSE). The optional n8n-derived catalog you may generate locally is subject to n8n's license and is not part of this project.
 
 ### Password retrieval and use
 

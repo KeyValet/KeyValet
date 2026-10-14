@@ -1,0 +1,18 @@
+{
+  "fingerprint": "df4d03aed184a45ba76b546049ab73fa04639f562287a155bb0155fae2d75aaf",
+  "file_count": 649,
+  "algorithm": "sha256 of sorted(path + NUL + sha256(file) hex + LF)",
+  "included_roots": [
+    "rust/",
+    "scripts/",
+    ".github/",
+    "templates/",
+    "docs/",
+    "deploy/",
+    "root files"
+  ],
+  "excluded_roots": [
+    "rust/target*",
+    "docs/remote-approval-reports/assets/"
+  ]
+}

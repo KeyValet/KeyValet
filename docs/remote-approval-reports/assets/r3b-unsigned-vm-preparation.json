@@ -1,0 +1,62 @@
+{
+  "signing_input": true,
+  "offline_scripts": true,
+  "files": [
+    {
+      "version": "0.3.0",
+      "name": "kv-helper.exe",
+      "bytes": 28467200,
+      "sha256": "e4d5c69dcf9b0eb872f88a388d01b0bc1d4827aeb3c090f98b54f549c4fa389c",
+      "product": "KeyValet",
+      "architecture": "x64"
+    },
+    {
+      "version": "0.3.0",
+      "name": "kv-agent.exe",
+      "bytes": 2942976,
+      "sha256": "461db0d34648d7c7fb5b2f48c10aa5f4faf7bac768993e028c4cfe36b533e776",
+      "product": "KeyValet",
+      "architecture": "x64"
+    },
+    {
+      "version": "0.3.0",
+      "name": "kv-cli.exe",
+      "bytes": 18624512,
+      "sha256": "5ce7ef672b33d94c4bf8216c168092d1be980f42179affeacd775002d66724c4",
+      "product": "KeyValet",
+      "architecture": "x64"
+    },
+    {
+      "version": "0.3.0",
+      "name": "kv-mcp.exe",
+      "bytes": 21292544,
+      "sha256": "f4b9273ba2b6f9decd0566abc253b94963e5dcd57d0a54a3682a22fe05a0e7a9",
+      "product": "KeyValet",
+      "architecture": "x64"
+    },
+    {
+      "version": "0.3.0",
+      "name": "kv-hook.exe",
+      "bytes": 4511232,
+      "sha256": "b51c487fb2f9e8b9660b4874932de47e7b29d531f0535599b22c4b36ab8f18b0",
+      "product": "KeyValet",
+      "architecture": "x64"
+    },
+    {
+      "version": "0.3.0",
+      "name": "kv-server.exe",
+      "bytes": 16300032,
+      "sha256": "cf2afeba00487212a7baef66b382e3f312b66e65ce08abb9c47f2e15d3bdf180",
+      "product": "KeyValet",
+      "architecture": "x64"
+    },
+    {
+      "version": "0.3.0",
+      "name": "kv-relay-client.exe",
+      "bytes": 14133760,
+      "sha256": "d621c3bc51857dba56b28bacba94b2b55b3c57cf61688237f6124215a52173d3",
+      "product": "KeyValet",
+      "architecture": "x64"
+    }
+  ]
+}

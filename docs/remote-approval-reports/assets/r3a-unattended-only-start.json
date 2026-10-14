@@ -1,0 +1,7 @@
+{
+  "started_utc": "2026-10-13T15:25:59.716671+00:00",
+  "user_said_begin": true,
+  "driver": "r3a-start-unattended-only.py",
+  "window": 22251,
+  "secret_values_in_evidence": false
+}

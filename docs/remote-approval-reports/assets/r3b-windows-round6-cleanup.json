@@ -1,0 +1,16 @@
+{
+    "hello_cancel_receipt":  false,
+    "formal_agent_preserved":  true,
+    "pcp_remote_keys":  0,
+    "runtime_preserved":  "C:\\ProgramData\\KeyValet-Backups\\r3b-hello-runtime-0ae3b6a67d924a3b9541862fd286d4b4",
+    "hello_guard_delete_requested":  true,
+    "hello_creation_completed":  true,
+    "hello_signing_started":  true,
+    "owner_exit":  101,
+    "utc":  "2026-10-13T22:07:09.0059671Z",
+    "temporary_tasks_removed":  true,
+    "hello_signing_completed":  true,
+    "hello_cleanup_proof":  "CreationGuard deletion requested; independent alias inventory follows",
+    "system_exit":  101,
+    "hello_delete_independently_checked":  false
+}

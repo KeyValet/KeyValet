@@ -22,12 +22,13 @@ if ($Worker) {
     try {
         $specs = @(
             @{ prefix='kv_platform'; test='device_key::windows::tests::pcp_identity_dual_key_roundtrip' },
+            @{ prefix='kv_platform'; test='device_key::windows::tests::pcp_partial_creation_cleans_up_without_fallback' },
             @{ prefix='kv_agent'; test='remote::windows::pcp_acceptance::windows_pcp_k1_native_acceptance' }
         )
         $results = @()
         foreach ($spec in $specs) {
             $binary = $null
-            foreach ($candidate in Get-ChildItem -LiteralPath (Join-Path $TargetDirectory 'debug/deps') -Filter ($spec.prefix + '-*.exe')) {
+            foreach ($candidate in (Get-ChildItem -LiteralPath (Join-Path $TargetDirectory 'debug/deps') -Filter ($spec.prefix + '-*.exe') | Sort-Object LastWriteTime -Descending)) {
                 $listing = & $candidate.FullName --list 2>$null
                 if ($LASTEXITCODE -eq 0 -and ($listing -contains ($spec.test + ': test'))) {
                     $binary = $candidate.FullName; break
@@ -35,9 +36,10 @@ if ($Worker) {
             }
             if (!$binary) { throw ('Build the native test executable for ' + $spec.prefix + ' first.') }
             $start = [DateTime]::UtcNow
-            & $binary $spec.test --ignored --exact --nocapture *> (Join-Path $ResultDirectory ($spec.prefix + '.log'))
+            $logName = $spec.test.Split(':')[-1] + '.log'
+            & $binary $spec.test --ignored --exact --nocapture *> (Join-Path $ResultDirectory $logName)
             $exitCode = $LASTEXITCODE
-            $results += @{test=$spec.test; binary=$binary; exit_code=$exitCode; passed=($exitCode -eq 0); seconds=([DateTime]::UtcNow-$start).TotalSeconds}
+            $results += @{test=$spec.test; binary=$binary; binary_sha256=(Get-FileHash -LiteralPath $binary -Algorithm SHA256).Hash.ToLowerInvariant(); exit_code=$exitCode; passed=($exitCode -eq 0); seconds=([DateTime]::UtcNow-$start).TotalSeconds}
             if ($exitCode -ne 0) { throw ('Native PCP test failed: ' + $spec.test) }
         }
         @{sid=$sid; passed=$true; tests=$results} | ConvertTo-Json -Depth 8 |

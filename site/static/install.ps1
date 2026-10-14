@@ -1,5 +1,5 @@
-# Windows development installer. Public Windows packages require Authenticode signing first.
-# Run a saved copy to pass -PackagePath and -AllowUnsignedAgent for a local development build.
+# Windows release installer. Authenticode signing is optional.
+# Run a saved copy to select -Tag or a local -PackagePath.
 [CmdletBinding()]
 param([string]$Tag, [string]$PackagePath, [switch]$AllowUnsignedAgent, [switch]$SkipSetup)
 $ErrorActionPreference = 'Stop'

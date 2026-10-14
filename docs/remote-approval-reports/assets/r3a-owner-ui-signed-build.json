@@ -1,0 +1,32 @@
+{
+  "observed_utc": "2026-10-13T15:13:39.768253+00:00",
+  "team": "PWCRJPY7YC",
+  "new_binary": "kv-helper",
+  "binaries": {
+    "kv-helper": {
+      "sha256": "77b82de845f7978011f76688fa49d8c68f9db9759e774aad6981847344bc8852",
+      "strict_requirement": true,
+      "rebuilt": true
+    },
+    "kv-cli": {
+      "sha256": "53e9fe0f41f04958f4c93c1ce11b4b7ef7d6f259e1bc5218bda63688d0e546e0",
+      "strict_requirement": true,
+      "rebuilt": false
+    },
+    "kv-touchid": {
+      "sha256": "559de7dd8419beecd98c0123b6dfe4a16b719755307374558e1f7a759c419e39",
+      "strict_requirement": true,
+      "rebuilt": false
+    },
+    "kv-relay-client": {
+      "sha256": "accc5f6a0cff09b049a0697f4c048eeebd13f495749e6703b68926f18c4ab91c",
+      "strict_requirement": true,
+      "rebuilt": false
+    }
+  },
+  "ci_receipt": "r3a-owner-ui-ci-summary.json",
+  "workspace_test_exit": 101,
+  "owner_regressions_passed": 5,
+  "installed": false,
+  "secret_values_in_evidence": false
+}

@@ -1,0 +1,14 @@
+{
+  "utc": "2026-10-13T15:16:42.708673+00:00",
+  "host": "192.168.1.182",
+  "exit_code": 255,
+  "stderr": "Connection timed out during banner exchange\nConnection to 192.168.1.182 port 22 timed out\n",
+  "last_read_progress": {
+    "utc": "2026-10-13T14:52:10.3040558Z",
+    "stage": "creating_ak_s",
+    "owner": "Running",
+    "system": "Running"
+  },
+  "hello_t2_passed": false,
+  "cleanup_verified": false
+}

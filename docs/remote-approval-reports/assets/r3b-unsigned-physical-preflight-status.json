@@ -1,0 +1,35 @@
+{
+  "progress.json": {
+    "phase": "complete",
+    "utc": "2026-10-14T05:31:16.7353226Z",
+    "session": 13,
+    "mode": "Preflight",
+    "owner_sid": "S-1-5-21-3389053113-2113560702-4064643913-1001"
+  },
+  "agent_sessions": [
+    13
+  ],
+  "task": "Ready",
+  "unicode_directory_exact": false,
+  "result.json": {
+    "mode": "Preflight",
+    "checks": [
+      "initialize_tools_jsonrpc_no_handshake_leak",
+      "fresh_session_locked_status_without_authentication",
+      "helper_owned_protected_worker_observed",
+      "client_eof_exits",
+      "protected_worker_exits_after_client"
+    ],
+    "session": 13,
+    "failure": null,
+    "owner_sid": "S-1-5-21-3389053113-2113560702-4064643913-1001",
+    "hello_tested": false,
+    "passed": true,
+    "seconds": 2.1686335999999997,
+    "protected_workers_observed": 1,
+    "credential_values_logged": false,
+    "valid_mcp_frames": 3,
+    "mcp_sha256": "4f82b0b121c5d77273b698f50af14b3ca1b2c503574d55b581d2ce6df751cde4"
+  },
+  "ssh_exit": 0
+}

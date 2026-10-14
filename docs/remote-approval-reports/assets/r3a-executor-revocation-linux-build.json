@@ -1,0 +1,12 @@
+{
+  "started_utc": "2026-10-13T17:07:49.702215+00:00",
+  "installed": false,
+  "user_prompts_started": 0,
+  "checks": {
+    "build": 0,
+    "test": 0
+  },
+  "source_bundle_bytes": 1703295,
+  "source_bundle_sha256": "875703f63da55ddbf4948bb7e4e9a12ec24f8c28bebbec1d1ae8c8125d77f6ae",
+  "finished_utc": "2026-10-13T17:08:16.564695+00:00"
+}

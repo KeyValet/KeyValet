@@ -1,0 +1,18 @@
+{
+  "started_utc": "2026-10-13T10:57:32.759369+00:00",
+  "rust": "1.99.0",
+  "checks": {
+    "fmt": 0,
+    "clippy": 0,
+    "build": 0,
+    "test": 0
+  },
+  "source_files": 356,
+  "source_unchanged_during_checks": true,
+  "changed_source_files": [],
+  "passed": 1363,
+  "failed": 0,
+  "ignored": 10,
+  "groups": 69,
+  "finished_utc": "2026-10-13T11:02:44.760685+00:00"
+}

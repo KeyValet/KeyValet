@@ -1,0 +1,32 @@
+{
+  "name": "@openai/codex",
+  "version": "0.162.1-win32-x64",
+  "dist": {
+    "shasum": "2116091e9bd891cf81fbd73475a453c3eacca0c3",
+    "tarball": "https://registry.npmjs.org/@openai/codex/-/codex-0.162.1-win32-x64.tgz",
+    "fileCount": 47,
+    "integrity": "sha512-dfl4MhHuEi0ARKyNmrTxk+RQmsWNCQAoVLUtrYq+yrW1C8P2sg5ziwgHUUACHjYLKuACV7ARH5Nq5pnCz3GlaQ==",
+    "signatures": [
+      {
+        "sig": "MEQCIHYOlmIon05asI2IeTM/uUKlUXX74C+Ku37aesMxcjChAiAXN7EcQDHyDbLOzsJHvCOeq8eGcuTK92kJkStQFgSDTg==",
+        "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+      },
+      {
+        "sig": "MEYCIQCXfE6an/SRUCnp3TsCNg4M6ofPSlKCjw57EglMBWuF/QIhANb32MlKIxAL11VYcnB3OLlz/fueFrbnU6mzOaUSiD+e",
+        "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+      }
+    ],
+    "attestations": {
+      "url": "https://registry.npmjs.org/-/npm/v1/attestations/@openai%2fcodex@0.162.1-win32-x64",
+      "provenance": {
+        "predicateType": "https://slsa.dev/provenance/v1"
+      }
+    },
+    "unpackedSize": 457335400
+  },
+  "repository": {
+    "url": "git+https://github.com/openai/codex.git",
+    "type": "git",
+    "directory": "codex-cli"
+  }
+}

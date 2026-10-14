@@ -1,0 +1,65 @@
+{
+  "observed_utc": "2026-10-14T07:15:10.618144+00:00",
+  "free_before": 12167643136,
+  "free_after": 16144515072,
+  "removed": [
+    {
+      "path": "/Users/guang/Library/Developer/Xcode/DerivedData/ModuleCache.noindex",
+      "bytes_planned": 8349932,
+      "cache_only": true,
+      "errors": []
+    },
+    {
+      "path": "/Users/guang/Library/Developer/Xcode/DerivedData/CompilationCache.noindex",
+      "bytes_planned": 16688,
+      "cache_only": true,
+      "errors": []
+    },
+    {
+      "path": "/Users/guang/Library/Developer/Xcode/DerivedData/Runner-bzezcmlzqdncdkdtxadtxyursrcq/Index.noindex",
+      "bytes_planned": 25802872,
+      "cache_only": true,
+      "errors": []
+    },
+    {
+      "path": "/Users/guang/Library/Developer/Xcode/DerivedData/Runner-bzezcmlzqdncdkdtxadtxyursrcq/Build/Intermediates.noindex",
+      "bytes_planned": 204838376,
+      "cache_only": true,
+      "errors": []
+    },
+    {
+      "path": "/Users/guang/Library/Developer/Xcode/DerivedData/Runner-dfraqmxsqvfjtxhbtzasuvknioxw/Build/Intermediates.noindex",
+      "bytes_planned": 50988,
+      "cache_only": true,
+      "errors": []
+    },
+    {
+      "path": "/Users/guang/Library/Developer/Xcode/DerivedData/Runner-cqcmfgyhxfctuygdwliertkcbapb/Build/Intermediates.noindex",
+      "bytes_planned": 161925,
+      "cache_only": true,
+      "errors": []
+    },
+    {
+      "path": "/Users/guang/Library/Developer/Xcode/DerivedData/Runner-hgdjxejttshguhdpwagjnevtgipm/Index.noindex",
+      "bytes_planned": 62370676,
+      "cache_only": true,
+      "errors": []
+    },
+    {
+      "path": "/Users/guang/Library/Developer/Xcode/DerivedData/Runner-hgdjxejttshguhdpwagjnevtgipm/Build/Intermediates.noindex",
+      "bytes_planned": 1638600963,
+      "cache_only": true,
+      "errors": []
+    },
+    {
+      "path": "/Users/guang/dev/keyvalet/rust/target-r2b/debug/deps",
+      "bytes_planned": 1926229942,
+      "cache_only": true,
+      "errors": []
+    }
+  ],
+  "previous_chrome_cache_cleanup_partial_due_to_active_writer": true,
+  "active_rust_targets": [],
+  "native_build_active": false,
+  "source_installed_binaries_signed_stages_backup_evidence_and_browser_user_data_preserved": true
+}

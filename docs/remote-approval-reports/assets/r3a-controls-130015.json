@@ -1,0 +1,91 @@
+{
+  "started_utc": "2026-10-13T12:59:24.952860+00:00",
+  "commands": [
+    {
+      "case": "allow_1h",
+      "elapsed_s": 3.141659,
+      "exit": 0,
+      "public_result": {
+        "ok": true,
+        "command": "grants_issued",
+        "grants": [
+          {
+            "jti": "01M4TNJD387H1KZXETKHSYVGRK",
+            "aud": "01M4S8KJ48BSMNK1S4BEGT07FC",
+            "exp": 1791900001,
+            "nbf": 1791896401,
+            "origin": "settings",
+            "scope": {
+              "level": "credential",
+              "credential": "api_key/r3a-graph-readonly",
+              "max_tier": "T1"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "case": "grant_list",
+      "elapsed_s": 0.043336,
+      "exit": 0,
+      "public_result": {
+        "ok": true,
+        "command": "grants",
+        "grants": [
+          {
+            "jti": "01M4TNJD387H1KZXETKHSYVGRK",
+            "aud": "01M4S8KJ48BSMNK1S4BEGT07FC",
+            "exp": 1791900001,
+            "nbf": 1791896401,
+            "revoked_at": null,
+            "origin": "settings",
+            "scope": {
+              "level": "credential",
+              "credential": "api_key/r3a-graph-readonly",
+              "max_tier": "T1"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "case": "remote_grants_before_revoke",
+      "elapsed_s": 11.176476,
+      "exit": 4,
+      "public_result": {
+        "ok": false,
+        "command": null,
+        "error_code": "directive_result_timeout"
+      }
+    }
+  ],
+  "secret_values_in_evidence": false,
+  "resume_after_verified_mode": true,
+  "audit_before_controls_receipt": "r3a-native-audit-extended-125228.json",
+  "completed_mode_receipt": "r3a-controls-124930.json",
+  "native_local_mode_after_remote": "per_session",
+  "settings_mcp_process": {
+    "pid": 1979054,
+    "start_time": 55392920,
+    "uid": 1000,
+    "parent_pid": 1979052
+  },
+  "read_settings_diagnostic": {
+    "elapsed_s": 3.110717,
+    "is_error": false
+  },
+  "native_mcp_settings_after_remote": {
+    "grant_mode": "per_session",
+    "remember_hours": 8.0
+  },
+  "tighten_settings_diagnostic": {
+    "elapsed_s": 0.008623,
+    "is_error": false
+  },
+  "native_mcp_settings_after_local_change": {
+    "grant_mode": "per_use",
+    "remember_hours": 8.0
+  },
+  "fixed_error": "control_command_not_applied",
+  "finished_utc": "2026-10-13T13:00:15.656378+00:00"
+}

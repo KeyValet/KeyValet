@@ -1,0 +1,17 @@
+{
+  "utc": "2026-10-14T00:14:41.114468+00:00",
+  "action": "purge only removed pricing URLs from edge cache through the configured KeyValet HTTP proxy",
+  "zone": "keyvalet.dev",
+  "urls": [
+    "https://keyvalet.dev/pricing/",
+    "https://keyvalet.dev/pricing",
+    "https://keyvalet.dev/zh-CN/pricing/",
+    "https://keyvalet.dev/zh-CN/pricing",
+    "https://keyvalet.dev/pricing/index.html",
+    "https://keyvalet.dev/zh-CN/pricing/index.html"
+  ],
+  "http_status": 200,
+  "success": true,
+  "credential_value_read_or_exported": false,
+  "cloudflare_settings_changed": false
+}

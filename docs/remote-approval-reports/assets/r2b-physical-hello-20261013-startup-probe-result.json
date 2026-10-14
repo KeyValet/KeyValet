@@ -1,0 +1,41 @@
+{
+  "changes_installed_security": false,
+  "cases": [
+    {
+      "variant": "initial_query=False,default_query=False,protected_default=True",
+      "exit_code": 3221225794,
+      "exit_hex": "0xc0000142",
+      "timed_out": false,
+      "error": null
+    },
+    {
+      "variant": "initial_query=True,default_query=False,protected_default=True",
+      "exit_code": 3221225794,
+      "exit_hex": "0xc0000142",
+      "timed_out": false,
+      "error": null
+    },
+    {
+      "variant": "initial_query=False,default_query=True,protected_default=True",
+      "exit_code": 3221225794,
+      "exit_hex": "0xc0000142",
+      "timed_out": false,
+      "error": null
+    },
+    {
+      "variant": "initial_query=True,default_query=True,protected_default=True",
+      "exit_code": 3221225794,
+      "exit_hex": "0xc0000142",
+      "timed_out": false,
+      "error": null
+    },
+    {
+      "variant": "initial_query=False,default_query=False,protected_default=False",
+      "exit_code": 0,
+      "exit_hex": "0x00000000",
+      "timed_out": false,
+      "error": null
+    }
+  ],
+  "application": "Windows cmd.exe exit 0"
+}

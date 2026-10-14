@@ -193,14 +193,10 @@ pub fn verify_server(raw: std::os::windows::io::RawHandle) -> io::Result<()> {
             std::path::Path::new(crate::paths::HELPER_BIN),
         )
         || !crate::trust::trusted_path(&peer.exe_path)
-        || !(crate::trust::verify_publisher(&peer.exe_path, crate::paths::AGENT_PUBLISHER).is_ok()
-            || crate::trust::allow_unsigned_agent(std::path::Path::new(
-                crate::paths::ALLOW_UNSIGNED_AGENT,
-            )))
     {
         return Err(io::Error::new(
             io::ErrorKind::PermissionDenied,
-            "untrusted KeyValet pipe server",
+            "helper_server_binary_untrusted",
         ));
     }
     Ok(())

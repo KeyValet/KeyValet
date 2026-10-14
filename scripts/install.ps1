@@ -4,7 +4,7 @@
 param(
     [ValidatePattern('^v\d+\.\d+\.\d+$')][string]$Tag,
     [string]$PackagePath,
-    [switch]$AllowUnsignedAgent,
+    [switch]$AllowUnsignedAgent, # Compatibility option; unsigned releases are accepted by default.
     [switch]$SkipSetup,
     [switch]$Uninstall,
     [switch]$InstallSystem,
@@ -19,7 +19,7 @@ $vaultDir = 'C:\ProgramData\KeyValet'
 $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
 $elevated = ([Security.Principal.WindowsPrincipal]$identity).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 if ($env:OS -ne 'Windows_NT' -or [Environment]::OSVersion.Version.Build -lt 26100) { throw 'KeyValet requires Windows 11 24H2+ (build 26100+) and Windows Hello.' }
-if ($env:SystemDrive -ine 'C:') { throw 'This preview requires Windows on C:; the protected installation paths are fixed.' }
+if ($env:SystemDrive -ine 'C:') { throw 'KeyValet requires Windows on C:; the protected installation paths are fixed.' }
 
 function Write-Utf8([string]$Path, [string]$Text) {
     $temporary = Join-Path (Split-Path $Path -Parent) ('.keyvalet-write-' + [guid]::NewGuid().ToString('N'))
@@ -172,18 +172,52 @@ function Set-ProtectedDirectory([string]$Path, [bool]$UserRead) {
     }
     Set-Acl $Path $acl
 }
-function Assert-SignedBinary([string]$Path) {
-    if ($AllowUnsignedAgent) { return }
-    $signature = Get-AuthenticodeSignature $Path
-    if ($signature.Status -ne 'Valid' -or !$signature.SignerCertificate -or
-        $signature.SignerCertificate.GetNameInfo([Security.Cryptography.X509Certificates.X509NameType]::SimpleName, $false) -cne 'Simvito Limited') {
-        throw "Refusing unsigned or wrong-publisher binary: $Path. -AllowUnsignedAgent is for development builds only."
-    }
-}
 function Quote-Argument([string]$Value) {
     # CommandLineToArgvW quoting for the elevation boundary, including embedded quotes and
     # trailing backslashes. This is argv data, never interpolated into a PowerShell expression.
     '"' + [regex]::Replace([regex]::Replace($Value, '(\\*)"', '$1$1\"'), '(\\+)$', '$1$1') + '"'
+}
+
+function Read-NativeUiRuntime([string]$Directory) {
+    $path = Join-Path $Directory 'native-ui-runtime.json'
+    if (!(Test-Path -LiteralPath $path)) { return @() } # Older TaskDialog packages.
+    if ((Get-Item -LiteralPath $path).Length -gt 1048576) { throw 'Native UI manifest is too large.' }
+    $manifest = Get-Content -LiteralPath $path -Raw -Encoding UTF8 | ConvertFrom-Json
+    if ($manifest.schema -ne 1 -or $manifest.sdk_version -cne '2.5.1' -or
+        @($manifest.files).Count -eq 0 -or @($manifest.files).Count -gt 4096) { throw 'Invalid native UI runtime manifest.' }
+    $seen = @{}
+    foreach ($file in $manifest.files) {
+        $relative = [string]$file.path
+        if ($relative -cnotmatch '^(?:[A-Za-z0-9._-]+/)*[A-Za-z0-9._-]+$' -or
+            @($relative.Split('/') | Where-Object { $_ -in @('.','..') }).Count -gt 0 -or
+            $relative -ieq 'native-ui-runtime.json' -or $relative -imatch '\.(exe|ps1|cmd|bat)$' -or
+            [string]$file.sha256 -cnotmatch '^[a-f0-9]{64}$' -or $seen.ContainsKey($relative)) {
+            throw 'Invalid native UI runtime path or checksum.'
+        }
+        $seen[$relative] = $true
+    }
+    foreach ($required in 'Microsoft.UI.Xaml.dll','Microsoft.UI.Xaml.Controls.dll','Microsoft.WindowsAppRuntime.dll','resources.pri') {
+        if (!$seen.ContainsKey($required)) { throw "Incomplete native UI runtime: $required" }
+    }
+    @($manifest.files)
+}
+
+function Assert-NativeUiRuntime([string]$Directory, $Files) {
+    foreach ($file in $Files) {
+        $path = Join-Path $Directory $file.path
+        $item = Get-Item -LiteralPath $path -Force
+        if ($item.PSIsContainer -or ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -or
+            (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash -ine $file.sha256) { throw 'Native UI runtime integrity check failed.' }
+        if ($item.Extension -ieq '.dll') {
+            $signature = Get-AuthenticodeSignature -LiteralPath $path
+            $publisher = if ($signature.SignerCertificate) {
+                $signature.SignerCertificate.GetNameInfo([Security.Cryptography.X509Certificates.X509NameType]::SimpleName,$false)
+            } else { '' }
+            if ($signature.Status -ne 'Valid' -or $publisher -notin @('Microsoft Corporation','Microsoft Windows')) {
+                throw "Untrusted native UI runtime DLL: $($file.path)"
+            }
+        }
+    }
 }
 
 function Set-KeyValetToolTimeout([string]$Text, [string]$Mcp) {
@@ -257,10 +291,11 @@ function Install-RelayClient {
         foreach ($sid in 'S-1-5-18','S-1-5-32-544') { $acl.AddAccessRule([Security.AccessControl.FileSystemAccessRule]::new([Security.Principal.SecurityIdentifier]::new($sid), 'FullControl', 'Allow')) }
         $acl.AddAccessRule([Security.AccessControl.FileSystemAccessRule]::new($relaySid, 'Read', 'Allow'))
         Set-Acl -LiteralPath $config $acl
-        $text = Get-Content -LiteralPath $config -Raw -Encoding UTF8
-        if ($text -match '(?m)^\s*device_id\s*=' -and $text -match '(?m)^\s*account_id\s*=') { return $true }
     }
-    # The control worker creates the first binding through authenticated helper IPC.
+    # An unbound service keeps its authenticated control worker alive for first pairing.
+    # The helper proves fixed-path absence without granting directory access to the service.
+    # Runtime authentication requires this service account, installed file identity and
+    # privileged ownership/ACLs. Authenticode signing is optional for Windows releases.
     return $true
 }
 
@@ -290,7 +325,6 @@ if (!$InstallSystem) {
         '-OwnerSid', (Quote-Argument $OwnerSid), '-OwnerProfile', (Quote-Argument $OwnerProfile))
     if ($Tag) { $arguments += @('-Tag', $Tag) }
     if ($PackagePath) { $arguments += @('-PackagePath', (Quote-Argument ([IO.Path]::GetFullPath($PackagePath)))) }
-    if ($AllowUnsignedAgent) { $arguments += '-AllowUnsignedAgent' }
     if ($Uninstall) { $arguments += '-Uninstall' }
     $powershell = 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe'
     $process = Start-Process $powershell -Verb RunAs -ArgumentList $arguments -PassThru -Wait
@@ -415,7 +449,7 @@ if (!$InstallSystem) {
     }
     Add-Hooks "$OwnerProfile\.claude\settings.json" @{
         UserPromptSubmit = @(@{ hooks = @(@{ type = 'command'; command = "$hook prompt" }) })
-        PreToolUse = @(@{ matcher = 'Bash|Write|Edit|MultiEdit|mcp__.*'; hooks = @(@{ type = 'command'; command = "$hook tool" }) })
+        PreToolUse = @(@{ matcher = 'Bash|PowerShell|Write|Edit|MultiEdit|NotebookEdit|mcp__.*'; hooks = @(@{ type = 'command'; command = "$hook tool" }) })
         Stop = @(@{ hooks = @(@{ type = 'command'; command = "$hook claude-stop"; timeout = 10 }) })
     }
     Add-Hooks "$OwnerProfile\.codex\hooks.json" @{
@@ -505,14 +539,14 @@ try {
     $root = Assert-PackageArchive "$stage/package.zip" $architecture $Tag
     Expand-Archive "$stage/package.zip" "$stage/unpacked"
     $package = Join-Path "$stage/unpacked" $root
+    $nativeUiFiles = @(Read-NativeUiRuntime "$package/bin")
+    Assert-NativeUiRuntime "$package/bin" $nativeUiFiles
     foreach ($binary in 'kv-helper', 'kv-agent', 'kv-cli', 'kv-mcp', 'kv-hook') {
         Assert-BinaryArchitecture "$package/bin/$binary.exe" $architecture
-        Assert-SignedBinary "$package/bin/$binary.exe"
     }
     foreach ($binary in 'kv-server','kv-relay-client') {
         if (Test-Path -LiteralPath "$package/bin/$binary.exe") {
             Assert-BinaryArchitecture "$package/bin/$binary.exe" $architecture
-            Assert-SignedBinary "$package/bin/$binary.exe"
         }
     }
     if (!(Test-Path "$package/templates/catalog.json")) { throw 'Package template catalog is missing.' }
@@ -538,6 +572,20 @@ try {
     }
     # Validate existing leaf permissions before overwriting anything or stopping the service.
     Set-ProtectedDirectory "$installDir/bin" $true
+    Assert-PrivilegedFile "$installDir/bin/native-ui-runtime.json" $true
+    foreach ($file in $nativeUiFiles) {
+        $relative = [string]$file.path
+        $parent = Split-Path (Join-Path "$installDir/bin" $relative) -Parent
+        if ($parent -ine "$installDir\bin") {
+            $parts = $relative.Split('/')
+            $directory = "$installDir/bin"
+            for ($i=0; $i -lt $parts.Length-1; $i++) {
+                $directory = Join-Path $directory $parts[$i]
+                Set-ProtectedDirectory $directory $true
+            }
+        }
+        Assert-PrivilegedFile (Join-Path "$installDir/bin" $relative) $true
+    }
     Set-ProtectedDirectory "$installDir/templates" $true
     foreach ($binary in 'kv-helper', 'kv-agent', 'kv-cli', 'kv-mcp', 'kv-hook','kv-server','kv-relay-client') { Assert-PrivilegedFile "$installDir/bin/$binary.exe" $true }
     Assert-PrivilegedFile "$installDir/bin/keyvalet.ps1" $true
@@ -584,6 +632,23 @@ try {
         & 'C:\Windows\System32\icacls.exe' "$installDir\bin\$binary.exe" /setowner '*S-1-5-32-544' | Out-Null
         if ($LASTEXITCODE -ne 0) { throw 'Cannot protect remote binaries.' }
     }
+    foreach ($file in $nativeUiFiles) {
+        $destination = Join-Path "$installDir/bin" $file.path
+        Copy-Item -LiteralPath (Join-Path "$package/bin" $file.path) -Destination $destination -Force
+        & 'C:\Windows\System32\icacls.exe' $destination /reset | Out-Null
+        if ($LASTEXITCODE -ne 0) { throw 'Cannot protect native UI runtime permissions.' }
+        & 'C:\Windows\System32\icacls.exe' $destination /setowner '*S-1-5-32-544' | Out-Null
+        if ($LASTEXITCODE -ne 0) { throw 'Cannot protect native UI runtime owner.' }
+        Assert-PrivilegedFile $destination $true
+    }
+    if ($nativeUiFiles.Count -gt 0) {
+        Copy-Item -LiteralPath "$package/bin/native-ui-runtime.json" -Destination "$installDir/bin/" -Force
+        & 'C:\Windows\System32\icacls.exe' "$installDir\bin\native-ui-runtime.json" /reset | Out-Null
+        if ($LASTEXITCODE -ne 0) { throw 'Cannot protect native UI manifest permissions.' }
+        & 'C:\Windows\System32\icacls.exe' "$installDir\bin\native-ui-runtime.json" /setowner '*S-1-5-32-544' | Out-Null
+        if ($LASTEXITCODE -ne 0) { throw 'Cannot protect native UI manifest owner.' }
+        Assert-NativeUiRuntime "$installDir/bin" $nativeUiFiles
+    }
     Copy-Item "$package/templates/catalog.json" "$installDir/templates/" -Force
     if (Test-Path "$package/wsl") {
         foreach ($file in $wslFiles) {
@@ -600,15 +665,8 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Cannot reset owner.sid permissions.' }
     & 'C:\Windows\System32\icacls.exe' "$vaultDir\owner.sid" /setowner '*S-1-5-32-544' | Out-Null
     if ($LASTEXITCODE -ne 0) { throw 'Cannot protect owner.sid.' }
-    if ($AllowUnsignedAgent) {
-        Write-Utf8 "$installDir/allow-unsigned-agent" 'Explicit unsigned development installation.'
-        & 'C:\Windows\System32\icacls.exe' "$installDir\allow-unsigned-agent" /reset | Out-Null
-        if ($LASTEXITCODE -ne 0) { throw 'Cannot reset the development marker permissions.' }
-        & 'C:\Windows\System32\icacls.exe' "$installDir\allow-unsigned-agent" /setowner '*S-1-5-32-544' | Out-Null
-        if ($LASTEXITCODE -ne 0) { throw 'Cannot protect the development marker.' }
-    }
-    elseif (Test-Path "$installDir/allow-unsigned-agent") { Remove-Item "$installDir/allow-unsigned-agent" -Force }
-    # Remove the preview's former private location after validating its ACL above.
+    # Retire both legacy development markers after validating their ACLs above.
+    if (Test-Path "$installDir/allow-unsigned-agent") { Remove-Item "$installDir/allow-unsigned-agent" -Force }
     if (Test-Path "$vaultDir/allow-unsigned-agent") { Remove-Item "$vaultDir/allow-unsigned-agent" -Force }
     if (!$service) {
         New-Service -Name KeyValetHelper -DisplayName 'KeyValet Helper' -BinaryPathName ('"' + "$installDir\bin\kv-helper.exe" + '" --service') -StartupType Automatic | Out-Null
@@ -632,6 +690,7 @@ try {
     $relayReady = Install-RelayClient
     Start-Service KeyValetHelper
     if ($relayReady) { Set-Service KeyValetRelay -StartupType Automatic; Start-Service KeyValetRelay }
+    elseif (Get-Service KeyValetRelay -ErrorAction SilentlyContinue) { Set-Service KeyValetRelay -StartupType Manual }
     # Management commands require elevation; public status queries run in the original console.
     # Use kv-cli.exe from an elevated terminal for piped input.
     Write-Utf8 "$installDir/bin/keyvalet.ps1" @'

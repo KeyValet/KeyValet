@@ -1,0 +1,16 @@
+{
+  "no_installation_required": true,
+  "missing_or_false_cancellation_receipt_rejected": true,
+  "checks": [
+    {
+      "engine": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+      "exit": 0
+    },
+    {
+      "engine": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+      "exit": 0
+    }
+  ],
+  "passed": true,
+  "ssh_exit": 0
+}

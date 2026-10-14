@@ -1,0 +1,45 @@
+{
+  "ci-integrated6-result": {
+    "commands": [
+      {
+        "command": "cargo fmt --all -- --check",
+        "seconds": 1.2722532,
+        "exit_code": 0
+      },
+      {
+        "command": "cargo clippy --workspace --all-targets -- -D warnings",
+        "seconds": 0.4727575,
+        "exit_code": 0
+      },
+      {
+        "command": "cargo build --workspace --locked",
+        "seconds": 8.5056504,
+        "exit_code": 0
+      },
+      {
+        "command": "cargo test --workspace --locked",
+        "seconds": 9.1130133,
+        "exit_code": 101
+      }
+    ],
+    "finished_utc": "2026-10-14T08:26:20.5311505Z",
+    "failure": "CI command 4 failed.",
+    "passed": false
+  },
+  "tasks": [
+    {
+      "TaskName": "KeyValetR3BUnsignedCiIntegrated6-20261014",
+      "State": 3
+    },
+    {
+      "TaskName": "KeyValetR3BUnsignedCodexMcpProbe-20261014",
+      "State": 3
+    }
+  ],
+  "ci-integrated6-progress": {
+    "phase": "ci",
+    "command": 4,
+    "utc": "2026-10-14T08:26:11.4126420Z"
+  },
+  "ssh_exit": 0
+}

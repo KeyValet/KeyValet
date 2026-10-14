@@ -1,0 +1,30 @@
+{
+  "tests": [
+    {
+      "seconds": 0.3412723,
+      "binary_sha256": "8dc7b924919f0bb5c7228f93710f800667123049959084e237d0707ba0cec778",
+      "passed": true,
+      "test": "device_key::windows::tests::pcp_identity_dual_key_roundtrip",
+      "binary": "C:\\kv-r2b-20261012\\target\\debug\\deps\\kv_platform-bbc1303a78ef43f1.exe",
+      "exit_code": 0
+    },
+    {
+      "seconds": 0.0619244,
+      "binary_sha256": "8dc7b924919f0bb5c7228f93710f800667123049959084e237d0707ba0cec778",
+      "passed": true,
+      "test": "device_key::windows::tests::pcp_partial_creation_cleans_up_without_fallback",
+      "binary": "C:\\kv-r2b-20261012\\target\\debug\\deps\\kv_platform-bbc1303a78ef43f1.exe",
+      "exit_code": 0
+    },
+    {
+      "seconds": 0.463723,
+      "binary_sha256": "559fe4bda186fc39a41533629793c11fea4e3f7288ef1098a28d37cfa6a44125",
+      "passed": true,
+      "test": "remote::windows::pcp_acceptance::windows_pcp_k1_native_acceptance",
+      "binary": "C:\\kv-r2b-20261012\\target\\debug\\deps\\kv_agent-d6155e4a924ef552.exe",
+      "exit_code": 0
+    }
+  ],
+  "sid": "S-1-5-18",
+  "passed": true
+}

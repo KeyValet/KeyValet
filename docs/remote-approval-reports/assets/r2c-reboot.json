@@ -1,0 +1,10 @@
+{
+  "started_at_unix_ms": 1791848129111,
+  "boot_count_before": "37",
+  "method": "adb reboot",
+  "first_unlock_required": true,
+  "boot_count_after": "38",
+  "first_unlock_confirmed_by_user": true,
+  "unlocked_observed_at_unix_ms": 1791848234799,
+  "pid_before_new_push": ""
+}

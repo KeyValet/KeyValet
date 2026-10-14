@@ -1,0 +1,50 @@
+{
+  "observed_utc": "2026-10-13T13:39:58.037547+00:00",
+  "secret_values_in_evidence": false,
+  "touch_id_requests": 0,
+  "mode_before": {
+    "exit": 0,
+    "mode": "per_use"
+  },
+  "tighten_same_mode": {
+    "exit": 0,
+    "mode": null
+  },
+  "mode_after": {
+    "exit": 0,
+    "mode": "per_use"
+  },
+  "status": {
+    "exit": 0,
+    "ok": true,
+    "remote_error": null,
+    "remote": {
+      "device_id": "01M4S8KJ48BSMNK1S4BEGT07FC",
+      "account_id": "acct_zeP4_V8iHJdLbzJrDU3rfQ",
+      "relay": "connected",
+      "mode": "per_use",
+      "pending_n": 0,
+      "grants_n": 3,
+      "unattended": false
+    }
+  },
+  "selected_grant_rows": [
+    [
+      "01M4TNJD387H1KZXETKHSYVGRK",
+      "01M4SM5QTRQKNQE1TD6FBJTG79",
+      "01M4S8KJ48BSMNK1S4BEGT07FC",
+      "T1",
+      1791900001,
+      null
+    ]
+  ],
+  "audit_head": {
+    "seq": 1953,
+    "hash": "a9e77b38474a8f5695d94e3d5f6bbe3deb0a1a174d3660a8a91237be0d304603"
+  },
+  "broker_capabilities": {
+    "binary": "/usr/local/lib/keyvalet/bin/kv-helper",
+    "exit": 0,
+    "capabilities": ""
+  }
+}

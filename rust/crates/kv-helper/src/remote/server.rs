@@ -99,12 +99,22 @@ pub(crate) fn replace_helper(expected: &Arc<RemoteHelper>, next: Arc<RemoteHelpe
     if !Arc::ptr_eq(&current, expected) {
         return Err(Error("remote_identity_changed"));
     }
-    expected
-        .state
-        .lock()
+    super::engine::blocking_lock(&expected.state)
         .map_err(|_| Error("state_unavailable"))?
         .retired = true;
     *current = next.clone();
+    #[cfg(any(target_os = "macos", windows))]
+    kv_platform::agent::set_remote_identity(next.local.device_id.clone());
+    if next.services.runner.has_private_ui() {
+        let next = next.clone();
+        tokio::spawn(async move {
+            let _ = next
+                .services
+                .runner
+                .private_ui("remote_identity", json!({"device_id":next.local.device_id}))
+                .await;
+        });
+    }
     drop(next.start_timer());
     Ok(())
 }
@@ -211,10 +221,15 @@ async fn serve_stream(
         let id = request.extra.get("id").and_then(Value::as_u64);
         let helper = helper
             .as_ref()
-            .filter(|helper| helper.state.lock().is_ok_and(|state| !state.retired))
+            .filter(|helper| {
+                super::engine::blocking_lock(&helper.state).is_ok_and(|state| !state.retired)
+            })
             .cloned()
             .or_else(runtime);
         let response = async {
+            if request.op == kv_ipc::remote::Op::RelayConfigPresence {
+                return super::relay_config::handle(context.role(), request.params);
+            }
             if request.op == kv_ipc::remote::Op::AccountRecover {
                 return match super::startup::recover(context, helper.clone(), request.params).await
                 {

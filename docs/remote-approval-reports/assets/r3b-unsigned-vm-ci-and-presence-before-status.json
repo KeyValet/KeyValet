@@ -1,0 +1,32 @@
+{
+  "ci_task": 3,
+  "ci-final2-result.json": {
+    "finished_utc": "2026-10-14T06:37:01.8629697Z",
+    "passed": true,
+    "failure": null,
+    "commands": [
+      {
+        "seconds": 1.2220317,
+        "command": "cargo fmt --all -- --check",
+        "exit_code": 0
+      },
+      {
+        "seconds": 144.1331705,
+        "command": "cargo clippy --workspace --all-targets -- -D warnings",
+        "exit_code": 0
+      },
+      {
+        "seconds": 42.9602021,
+        "command": "cargo build --workspace --locked",
+        "exit_code": 0
+      },
+      {
+        "seconds": 556.0368659,
+        "command": "cargo test --workspace --locked",
+        "exit_code": 0
+      }
+    ]
+  },
+  "before_task": 4,
+  "ssh_exit": 0
+}

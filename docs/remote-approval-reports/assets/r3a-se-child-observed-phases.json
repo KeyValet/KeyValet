@@ -1,0 +1,15 @@
+{
+  "observed_utc": "2026-10-14T05:16:52.944933+00:00",
+  "terminal_exit": 0,
+  "markers_seen": [
+    "退出屏保后",
+    "presence=present",
+    "之前的 Deny / Esc",
+    "SE 取消用例",
+    "strong_sign_cancelled",
+    "AUTHENTICATION COMPLETE",
+    "待用批准",
+    "执行进程已退出"
+  ],
+  "fixed_errors": []
+}

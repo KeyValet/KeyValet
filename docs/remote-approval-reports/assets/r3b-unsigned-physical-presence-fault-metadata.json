@@ -1,0 +1,16 @@
+{
+  "faults": [
+    {
+      "ProcessId": "0x3238",
+      "AppVersion": "0.0.0.0",
+      "ExceptionCode": "c0000005",
+      "FaultingOffset": "000000000032c59a",
+      "ModuleName": "kv_agent-d6155e4a924ef552.exe",
+      "utc": "2026-10-14T06:25:22.3674060Z",
+      "ModuleVersion": "0.0.0.0",
+      "AppName": "kv_agent-d6155e4a924ef552.exe"
+    }
+  ],
+  "protected_mcp_count": 0,
+  "ssh_exit": 0
+}

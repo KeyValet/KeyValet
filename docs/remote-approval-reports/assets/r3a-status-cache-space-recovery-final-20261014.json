@@ -1,0 +1,24 @@
+{
+  "observed_utc": "2026-10-14T08:53:49.441684+00:00",
+  "free_before": 13597618176,
+  "free_after": 27595223040,
+  "removed": [
+    {
+      "path": "rust/target-status/debug/incremental",
+      "bytes_planned": 6942438765,
+      "cache_only": true
+    },
+    {
+      "path": "rust/target-status/debug/deps",
+      "bytes_planned": 9350987023,
+      "cache_only": true
+    },
+    {
+      "path": "rust/target-status/debug/build",
+      "bytes_planned": 377652924,
+      "cache_only": true
+    }
+  ],
+  "no_build_or_test_process_active": true,
+  "top_level_products_tooling_verification_all_signed_stages_and_all_user_data_preserved": true
+}

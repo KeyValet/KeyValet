@@ -1,0 +1,16 @@
+{
+  "observed_utc": "2026-10-13T23:10:12.866933+00:00",
+  "verified_binaries": [
+    "kv-helper",
+    "kv-cli",
+    "kv-touchid",
+    "kv-relay-client"
+  ],
+  "scripts_syntax_ok": true,
+  "source_unchanged_since_four_checks": true,
+  "admin_cache_available_in_current_context": false,
+  "free_bytes": 17518710784,
+  "keyvalet_touch_id_requests": 0,
+  "native_case_started": false,
+  "secret_values_in_evidence": false
+}

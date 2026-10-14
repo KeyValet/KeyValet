@@ -1,0 +1,46 @@
+{
+    "unsigned_development":  true,
+    "profile":  "debug, CARGO_PROFILE_DEV_DEBUG=0",
+    "utc":  "2026-10-13T09:30:51.2197291Z",
+    "source_fingerprint":  "9979a2242f1ceebf05c43d731427338be7d1ff93e2ec80170186cc2925a56edd",
+    "binaries":  [
+                     {
+                         "sha256":  "543eeee75b58119e06838918b762db527c0551f2a3ee4981bde5037bccc88b84",
+                         "name":  "kv-agent.exe",
+                         "bytes":  2925056
+                     },
+                     {
+                         "sha256":  "6ca66bf1dbae23cd76faa07aee7547525d9d8f6c8c071729f40998cd578bbc9e",
+                         "name":  "kv-cli.exe",
+                         "bytes":  18944512
+                     },
+                     {
+                         "sha256":  "0fe05d39b6b81c7ac99c46420151b495a72328526a67a2196849b6a81e87d82d",
+                         "name":  "kv-helper.exe",
+                         "bytes":  28721152
+                     },
+                     {
+                         "sha256":  "48776337e18654eac1cd04050c73cff93cf370e745db7e18f5acc623d8c74134",
+                         "name":  "kv-hook.exe",
+                         "bytes":  4508160
+                     },
+                     {
+                         "sha256":  "7fb7f943f3d6536bb76eb163d13a35467998b770bd492751435331a87acd7793",
+                         "name":  "kv-mcp.exe",
+                         "bytes":  21710848
+                     },
+                     {
+                         "sha256":  "037a06f359eea5db619861070f80ef97b05a7e3525ecd2547ce459646c87822a",
+                         "name":  "kv-relay-client.exe",
+                         "bytes":  14460928
+                     },
+                     {
+                         "sha256":  "f3ef30e161850e102166c27ec662ce60d35fb072e7955f59ba09506f303b60d3",
+                         "name":  "kv-server.exe",
+                         "bytes":  16778752
+                     }
+                 ],
+    "archive":  "C:\\kv-r2b-hello-fix-20261013\\repo\\dist\\keyvalet-v0.3.0-windows-x64.zip",
+    "bytes":  38308449,
+    "sha256":  "e2db970c1678b5f120377ee83b3f026cc98dbfcee2416563bca07cc43d2d94b9"
+}

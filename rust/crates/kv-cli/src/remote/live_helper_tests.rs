@@ -441,6 +441,17 @@ fn desktop_approval_and_owner_plans_work_with_the_real_helper_contract() {
     let mut dialog = DesktopDialog { labels: 0 };
     let now = host.now();
     ApprovalFlow::run(&view, &mut dialog, &mut host, &|| now).unwrap();
+    let canonical: CanonicalRequest =
+        serde_json::from_value(fixture()["canonical"].clone()).unwrap();
+    let result = host
+        .runtime
+        .block_on(
+            host.executor
+                .wait(&id, 5_000, 10, canonical.agent.uid, canonical.agent.pid),
+        )
+        .unwrap();
+    assert_eq!(result.status, kv_core::remote::ToolStatus::Ok);
+    assert_eq!(result.result.as_value().unwrap()["executed"], true);
     assert_eq!(host.runner.0.load(Ordering::SeqCst), 1);
     assert!(host
         .calls
@@ -542,13 +553,19 @@ fn cli_grant_directive_confirmation_and_revoke_work_with_a_real_helper() {
         .iter()
         .filter(|request| request.op == Op::GrantIssue)
         .collect::<Vec<_>>();
-    assert_eq!(issues.len(), 3);
+    assert_eq!(issues.len(), 4);
     assert!(issues.iter().all(|request| ["iss", "iss_alg", "jti", "sig"]
         .iter()
         .all(|field| request.params.get(field).is_none())));
     assert!(issues[1].params.get("confirmation_token").is_none());
     assert!(issues[2].params["confirmation_token"].is_string());
+    assert!(issues[3].params["confirmation_token"].is_string());
+    assert_ne!(
+        issues[2].params["confirmation_token"],
+        issues[3].params["confirmation_token"]
+    );
     assert_eq!(issues[2].params["confirm"], "srv");
+    assert_eq!(issues[3].params["confirm"], "srv");
     host.invoke("remote srv status --json").unwrap();
     let Success::Remote { results } = host.outputs.last().unwrap() else {
         panic!("missing status");
@@ -572,6 +589,18 @@ fn a_live_watch_observes_signed_decisions_and_runs_the_owner_hook_once() {
     assert_eq!(host.hooks.len(), 1);
     assert_eq!(host.hooks[0].0, id);
     assert!(!host.hooks[0].1.is_empty());
+    // Approval acceptance schedules execution; observing its history is not a completion barrier.
+    let canonical: CanonicalRequest =
+        serde_json::from_value(fixture()["canonical"].clone()).unwrap();
+    let result = host
+        .runtime
+        .block_on(
+            host.executor
+                .wait(&id, 5_000, 10, canonical.agent.uid, canonical.agent.pid),
+        )
+        .unwrap();
+    assert_eq!(result.status, kv_core::remote::ToolStatus::Ok);
+    assert_eq!(result.result.as_value().unwrap()["executed"], true);
     assert_eq!(host.runner.0.load(Ordering::SeqCst), 1);
     assert!(host
         .calls

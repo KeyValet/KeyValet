@@ -1,0 +1,11 @@
+{
+  "dispatched_utc": "2026-10-14T00:53:38.625337+00:00",
+  "window_id": 27206,
+  "terminal": "/dev/ttys000",
+  "command_dispatched": true,
+  "user_start": "开始",
+  "checklist": "签名包与四项 CI 已核对，接下来约 10–15 分钟你要做的事：\n1. 回复「开始收尾验证」后，我打开 Mac Terminal；输入系统要求的 Mac 管理员密码，看到安装完成和 Owner IPC: True。\n2. Terminal 出现 ndu polkit 提示时，输入 ndu 用户 guang 的密码；后续再次提示也在 Terminal 完成。\n3. Terminal 标明“在场投递／明确拒绝”时按回车，在随后 Mac GET 框点击 Deny。\n4. Terminal 标明“Esc 用例”时按回车，在随后 Mac GET 框按 Esc，再回 Terminal 按回车核对 waiting／执行 0。\n5. Terminal 标明“SE 取消用例”时按回车，确认普通授权框，在系统 Touch ID 窗口点击取消，看到 key_operation_cancelled 算成功。\n6. Terminal 标明“待用批准”时按回车，先不要操作 Mac GET 框，等“执行进程已退出”后才点击 Allow／仅本次。\n7. Terminal 标明“签发一小时 T1 Grant”时按回车，在 Mac 确认并完成第一次 Touch ID。\n8. Terminal 标明“正向吊销”时按回车，在 Mac 核对目标为 ndu 后确认并完成第二次 Touch ID，看到待用批准 cancelled、Grant 已吊销及秒数。\n结束后 ndu 的远程身份会被吊销，历史完整保留；反向缺 AK_s 仍按能力限制记录，两小时合盖不再测。现在开始吗？",
+  "source_files": 516,
+  "source_unchanged_since_ci": true,
+  "secret_values_in_evidence": false
+}

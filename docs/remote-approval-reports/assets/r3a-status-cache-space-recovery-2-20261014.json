@@ -1,0 +1,26 @@
+{
+  "observed_utc": "2026-10-14T06:59:26.586601+00:00",
+  "free_before": 14431076352,
+  "free_after": 15047266304,
+  "removed": [
+    {
+      "path": "rust/target-status/debug/examples",
+      "bytes": 444311600,
+      "kind": "rebuildable_examples_or_build_cache"
+    },
+    {
+      "path": "rust/target-status/debug/build",
+      "bytes": 465670661,
+      "kind": "rebuildable_examples_or_build_cache"
+    },
+    {
+      "path": "rust/target-status/debug/deps",
+      "files": 1506,
+      "bytes": 97272096,
+      "kind": "rebuildable_deps_older_than_one_hour"
+    }
+  ],
+  "installed_and_signed_stages_preserved": true,
+  "source_backups_evidence_preserved": true,
+  "no_compiler_active": true
+}

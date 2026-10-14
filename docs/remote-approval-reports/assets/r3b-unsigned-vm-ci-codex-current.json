@@ -1,0 +1,26 @@
+{
+  "ci-integrated3-progress.json": {
+    "command": 2,
+    "phase": "ci",
+    "utc": "2026-10-14T07:35:17.5197391Z"
+  },
+  "ci-integrated3-result.json": {
+    "finished_utc": "2026-10-14T07:35:19.4033263Z",
+    "passed": false,
+    "commands": [
+      {
+        "exit_code": 0,
+        "command": "cargo fmt --all -- --check",
+        "seconds": 1.2716258
+      },
+      {
+        "exit_code": 101,
+        "command": "cargo clippy --workspace --all-targets -- -D warnings",
+        "seconds": 1.87919
+      }
+    ],
+    "failure": "CI command 2 failed."
+  },
+  "codex_files": [],
+  "ssh_exit": 0
+}

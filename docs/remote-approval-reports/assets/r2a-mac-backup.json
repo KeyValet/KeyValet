@@ -1,0 +1,10 @@
+{
+  "backup": "/private/var/backups/keyvalet-r2a-20261013T072000",
+  "archive_sha256": "b8f3eb2fec124cdabd45b73f8ade50967176589ef791c57eea5447f5e36e47cd",
+  "verified": true,
+  "active_services_restored": [
+    "system/dev.keyvalet.helper",
+    "gui/501/dev.keyvalet.agent"
+  ],
+  "app_data_absent_before": true
+}

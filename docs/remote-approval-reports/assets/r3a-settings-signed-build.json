@@ -1,0 +1,23 @@
+{
+  "started_utc": "2026-10-13T13:52:54.529002+00:00",
+  "binaries": {
+    "kv-helper": {
+      "sha256": "f30f5a6c92888e9a3ffc54fe1f0042e26f54d47fd36d665cd017348873961a79",
+      "strict_requirement_exit": 0
+    },
+    "kv-cli": {
+      "sha256": "53e9fe0f41f04958f4c93c1ce11b4b7ef7d6f259e1bc5218bda63688d0e546e0",
+      "strict_requirement_exit": 0
+    },
+    "kv-touchid": {
+      "sha256": "559de7dd8419beecd98c0123b6dfe4a16b719755307374558e1f7a759c419e39",
+      "strict_requirement_exit": 0
+    },
+    "kv-relay-client": {
+      "sha256": "accc5f6a0cff09b049a0697f4c048eeebd13f495749e6703b68926f18c4ab91c",
+      "strict_requirement_exit": 0
+    }
+  },
+  "new_dependencies": false,
+  "finished_utc": "2026-10-13T13:52:55.880990+00:00"
+}

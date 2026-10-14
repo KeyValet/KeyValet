@@ -1,0 +1,12 @@
+{
+  "desktop": [
+    13
+  ],
+  "battery": [
+    {
+      "charge": 4,
+      "status": 1
+    }
+  ],
+  "ssh_exit": 0
+}

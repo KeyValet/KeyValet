@@ -1,0 +1,56 @@
+{
+  "observed_utc": "2026-10-14T01:00:15.129505+00:00",
+  "failed_attempt": "r3a-remaining-native-20261014T005404Z.json",
+  "installed_receipt": "r3a-se-mac-install-20261014T005346Z.json",
+  "fixed_error": "remaining_desktop_not_present_before_request",
+  "request_issued_n": 0,
+  "owner_control_command_n": 0,
+  "revocation_started": false,
+  "reason": "new_agent_lock_and_saver_notifications_not_yet_observed",
+  "cg_dictionary_screen_lock": null,
+  "cg_dictionary_screensaver": null,
+  "os_snapshot_observed_utc": "2026-10-14T00:57:33.274447+00:00",
+  "os_snapshot_idle_seconds": 0.004,
+  "source_files": 516,
+  "changed_source_files": [
+    "rust/crates/kv-core/schemas/remote/grant.schema.json",
+    "rust/crates/kv-core/schemas/remote/grant_issue_result.schema.json",
+    "rust/crates/kv-core/schemas/remote/grant_list_result.schema.json",
+    "rust/crates/kv-core/schemas/remote/unsigned_grant.schema.json",
+    "rust/crates/kv-core/src/remote/validation.rs",
+    "rust/crates/kv-core/testdata/remote/grant_validation_cases.json",
+    "rust/crates/kv-core/testdata/remote/schema_samples.json",
+    "rust/crates/kv-core/tests/remote.rs",
+    "rust/crates/kv-helper/src/remote/tests.rs"
+  ],
+  "ci_checks": {
+    "fmt": 0,
+    "clippy": 0,
+    "build": 0,
+    "test": 0
+  },
+  "installed_binaries": {
+    "kv-helper": {
+      "installed_sha256_matches": true,
+      "strict_requirement_exit": 0
+    },
+    "kv-cli": {
+      "installed_sha256_matches": true,
+      "strict_requirement_exit": 0
+    },
+    "kv-touchid": {
+      "installed_sha256_matches": true,
+      "strict_requirement_exit": 0
+    },
+    "kv-relay-client": {
+      "installed_sha256_matches": true,
+      "strict_requirement_exit": 0
+    }
+  },
+  "driver_before": "r3a-remaining-presence-before.log",
+  "driver_after": "r3a-remaining-presence-after.log",
+  "driver_after_passed": 7,
+  "secret_values_in_evidence": false,
+  "rust_source_modified_this_fix": false,
+  "approval_started_by_diagnostic": false
+}

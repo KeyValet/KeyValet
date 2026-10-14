@@ -1,0 +1,29 @@
+{
+  "free_bytes": 375971827712,
+  "sid": "S-1-5-21-3389053113-2113560702-4064643913-1001",
+  "battery": [
+    {
+      "charge": 11,
+      "status": 1
+    }
+  ],
+  "clients": [
+    {
+      "installed": false,
+      "name": "claude"
+    },
+    {
+      "installed": false,
+      "name": "codex"
+    },
+    {
+      "installed": false,
+      "name": "cursor"
+    },
+    {
+      "installed": true,
+      "name": "wsl"
+    }
+  ],
+  "ssh_exit": 0
+}

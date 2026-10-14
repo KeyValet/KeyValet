@@ -1,0 +1,11 @@
+{
+  "before_pid": "20794",
+  "after_pid": "",
+  "force_stop_used": false,
+  "killed_at_unix_ms": 1791821591799,
+  "woken_pid": "20975",
+  "plans": 0,
+  "fcm_accepted_to_sync_seconds": 5.426,
+  "kill_to_sync_seconds": 6.885,
+  "fixture_approval": false
+}

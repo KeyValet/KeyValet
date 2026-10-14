@@ -1,0 +1,29 @@
+{
+  "error": null,
+  "passed": true,
+  "signing": "unsigned development",
+  "timestamp_utc": "2026-10-12T15:02:35.0484349Z",
+  "profile_cleanup_pending_reboot": [
+    {
+      "path": "C:\\Users\\KVSmoke30cf425f",
+      "sid": "S-1-5-21-3283475767-415700631-2745889461-1017"
+    }
+  ],
+  "hello_tested": false,
+  "wsl_interop_tested": false,
+  "windows_build": "10.0.26200.0",
+  "architecture": "x64",
+  "checks": [
+    "fresh install, SYSTEM identity and authenticated pipe control",
+    "complete remote binaries and unpaired relay virtual service account",
+    "complete WSL bridge assets installed from the tested package",
+    "cross-account remote status rejection for another administrator",
+    "real standard-owner authenticated public status without Hello; no fallback or binding keys",
+    "untrusted owner record, binary and WSL bridge DACL rejection before service stop",
+    "wrong-owner upgrade rejection",
+    "same-owner upgrade",
+    "SCM stop and restart",
+    "uninstall retains the vault by default",
+    "explicit removal and integration cleanup"
+  ]
+}

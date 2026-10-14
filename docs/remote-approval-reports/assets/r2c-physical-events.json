@@ -1,0 +1,163 @@
+{
+  "timezone": "UTC epoch; UI Asia/Shanghai",
+  "executor": "software fixture; synthetic execution only",
+  "hardware_phone": "Pixel 7 / Android 16",
+  "pairing": {
+    "sas": "400879",
+    "executor_confirmed": true,
+    "phone_strong_signature_verified": true,
+    "user_fingerprint_confirmed": true,
+    "screenshot": "r2c-pair-sas.png"
+  },
+  "approvals": [
+    {
+      "id": "01M4S6588RQA4RN4FHAA3AMXQ7",
+      "tier": "T1",
+      "created_at_unix_s": 1791846688,
+      "delivery": "silent",
+      "silent_notification_at_unix_ms": 1791846690716,
+      "notification_id": 1215169565,
+      "escalate_elapsed_s": 31,
+      "native_sync_banner_at_unix_ms": 1791846722853,
+      "decision_elapsed_s": 37,
+      "level": "Quick",
+      "decision": "Allow",
+      "executions": 1,
+      "second_claim": "Replay",
+      "user_confirmed_lock_screen_action": true
+    },
+    {
+      "id": "01M4S66XZGMCFKF7FS5HDDT5ET",
+      "tier": "T2",
+      "created_at_unix_s": 1791846742,
+      "delivery": "banner",
+      "decision_elapsed_s": 14,
+      "level": "Strong",
+      "decision": "Allow",
+      "executions": 2,
+      "second_claim": "Replay",
+      "user_confirmed_open_only_and_fingerprint": true
+    },
+    {
+      "id": "01M4S6D848P648X8XEB1P4WA42",
+      "tier": "T1",
+      "created_at_unix_s": 1791846949,
+      "delivery": "silent",
+      "away_preference": true,
+      "banner_created_at_unix_ms": 1791846954724,
+      "banner_elapsed_s_approx": 5.7,
+      "level": "Quick",
+      "decision": "Allow",
+      "executions": 3,
+      "second_claim": "Replay",
+      "decision_elapsed_s": 18
+    },
+    {
+      "id": "01M4S6GENGB78WHAEQFE9EY0YE",
+      "tier": "T1",
+      "created_at_unix_s": 1791847054,
+      "delivery": "silent",
+      "notification_id": 1873140361,
+      "silent_created_at_unix_ms": 1791847059866,
+      "escalate_elapsed_s": 31,
+      "level": "Quick",
+      "decision": "Allow",
+      "executions": 4,
+      "second_claim": "Replay",
+      "decision_elapsed_s": 43,
+      "silent_and_banner_same_id_verified_in_android_history": true
+    },
+    {
+      "id": "01M4S6QDAG740777TXRQCVYB8A",
+      "tier": "T1",
+      "created_at_unix_s": 1791847282,
+      "delivery": "silent",
+      "notification_id": -1970646448,
+      "process_was_terminated": true,
+      "silent_observed_at_unix_ms": 1791847288780,
+      "banner_observed_at_unix_ms": 1791847317482,
+      "escalate_elapsed_s": 31,
+      "banner_has_sound_and_vibration": true,
+      "banner_has_only_alert_once_flag": false,
+      "same_notification_id": true,
+      "level": "Quick",
+      "decision": "Allow",
+      "executions": 5,
+      "second_claim": "Replay",
+      "decision_elapsed_s": 52,
+      "audible_sound_confirmed_by_user": true
+    }
+  ],
+  "settings": [
+    {
+      "op": "SetMode",
+      "mode": "remember:1h",
+      "click_at_unix_ms": 1791846818107,
+      "result_at_unix_s": 1791846823,
+      "elapsed_s_approx": 5,
+      "screenshot": "r2c-mode-complete.png"
+    },
+    {
+      "op": "Grant",
+      "hours": 1,
+      "signature": "Strong",
+      "dialog_open_at_unix_ms": 1791846853234,
+      "verified_before_unix_ms": 1791846869000,
+      "elapsed_upper_bound_s": 16,
+      "user_clicked_continue_before_automated_tap": true,
+      "screenshot": "r2c-grant-complete.png"
+    },
+    {
+      "op": "RevokeAllGrants",
+      "click_at_unix_ms": 1791846880961,
+      "result_at_unix_s": 1791846881,
+      "grants": 0,
+      "elapsed_s_approx": "<1",
+      "screenshot": "r2c-revoke-all-complete.png"
+    }
+  ],
+  "timing_limits": "Fixture elapsed uses UTC seconds; notification times use phone wall clock; server envelope timestamps may differ by a few seconds. Settings include user biometric time.",
+  "audio_initial_user_observation": "Banner visible; no sound heard. Ringer NORMAL, zen off, volume 4/7. Deduplicate posts and retest before sound pass.",
+  "audio_final_user_observation": "User corrected prior observation: the click was theirs and sound was heard after dedup APK install.",
+  "clock": [
+    {
+      "offset_s": -300,
+      "id": "01M4S70N78YFYG6D1X26868MEF",
+      "screenshot": "r2c-clock-minus-300.png",
+      "warning_visible": true
+    },
+    {
+      "offset_s": 300,
+      "id": "01M4S71BP04XE6ATP179ZQ6VT3",
+      "screenshot": "r2c-clock-plus-300.png",
+      "warning_visible": true
+    }
+  ],
+  "offline_one_hour": {
+    "status": "deferred_by_user",
+    "reason": "Pixel 7 is needed for messages; user requested a later time window."
+  },
+  "reboot": {
+    "boot_count_before": 37,
+    "boot_count_after": 38,
+    "first_unlock_confirmed_by_user": true,
+    "same_fcm_token": true,
+    "google_network_restored_by_user": true,
+    "native_worker_woke": true,
+    "approval_notification_after_reboot": false,
+    "evidence": "r2c-reboot-recovery-trace.json",
+    "status": "token persistence passed; approval pull retries"
+  },
+  "logout": {
+    "confirmed_at_unix_ms": 1791850189464,
+    "confirmation": "KeyValet own logout dialog",
+    "remote_delete": "queued; live relay still retains token/session",
+    "own_login_page_at_unix_ms": 1791850190594,
+    "native_worker_refused_login_required": true,
+    "post_logout_notifications_observed": 0,
+    "remote_token_deleted": false,
+    "remote_session_removed": false,
+    "screenshot": "r2c-logout-final.png",
+    "background_log": "r2c-reboot-background.log"
+  }
+}

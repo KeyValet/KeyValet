@@ -1,0 +1,20 @@
+{
+    "passed":  true,
+    "temporary_test_signing_only":  true,
+    "relay_start":  "Auto",
+    "relay_identity":  "NT SERVICE\\KeyValetRelay",
+    "waiting_events":  [
+                           {
+                               "TimeCreated":  "\/Date(1791904333379)\/",
+                               "Id":  1001,
+                               "values":  "waiting_for_relay_binding"
+                           },
+                           {
+                               "TimeCreated":  "\/Date(1791902091973)\/",
+                               "Id":  1001,
+                               "values":  "waiting_for_relay_binding"
+                           }
+                       ],
+    "relay_state":  "Running",
+    "seconds":  5.0257999999999994
+}

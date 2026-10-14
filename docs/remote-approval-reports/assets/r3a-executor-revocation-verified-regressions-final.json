@@ -1,0 +1,27 @@
+{
+  "observed_utc": "2026-10-13T17:39:40.583362+00:00",
+  "regressions_passed": 6,
+  "tests": [
+    "remote::tests::revocations::executor_revocation_cancels_unused_approval_and_tombstones_all_grants",
+    "remote::tests::revocations::executor_revocation_of_one_issuer_preserves_other_issuers_authority",
+    "remote::tests::revocations::executor_revocation_prevents_late_grant_use_and_new_remote_requests",
+    "remote::tests::revocations::executor_revocation_rejects_quick_proof_without_invalidating_existing_authority",
+    "remote::tests::revocations::executor_revocation_without_a_strong_key_does_not_request_authentication_or_a_relay_session",
+    "remote::tests::owner_workflow::executor_revocation_delivers_strong_proof_before_closing_its_online_relay_session"
+  ],
+  "ci_receipt": "r3a-executor-revocation-ci-final-summary.json",
+  "gui_required": false,
+  "installed_services_used": false,
+  "native_revocations": 0,
+  "security_relaxation": false,
+  "source_sha256": {
+    "rust/crates/kv-helper/src/remote/engine.rs": "014ea53c84460d4b7488e565a2a11436bfc902a73bafc08f37e85fe105fce2d6",
+    "rust/crates/kv-helper/src/remote/directives.rs": "167aad61874f92c7f03d4e54f425d10d7176313e941e9196fe2c03d5efc34633",
+    "rust/crates/kv-helper/src/remote/revocations.rs": "5dd599c8a47735f9f291ed383857bb36569baaab67410dd02ca0142afd212c77",
+    "rust/crates/kv-helper/src/remote/grants.rs": "af1003767506f29350e788edd6cdd149aed630c5471b83bb5a5ecbc199cd3c1f",
+    "rust/crates/kv-helper/src/remote/tests/revocations.rs": "ff7d29f913b7ed6e40a0dcdf7dfe6cb42001b5069b63ab15c9d75e66a65d105f",
+    "rust/crates/kv-helper/src/remote/tests/owner_workflow.rs": "0dfd91fb7f43254f9fa842b93458a9b254bed879dc0193ed16856041bc2b55b3",
+    "rust/crates/kv-helper/src/remote/production.rs": "a0e25128ad25e53a9f2b6e6a8b084ee4e6d9d98a2af8ebd0b4db795cff9ef1d0",
+    "rust/crates/kv-helper/src/remote/tests/owner.rs": "aac73255f4aab5dee89cb17d31f194d6a685d661d98a607e793c60c728d45ebe"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "started_utc": "2026-10-13T03:16:12.729906+00:00",
+  "old_device_id": "01M4SK52X82Z38Q6N87AH5CYRY",
+  "server_revoked_utc": "2026-10-13T03:08:43+00:00",
+  "preflight_counts": {
+    "pending_approvals": 0,
+    "grants": 0,
+    "issued_grants": 0,
+    "issued_approvals": 0,
+    "issued_directives": 0,
+    "directives": 0,
+    "nonces": 0,
+    "remote_outbox": 0
+  },
+  "old_server_tombstone_modified": false,
+  "old_secure_enclave_keys_deleted": false,
+  "credential_vault_sha256_before": "4368ae7ec9661df1d7e69866e431a053ecb2982b6b2ae09723570c55b09f23fd",
+  "stopped_counts": {
+    "pending_approvals": 0,
+    "grants": 0,
+    "issued_grants": 0,
+    "issued_approvals": 0,
+    "issued_directives": 0,
+    "directives": 0,
+    "nonces": 0,
+    "remote_outbox": 0
+  },
+  "archived_remote_directory": "/private/var/backups/keyvalet-r3a-reenroll-20261013T031618Z/remote",
+  "credential_vault_sha256_after": "4368ae7ec9661df1d7e69866e431a053ecb2982b6b2ae09723570c55b09f23fd",
+  "credential_vault_unchanged": true,
+  "finished_utc": "2026-10-13T03:16:18.802263+00:00"
+}

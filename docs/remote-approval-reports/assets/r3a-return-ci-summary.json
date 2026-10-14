@@ -1,0 +1,39 @@
+{
+  "started_utc": "2026-10-13T21:36:39.029018+00:00",
+  "toolchain": "1.99.0",
+  "checks": [
+    {
+      "check": "fmt",
+      "exit": 0,
+      "elapsed_s": 1.153186,
+      "log": "r3a-return-ci-fmt.log"
+    },
+    {
+      "check": "clippy",
+      "exit": 0,
+      "elapsed_s": 1.419364,
+      "log": "r3a-return-ci-clippy.log"
+    },
+    {
+      "check": "build",
+      "exit": 0,
+      "elapsed_s": 3.88059,
+      "log": "r3a-return-ci-build.log"
+    },
+    {
+      "check": "test",
+      "exit": 0,
+      "elapsed_s": 302.438118,
+      "log": "r3a-return-ci-test.log"
+    }
+  ],
+  "source_files": 360,
+  "finished_utc": "2026-10-13T21:41:47.926221+00:00",
+  "source_unchanged_during_checks": true,
+  "changed_paths": [],
+  "all_four_passed": true,
+  "passed": 1390,
+  "failed": 0,
+  "ignored": 10,
+  "test_groups": 69
+}

@@ -1,0 +1,13 @@
+{
+  "dispatched_utc": "2026-10-13T23:39:29.175135+00:00",
+  "window_id": 26052,
+  "terminal": "/dev/ttys000",
+  "command_dispatched": true,
+  "checklist": "SSH 输入占用已修正，2 项无安装依赖的回归通过；在场已恢复 present，现在只补一轮锁屏计时。接下来约 2–3 分钟你要做的事：\n1. 回复「开始锁屏验证」后，我在 Mac Terminal 运行只观察脚本，无需 sudo 或再次安装。\n2. 等 Terminal 显示 baseline=present，再按 Control+Command+Q 锁屏，等 10 秒后正常解锁 Mac。\n3. 回到同一 Terminal 按一次回车，看到 after_measured_unlock=present 和“在场信号诊断结束”算完成。\n不发凭证请求，KeyValet Touch ID 请求为 0；系统解锁按日常方式完成。现在开始吗？",
+  "user_start": "开始锁屏验证",
+  "keyvalet_touch_id_requests": 0,
+  "credential_operations": 0,
+  "reinstall": false,
+  "sudo_requests": 0,
+  "secret_values_in_evidence": false
+}

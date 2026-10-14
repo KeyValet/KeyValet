@@ -11,7 +11,7 @@ KeyValet 是给 AI agent 的凭证运行时，支持 macOS、Linux 和 Windows�
 
 [安全模型](https://github.com/KeyValet/KeyValet/blob/main/SECURITY.md)
 
-> **状态**：macOS 已有发行版；Windows 11 当前为开发预览，Hello、服务与安装器代码已实现，正式签名包和真机验证尚待完成，见 [Windows 支持记录](https://github.com/KeyValet/KeyValet/blob/main/docs/windows.md)。本指南介绍 macOS 发行版。界面支持英文和简体中文，也可以用 `KEYVALET_LANG=en|zh` 指定。
+> **状态**：Windows 正式包没有代码签名，本地与远程功能均不要求 Authenticode。发布与验收状态见[下载页](/zh-CN/download/)和 [Windows 支持记录](https://github.com/KeyValet/KeyValet/blob/main/docs/windows.md)。本指南介绍 macOS 发行版。界面支持英文和简体中文，也可以用 `KEYVALET_LANG=en|zh` 指定。
 
 Linux 本地版已实现 systemd 服务、polkit 认证和 TPM 2.0 保护；无 TPM 时允许显式开启软件
 保护。当前从源码运行 `sh scripts/install.sh` 安装，详见

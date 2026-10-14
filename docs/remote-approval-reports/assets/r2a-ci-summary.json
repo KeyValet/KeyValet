@@ -1,0 +1,10 @@
+{
+  "passed": 1333,
+  "failed": 0,
+  "ignored": 10,
+  "test_result_groups": 69,
+  "source_files": 353,
+  "files_modified_after_ci_start": [],
+  "source_changed_after_observation": [],
+  "all_four_commands_exit_zero": true
+}

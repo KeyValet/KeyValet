@@ -2,27 +2,29 @@ name: Windows package
 
 on:
   workflow_dispatch:
+  workflow_call:
     inputs:
-      signed:
-        description: 'Sign for production (requires the Windows signing certificate in the release environment)'
-        type: boolean
-        default: true
+      tag:
+        description: 'Release tag (defaults to the kv-cli package version)'
+        required: false
+        type: string
+        default: ''
 
-# Builds reviewable artifacts. Public release attachment waits for the Windows hardware matrix
-# and a maintainer; it does not change the existing notarized macOS release flow.
+# Windows release packages are unsigned. Tagged builds are attached to the draft release.
 permissions:
   contents: read
 
 jobs:
   package:
-    runs-on: windows-latest
-    environment: release
+    runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
         include:
           - architecture: x64
+            runner: windows-latest
             target: x86_64-pc-windows-msvc
           - architecture: arm64
+            runner: windows-11-arm
             target: aarch64-pc-windows-msvc
     steps:
       - uses: actions/checkout@v4
@@ -34,66 +36,21 @@ jobs:
           workspaces: rust
       - name: Resolve package version
         shell: pwsh
+        env:
+          REQUESTED_TAG: ${{ inputs.tag }}
         run: |
           $version = [regex]::Match((Get-Content rust/crates/kv-cli/Cargo.toml -Raw), '(?m)^version\s*=\s*"([^"]+)"').Groups[1].Value
+          if ($env:REQUESTED_TAG -and $env:REQUESTED_TAG -cne "v$version") { throw "Release tag must match v$version." }
           "PACKAGE_TAG=v$version" >> $env:GITHUB_ENV
-      - name: Import Windows signing certificate
-        if: inputs.signed
-        shell: pwsh
-        env:
-          WINDOWS_SIGNING_PFX_BASE64: ${{ secrets.WINDOWS_SIGNING_PFX_BASE64 }}
-          WINDOWS_SIGNING_PFX_PASSWORD: ${{ secrets.WINDOWS_SIGNING_PFX_PASSWORD }}
-        run: |
-          if (!$env:WINDOWS_SIGNING_PFX_BASE64) { throw 'Windows signing certificate is not configured. Choose an unsigned development artifact explicitly.' }
-          $path = Join-Path $env:RUNNER_TEMP keyvalet-signing.pfx
-          try {
-            [IO.File]::WriteAllBytes($path, [Convert]::FromBase64String($env:WINDOWS_SIGNING_PFX_BASE64))
-            $password = ConvertTo-SecureString $env:WINDOWS_SIGNING_PFX_PASSWORD -AsPlainText -Force
-            $certificates = Import-PfxCertificate -FilePath $path -CertStoreLocation Cert:\CurrentUser\My -Password $password
-            $certificate = @($certificates | Where-Object { $_.HasPrivateKey })
-            if ($certificate.Count -ne 1) { throw 'The signing PFX must contain one private signing certificate.' }
-            $certificate = $certificate[0]
-            "WINDOWS_CERT_THUMBPRINT=$($certificate.Thumbprint)" >> $env:GITHUB_ENV
-          } finally { Remove-Item $path -Force -ErrorAction SilentlyContinue }
       - name: Build package
         shell: pwsh
         run: |
-          $options = @{ Tag = $env:PACKAGE_TAG; Architecture = '${{ matrix.architecture }}' }
-          if ('${{ inputs.signed }}' -eq 'true') { $options.SigningCertificateThumbprint = $env:WINDOWS_CERT_THUMBPRINT }
-          else { $options.AllowUnsigned = $true }
-          ./scripts/package-windows.ps1 @options
-          $package = "dist/keyvalet-$env:PACKAGE_TAG-windows-${{ matrix.architecture }}"
-          foreach ($binary in 'kv-server','kv-relay-client') {
-            $source = "rust/target/${{ matrix.target }}/release/$binary.exe"
-            if (!(Test-Path -LiteralPath $source)) { throw "Missing remote artifact: $binary" }
-            Copy-Item -LiteralPath $source "$package/bin/" -Force
-            if ('${{ inputs.signed }}' -eq 'true') {
-              $certificate = Get-Item "Cert:\CurrentUser\My\$env:WINDOWS_CERT_THUMBPRINT"
-              $signature = Set-AuthenticodeSignature -FilePath "$package/bin/$binary.exe" -Certificate $certificate -HashAlgorithm SHA256 -TimestampServer 'http://timestamp.digicert.com'
-              if ($signature.Status -ne 'Valid') { throw "Remote binary signing failed: $binary" }
-              $verified = Get-AuthenticodeSignature "$package/bin/$binary.exe"
-              if ($verified.Status -ne 'Valid' -or $verified.SignerCertificate.GetNameInfo([Security.Cryptography.X509Certificates.X509NameType]::SimpleName, $false) -cne 'Simvito Limited') { throw 'Unexpected remote signing publisher.' }
-            }
-          }
-          New-Item "$package/service/relay-client" -ItemType Directory -Force | Out-Null
-          Copy-Item rust/crates/kv-relay-client/service/* "$package/service/relay-client/" -Force
-          $zip = "$package.zip"
-          Remove-Item -LiteralPath $zip -Force
-          Compress-Archive -LiteralPath $package -DestinationPath $zip
-          $name = Split-Path $zip -Leaf
-          $digest = (Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash.ToLowerInvariant()
-          [IO.File]::WriteAllText("dist/SHA256SUMS-windows-${{ matrix.architecture }}", "$digest  $name`n", [Text.UTF8Encoding]::new($false))
+          ./scripts/package-windows.ps1 -Tag $env:PACKAGE_TAG -Architecture '${{ matrix.architecture }}'
       - uses: actions/upload-artifact@v4
         with:
-          name: keyvalet-${{ env.PACKAGE_TAG }}-windows-${{ matrix.architecture }}
+          name: release-${{ env.PACKAGE_TAG }}-windows-${{ matrix.architecture }}
           path: |
             dist/keyvalet-${{ env.PACKAGE_TAG }}-windows-${{ matrix.architecture }}.zip
             dist/SHA256SUMS-windows-${{ matrix.architecture }}
+          if-no-files-found: error
           retention-days: 7
-      - name: Remove signing certificate
-        if: always()
-        shell: pwsh
-        run: |
-          if ($env:WINDOWS_CERT_THUMBPRINT) {
-            Remove-Item "Cert:\CurrentUser\My\$env:WINDOWS_CERT_THUMBPRINT" -DeleteKey -Force -ErrorAction SilentlyContinue
-          }

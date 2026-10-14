@@ -1,0 +1,12 @@
+{
+  "observed_utc": "2026-10-14T05:33:58.523404+00:00",
+  "source_snapshot": "r3a-se-child-closure-ci5-source.json",
+  "checks_summary": "r3a-se-child-closure-ci5-summary.json",
+  "source_files": 522,
+  "source_unchanged": true,
+  "changed_source_files": [],
+  "free_bytes": 15657484288,
+  "minimum_free_bytes": 15000000000,
+  "rust_changes_this_segment": 0,
+  "secret_values_in_evidence": false
+}

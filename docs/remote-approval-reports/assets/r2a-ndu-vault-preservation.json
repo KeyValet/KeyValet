@@ -1,0 +1,9 @@
+{
+  "backup_vault_sha256": "2e05690eb190cdee577ec3735b80ba188ff2ccb67a72ba027eb84998fa00ae72",
+  "installed_vault_sha256": "2e05690eb190cdee577ec3735b80ba188ff2ccb67a72ba027eb84998fa00ae72",
+  "encrypted_vault_unchanged": true,
+  "tpm_cli_types_exit": 0,
+  "credential_types_n": 0,
+  "root_cli_tpm_unlock": "passed",
+  "new_credential_added": false
+}

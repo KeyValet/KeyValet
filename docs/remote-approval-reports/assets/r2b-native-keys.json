@@ -1,0 +1,30 @@
+{
+  "cleanup": true,
+  "context": "LocalSystem",
+  "hpke_roundtrip": true,
+  "identity_signature_bytes": 64,
+  "installed_summary": "\n========== KeyValet 密钥保护状态 ==========\n保护方案: 尚未初始化\n硬件保护: 尚未配置\n本机 TPM: 已检测到 TPM 2.0；实现类型未确认\n使用授权: 尚未配置\n凭证库尚未初始化；没有已配置的密钥保护方案。 PCP DK: pcp_ecdh=present, pcp_ecdsa=present.\n恢复口令: 未配置\n派生密钥和解密后的秘密仍会进入进程内存。\n========================================\n\nrelay： 未知（远程 helper 未就绪）\n远程状态不可用： 执行端或 helper 拒绝了操作（forbidden）\n",
+  "key_kind": "pcp_tpm",
+  "milliseconds": 441.183,
+  "pcp_ecdh": true,
+  "pcp_ecdsa": true,
+  "quick_fixture": {
+    "alg": "ES256",
+    "milliseconds": 62.586299999999994,
+    "verified": true
+  },
+  "raw_secret_bytes": 32,
+  "raw_secret_matches_software": true,
+  "reopen": true,
+  "software_fallback": false,
+  "status": {
+    "evidence": "pcp_machine_key_inventory",
+    "pcp_ecdh": true,
+    "pcp_ecdsa": true,
+    "ready": true
+  },
+  "strong_fixture": {
+    "alg": "RS256",
+    "status": "waiting_pin"
+  }
+}

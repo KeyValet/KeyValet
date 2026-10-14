@@ -1,0 +1,28 @@
+{
+  "observed_utc": "2026-10-13T17:26:33.760970+00:00",
+  "before": {
+    "device_id": "01M4S8KJ48BSMNK1S4BEGT07FC",
+    "account_id": "acct_zeP4_V8iHJdLbzJrDU3rfQ",
+    "mode": "per_use",
+    "pending_n": 0,
+    "grants_n": 0,
+    "unattended": false,
+    "device_revocations_pending": 0
+  },
+  "expected_strong_key_absent": true,
+  "exit": 3,
+  "elapsed_s_including_ssh": 0.226363,
+  "ok": false,
+  "fixed_error": "key_unavailable",
+  "after": {
+    "device_id": "01M4S8KJ48BSMNK1S4BEGT07FC",
+    "account_id": "acct_zeP4_V8iHJdLbzJrDU3rfQ",
+    "mode": "per_use",
+    "pending_n": 0,
+    "grants_n": 0,
+    "unattended": false,
+    "device_revocations_pending": 0
+  },
+  "revocations_completed": 0,
+  "matches_preflight": true
+}

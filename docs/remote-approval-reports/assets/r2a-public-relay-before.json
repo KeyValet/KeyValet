@@ -1,0 +1,24 @@
+{
+  "utc": "2026-10-12T23:23:42.668788+00:00",
+  "/v1/health": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "version": "0.3.0"
+    },
+    "curl_exit": 0
+  },
+  "/v1/account/providers": {
+    "status": 200,
+    "body": {
+      "apple": false,
+      "apple_app_id": "",
+      "apple_callback_url": "https://relay.keyvalet.dev/v1/account/apple/callback",
+      "apple_services_id": "",
+      "google": true,
+      "google_ios_client_id": "377993819556-a9jv022e3ikitqbb00k698ai4m30ncpu.apps.googleusercontent.com",
+      "google_web_client_id": "377993819556-9mvtbodaont066ugeen78kphubspa98j.apps.googleusercontent.com"
+    },
+    "curl_exit": 0
+  }
+}

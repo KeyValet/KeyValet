@@ -1,0 +1,13 @@
+{
+  "device_id": "01M4SK52X82Z38Q6N87AH5CYRY",
+  "dk_pub": {
+    "kty": "EC",
+    "crv": "P-256",
+    "x": "q2M_WqwnYUV_vp6AhBb_N19_5nZWH1x-MXvPTsskHxw",
+    "y": "YWJoWiz82uk6CSlSVbpfrWB-DIRfu6xvpJ-oOM8yInM"
+  },
+  "revoked_utc": "2026-10-13T03:08:43+00:00",
+  "read_only": true,
+  "local_dk_matches": true,
+  "observed_utc": "2026-10-13T03:16:12.627547+00:00"
+}

@@ -1,0 +1,29 @@
+{
+  "vault_present": false,
+  "diagnostic_service_remaining": false,
+  "remaining_temporary_tasks": [],
+  "removed_temporary_tasks": [
+    "KeyValetPhysicalCancelTest-20261013",
+    "KeyValetPhysicalInstall-20261013",
+    "KeyValetPhysicalRepeatTest-20261013",
+    "KeyValetPhysicalStrongTest-20261013"
+  ],
+  "master_key_file_present": false,
+  "managed_agent_task_preserved": true,
+  "finished_utc": "2026-10-13T05:44:50.9143854Z",
+  "backup_preserved": true,
+  "services": [
+    {
+      "Name": "KeyValetHelper",
+      "State": "Running",
+      "StartMode": "Auto",
+      "StartName": "LocalSystem"
+    },
+    {
+      "Name": "KeyValetRelay",
+      "State": "Stopped",
+      "StartMode": "Manual",
+      "StartName": "NT SERVICE\\KeyValetRelay"
+    }
+  ]
+}

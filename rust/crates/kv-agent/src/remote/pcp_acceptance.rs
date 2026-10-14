@@ -20,10 +20,18 @@ impl Drop for Cleanup {
     }
 }
 fn fixture(name: &str) -> Value {
-    let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../kv-core/testdata/remote")
-        .join(name);
-    remote::canonical::from_json(&std::fs::read(path).unwrap()).unwrap()
+    // Native test executables can be copied to a physical PC without installing Rust/source.
+    let text = match name {
+        "decision_valid.json" => {
+            include_str!("../../../kv-core/testdata/remote/decision_valid.json")
+        }
+        "test_keys.json" => include_str!("../../../kv-core/testdata/remote/test_keys.json"),
+        "envelope_roundtrip.json" => {
+            include_str!("../../../kv-core/testdata/remote/envelope_roundtrip.json")
+        }
+        _ => panic!("unknown native fixture"),
+    };
+    remote::canonical::from_json(text.as_bytes()).unwrap()
 }
 
 /// Run the native kv-agent library test binary under LocalSystem, after service startup.
@@ -177,6 +185,17 @@ fn windows_pcp_k1_native_acceptance() {
     } else {
         None
     };
+    let strong = std::env::var_os("R3B_STRONG_EXCHANGE").map(|directory| {
+        strong_exchange(
+            std::path::Path::new(&directory),
+            &record,
+            &request,
+            &canonical,
+            &decision,
+            &loaded,
+            &executor_key,
+        )
+    });
     drop(loaded);
     identity.delete();
     quick.delete();
@@ -185,10 +204,198 @@ fn windows_pcp_k1_native_acceptance() {
         "pcp_ecdh":true,"pcp_ecdsa":true,"reopen":true,"identity_signature_bytes":signature.len(),
         "raw_secret_bytes":raw.len(),"raw_secret_matches_software":true,"hpke_roundtrip":true,
         "quick_fixture":{"verified":true,"alg":"ES256","milliseconds":quick_fixture_ms},
-        "strong_fixture":{"status":"waiting_pin","alg":"RS256"},"cleanup":true,
+        "strong_fixture":strong.unwrap_or_else(|| json!({"status":"not_requested","alg":"RS256"})),"cleanup":true,
         "status":status,"installed_summary":installed,"milliseconds":began.elapsed().as_secs_f64()*1000.0});
     if let Some(path) = std::env::var_os("R2B_NATIVE_REPORT") {
         std::fs::write(path, serde_json::to_vec_pretty(&report).unwrap()).unwrap();
     }
     println!("R2B_NATIVE {}", serde_json::to_string(&report).unwrap());
+}
+
+fn strong_exchange(
+    directory: &std::path::Path,
+    record: &remote::DeviceRecord,
+    request: &remote::ApprovalRequest,
+    canonical: &remote::canonical::CanonicalRequest,
+    decision: &remote::ApprovalDecision,
+    identity: &PcpDeviceKey,
+    executor_key: &SoftwareDeviceKey,
+) -> Value {
+    let began = std::time::Instant::now();
+    let now = crate::remote::view::unix_seconds();
+    let mut request: remote::ApprovalRequest = serde_json::from_value(
+        crate::remote::tests::per_use_strong_fixture(serde_json::to_value(request).unwrap()),
+    )
+    .unwrap();
+    let mut canonical = canonical.clone();
+    canonical.exp = now + 900;
+    request.exp = canonical.exp;
+    request.digest = canonical.digest().unwrap();
+    let executor: remote::DeviceRecord =
+        serde_json::from_value(fixture("envelope_roundtrip.json")["sender"].clone()).unwrap();
+    let header = |from: &str, to: &str, kind| remote::EnvelopeHeader {
+        v: 1,
+        r#type: kind,
+        id: request.approval_id.clone(),
+        account: "acct_r3b_fixture".into(),
+        from: from.into(),
+        to: to.into(),
+        created_at: now,
+        exp: request.exp,
+        extra: remote::Extra::new(),
+    };
+    let sealed = remote::envelope::seal(
+        header(
+            &executor.device_id,
+            &record.device_id,
+            remote::EnvelopeType::ApprovalRequest,
+        ),
+        &remote::canonical::jcs(&request).unwrap(),
+        &record.dk_pub,
+        executor_key,
+    )
+    .unwrap();
+    let opened =
+        remote::envelope::open(&sealed, &record.device_id, identity, &executor, now).unwrap();
+    let received: remote::ApprovalRequest = remote::canonical::from_json(&opened).unwrap();
+    assert_eq!(received, request);
+    let input =
+        json!({"device":record,"request":received,"canonical":canonical,"decision":decision});
+    std::fs::write(
+        directory.join("input.tmp"),
+        remote::canonical::jcs(&input).unwrap(),
+    )
+    .unwrap();
+    std::fs::rename(directory.join("input.tmp"), directory.join("input.json")).unwrap();
+    let output = std::path::PathBuf::from(
+        std::env::var_os("R3B_STRONG_OUTPUT").expect("explicit owner output directory required"),
+    );
+    let reply = output.join("owner-result.json");
+    let signed = output.join("owner-strong-result.json");
+    let repeated_reply = output.join("owner-repeat-result.json");
+    while !signed.try_exists().unwrap() || !repeated_reply.try_exists().unwrap() {
+        assert!(
+            !reply.try_exists().unwrap(),
+            "owner failed before publishing signed decisions"
+        );
+        assert!(
+            began.elapsed() < std::time::Duration::from_secs(850),
+            "owner Strong fixture timed out; PCP guards will clean up"
+        );
+        std::thread::sleep(std::time::Duration::from_millis(250));
+    }
+    let bytes = std::fs::read(signed).unwrap();
+    assert!(bytes.len() <= 64 * 1024);
+    let result: Value = remote::canonical::from_json(&bytes).unwrap();
+    let mut approver = record.clone();
+    approver.ak_s = Some(serde_json::from_value(result["ak_s"].clone()).unwrap());
+    assert_eq!(
+        approver.ak_s.as_ref().unwrap().alg,
+        SignatureAlgorithm::RS256
+    );
+    approver.caps.push(remote::Capability::ApproveStrong);
+    let decision: remote::ApprovalDecision =
+        serde_json::from_value(result["decision"].clone()).unwrap();
+    let repeated_bytes = std::fs::read(repeated_reply).unwrap();
+    assert!(repeated_bytes.len() <= 64 * 1024);
+    let repeated_result: Value = remote::canonical::from_json(&repeated_bytes).unwrap();
+    let repeated: remote::ApprovalDecision =
+        serde_json::from_value(repeated_result["decision"].clone()).unwrap();
+    let verification_started = std::time::Instant::now();
+    let envelope = remote::envelope::seal(
+        header(
+            &approver.device_id,
+            &executor.device_id,
+            remote::EnvelopeType::ApprovalDecision,
+        ),
+        &remote::canonical::jcs(&decision).unwrap(),
+        &executor.dk_pub,
+        identity,
+    )
+    .unwrap();
+    let plaintext = remote::envelope::open(
+        &envelope,
+        &executor.device_id,
+        executor_key,
+        &approver,
+        crate::remote::view::unix_seconds(),
+    )
+    .unwrap();
+    let decision: remote::ApprovalDecision = remote::canonical::from_json(&plaintext).unwrap();
+    let verify_now = crate::remote::view::unix_seconds();
+    #[derive(Default)]
+    struct Nonces(std::collections::HashSet<String>);
+    impl remote::validation::NonceStore for Nonces {
+        fn consume(&mut self, nonce: &str, _: &str, _: i64) -> remote::Result<()> {
+            if self.0.insert(nonce.to_owned()) {
+                Ok(())
+            } else {
+                Err(remote::RemoteError::Replay)
+            }
+        }
+    }
+    let mut nonces = Nonces::default();
+    remote::validation::verify_and_consume_decision(
+        &decision,
+        &request,
+        &canonical,
+        &approver,
+        verify_now,
+        &mut nonces,
+    )
+    .unwrap();
+    assert!(matches!(
+        remote::validation::verify_and_consume_decision(
+            &repeated,
+            &request,
+            &canonical,
+            &approver,
+            verify_now,
+            &mut nonces
+        ),
+        Err(remote::RemoteError::Replay)
+    ));
+    let mut changed = decision.clone();
+    changed.digest = "0".repeat(64);
+    assert!(remote::validation::verify_decision(
+        &changed, &request, &canonical, &approver, verify_now
+    )
+    .is_err());
+    let mut quick = decision.clone();
+    quick.level = remote::ApprovalLevel::Quick;
+    assert!(matches!(
+        remote::validation::verify_decision(&quick, &request, &canonical, &approver, verify_now),
+        Err(remote::RemoteError::InsufficientLevel)
+    ));
+    let mut wrong = approver.clone();
+    wrong.ak_s.as_mut().unwrap().alg = SignatureAlgorithm::ES256;
+    assert!(remote::validation::verify_decision(
+        &decision, &request, &canonical, &wrong, verify_now
+    )
+    .is_err());
+    let mut verified = json!({"status":"passed","tier":"T2","alg":"RS256","signature_bytes":remote::keys::decode_b64(&decision.sig).unwrap().len(),
+        "hpke_roundtrip":true,"accepted_nonces":1,"replay_rejected":true,"digest_tamper_rejected":true,"quick_t2_rejected":true,
+        "wrong_record_alg_rejected":true,"verification_ms":verification_started.elapsed().as_secs_f64()*1000.0,
+        "milliseconds":began.elapsed().as_secs_f64()*1000.0});
+    std::fs::write(
+        directory.join("strong-verified.json"),
+        remote::canonical::jcs(&verified).unwrap(),
+    )
+    .unwrap();
+    while !reply.try_exists().unwrap() {
+        assert!(began.elapsed() < std::time::Duration::from_secs(850));
+        std::thread::sleep(std::time::Duration::from_millis(250));
+    }
+    let bytes = std::fs::read(reply).unwrap();
+    assert!(bytes.len() <= 64 * 1024);
+    let result: Value = remote::canonical::from_json(&bytes).unwrap();
+    assert_eq!(result["cancelled"], true);
+    assert_eq!(result["cancel_status"], 3);
+    assert_eq!(result["hello_cleanup"], true);
+    verified["hello"] = result["timings"].clone();
+    verified["cancel_status"] = result["cancel_status"].clone();
+    verified["cancel_attempts"] = result["cancel_attempts"].clone();
+    verified["hello_cleanup"] = json!(true);
+    verified["native_repeat"] = result["native_repeat"].clone();
+    verified
 }

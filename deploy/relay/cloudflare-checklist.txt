@@ -18,6 +18,11 @@ KeyValet relay origin deployment checklist
    https://www.cloudflare.com/ips/ . Refresh the allowlist when ranges change.
    Do not expose port 8787. Restrict administrative SSH separately.
    This firewall rule is also required to trust CF-Connecting-IP forwarded by nginx.
+   The template also checks the original TCP peer ($realip_remote_addr), even
+   when the shared nginx http block uses real_ip_header. On a shared host, keep
+   this per-vhost allowlist while coordinating host firewall changes with the
+   owners of other HTTPS services. Test that direct-origin requests return 403,
+   including requests that spoof CF-Connecting-IP, and proxied requests return 200.
 9. Optional: enable Authenticated Origin Pulls in Cloudflare, install its CA
    in /etc/ssl/keyvalet-relay/cloudflare-origin-pull-ca.pem and uncomment
    ssl_client_certificate / ssl_verify_client in the nginx template.
@@ -27,3 +32,12 @@ KeyValet relay origin deployment checklist
     Verify reconnection and inbox replay after an edge or origin restart.
 11. For Docker on Linux, use --network=host and a volume owned by UID/GID 8787.
     Keep nginx on the host and retain the loopback-only listener.
+12. For mobile push, create a dedicated non-login keyvalet-push user/group and
+    install kv-push at /usr/local/lib/keyvalet/kv-push. Copy keyvalet-push.service
+    to /etc/systemd/system and push.conf to the relay-server drop-in directory.
+    Create /etc/keyvalet-push/provider.env from push.env.example. Provider key
+    files are root:keyvalet-push 0640; the shared random relay-bearer is root-only
+    0600 and enters both services through systemd LoadCredential. No token or
+    private key belongs in the repository. Verify only 127.0.0.1:8788 listens;
+    /v1/push without its private bearer returns 401. APNs and FCM provider
+    credentials must match the actual mobile App. Do not expose this port in nginx.

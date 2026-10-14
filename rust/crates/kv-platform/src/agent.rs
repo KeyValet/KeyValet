@@ -263,7 +263,7 @@ impl AgentConn {
 pub struct AgentHub {
     conns: Mutex<HashMap<AgentKey, Arc<AgentConn>>>,
     prompt_locks: Mutex<HashMap<AgentKey, Arc<AsyncMutex<()>>>>,
-    /// How the currently registered agent was accepted ("signed" / "unsigned"); exposed to the
+    /// How the currently registered agent was accepted ("signed" on macOS, "installed" on Windows); exposed to the
     /// session status so `agent_trust` says what it means.
     trust: Mutex<&'static str>,
 }
@@ -434,6 +434,15 @@ impl Authenticator for AgentAuthenticator {
                 Some("approved") => AuthOutcome::Approved,
                 Some("unsupported") => AuthOutcome::Unsupported,
                 Some("denied") => AuthOutcome::Denied,
+                Some(outcome @ ("cancelled" | "failed" | "timeout" | "unavailable")) => {
+                    let code = match outcome {
+                        "cancelled" => "local_approval_cancelled",
+                        "failed" => "local_approval_failed",
+                        "timeout" => "local_approval_timeout",
+                        _ => "local_approval_unavailable",
+                    };
+                    AuthOutcome::Error(json!({"code":code}).to_string())
+                }
                 _ => AuthOutcome::Error("malformed agent reply".to_string()),
             },
             Ok((_, Some(_))) => AuthOutcome::Error("unexpected agent reply payload".to_string()),
@@ -1354,6 +1363,33 @@ mod tests {
             } else {
                 assert!(matches!(actual, AuthOutcome::Error(_)));
             }
+        }
+    }
+
+    #[tokio::test]
+    async fn r3a_authentication_cancellation_failure_and_timeout_are_never_denied() {
+        for (outcome, code) in [
+            ("cancelled", "local_approval_cancelled"),
+            ("failed", "local_approval_failed"),
+            ("timeout", "local_approval_timeout"),
+            ("unavailable", "local_approval_unavailable"),
+        ] {
+            let (hub, key, mut peer) = registered_hub();
+            let authenticator = AgentAuthenticator { hub, key };
+            let call =
+                tokio::spawn(async move { authenticator.authenticate("test", "Cancel").await });
+            let request = read_request(&mut peer).await;
+            peer.get_mut()
+                .write_all(&wire::encode_line(
+                    &json!({"id":request["id"],"outcome":outcome}),
+                ))
+                .await
+                .unwrap();
+            let AuthOutcome::Error(message) = call.await.unwrap() else {
+                panic!("only an explicit denial may be denied")
+            };
+            let error: Value = serde_json::from_str(&message).unwrap();
+            assert_eq!(error["code"], code);
         }
     }
 

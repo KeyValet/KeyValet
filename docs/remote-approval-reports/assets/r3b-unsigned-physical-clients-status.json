@@ -1,0 +1,37 @@
+{
+  "progress.json": {
+    "phase": "complete",
+    "utc": "2026-10-14T05:56:48.3372897Z"
+  },
+  "task": "Ready",
+  "result.json": {
+    "apps": [
+      {
+        "login_attempted": false,
+        "name": "codex",
+        "source": "https://chatgpt.com/codex/install.ps1",
+        "installed": false,
+        "error_type": "WebException"
+      },
+      {
+        "source": "https://claude.ai/install.ps1",
+        "installer_sha256": "a6cc2f07092a9bd27b043558efcd44a6da0a6562db7b120849606715eacf65b2",
+        "installer_exit": 1,
+        "name": "claude",
+        "login_attempted": false,
+        "installed": false
+      },
+      {
+        "source": "https://cursor.com/install?win32=true",
+        "installer_sha256": "c3c52dccadad30254c5509413ef7746d44f2110690e1c3414721e47943f737c2",
+        "installer_exit": 0,
+        "name": "cursor-agent",
+        "login_attempted": false,
+        "installed": false
+      }
+    ],
+    "login_attempted": false,
+    "credentials_read": false
+  },
+  "ssh_exit": 0
+}

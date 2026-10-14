@@ -2,6 +2,8 @@
 
 第一轮（W0–W9，见 [remote-approval-agent-prompts-2026-10.zh-CN.md](remote-approval-agent-prompts-2026-10.zh-CN.md)）交付了契约、relay、helper、CLI、桌面、手机、安装器和软件级全链路测试，但 §16 的实机验收表基本还是「未通过 / 未测」。第二轮的目标只有一个：**把 M2（Ubuntu × MacBook）、M3（手机）、M4（Windows）在真机上跑通，并把事实回写进文档。**
 
+第三轮（真机闭环收尾）的 prompt 见 [remote-approval-agent-prompts-r3-2026-10.zh-CN.md](remote-approval-agent-prompts-r3-2026-10.zh-CN.md)。
+
 用法同第一轮：每个代码块整块复制给一个 agent。R2-A、R2-B、R2-C、R2-D 并行启动；R2-E 在前四个报告齐后最后跑。
 
 本轮已拍板、所有 prompt 都以此为准的决定（不同意的话，复制前先改）：

@@ -1,0 +1,21 @@
+{
+  "observed_utc": "2026-10-13T23:48:40.307345+00:00",
+  "source_receipt": "r3a-presence-transitions-20261013T234742Z.json",
+  "started_utc": "2026-10-13T23:46:49.250355+00:00",
+  "finished_utc": "2026-10-13T23:47:42.180557+00:00",
+  "sample_counts": {
+    "present": 19,
+    "away": 20
+  },
+  "os_event_count": 2,
+  "os_callbacks_on_main_thread": true,
+  "real_locked_duration_s": 28.473942,
+  "locked_to_authenticated_away_s": 8.160197,
+  "unlocked_to_authenticated_present_s": 6.782415,
+  "complete_transition_pair": true,
+  "remote_hint_within_5s": false,
+  "physical_lid_test_performed": false,
+  "credential_operations": 0,
+  "keyvalet_touch_id_requests": 0,
+  "secret_values_in_evidence": false
+}

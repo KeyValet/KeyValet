@@ -8,12 +8,38 @@ use tokio::io::{AsyncBufReadExt, AsyncRead, AsyncWrite, AsyncWriteExt, BufReader
 
 pub const APPROVAL_ID: &str = "01J00000000000000000000000";
 
+/// Metadata-only recording for the explicitly compiled live runtime fixture.
+pub fn probe_event(event: &str, mut fields: Value) {
+    use std::io::Write;
+    static START: std::sync::OnceLock<std::time::Instant> = std::sync::OnceLock::new();
+    static LOG: Mutex<()> = Mutex::new(());
+    let Ok(path) = std::env::var("R2D_WIRE_LOG") else {
+        return;
+    };
+    let _guard = LOG.lock().unwrap();
+    fields["event"] = json!(event);
+    fields["elapsed_s"] = json!(START
+        .get_or_init(std::time::Instant::now)
+        .elapsed()
+        .as_secs_f64());
+    if let Ok(mut file) = std::fs::OpenOptions::new()
+        .append(true)
+        .create(true)
+        .open(path)
+    {
+        let _ = writeln!(file, "{fields}");
+    }
+}
+
 #[derive(Clone)]
 pub enum Scenario {
     ApproveAfter(Duration),
     RestartAfter(Duration),
     Denied,
     Expired,
+    LocalDenied,
+    LocalExpired,
+    Cancelled,
     NoApprover,
     Offline,
     Never,
@@ -141,6 +167,11 @@ impl FakeHelper {
                     }
                     Scenario::Denied => self.pending_result("approval_denied"),
                     Scenario::Expired => self.pending_result("approval_expired"),
+                    Scenario::Cancelled => {
+                        let mut value = self.pending_result("approval_expired");
+                        value["reason"] = json!("cancelled");
+                        value
+                    }
                     Scenario::NoApprover => self.pending_result("no_approver"),
                     _ => {
                         tokio::time::sleep(wait).await;
@@ -160,6 +191,11 @@ impl FakeHelper {
                 let status = match self.scenario {
                     Scenario::Denied => Some("approval_denied"),
                     Scenario::Expired => Some("approval_expired"),
+                    Scenario::Cancelled => {
+                        let mut value = self.pending_result("approval_expired");
+                        value["reason"] = json!("cancelled");
+                        return value;
+                    }
                     Scenario::NoApprover => Some("no_approver"),
                     _ => None,
                 };
@@ -187,7 +223,10 @@ impl FakeHelper {
         }
     }
 
-    pub fn serve(self: &Arc<Self>, stream: impl AsyncRead + AsyncWrite + Unpin + Send + 'static) -> tokio::task::JoinHandle<()> {
+    pub fn serve(
+        self: &Arc<Self>,
+        stream: impl AsyncRead + AsyncWrite + Unpin + Send + 'static,
+    ) -> tokio::task::JoinHandle<()> {
         let helper = self.clone();
         tokio::spawn(async move {
             let (read, write) = tokio::io::split(stream);
@@ -206,9 +245,14 @@ impl FakeHelper {
                 calls.spawn(async move {
                     let announce = !request.op.starts_with("remote.");
                     let result = helper.request(&request.op, request.params).await;
+                    let local = if request.op == "httpRequest" { match helper.scenario {
+                        Scenario::LocalDenied => Some("local_approval_denied"),
+                        Scenario::LocalExpired => Some("local_approval_expired"),
+                        _ => None,
+                    }} else {None};
                     let frame = format!(
                         "{}\n",
-                        json!({"id": request.id, "ok": true, "result": result})
+                        if let Some(code)=local {json!({"id": request.id,"ok":false,"error":{"code":code,"approval_id":APPROVAL_ID}})} else {json!({"id": request.id, "ok": true, "result": result})}
                     );
                     let _ = writer.lock().await.write_all(frame.as_bytes()).await;
                     if announce && crate::approval::is_pending(&result) {

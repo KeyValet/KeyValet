@@ -1,8 +1,36 @@
 # Install in /etc/nginx/conf.d/keyvalet-relay.conf and replace relay.example.com.
 # The origin firewall must accept HTTPS only from Cloudflare's published IP ranges.
+# Refreshed from https://www.cloudflare.com/ips/ on 2026-10-12.
+# Use the original TCP peer even if a shared nginx http block enables real_ip_header.
+geo $realip_remote_addr $keyvalet_relay_cloudflare_origin {
+    default 0;
+    173.245.48.0/20 1;
+    103.21.244.0/22 1;
+    103.22.200.0/22 1;
+    103.31.4.0/22 1;
+    141.101.64.0/18 1;
+    108.162.192.0/18 1;
+    190.93.240.0/20 1;
+    188.114.96.0/20 1;
+    197.234.240.0/22 1;
+    198.41.128.0/17 1;
+    162.158.0.0/15 1;
+    104.16.0.0/13 1;
+    104.24.0.0/14 1;
+    172.64.0.0/13 1;
+    131.0.72.0/22 1;
+    2400:cb00::/32 1;
+    2606:4700::/32 1;
+    2803:f800::/32 1;
+    2405:b500::/32 1;
+    2405:8100::/32 1;
+    2a06:98c0::/29 1;
+    2c0f:f248::/32 1;
+}
 server {
     listen 443 ssl http2;
     server_name relay.example.com;
+    if ($keyvalet_relay_cloudflare_origin = 0) { return 403; }
     ssl_certificate     /etc/ssl/keyvalet-relay/origin.pem;
     ssl_certificate_key /etc/ssl/keyvalet-relay/origin.key;
     # Optional Authenticated Origin Pulls: enable in Cloudflare and install its CA.
@@ -11,6 +39,7 @@ server {
     client_max_body_size 1m;
     # Avoid logging bearer tokens, bodies or pairing query parameters.
     access_log off;
+    include /etc/nginx/keyvalet-push-private.conf;
     location / {
         proxy_pass http://127.0.0.1:8787;
         proxy_http_version 1.1;

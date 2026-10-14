@@ -10,6 +10,178 @@ const NOW: i64 = 1791648000;
 const URI: &str = "kv-pair://relay.example.com/AAAAAAAAAAAAAAAAAAAAAAAAAA";
 
 #[test]
+fn r3a_rejoin_is_an_explicit_owner_intent_and_still_requires_sas_confirmation() {
+    let dir = tempfile::tempdir().unwrap();
+    let mut host = Fake::new(dir.path());
+    host.answers.push_back(Some("y".into()));
+    run(&mut host, &["pair", "--rejoin", URI, "--json"]).unwrap();
+    assert_eq!(host.ops(), [Op::PairComplete, Op::PairConfirm]);
+    assert_eq!(host.requests[0].params, json!({"uri":URI,"rejoin":true}));
+    assert_eq!(
+        host.requests[1].params,
+        json!({"sas":"123456","confirmed":true})
+    );
+
+    let mut host = Fake::new(dir.path());
+    host.answers.push_back(Some("n".into()));
+    assert_eq!(
+        run(&mut host, &["pair", "--rejoin", URI]).unwrap_err().code,
+        "user_cancelled"
+    );
+    assert_eq!(host.ops(), [Op::PairComplete]);
+    for args in [
+        vec!["pair", "--rejoin"],
+        vec!["pair", "--rejoin", "--new"],
+        vec!["pair", "--rejoin", "--resume"],
+    ] {
+        let mut host = Fake::new(dir.path());
+        assert!(run(&mut host, &args).is_err());
+        assert!(host.ops().is_empty());
+    }
+}
+
+#[test]
+fn r3a_cli_finite_t2_does_not_issue_after_only_the_first_label() {
+    for second in [None, Some("wrong")] {
+        let dir = tempfile::tempdir().unwrap();
+        let mut host = Fake::new(dir.path());
+        host.replies.extend([
+            (Op::DevicesList, Response::ok(json!({"devices":host.directory}))),
+            (Op::GrantIssue, Response::ok(json!({"confirmation_token":"test-first-proof","expires_at":NOW+120,"device_id":"dev_srv","label":"srv","confirmations_left":2}))),
+            (Op::GrantIssue, Response::ok(json!({"confirmation_token":"test-second-proof","expires_at":NOW+120,"device_id":"dev_srv","label":"srv","confirmations_left":1}))),
+        ]);
+        host.answers
+            .extend([Some("srv".into()), second.map(str::to_owned)]);
+        let error = run(
+            &mut host,
+            &[
+                "remote",
+                "srv",
+                "unattended",
+                "--include-sensitive",
+                "--until",
+                "1h",
+            ],
+        )
+        .unwrap_err();
+        assert_eq!(error.code, "user_cancelled");
+        assert_eq!(
+            host.ops(),
+            [Op::DevicesList, Op::GrantIssue, Op::GrantIssue]
+        );
+    }
+}
+
+#[test]
+fn r3a_cli_rejects_changed_or_reused_second_confirmation_before_signing() {
+    for (field, value) in [
+        ("confirmation_token", json!("test-first-proof")),
+        ("confirmation_token", json!("")),
+        ("expires_at", json!(NOW + 121)),
+        ("expires_at", json!(NOW + 119)),
+        ("device_id", json!("dev_other")),
+        ("label", json!("other")),
+        ("confirmations_left", json!(2)),
+    ] {
+        let dir = tempfile::tempdir().unwrap();
+        let mut host = Fake::new(dir.path());
+        let mut second = json!({"confirmation_token":"test-second-proof","expires_at":NOW+120,
+            "device_id":"dev_srv","label":"srv","confirmations_left":1});
+        second[field] = value;
+        host.replies.extend([
+            (
+                Op::DevicesList,
+                Response::ok(json!({"devices":host.directory})),
+            ),
+            (
+                Op::GrantIssue,
+                Response::ok(
+                    json!({"confirmation_token":"test-first-proof","expires_at":NOW+120,
+                "device_id":"dev_srv","label":"srv","confirmations_left":2}),
+                ),
+            ),
+            (Op::GrantIssue, Response::ok(second)),
+        ]);
+        host.answers
+            .extend([Some("srv".into()), Some("srv".into())]);
+        let error = run(
+            &mut host,
+            &[
+                "remote",
+                "srv",
+                "unattended",
+                "--include-sensitive",
+                "--until",
+                "1h",
+            ],
+        )
+        .unwrap_err();
+        assert_eq!(error.code, "invalid_response");
+        assert_eq!(
+            host.ops(),
+            [Op::DevicesList, Op::GrantIssue, Op::GrantIssue]
+        );
+        assert_eq!(host.answers.len(), 1);
+    }
+}
+
+#[test]
+fn r3a_nested_remote_grant_revoke_all_uses_the_same_owner_directive() {
+    let dir = tempfile::tempdir().unwrap();
+    let mut host = Fake::new(dir.path());
+    run(
+        &mut host,
+        &["remote", "srv", "grant", "revoke-all", "--json"],
+    )
+    .unwrap();
+    assert_eq!(host.ops(), [Op::DevicesList, Op::DirectiveIssue]);
+    assert_eq!(host.requests[1].params["op"], "revoke_all_grants");
+    assert_eq!(host.requests[1].params["aud"], "dev_srv");
+    for key in ["sig", "iss", "nonce", "exp"] {
+        assert!(host.requests[1].params.get(key).is_none());
+    }
+    for extra in ["extra", "--sig", "--yes"] {
+        let mut host = Fake::new(dir.path());
+        assert!(run(&mut host, &["remote", "srv", "grant", "revoke-all", extra]).is_err());
+        assert!(host.ops().is_empty());
+    }
+}
+
+#[test]
+fn r3a_pair_resume_confirms_the_live_sas_without_redeeming_a_token_again() {
+    let dir = tempfile::tempdir().unwrap();
+    let mut host = Fake::new(dir.path());
+    host.replies.extend([
+        (Op::Status, Response::ok(json!({"pairing":{"state":"pending","sas":"123456","expires_at":NOW+60,"global_grants":0}}))),
+        (Op::PairConfirm, Response::ok(json!({}))),
+        (Op::Status, Response::ok(json!({"pairing":{"state":"completed"}}))),
+    ]);
+    host.answers.push_back(Some("y".into()));
+    let result = run(&mut host, &["pair", "--resume", "--json"]).unwrap();
+    assert_eq!(json!(result)["result"]["paired"], true);
+    assert_eq!(host.ops(), [Op::Status, Op::PairConfirm, Op::Status]);
+    assert_eq!(
+        host.requests[1].params,
+        json!({"sas":"123456","confirmed":true})
+    );
+    for pairing in [json!(null), json!({"sas":"123456","expires_at":NOW-1})] {
+        let mut host = Fake::new(dir.path());
+        host.replies
+            .push_back((Op::Status, Response::ok(json!({"pairing":pairing}))));
+        assert!(run(&mut host, &["pair", "--resume"]).is_err());
+        assert_eq!(host.ops(), [Op::Status]);
+    }
+    let mut host = Fake::new(dir.path());
+    host.replies.push_back((
+        Op::Status,
+        Response::ok(json!({"pairing":{"sas":"123456","expires_at":NOW+60}})),
+    ));
+    host.answers.push_back(Some("n".into()));
+    assert!(run(&mut host, &["pair", "--resume"]).is_err());
+    assert_eq!(host.ops(), [Op::Status]);
+}
+
+#[test]
 fn pairing_global_grants_notice_and_exclusion_are_typed_and_explicit() {
     for (choice, expected) in [
         (Some("e"), Some(true)),
@@ -211,6 +383,94 @@ fn record(id: &str, label: &str, execute: bool) -> DeviceRecord {
         "ak_q":null,"ak_s":null,"attestation":null,"caps":if execute {vec!["execute"]} else {vec!["approve_quick","approve_strong"]}})).unwrap()
 }
 
+#[test]
+fn account_recovery_reads_a_secret_passes_only_an_intent_and_persists_public_binding() {
+    let directory = tempfile::tempdir().unwrap();
+    let mut fake = Fake::new(directory.path());
+    let old = kv_core::remote::keys::encode_b64(&[1; 32]);
+    let new = kv_core::remote::keys::encode_b64(&[2; 32]);
+    fake.answers.push_back(Some(old.clone()));
+    let result = kv_ipc::remote::AccountRecoverResult {
+        binding: kv_core::remote::ipc::RelayBinding {
+            relay_url: "https://relay.example.com".into(),
+            device_id: "dev_restored".into(),
+            account_id: "acct_restored".into(),
+        },
+        recovery_code: new.clone(),
+    };
+    fake.replies.push_back((
+        Op::AccountRecover,
+        Response::ok(serde_json::to_value(&result).unwrap()),
+    ));
+    let argv: Vec<String> = ["relay", "recover", "acct_restored", "--software", "--json"]
+        .into_iter()
+        .map(str::to_owned)
+        .collect();
+    super::run(&mut fake, &argv).unwrap();
+    assert_eq!(fake.ops(), [Op::AccountRecover]);
+    assert_eq!(
+        fake.requests[0].params,
+        json!({"account_id":"acct_restored","recovery_code":old,
+        "relay_url":"https://relay.example.com","software":true})
+    );
+    assert!(!serde_json::to_string(&argv).unwrap().contains(&old));
+    assert!(!format!("{result:?}").contains(&new));
+    assert!(matches!(&fake.emitted[0].output,Success::RelayRecovered(value) if value == &result));
+    assert_eq!(
+        relay::Config::read(&fake.config)
+            .unwrap()
+            .account_id
+            .as_deref(),
+        Some("acct_restored")
+    );
+    assert!(output::render(&fake.emitted[0].output, false, false).contains(&new));
+}
+
+#[test]
+fn account_recovery_rejects_missing_secrets_arguments_and_a_substituted_binding() {
+    for (answer, exit) in [(None, 6), (Some("bad-code".to_owned()), 2)] {
+        let directory = tempfile::tempdir().unwrap();
+        let mut fake = Fake::new(directory.path());
+        fake.answers.push_back(answer);
+        let args: Vec<String> = ["relay", "recover", "acct_restored"]
+            .into_iter()
+            .map(str::to_owned)
+            .collect();
+        assert_eq!(super::run(&mut fake, &args).unwrap_err().exit_code(), exit);
+        assert!(fake.requests.is_empty());
+    }
+    let invalid: Vec<String> = [
+        "relay",
+        "recover",
+        "acct_restored",
+        "--recovery-code",
+        "secret",
+    ]
+    .into_iter()
+    .map(str::to_owned)
+    .collect();
+    assert_eq!(Invocation::parse(&invalid).unwrap_err().exit_code(), 2);
+    let directory = tempfile::tempdir().unwrap();
+    let mut fake = Fake::new(directory.path());
+    fake.answers
+        .push_back(Some(kv_core::remote::keys::encode_b64(&[1; 32])));
+    fake.replies.push_back((Op::AccountRecover,Response::ok(json!({"binding":{
+        "relay_url":"https://relay.example.com","device_id":"dev_restored","account_id":"substituted"},
+        "recovery_code":kv_core::remote::keys::encode_b64(&[2;32])}))));
+    let argv: Vec<String> = ["relay", "recover", "acct_restored"]
+        .into_iter()
+        .map(str::to_owned)
+        .collect();
+    assert_eq!(super::run(&mut fake, &argv).unwrap_err().exit_code(), 3);
+    assert_eq!(
+        relay::Config::read(&fake.config)
+            .unwrap()
+            .account_id
+            .as_deref(),
+        Some("acct_test")
+    );
+}
+
 struct Fake {
     directory: Vec<DeviceRecord>,
     requests: Vec<Request>,
@@ -228,6 +488,7 @@ struct Fake {
     verified: usize,
     fail: Option<&'static str>,
     confirmation_advances: VecDeque<i64>,
+    confirmation_deadlines: HashMap<String, i64>,
     fail_emit_at: Option<usize>,
 }
 
@@ -255,6 +516,7 @@ impl Fake {
             verified: 0,
             fail: None,
             confirmation_advances: VecDeque::new(),
+            confirmation_deadlines: HashMap::new(),
             fail_emit_at: None,
         }
     }
@@ -301,14 +563,27 @@ impl Fake {
                         .unwrap()
                         .label
                         .clone();
+                    self.confirmation_deadlines
+                        .insert(intent.aud.clone(), self.now + 120);
                     return Response::ok(
-                        json!({"confirmation_token":"one-use-helper-token","expires_at":self.now+120,"device_id":intent.aud,"label":label}),
+                        json!({"confirmation_token":"one-use-helper-token","expires_at":self.now+120,"device_id":intent.aud,"label":label,"confirmations_left":2}),
                     );
                 }
                 if intent.scope.max_tier == Tier::T2 {
+                    if intent.confirmation_token.as_deref() == Some("one-use-helper-token") {
+                        let expires_at = self
+                            .confirmation_deadlines
+                            .get(&intent.aud)
+                            .copied()
+                            .unwrap_or(NOW + 120);
+                        return Response::ok(
+                            json!({"confirmation_token":"one-use-helper-second-token","expires_at":expires_at,
+                            "device_id":intent.aud,"label":intent.confirm,"confirmations_left":1}),
+                        );
+                    }
                     assert_eq!(
                         intent.confirmation_token.as_deref(),
-                        Some("one-use-helper-token")
+                        Some("one-use-helper-second-token")
                     );
                 }
                 let grant = Grant {
@@ -519,7 +794,12 @@ fn all_table_commands_use_only_cli_ops_and_round_trip_json() {
                 "--until",
                 "7d",
             ],
-            &[Op::DevicesList, Op::GrantIssue, Op::GrantIssue],
+            &[
+                Op::DevicesList,
+                Op::GrantIssue,
+                Op::GrantIssue,
+                Op::GrantIssue,
+            ],
         ),
         (
             &["remote", "srv", "lock"],
@@ -591,6 +871,9 @@ fn all_table_commands_use_only_cli_ops_and_round_trip_json() {
             }
             .into(),
         ));
+        if args.contains(&"unattended") {
+            fake.answers.push_back(Some("srv".into()));
+        }
         let result = run(&mut fake, args).unwrap_or_else(|e| panic!("{args:?}: {e:?}"));
         assert_eq!(fake.ops(), *ops, "{args:?}");
         fake.emit(&result, true).unwrap();
@@ -717,7 +1000,7 @@ fn unattended_confirmation_uses_helper_label_and_rejects_invalid_preparations() 
         "7d",
     ];
     let prepared = json!({"confirmation_token":"one-use-helper-token","expires_at":NOW+120,
-        "device_id":"dev_srv","label":"renamed-executor"});
+        "device_id":"dev_srv","label":"renamed-executor","confirmations_left":2});
     let temp = tempfile::tempdir().unwrap();
     let mut fake = Fake::new(temp.path());
     fake.replies.push_back((
@@ -726,7 +1009,10 @@ fn unattended_confirmation_uses_helper_label_and_rejects_invalid_preparations() 
     ));
     fake.replies
         .push_back((Op::GrantIssue, Response::ok(prepared.clone())));
-    fake.answers.push_back(Some("renamed-executor".into()));
+    fake.answers.extend([
+        Some("renamed-executor".into()),
+        Some("renamed-executor".into()),
+    ]);
     run(&mut fake, &argv).unwrap();
     assert_eq!(fake.requests[2].params["confirm"], "renamed-executor");
 
@@ -830,6 +1116,18 @@ fn parser_snapshots_preserve_argument_and_scope_shapes() {
             shape(&json!({"ok":false,"error":error})),
             json!({"ok":"boolean","error":{"code":"string","message":"string"}})
         );
+    }
+}
+
+#[test]
+fn r3b_remote_audit_limit_matches_the_receiver_bound() {
+    for limit in ["1", "200"] {
+        let arguments = ["remote", "srv", "audit", "--limit", limit].map(str::to_owned);
+        assert!(Invocation::parse(&arguments).is_ok());
+    }
+    for limit in ["0", "201", "1000", "1001"] {
+        let arguments = ["remote", "srv", "audit", "--limit", limit].map(str::to_owned);
+        assert!(Invocation::parse(&arguments).is_err());
     }
 }
 
@@ -1105,8 +1403,12 @@ fn wildcard_grants_include_future_executors_but_t2_requires_each_label() {
     assert_eq!(fake.requests[1].params["scope"]["level"], "global");
     assert_eq!(fake.notices.len(), 1);
     let mut fake = Fake::new(temp.path());
-    fake.answers
-        .extend([Some("srv".into()), Some("other".into())]);
+    fake.answers.extend([
+        Some("srv".into()),
+        Some("srv".into()),
+        Some("other".into()),
+        Some("other".into()),
+    ]);
     let Success::GrantsIssued { grants } = run(
         &mut fake,
         &[
@@ -1128,6 +1430,8 @@ fn wildcard_grants_include_future_executors_but_t2_requires_each_label() {
         fake.ops(),
         [
             Op::DevicesList,
+            Op::GrantIssue,
+            Op::GrantIssue,
             Op::GrantIssue,
             Op::GrantIssue,
             Op::GrantIssue,
@@ -1780,7 +2084,7 @@ fn wildcard_t2_cancellation_never_issues_a_partial_grant() {
         .requests
         .iter()
         .skip(1)
-        .all(|r| r.params.get("confirm").is_none()));
+        .all(|r| r.params["confirmation_token"] != "one-use-helper-second-token"));
 }
 
 #[test]

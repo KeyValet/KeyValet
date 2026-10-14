@@ -1,0 +1,52 @@
+{
+  "utc": "2026-10-14T00:17:40.626127+00:00",
+  "checks": [
+    {
+      "url": "https://keyvalet.dev/pricing/",
+      "status": 200,
+      "expected_status": 404,
+      "sha256": "56c78792b63dbd7aa49e3d0577a54bdb79ceddd6fb8d94cdbe923ab87d85317c",
+      "bytes": 7851,
+      "cache_status": "HIT",
+      "age": "1063",
+      "passed": false,
+      "pricing_page_removed": false
+    },
+    {
+      "url": "https://keyvalet.dev/pricing",
+      "status": 404,
+      "expected_status": 404,
+      "sha256": "48a0c9f0385f0cd61782a3471f20a87c80921d945a4ed6a7e77947598aa68f57",
+      "bytes": 2516,
+      "cache_status": null,
+      "age": null,
+      "passed": true,
+      "pricing_page_removed": true
+    },
+    {
+      "url": "https://keyvalet.dev/zh-CN/pricing/",
+      "status": 200,
+      "expected_status": 404,
+      "sha256": "87de21cbf6e0b7bfefb787985b7b9611962078a7d011c1654fcc86965eeedd1b",
+      "bytes": 7905,
+      "cache_status": "HIT",
+      "age": "1061",
+      "passed": false,
+      "pricing_page_removed": false
+    },
+    {
+      "url": "https://keyvalet.dev/zh-CN/pricing",
+      "status": 404,
+      "expected_status": 404,
+      "sha256": "48a0c9f0385f0cd61782a3471f20a87c80921d945a4ed6a7e77947598aa68f57",
+      "bytes": 2516,
+      "cache_status": null,
+      "age": null,
+      "passed": true,
+      "pricing_page_removed": true
+    }
+  ],
+  "passed": false,
+  "cache_purge_everything_api_success": true,
+  "cloudflare_settings_changed": false
+}

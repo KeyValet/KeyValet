@@ -1,0 +1,19 @@
+{
+  "started_utc": "2026-10-13T03:19:09.389503+00:00",
+  "rust": "1.99.0",
+  "environment": {
+    "CARGO_INCREMENTAL": "0",
+    "CARGO_PROFILE_DEV_DEBUG": "0",
+    "CARGO_PROFILE_TEST_DEBUG": "0",
+    "CARGO_TARGET_DIR": "/Users/guang/dev/keyvalet/rust/target-r2a"
+  },
+  "fmt": 0,
+  "clippy": 0,
+  "build": 0,
+  "test": 0,
+  "passed": 1342,
+  "failed": 0,
+  "ignored": 10,
+  "groups": 69,
+  "finished_utc": "2026-10-13T03:24:02.995614+00:00"
+}

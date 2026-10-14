@@ -79,6 +79,10 @@ fn provider_error(error: kv_ipc::remote::DeviceKeyError) -> RemoteError {
         kv_ipc::remote::DeviceKeyError::Unavailable => RemoteError::KeyUnavailable,
         kv_ipc::remote::DeviceKeyError::UnsupportedAlgorithm => RemoteError::UnsupportedAlgorithm,
         kv_ipc::remote::DeviceKeyError::OperationFailed => RemoteError::KeyOperationFailed,
+        kv_ipc::remote::DeviceKeyError::OperationCancelled => RemoteError::KeyOperationCancelled,
+        kv_ipc::remote::DeviceKeyError::AuthenticationFailed => {
+            RemoteError::KeyAuthenticationFailed
+        }
     }
 }
 
@@ -182,6 +186,8 @@ fn software_provider_error(error: RemoteError) -> kv_ipc::remote::DeviceKeyError
         RemoteError::InvalidKey | RemoteError::InvalidEncoding => DeviceKeyError::InvalidKey,
         RemoteError::UnsupportedAlgorithm => DeviceKeyError::UnsupportedAlgorithm,
         RemoteError::KeyUnavailable => DeviceKeyError::Unavailable,
+        RemoteError::KeyOperationCancelled => DeviceKeyError::OperationCancelled,
+        RemoteError::KeyAuthenticationFailed => DeviceKeyError::AuthenticationFailed,
         _ => DeviceKeyError::OperationFailed,
     }
 }
@@ -517,6 +523,44 @@ mod identity_tests {
     }
 
     #[test]
+    fn device_record_with_dk_sig_pair_sas_vector_binds_both_keys() {
+        let vector = fixture("device_record_with_dk_sig_pair_sas.json");
+        let token = decode_b64(vector["token"].as_str().unwrap()).unwrap();
+        let mut initiator = record(&vector["initiator"]);
+        let joiner = record(&vector["joiner"]);
+        let sas = super::super::pairing::device_sas(&token, &initiator, &joiner).unwrap();
+        assert_eq!(sas, vector["expect"]["sas"]);
+        assert_eq!(
+            super::super::pairing::device_sas(&token, &joiner, &initiator).unwrap(),
+            sas
+        );
+        let original = initiator.dk_sig.clone();
+        if let Optional::Value(key) = &mut initiator.dk_sig {
+            key.r#pub = joiner.dk_pub.clone();
+        }
+        assert_eq!(
+            super::super::pairing::device_sas(&token, &initiator, &joiner).unwrap() != sas,
+            vector["expect"]["tampered_key_changes_sas"]
+        );
+        initiator.dk_sig = original;
+        if let Optional::Value(key) = &mut initiator.dk_sig {
+            key.extra
+                .insert("future_key".into(), json!({"binding":"changed"}));
+        }
+        assert_eq!(
+            super::super::pairing::device_sas(&token, &initiator, &joiner).unwrap() != sas,
+            vector["expect"]["tampered_extension_changes_sas"]
+        );
+        initiator.dk_sig = Optional::Missing;
+        assert_eq!(
+            super::super::pairing::device_sas(&token, &initiator, &joiner).unwrap(),
+            vector["expect"]["legacy_sas"]
+        );
+        initiator.dk_sig = Optional::Null;
+        assert!(super::super::pairing::device_sas(&token, &initiator, &joiner).is_err());
+    }
+
+    #[test]
     fn present_invalid_identity_key_never_uses_dk_or_approval_keys() {
         let vector = fixture("device_record_with_dk_sig_valid.json");
         let mut device = record(&vector["device"]);
@@ -602,5 +646,158 @@ mod identity_tests {
                 .insert("future_key".into(), json!({"binding":"tampered"}));
         }
         assert!(!super::super::validation::same_device_authority(&a, &b));
+    }
+
+    #[test]
+    fn r3a_se_failure_survives_the_signer_adapter_without_creating_a_signature() {
+        struct Failure(kv_ipc::remote::DeviceKeyError);
+        impl kv_ipc::remote::DeviceKeyProvider for Failure {
+            fn sign(
+                &self,
+                _: SignatureAlgorithm,
+                _: &[u8],
+            ) -> std::result::Result<Vec<u8>, kv_ipc::remote::DeviceKeyError> {
+                Err(self.0)
+            }
+            fn ecdh(
+                &self,
+                _: &[u8],
+            ) -> std::result::Result<Zeroizing<[u8; 32]>, kv_ipc::remote::DeviceKeyError>
+            {
+                panic!("a failed signer must not perform ECDH")
+            }
+            fn public_jwk(&self) -> std::result::Result<Value, kv_ipc::remote::DeviceKeyError> {
+                panic!("a failed signer must not load key material")
+            }
+            fn presence_kind(&self) -> &str {
+                "secure_enclave"
+            }
+            fn key_kind(&self) -> &str {
+                "secure_enclave"
+            }
+        }
+        for (failure, expected) in [
+            (
+                kv_ipc::remote::DeviceKeyError::OperationCancelled,
+                "key_operation_cancelled",
+            ),
+            (
+                kv_ipc::remote::DeviceKeyError::AuthenticationFailed,
+                "key_authentication_failed",
+            ),
+            (
+                kv_ipc::remote::DeviceKeyError::OperationFailed,
+                "key_operation_failed",
+            ),
+        ] {
+            let provider = Failure(failure);
+            let error = sign_object(
+                &json!({"fixture":"signed intent"}),
+                SignatureAlgorithm::ES256,
+                &provider,
+            )
+            .unwrap_err();
+            assert_eq!(error.code(), expected);
+        }
+    }
+
+    #[test]
+    fn split_ipc_provider_adapter_pins_both_keys_and_signs_recovery() {
+        struct Split {
+            agreement: SoftwareDeviceKey,
+            signing: SoftwareDeviceKey,
+        }
+        impl kv_ipc::remote::DeviceKeyProvider for Split {
+            fn sign(
+                &self,
+                alg: SignatureAlgorithm,
+                payload: &[u8],
+            ) -> std::result::Result<Vec<u8>, kv_ipc::remote::DeviceKeyError> {
+                DeviceKeyProvider::sign(&self.signing, alg, payload)
+                    .map_err(software_provider_error)
+            }
+            fn ecdh(
+                &self,
+                peer: &[u8],
+            ) -> std::result::Result<Zeroizing<[u8; 32]>, kv_ipc::remote::DeviceKeyError>
+            {
+                DeviceKeyProvider::ecdh(&self.agreement, peer).map_err(software_provider_error)
+            }
+            fn public_jwk(&self) -> std::result::Result<Value, kv_ipc::remote::DeviceKeyError> {
+                Ok(serde_json::to_value(
+                    DeviceKeyProvider::public_jwk(&self.agreement)
+                        .map_err(software_provider_error)?,
+                )
+                .unwrap())
+            }
+            fn identity_sign_jwk(
+                &self,
+            ) -> std::result::Result<Option<Value>, kv_ipc::remote::DeviceKeyError> {
+                Ok(Some(
+                    serde_json::to_value(
+                        DeviceKeyProvider::public_jwk(&self.signing)
+                            .map_err(software_provider_error)?,
+                    )
+                    .unwrap(),
+                ))
+            }
+            fn key_kind(&self) -> &str {
+                "software"
+            }
+            fn presence_kind(&self) -> &str {
+                "none"
+            }
+        }
+        let keys = fixture("test_keys.json");
+        let key = |name: &str| {
+            SoftwareDeviceKey::from_p256_bytes(
+                &decode_b64(keys[name]["private_scalar"].as_str().unwrap()).unwrap(),
+            )
+            .unwrap()
+        };
+        let provider = Split {
+            agreement: key("recipient"),
+            signing: key("wrong"),
+        };
+        let device = record(&fixture("device_record_with_dk_sig_valid.json")["device"]);
+        verify_identity_provider(&device, &provider).unwrap();
+        let mut changed = device.clone();
+        changed.dk_sig = Optional::Missing;
+        assert!(verify_identity_provider(&changed, &provider).is_err());
+        assert!(verify_identity_provider(&device, &key("recipient")).is_err());
+        let request = super::super::relay::RecoverAccountRequest::signed(
+            "acct_test".into(),
+            "A".repeat(43),
+            device.clone(),
+            &provider,
+        )
+        .unwrap();
+        let proof = super::super::relay::RecoverAccountProof {
+            action: super::super::relay::RecoverAccountAction::RecoverAccount,
+            account_id: request.account_id.clone(),
+            device: request.device.clone(),
+            nonce: request.nonce.clone(),
+            new_recovery_code_hash: sha256_hex(request.new_recovery_code.as_bytes()),
+        };
+        verify_identity_signature(
+            &device,
+            &jcs(&proof).unwrap(),
+            &decode_b64(&request.sig).unwrap(),
+        )
+        .unwrap();
+        assert!(!format!("{request:?}").contains(&request.recovery_code));
+        assert!(!format!("{request:?}").contains(&request.new_recovery_code));
+        assert!(super::super::relay::RecoverAccountRequest::signed(
+            "acct_test".into(),
+            "A".repeat(43),
+            changed,
+            &provider
+        )
+        .is_err());
+        assert!(DeviceKeyProvider::identity_sign_jwk(
+            &SoftwareDeviceKey::generate_p256().into_provider()
+        )
+        .unwrap()
+        .is_none());
     }
 }

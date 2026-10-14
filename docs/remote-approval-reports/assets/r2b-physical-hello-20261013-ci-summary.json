@@ -1,0 +1,130 @@
+{
+  "mac": {
+    "platform": "macOS Apple Silicon",
+    "toolchain": "rustc 1.99.0 (b940084d7 2026-09-28)",
+    "started_utc": "2026-10-13T06:31:08.585974+00:00",
+    "commands": [
+      {
+        "command": "cargo +1.99.0 fmt --all -- --check",
+        "exit_code": 0,
+        "seconds": 1.0284347909910139,
+        "log": "mac-ci-1.log"
+      },
+      {
+        "command": "cargo +1.99.0 clippy --workspace --all-targets -- -D warnings",
+        "exit_code": 0,
+        "seconds": 28.24783512498834,
+        "log": "mac-ci-2.log"
+      },
+      {
+        "command": "cargo +1.99.0 build --workspace --locked",
+        "exit_code": 0,
+        "seconds": 18.372254582995083,
+        "log": "mac-ci-3.log"
+      },
+      {
+        "command": "cargo +1.99.0 test --workspace --locked",
+        "exit_code": 0,
+        "seconds": 301.2068866250047,
+        "log": "mac-ci-4.log"
+      }
+    ],
+    "finished_utc": "2026-10-13T06:36:57.261862+00:00",
+    "passed": true
+  },
+  "windows": {
+    "toolchain": "rustc 1.99.0 (b940084d7 2026-09-28)",
+    "platform": "Windows 11 VM MSVC x64",
+    "commands": [
+      {
+        "log": "windows-ci-1.log",
+        "command": "cargo fmt --all -- --check",
+        "seconds": 3.0753896,
+        "exit_code": 0
+      },
+      {
+        "log": "windows-ci-2.log",
+        "command": "cargo clippy --workspace --all-targets -- -D warnings",
+        "seconds": 113.400587,
+        "exit_code": 101
+      },
+      {
+        "log": "windows-ci-3.log",
+        "command": "cargo build --workspace --locked",
+        "seconds": 70.9116025,
+        "exit_code": 0
+      },
+      {
+        "log": "windows-ci-4.log",
+        "command": "cargo test --workspace --locked",
+        "seconds": 370.2273733,
+        "exit_code": 0
+      }
+    ],
+    "started_utc": "2026-10-13T06:32:28.3479239Z",
+    "finished_utc": "2026-10-13T06:52:40.7766578Z",
+    "passed": false
+  },
+  "windows_test_counts": {
+    "passed": 1102,
+    "failed": 0,
+    "ignored": 25
+  },
+  "mac_test_counts": {
+    "passed": 1357,
+    "failed": 0,
+    "ignored": 10
+  },
+  "unapplied_cli_candidate": {
+    "finished_utc": "2026-10-13T06:43:47.5880267Z",
+    "main_source_changed": false,
+    "candidate": "One cfg(any(unix,test)) attribute on unavailable_at",
+    "native_source_restored": true,
+    "exit_code": 0
+  },
+  "source_fingerprint": "f2ce1d3e44675ac57c870517407bcc636cb31986a14be131ecf2e98e125e5cc7",
+  "windows_original_file_hashes": [
+    {
+      "file": "r2b-physical-hello-20261013-windows-ci-result.json",
+      "original_sha256": "b37e3bcc3f57342b0a569a7ee94f2827a8c4df88a75ef6e3ad1cbb00a190e1f2",
+      "original_encoding": "utf-8-sig",
+      "evidence_sha256": "8b36fbaecccb819a4a61995bca0e24e4ed6e54e5a7e9b7f6c5db06e0d4745b28"
+    },
+    {
+      "file": "r2b-physical-hello-20261013-windows-ci-1.log",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_encoding": "utf-8-sig",
+      "evidence_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "r2b-physical-hello-20261013-windows-ci-2.log",
+      "original_sha256": "e0315b65f40ffd8ea051df7290a44b760ea7956a7c37366a90ebda77cb1bba8c",
+      "original_encoding": "utf-16",
+      "evidence_sha256": "faf0f81e052e2449a3ab465afbfd55cfe8f04fdc56804d5355eb80b2ee08e59e"
+    },
+    {
+      "file": "r2b-physical-hello-20261013-windows-ci-3.log",
+      "original_sha256": "c7ff92c1cccaf08606cdf28bf8d603fbfab3e5492db6f718aa01b2ccac17040f",
+      "original_encoding": "utf-16",
+      "evidence_sha256": "1e66baf2deb926b1240a31c467439cb3b5644ffe03ece4efd8c8cbe81fc4a6c0"
+    },
+    {
+      "file": "r2b-physical-hello-20261013-windows-ci-4.log",
+      "original_sha256": "4dd6b91cb94bbebd69ea5749e27e576bae98fe54604bcb6ccd2dff2c6bee9a60",
+      "original_encoding": "utf-16",
+      "evidence_sha256": "0f8ca3caf437d9ea58128b619268f02fa25832d72690b9fa8b36fd40ad555291"
+    },
+    {
+      "file": "r2b-physical-hello-20261013-cli-cfg-candidate-result.json",
+      "original_sha256": "51b03d03886dc819a870b05f2f905c0808269bb630ababa0e3a1278c4c7a4157",
+      "original_encoding": "utf-8-sig",
+      "evidence_sha256": "c3a47a8d96c4fcc045831093c3c411da226f673998c2b6f7f28ea708794d195a"
+    },
+    {
+      "file": "r2b-physical-hello-20261013-cli-cfg-candidate-clippy.log",
+      "original_sha256": "1ac9d911b356e819dbccfbd4165143558cffdb644db45ef18a6441c4c34878ea",
+      "original_encoding": "utf-16",
+      "evidence_sha256": "1b946004843677f909bf77bfcb4704f74437eb18834b47440ca254f9da445f5d"
+    }
+  ]
+}

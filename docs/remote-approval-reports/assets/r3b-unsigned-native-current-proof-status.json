@@ -1,0 +1,30 @@
+{
+  "audit-current-after": {
+    "current_tests_executed": false,
+    "passed_tests": [
+      "archived_audit_rejects_untrusted_selectors_and_wrong_history_identity",
+      "r3a_rejoined_endpoint_keeps_the_old_identity_audit_in_the_full_comparison",
+      "parser_snapshots_preserve_argument_and_scope_shapes"
+    ],
+    "expected_tests": [
+      "archived_audit_rejects_untrusted_selectors_and_wrong_history_identity",
+      "remote_archived_audit_is_queried_through_current_peer_and_validated",
+      "r3a_rejoined_endpoint_keeps_the_old_identity_audit_in_the_full_comparison",
+      "parser_snapshots_preserve_argument_and_scope_shapes"
+    ],
+    "fingerprint": "59fd39925f794b37b749e90afc4b2845d38ad09ca63589697ffa505cded93948",
+    "exit": 101,
+    "source_timestamp": "2026-10-14T08:40:00.3078363Z"
+  },
+  "tasks": [
+    {
+      "TaskName": "KeyValetR3BUnsignedCiIntegrated7-20261014",
+      "State": 3
+    },
+    {
+      "TaskName": "KeyValetR3BUnsignedCodexMcpProbe2-20261014",
+      "State": 3
+    }
+  ],
+  "ssh_exit": 0
+}

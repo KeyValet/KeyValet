@@ -124,6 +124,8 @@ impl RemoteState {
         }
         let peer = self.peer.lock().unwrap().clone();
         if let Some(peer) = peer {
+            #[cfg(feature = "runtime-probe")]
+            crate::fake_helper::probe_event("channel_sent", serde_json::json!({"approval_id": id}));
             let content = kv_i18n::t(
                 &format!("approval {id} 已批准；调用 credential_wait_approval(\"{id}\") 获取本次请求的结果。不要重复发起原请求。"),
                 &format!("approval {id} granted; call credential_wait_approval(\"{id}\") to get this request's result. Do not repeat the original request."),
@@ -155,9 +157,17 @@ fn decode_response(line: &str) -> Option<(u64, Result<Value, String>)> {
     let value: Value = serde_json::from_str(line).ok()?;
     let id = value["id"].as_u64()?;
     match value["ok"].as_bool()? {
-        true => Some((id, Ok(value.get("result")?.clone()))),
+        true => Some((
+            id,
+            Ok(approval::normalize_helper_result(
+                value.get("result")?.clone(),
+            )),
+        )),
         false => {
             let error = value.get("error")?;
+            if let Some(result) = approval::local_outcome(error) {
+                return Some((id, Ok(result)));
+            }
             Some((
                 id,
                 Err(error
@@ -180,21 +190,21 @@ fn decode_public_response(line: &str) -> Result<Value, SessionError> {
         Some(true) => value
             .as_object_mut()
             .and_then(|v| v.remove("result"))
+            .map(approval::normalize_helper_result)
             .ok_or_else(|| SessionError("Malformed remote helper response".into())),
         Some(false) => value
             .get("error")
             .map(|error| {
-                SessionError(
-                    error
-                        .as_str()
-                        .map(str::to_owned)
-                        .unwrap_or_else(|| error.to_string()),
-                )
+                approval::local_outcome(error).map(Ok).unwrap_or_else(|| {
+                    Err(SessionError(
+                        error
+                            .as_str()
+                            .map(str::to_owned)
+                            .unwrap_or_else(|| error.to_string()),
+                    ))
+                })
             })
-            .map_or_else(
-                || Err(SessionError("Malformed remote helper response".into())),
-                Err,
-            ),
+            .unwrap_or_else(|| Err(SessionError("Malformed remote helper response".into()))),
         None => Err(SessionError("Malformed remote helper response".into())),
     };
     scrub_value(&mut value);
@@ -827,7 +837,12 @@ impl HelperSession {
 
     pub fn initialize_client(&self, client: Value, peer: rmcp::Peer<rmcp::RoleServer>) {
         let name = client["name"].as_str().unwrap_or_default();
-        let budget = self.remote.config.lock().unwrap().budget(name);
+        let budget = self
+            .remote
+            .config
+            .lock()
+            .unwrap()
+            .client_budget(name, client["version"].as_str().unwrap_or_default());
         if !self.remote.timeout_observed.load(Ordering::Relaxed) {
             *self.remote.budget.lock().unwrap() = budget;
         }
@@ -1499,6 +1514,9 @@ impl HelperSession {
             }
             ReadyMessage::NotReady { error, .. } => {
                 stdin.close();
+                let error = approval::local_outcome(&Value::String(error.clone()))
+                    .map(|value| format!("{}{}", approval::RESULT_PREFIX, value))
+                    .unwrap_or(error);
                 return Err(self.fail_unlock(error).await);
             }
         }

@@ -1,391 +1,259 @@
 # 远程审批与多设备配对：产品文档
 
-- 版本：第一版（2026-10-11）
-- 配套：技术设计见 [remote-approval-architecture-2026-10.zh-CN.md](remote-approval-architecture-2026-10.zh-CN.md)。本文只讲给谁、解决什么、用起来什么样、怎么验收、怎么收费。
-- 现状：**尚未实现**。第一版的落地环境是作者自己的 Ubuntu 服务器 + MacBook，先 dogfooding，再给外部用户。
+- 版本：V1 两轮实现与验收回写，2026-10-13。
+- 配套：[架构与接口契约](remote-approval-architecture-2026-10.zh-CN.md)；本页说明用户、现有功能、使用边界和未完成验收，不作发布就绪声明。
+- 现状：核心软件链路、CLI 与手机控制面已实现。Ubuntu × MacBook 安装完成，但 Strong 配对未完成、实际 use n=0；Android Pixel 7 对软件执行端的核心审批通过，重启拉取／远端退出未通过；Windows 双 PCP 与安装通过，Hello 等待 PIN。iOS／商店发行与全部时间指标尚未完成，M5 未完成。
 
 ---
 
 ## 1. 一句话
 
-> agent 跑在哪台机器上不重要，审批永远发生在你手边：服务器上的 agent 想用钥匙，你在 MacBook（以后是手机）上看一眼真实请求，Touch ID 一下。
+把凭证留在执行端的受保护 vault，把批准留在用户手边的设备；每次决定绑定真实请求，等待期间不放行。
 
-## 2. 为什么现在做这个
+## 2. 为什么做远程审批
 
-- KeyValet 现在的审批发生在 agent 所在的机器上。只要 agent 搬到没人盯着的机器——Ubuntu 服务器、拔了显示器的 Mac mini、过夜跑的 Claude Code——就没人按 Touch ID，用户只能二选一：agent 卡死，或者全部放行。
-- 市场调研（见 [product-modes-and-pricing.zh-CN.md](product-modes-and-pricing.zh-CN.md) 与 2026-10-11 的补充考察）显示，7×24 常驻机器上的个人 agent 是凭证泄露痛苦最公开、对手最弱的一段：Hermes 的维护者明说「子 agent 和主进程是同一个 OS 用户，这不是漏洞」；用户在 issue 里写「每次泄露都要全量轮换，永久侵蚀信任」。KeyValet 的 root/系统用户隔离 + 硬件密钥正好对上这个问题，**唯一缺的就是远程审批**。
-- 作者自己就有这个需求：Ubuntu 服务器跑 agent，MacBook 是日常机器。第一个用户是自己，验证成本最低。
+既有本地审批要求人在执行端旁边：macOS 用 Touch ID／系统密码，Linux 用 polkit。服务器、无头 Mac 和长期任务需要用户在另一台设备看真实请求、决定批准范围。V1 已实现签名决定、端到端信封、等待恢复与远程设置；是否能在具体真机组合完成日常使用，要看验收表，不能从软件测试推断。
 
-## 3. 目标用户与场景
+首个真实部署是 ndu Ubuntu 服务器 + MacBook，relay.keyvalet.dev 已上线。凭证不跨设备同步，服务器 root／Windows SYSTEM 仍不在防护范围。
 
-| 优先级 | 用户 | 场景 | 现在怎么办 | 用了之后 |
-| --- | --- | --- | --- | --- |
-| P0（第一版） | 作者本人 / 有一台 Linux 服务器 + 一台 Mac 的个人开发者 | 服务器上跑 Claude Code、Codex、OpenClaw、Hermes 或 cron 脚本，需要 GitHub、OpenAI、Cloudflare 等 API | key 明文放服务器的 `.env` 或 agent 配置里；或者 SSH 上去手动 `keyvalet approve` | 服务器上没有明文 key；MacBook 上收到带真实请求的弹窗；常规操作一天批一次 |
-| P0（第一版） | Windows 11 + Linux / Mac 混合的个人开发者或小团队 | Windows 台式机跑 agent、Mac 批；或 Windows 笔记本（Hello）批 Linux 服务器 | 同上 | 三个平台谁都能当执行端，Mac 与 Windows 都能当审批端 |
-| P0（第一版） | 把 OpenClaw / Hermes 放在 Mac mini 上 24 小时跑的人 | 同上，但机器是无头 Mac | 同上 | 手机上批（第一版就有手机 App） |
-| P2（阶段 2） | 3–30 人团队 | 共享生产 API 给各自的 agent | Slack 里传 key | 凭证所有者的手机批；N-of-M 后续 |
+## 3. 目标用户与平台
 
-**平台**：执行端（存钥匙、替 agent 打电话的那台）第一版就覆盖 macOS / Linux / Windows 11；审批端（按允许的那台）第一版是**手机 App（Flutter，iOS + Android）**加 macOS（Touch ID）和 Windows（Hello）的原生弹窗 + 终端；Linux 桌面审批端第二版（§6.2）。同一台机器可以同时是两种角色。
+| 优先级 | 人群／场景 | 当前可用范围 | 验收边界 |
+| --- | --- | --- | --- |
+| P0 | Linux 服务器 + Mac 的个人开发者 | TPM 执行端、签名 Mac daemon／relay、owner CLI、原生审批 UI | 两端已安装，配对 Strong 未完成；首次真实凭证请求、延迟、吊销与审计未测 |
+| P0 | 使用 Android 手机审批无头执行端的人 | Google 登录、扫码／SAS、锁屏 Quick、App 指纹 Strong、票与设置 | Pixel 7 × 软件 fixture 核心流程通过；真实 Mac/ndu 请求、重启恢复／远端退出及一小时离线未完成 |
+| P0 | Windows 混合环境的个人开发者 | x64 系统服务、PCP 双 DK 与 Quick、PowerShell 安装／升级／卸载 | 模拟 TPM VM 通过；Hello 创建／Strong／取消／跨端 RS256 等待 PIN，生产签名发行待完成 |
+| 验收中 | iPhone 审批用户 | Flutter／Rust／NSE 代码与 iOS/iOS-sim 构建 | SE、APNs、Apple 登录、TestFlight 发行未测，资源待齐 |
+| V2 | 团队、Linux 桌面审批、云执行端 | 保留接口 | quorum、服务／组织信任根、Web 控制台、KMS／隔离执行尚未实现 |
 
-**不是目标**：需要 SSO/SCIM/SOC 2 的企业；想把 KeyValet 当通用秘密管理器的人。
+同一桌面设备可有 execute／approve 两种能力；手机是审批端，不保存执行端凭证。Mac 原生弹窗与终端、手机 App 是现有入口，桌面图形设置页不做，托盘／菜单栏为 V2。
 
-## 4. 用户故事
+手机必须先 Google／Apple 登录，随后通过双方 SAS 加入执行端账户。手机固定官方 relay，地址不展示、不可编辑。**自托管 relay 只服务桌面审批端／CLI**。Android 先验，iOS 后续完成。Google Debug 登录曾通过；当前 R2-C 手机停在登录页，relay HTTPS 恢复仍待处理，Apple provider 尚未配置。
 
-1. 作为服务器上跑 agent 的人，我希望 agent 第一次要用 GitHub 时，我在 MacBook 上看到「srv 上的 claude-code 想 POST repos/guang/demo/issues」，而不是一个只写着「允许访问」的框。
-2. 作为同一个人，我希望批一次「今天对 api.github.com 的 GET/POST 最多 500 次」，之后一整天不被打扰；但删除仓库这种事每次都要问我。
-3. 作为同一个人，我合上 MacBook 去睡觉，希望夜里的请求要么被预授权覆盖，要么老老实实等着，早上打开电脑一次性处理，**绝不**因为我不在就放行。
-4. 作为同一个人，我希望 relay 挂了的时候 agent 得到一句明确的话（「等待审批，relay 离线」），而不是超时报错一堆。
-5. 作为同一个人，我希望 MacBook 丢了之后，在服务器上一条命令就能让它再也批不了任何东西，而且它之前签的「今天 500 次」立刻失效。
-6. 作为同一个人，我希望加第二台 Mac 的时候只需要扫个码、核对 6 位数，不需要再碰服务器。
-7. 作为同一个人，我希望在 MacBook 上能查到「我这周给 srv 批了什么」，和服务器上的审计对得上。
-8. 作为同一个人，我希望服务器上的 agent 被网页里的指令骗了之后，最坏结果是「它让我批一个奇怪的请求，我拒绝」，而不是「key 已经飞了」。
-9. 作为以后的 Mac mini 用户，我希望同样的东西在手机上也能用，不用重新学一遍。
-10. 作为同一个人，我希望在弹窗里就能选「这一次 / 1 小时 / 本会话 / 这个凭证以后都别问我 / 这台机器以后都别问我」，而不是每次都只有「允许一次」。
-11. 作为同一个人，我希望不碰服务器就能从 Mac 上把它切成「每次都问」、把昨天给的「一直允许」收回来、把 vault 锁上、看它现在有哪些常设放行。
-12. 作为同一个人，我希望「以后再也不管」真的做得到，但也希望它别悄悄把「删仓库」也放进去——那种要我单独、明确地开，而且随时看得见它开着。
-13. 作为用 Windows 的人，我希望 Hello 和 Touch ID 一样能当审批端，Windows 台式机也能当执行端。
-14. 作为以后要上云的人，我希望把钥匙交给 KMS 或 Enclave 的时候，不用重新配对、重新学协议。
+## 4. 用户故事与当前边界
+
+1. 在另一台设备看谁发的请求、实际方法／主机／路径、风险和可选范围，再批准。
+2. 明确给某凭证签有期限／预算的 T1 放行票，日常少被打扰；普通票不覆盖敏感 T2。
+3. 离线或合盖时排队到请求到期，不因没人审批而放行；真实两小时合盖尚未测。
+4. 未批时收到待批状态，批准后续等原结果；拒绝、取消、到期是不同事实。
+5. 从审批端锁定、收紧模式或撤销票；离线目标显示撤销待确认，不能假报立即完成。
+6. 查签发台账、预算快照与跨端审计；未取到使用量显示未知。
+7. 用手机的实际硬件签名批准；登录成功或 UI 生物识别布尔值不能替代 Strong。
+8. 明确开启逐执行端的 T2 无人值守时，单独 Strong 与精确标签确认；全局 T2 拒绝。
 
 ## 5. 用户旅程
 
-### J-R1 第一次装好（目标：15 分钟内从零到第一次远程批准）
+以下是当前入口与流程；Ubuntu × MacBook 的整条旅程仍在验收，<10 分钟是目标。
 
-1. 服务器：`curl -fsSL https://keyvalet.dev/install.sh | sh`（已有则跳过）。安装显示保护状态：`tpm2` 或需要显式 `--software`。
-2. 服务器：`keyvalet relay install --public-url https://relay.example.com`（同机 relay 只听本地；安装器写出 nginx 配置模板，提示你把域名接到 Cloudflare 橙色云并放入 Origin CA 证书）。
-3. 服务器：`keyvalet pair --new`，终端打印一行 `kv-pair://…` 和二维码。
-4. MacBook：`keyvalet pair kv-pair://…`，弹出原生对话框：对方是 `srv (linux, tpm2)`，6 位安全码。服务器终端同时显示 6 位码。
-5. 用户核对一致：MacBook 上 Touch ID 确认，服务器终端按 `y`。两边各显示「已配对：srv ⇄ MacBook」。
-6. 服务器：让 agent 做一件需要凭证的事。MacBook 弹出第一个远程审批框。
+### J-R1 第一次配对
 
-验收：每一步只有一个动作；任何一步失败都有一句话告诉用户下一步；全程不在聊天里、不在命令行参数里出现任何 key。
+1. 在执行端安装 KeyValet，Linux 远程角色认证要求内核 6.5+、keyvalet／keyvalet-peer／keyvalet-relay 三服务；硬件失败报错，软件保护必须显式选择。日常机器覆盖安装先按平台说明备份 vault／配置。
+2. 桌面使用 keyvalet relay set-url https://relay.keyvalet.dev；桌面自托管可用自己的 HTTPS relay。relay install 只生成部署资产，证书、专用用户和服务激活仍须管理员完成。
+3. 执行端 keyvalet pair --new 首次匿名注册，显示账户 ID、恢复码、URI 与 Unicode QR。恢复码只在终端保存一次，不放聊天、日志或截图。
+4. Mac 使用 keyvalet pair <kv-pair://…>；手机先 Google／Apple 登录，再扫码。两端核对六位 SAS，纯执行端 owner 终端 y/N，审批端用 Strong 确认。
+5. 双方有效确认后才建立信任；候选公钥、扫描成功或 HTTP complete 成功都不算配对完成。加入新执行端时展示全局 T1 票数量并可选择排除继承。
 
-### J-R2 第一次远程审批（这个弹窗决定用户信不信这个产品）
+R2-A 首轮 SAS 一致、终端确认已交，但 209.526 s 后 Strong 阶段停止，首次 use 为0；Pixel 7 × fixture 配对约9 s并验手机 Strong。两种结果分开记录。
 
-对话框内容（见 §6 规范）：
+### J-R2 首次请求
 
-```
-srv 上的 claude-code 请求使用 GitHub (guang)
+审批 UI 已实现设备／系统／保护状态、agent、真实操作、凭证引用、agent 自述、风险、范围和时间提示。W6 的九类展示经用户核对，是真实预览截图，不代表公网请求执行。
 
-操作        POST repos/guang/demo/issues · title="Fix flaky test" · 1.2 KB
-agent 自述  创建 issue 记录测试失败
-来自        srv · /home/u/proj · 用户 u · 保护 tpm2
-风险        普通写入（T1）
+执行端产生 unlock／use／admin 请求；unlock/admin、T2 和常设范围要求 Strong。当前生产风险适配保守：GET／HEAD／TOTP 为 T1，其余 use 为 T2、T3 管理拒绝，不能以某个示例 POST 当作 Quick 已可用。远程票据也不解密尚未解锁的 vault，实际凭证会话仍须原有受保护解锁路径。
 
-范围  [ 这一次 ▾ ]   这一次 / 这个凭据本会话 / 本会话全部 /
-                     记住 1 小时 / 8 小时 / 24 小时 /
-                     这个凭证以后都允许（Touch ID） / 这台机器以后都允许（Touch ID）
+批准后按原凭证版本、进程和完整请求绑定执行，nonce／结果只消费一次；显示的 purpose 是 agent 自述，不是权限依据。Mac/ndu 尚无真实凭证 use 样本；手机 fixture 的 Quick／Strong 各执行一次、二次领取 Replay 已通过。
 
-                       [ 拒绝 ]   [ 允许 ]
+### J-R3 减少打扰
+
+```sh
+keyvalet grant --to srv --credential github/default --hosts api.github.com --methods GET --budget 500/24h --until 24h
+keyvalet grant list
 ```
 
-- 第一次会先弹一个 `unlock`：「srv 上的 claude-code（用户 u）想开始使用 vault，12 小时内有效」——Touch ID。
-- 允许后 agent 在服务器上拿到响应，并被要求用一句话告诉用户发生了什么（现有 J3 行为）。
-- 范围下拉里有什么由服务器那头按风险决定：敏感操作（T2）只有「这一次」；「以后都允许」两项选中后按钮变成「允许（Touch ID）」，因为这是放宽。
+独立签票需要 Strong，可限定 host/method/path/agent／预算／到期。弹窗的 session／remember 只从执行端提供的范围派生内部 T1 授权，保留原决定签名；它不能冒充可转发的新签名票。自动推荐「连续批几次后给24小时只读票」尚未实现，归 V2。
 
-### J-R3 日常：把打扰降到「每一次都值得看」
+### J-R3b 远程控制面
 
-- 连续批准同一凭据同一主机的只读请求几次后，对话框多一个快捷项：「以后 24 小时自动放行 api.github.com 的只读请求」。接受 = Touch ID 签一张放行票（Grant）。
-- 或者主动签：`keyvalet grant --to srv --credential openai/default --hosts api.openai.com --methods POST --paths /v1/chat/completions --budget 2000/24h`。
-- 删除、支付、IAM、发布之类的 T2 默认永远弹、永远 Touch ID，任何弹窗里选出来的「以后都允许」都盖不住它；想连 T2 也不问，见 J-R3b 的「无人值守」。
-- `keyvalet status --summary` 两端都能看到：relay 在线、已配对 1 台、待处理 0、有效放行 2、是否处于无人值守。
-
-### J-R3b 从审批端改设置（不碰服务器）
-
-审批端连上之后就是遥控器。第一版同时提供终端（`keyvalet remote srv …`）和手机 App 的设置页，两者是同一套签名对象的两个入口。
-
-| 你想做的 | 怎么做 | 要不要 Touch ID |
+| 操作 | 当前入口 | 最低审批要求／状态 |
 | --- | --- | --- |
-| 看 srv 现在什么模式、有哪些常设放行、有几条待批 | `keyvalet remote srv status / grants / pending` | 不要（点一下） |
-| 把 srv 切到「每次都问」 | `keyvalet remote srv mode per_use` | 不要（这是收紧） |
-| 把 srv 切到「记住 8 小时」 | `keyvalet remote srv mode remember:8h` | 要（这是放宽） |
-| 给 GitHub 发一张 1 小时的放行票 | `keyvalet remote srv allow --credential github/default --until 1h` | 不要（有到期的短票） |
-| GitHub 以后都别问 | `keyvalet remote srv allow --credential github/default --standing` | 要 |
-| 这台机器上所有凭证以后都别问（只读与普通写入） | `keyvalet remote srv allow --all --standing` | 要 |
-| 所有机器都别问（含以后新配对的） | `keyvalet remote '*' allow --all --standing` | 要，且提示会影响未来设备 |
-| 连删除、支付这类敏感操作也别问 | `keyvalet remote srv unattended --include-sensitive --until 7d` | 要 + 再输一遍设备名；两端状态变红 |
-| 收回昨天给的某张票 / 全部收回 | `keyvalet remote srv grant revoke <id>` / `revoke-all` | 不要 |
-| 立刻锁上 srv 的 vault | `keyvalet remote srv lock` | 不要 |
-| 改远程 unlock 的会话寿命、夜间批处理窗口 | `keyvalet remote srv unlock-ttl 6h` / `class batch …` | 变长要，变短不要 |
-| 查 srv 最近 24 小时用了什么 | `keyvalet remote srv audit --since 24h` | 不要；回来的只有摘要，没有任何凭证值 |
+| 看状态／待批／票／审计 | remote srv status/pending/grants/audit | Quick；签名回执仅元数据，使用量带获取时间 |
+| 切 per_use 收紧 | remote srv mode per_use | Quick |
+| 切 remember 放宽 | remote srv mode remember:8h | Strong |
+| 签1小时票 | remote srv allow --credential github/default --until 1h | **Strong**，短有效期不降级（K4/D03） |
+| 签常设 T1／全局 T1 | remote srv allow --all --standing；remote '*' allow --all --standing | Strong；全局提示未来执行端，配对可排除 |
+| 逐执行端 T2 无人值守 | remote srv unattended --include-sensitive --until 1h | Strong → 一次性准备令牌 → 精确标签 → 签发；不能全局覆盖未来设备 |
+| 收回某票／全部 | remote srv grant revoke <jti> / revoke-all | Quick；逐目标回执，离线保留 revocation_pending |
+| 锁定 | remote srv lock | Quick |
+| 修改 TTL／batch／标签 | remote srv unlock-ttl/class/label | 收紧 Quick，放宽／新 class／改名 Strong，CLI为主要入口 |
+| 强制手机横幅 | remote srv notify always-phone | Quick Directive，只改投递，不改权限 |
 
-每一条都会在两端留审计；服务器上本地改的和远程改的写同一份状态，谁后改谁生效。
+本地 /keyvalet:mode 与远程 SetMode 共用 helper 设置后端及 CAS，过时提案不能覆盖新状态。桌面 owner grant revoke 仍有 owner／Strong 认证路径，不能把“所有收回都免认证”作为承诺。
 
-验收：以上每一行在 5 秒内在 srv 生效；放宽类操作在没有 Touch ID 的情况下被服务器拒绝（不是被客户端拦下，是服务器验签拒绝）。
+手机设置切模式、1小时票、revoke-all 对 fixture 功能通过，实测约5 s／≤16 s／<1 s（含用户操作），尚未满足三步各<5 s；Mac 控制面 n=0。T2 发行流程已有软件回归，接收验证尚缺 K4 的有限标签与全局拒绝条件，见 §9 和架构 §7.6，不能宣布安全栏全部完成。
 
-### J-R4 用户没有马上批：agent 那边发生什么
+### J-R4 批得晚时
 
-这是用户最容易感知、也最容易做坏的一段。原则：**没批 ≠ 拒绝**；agent 不该因为你慢了一分钟就放弃或绕路。
+- 调用内默认最多60 s，受运行时预算封顶；有客户端 progressToken 才每15 s发进度。
+- 预算用尽返回 approval_pending，不表示拒绝。需要结果时调用 credential_wait_approval，返回原结果，不能重发原请求；只有 approved_retry_required 才允许同参数、同 approval_id 恢复。
+- Stop hook 对同一 agent 的未到期待批最多阻止三次；Devin 真实 block 后续等得到结果，Codex exec 真实 block 后续等，但最终回合未取得结果。
+- Claude channels 声明／发送有 CI；idle 唤醒、busy 合并、无 flag 丢弃均未测，不能承诺能自动唤醒每个会话。
+- 拒绝为 approval_denied；明确取消为 approval_cancelled；请求到期为 approval_expired；只等候超时且 exp 未到仍待批。
 
-1. **前一分钟左右**：agent 的那次调用原地等（在 Claude Code CLI、Grok、Gemini 这类允许长等待的运行时上等更久），终端里能看到「等待 MacBook 批准（42 s）」在跳。这段时间内批了，agent 直接拿到结果，完全无感。
-2. **超过预算**：调用返回一个明确的「待批准」结果，附 `approval_id`、到期时间、审批设备是否在线，以及一句写给模型的话：可以先做别的；需要结果时调用 `credential_wait_approval`；不要重复发起、不要向用户要密钥。
-3. **用户随后批了**：
-   - agent 正在调用 `credential_wait_approval` 等着 → 它立刻拿到**原请求的结果**（不是「去重试」）。
-   - agent 在做别的事 → 下次它调用等待工具时拿到结果。
-   - agent 已经没事做、准备结束对话 → KeyValet 的 Stop hook 拦一下：「还有一条待批准的请求没到期，去等结果」，最多拦 3 次。
-   - 用 Claude Code 且开了 channels → 批准消息直接推进 session，空闲的 session 会被叫醒。
-4. **到期还没批（默认 10 分钟）**：agent 得到「已过期」，再要就重新发起、重新弹窗。审批端那条也自动消失。
-5. **用户点了拒绝**：agent 立刻得到「已拒绝」+ 你写的一句原因，这是唯一表示「不」的状态。
+Codex 0.162.1 的实测 clientInfo profile 默认180 s，其他未测 Codex／未知客户端50 s；四分钟实验完成的是 Codex 和 Devin 两家。Claude OAuth／日常 provider、Gemini 登录、Grok 登录、Cursor 额度限制使本轮未进工具；没有把它们当工具超时。完整矩阵见架构 §6.9.3 与 [runtimes.md](runtimes.md)。
 
-MacBook 合盖、离线时的排队与积压处理不变：打开电脑按顺序弹出积压（最多 5 个同时），已过期的汇总成一句「有 3 条已过期，未执行」。不想被夜里的事打扰：提前签好令牌，或在策略里把特定凭证标为 `batch`，让请求等最长 24 小时。
+HTTP 网关／透明代理挂连接55–540 s，pending 返回429＋Retry-After:30。明确拒绝／取消／到期为403／409／410，SDK终态禁止重试。同一活 gateway session、同凭证与原 method/URL/headers/body可一次领取有限保留响应；最多16 tickets、每响应8 MiB，不支持跨重启恢复或外部 HTTP exactly-once。
 
-OpenClaw、Hermes 和各种 SDK 不走 MCP、走 HTTP 代理，它们没有「待批准」这个概念，KeyValet 就把 HTTP 连接挂着——目标是 OpenAI/Anthropic 这类 SDK 默认等 10 分钟的服务就挂 9 分钟，不认识的目标挂 55 秒后返回 429 让客户端按 `Retry-After` 重试。
+### J-R5 加设备
 
-验收：用 Claude Code、Codex、Cursor、Gemini、Devin、Grok 各跑一遍「用户 3 分钟后才批」，每个运行时都能在不重新输入指令的情况下拿到结果；没有一个运行时把超时报成「权限被拒」。
+已信任审批端可 pair --new，加另一桌面或已登录手机，核对 SAS并用实际 AK_s签名。基础 fan-out与两 Strong设备记录交换已有模块测试；产品多审批方／quorum策略归V2。手机不能用自建relay URI加入官方产品。
 
-### J-R5 加第二台审批设备
+### J-R6 丢失、吊销与恢复
 
-- 已配对的 MacBook 上 `keyvalet pair --new`（Touch ID 签发 token），新 Mac 上 `keyvalet pair kv-pair://…`，核对 6 位数。不需要碰服务器。
-- 手机 App 同样扫码（第一版就有）。
+devices revoke 使用 Strong证明，保存本机墓碑／逐peer消息并注销relay；待投递显示未完成。已安装设备一分钟失效目标未测，离线端不能承诺即时收到。锁定vault与 audit --remote 可查询已有记录。
 
-### J-R6 设备丢失 / 怀疑泄露
+全部设备会话丢失时，relay recover <account-id>从隐藏输入／stdin读取旧恢复码，DK证明绑定新设备与新码，成功原子注销旧注册并轮换码。它不恢复vault、凭证或硬件私钥，也不能擦除失联设备上的离线票；手机仍要人类登录。
 
-- 服务器上：`keyvalet devices revoke macbook-2024`（本地 polkit），或另一台审批设备上 Touch ID 吊销。
-- 效果：1 分钟内该设备的 relay 连接被断、它签过的未用批准和令牌全部失效、它收不到新请求。
-- 顺手：`/keyvalet:lock` 锁服务器 vault；`keyvalet audit --remote --since 24h` 看它批过什么。
+### J-R7 relay 或手机网络故障
 
-### J-R7 relay 出问题
-
-- relay 不可达：agent 立即收到 `approval_pending(relay offline)`；用户可以 SSH 上服务器 `keyvalet approve <pid>` 走 polkit 后备；`status` 明确报 `relay: offline`。
-- relay 数据丢了：设备重新注册即可，vault 与配对信息都在两端本地，不依赖 relay 保存。
+待批保留到exp，relay-client存持久密文队列；远程失败不降低认证。执行端owner可用已有本地审批后备。R2-C当前手机FCM能唤起，但relay HTTPS请求仍失败，重启拉取与远端退出删除未通过，不能用推送202掩盖。
 
 ### J-R8 升级与卸载
 
-- 升级任一端不影响另一端：信封有 `v`，不认识的 `type` 原样 ack 并审计。
-- 卸载审批端 = 自动吊销自己；卸载服务器端 = relay 上该设备记录保留 7 天后清理。
+协议拒绝未知授权／未来版本处理，未知描述字段无损保留并参与签名。升级／卸载按平台安装器保存vault和规定的队列／备份；Windows11项生命周期回归通过。卸载不等于已经向所有peer／relay完成吊销，需显式owner吊销；不能写成自动清除所有远端授权。
 
 ## 6. 审批界面规范
 
-必须显示（每一类审批都一样）：
-
-| 项 | 说明 |
+| 内容 | 当前规则 |
 | --- | --- |
-| 来源设备 | 配对时的标签 + OS + 保护状态（`tpm2` / `software_key`；后者红字） |
-| agent | 运行时名、工作目录或仓库、系统用户 |
-| 凭证 | 显示名 + 类型；`proxy_only` 与否 |
-| 真实操作 | 模板 `summarize` 的一行摘要 + 方法/主机/路径/大小。这是弹窗的主体，字号最大 |
-| agent 自述 | purpose 原文，前缀「agent 自述」，视觉上弱于真实操作 |
-| 风险档 | T0 只读 / T1 普通写入 / T2 敏感；T2 标红并说明「此类操作不能预授权」 |
-| 范围选择 | 只列执行端允许的选项；默认选执行端请求的那个 |
-| 档位 | Quick：按钮直接生效；Strong：按钮文案「允许（Touch ID）」 |
-| 异常提示 | 时钟偏差、合并了 N 条、这是积压请求（发起于 X 分钟前） |
+| 来源 | 受信设备标签／OS／保护状态，software或unknown明确显示 |
+| agent | 运行时、工作目录／仓库、系统用户；实际身份由OS认证 |
+| 凭证 | 引用／名称／类型、proxy_only；不显示值 |
+| 真实操作 | summary、方法／主机／路径／大小，作为主要内容 |
+| agent 自述 | purpose明示自述，不能当真实操作或授权 |
+| 风险 | T0/T1/T2、最低级别；T2突出且弹窗仅本次 |
+| 范围 | 只展示scope_options，不能由UI新增权限 |
+| 档位 | Quick点击；Strong使用真正AK_s操作；手机Strong通知只打开App |
+| 异常 | 创建时间／时钟偏差／积压／无人值守；不把不同操作批合并当已实现 |
 
-绝不显示：凭证值、完整请求头、body 原文、哈希值、vault 路径。
+不显示凭证值、完整headers／body、私钥、恢复码或vault路径。Mac Strong为系统userPresence（Touch ID／系统密码），手机AK_s为生物绑定密钥；WindowsHello代码路径保留RS256，交互等待PIN。
 
-Quick 与 Strong 的用户语言：
+### 6.1 选择范围的含义
 
-- Quick = 「点一下」：Mac 解锁着就能批；只用于只读和普通写入、收紧设置、吊销。
-- Strong = 「Touch ID / Hello」：敏感操作、开始使用 vault、改设备、任何放宽、签常设放行。
-
-### 6.1 审批边界：用户语言与它真正的含义
-
-| 你选的 | 意思 | 到期 | 盖得住敏感操作吗 | 要什么 |
-| --- | --- | --- | --- | --- |
-| 这一次 | 只放这一个请求，连参数都对得上才放 | 立刻 | 它本身就可能是敏感操作，按风险要 Touch ID | 按风险 |
-| 这个凭据本会话 | 这个 agent 这次开着期间，这条凭证的只读与普通写入不再问 | agent 退出 | 否 | 点一下 |
-| 本会话全部 | 同上，但所有凭证 | agent 退出 | 否 | 点一下 |
-| 记住 1 / 8 / 24 小时 | 这条凭证 N 小时内不再问 | N 小时 | 否 | 点一下 |
-| 这个凭证以后都允许 | 常设放行票，直到你收回 | 无 | 否 | Touch ID |
-| 这台机器以后都允许 | 这台执行端上所有凭证的常设放行票 | 无 | 否 | Touch ID |
-| 所有机器以后都允许 | 账户内全部执行端，包括以后新配对的 | 无 | 否 | Touch ID + 提示 |
-| 无人值守（含敏感操作） | 上面任一种 + 连删除/支付/IAM 也不问 | 默认 7 天，可改常设 | **是** | Touch ID + 再输一遍设备名；两端常驻红色 |
-
-共同规则：
-
-- 下拉里只会出现服务器那头允许的选项——敏感操作的弹窗里只有「这一次」。
-- 「以后都允许」默认只覆盖只读与普通写入；想连敏感操作也不问，只能到设置里单独开「无人值守」，不在弹窗快捷项里。
-- 任何一张票都能从审批端一键收回，收回不用 Touch ID；`revoke-all` 永远在第一屏。
-- 多张票同时生效时，取最严的那张决定「能不能免问敏感操作」，不会因为叠加而变宽。
-
-### 6.2 界面规划：手机是唯一的图形面，桌面只留弹窗，Web 留给团队
-
-结论：**个人用户只需要手机 App，加上电脑上本来就会弹的原生对话框。** 不做桌面图形设置程序；Web 控制台只随 Team 一起来，服务 Lead 角色，不做个人审批。
-
-| 任务 | 终端 CLI | 原生弹窗（Mac / Win，已有） | 手机 App | 瘦菜单栏 / 托盘 | Web 控制台 |
-| --- | --- | --- | --- | --- | --- |
-| 批一条请求（人在机器旁） | 可（`approvals`） | **主** | 备 | 打开待批列表 | — |
-| 批一条请求（人不在机器旁） | — | — | **主**（锁屏 Quick / Face ID 或指纹 Strong） | — | — |
-| 选审批边界（§6.1） | 可 | **主** | **主** | — | — |
-| 切模式、收票、锁 vault、无人值守开关 | **主** | — | **主** | 一键全部收回 | — |
-| 看待批、最近批了什么、放行票列表 | 可 | — | **主** | 状态点 + 计数 | Lead 视角 |
-| 配对 / 吊销设备 | **主** | SAS 确认框 | **主**（扫码） | — | 组织内设备 |
-| 添加凭证 | **主**（执行端终端，第一版） | 零明文录入框 | OAuth 登录（第二版） | — | 共享凭证 |
-| 策略规则、batch 类、超时等高级设置 | **主** | — | 只读显示 | — | 组织策略 |
-| 翻长审计、导出 | 可 | — | 摘要 | — | **主** |
-| 组织、成员、共享、账单 | — | — | — | — | **主**（Team） |
-
-#### 怎么判断「人在不在电脑前」
-
-KeyValet 不猜，只看每台带屏幕的机器上五个客观信号，全部成立才算「在」：
-
-1. 你的图形会话在前台（不是别人在用、不是只有 SSH）；
-2. 屏幕没锁、屏保没起；
-3. 最近 2 分钟内碰过键盘或鼠标（可调）；
-4. 有显示器接着，或者有活跃的远程桌面连接；
-5. 这台机器能弹 Touch ID / Hello / polkit 框。
-
-三种结果：**在**（五条全成立）、**走开了**（只是超过 2 分钟没碰键鼠）、**不在**（其余一切，包括信号拿不到）。拿不准一律算「不在」——判错的代价不对称：误判「在」会让请求在没人看的屏幕上干等，误判「不在」只是手机多响一次。
-
-| 情况 | 电脑上 | 手机上 |
-| --- | --- | --- |
-| 你在电脑前 | 弹框 | 静默进列表，不响；30 秒没人批才响 |
-| 你走开了 / 不在 | 有会话就仍弹框（回来能看到） | 立即横幅 + 声音 |
-| 你在 MacBook 前，请求来自服务器 | MacBook 弹框 | 静默，30 秒后响 |
-| 无头 Mac mini、服务器、RDP 断开 | — | 立即横幅 |
-| 快速用户切换给了家人 | 家人屏幕不弹 | 立即横幅 |
-
-你可以覆盖：`keyvalet remote srv notify always-phone`（手机永远响）、改 2 分钟阈值、改 30 秒升级时间、手机上开「我不在电脑前」、系统勿扰。在场判定**只决定哪里先响，不改变任何审批档位**——人在电脑前也不会让敏感操作变自动。细节与各平台信号见架构文档 §6.10。
-
-#### 手机 App 用什么做
-
-**Flutter，一套代码出 iOS 和 Android**，协议和密码学全在 Rust 核心里（Dart 只画界面、不碰任何私钥）。几件事必须是原生代码，不能靠 Flutter 插件：硬件密钥与**生物识别门控的签名**（Face ID / 指纹必须锁在密钥上，不能只是插件返回一个 true）、推送的后台解密（iOS 通知扩展、Android 消息服务）、设备证明（App Attest / Play Integrity）。iOS 走 TestFlight、Android 走内部测试轨道，两端都在第一版内。细节见架构文档 §9.2.1。
-
-| 面 | 阶段 | 做什么 | 不做什么 |
+| 选择 | 授权边界 | T2 | 最低要求 |
 | --- | --- | --- | --- |
-| 终端 CLI + 原生弹窗 | 第一版 | 全部能力的终端载体，永久保留为后备 | — |
-| **手机 App（Flutter，iOS + Android）** | **第一版**（iOS 走 TestFlight、Android 走内部测试轨道，不等公开上架） | 审批两档、每台执行端一页设置、放行票与一键收回、无人值守红色开关、扫码配对、吊销、最近活动摘要、推送（静默 / 横幅 / 升级） | 不做策略编辑器、不做审计浏览器 |
-| 瘦菜单栏 / 托盘 | 第二版，且仅当 dogfooding 证明桌前友好度不够 | 状态点、待批数、打开待批、一键全部收回；兼作对抗假弹窗的固定视觉锚点 | 不做设置页 |
-| Linux 桌面审批端 | 第二版 | polkit 作在场门的弹窗 | — |
-| Web 控制台 | 随 Team（总架构阶段 2） | Lead：组织、成员、共享凭证、策略下发、审计导出、账单 | 不做个人审批（passkey 审批技术可行，留 §13 的位，不规划） |
+| 这一次 | 完整原请求，一次消费 | 按该请求 | T1可Quick，T2/unlock/admin Strong |
+| 这个凭据本会话／本会话全部 | 当前agent/session内T1 | 不覆盖 | 原请求提供的Quick范围 |
+| 记住1／8／24小时 | 提供的精确时长，当前凭证T1 | 不覆盖 | 弹窗按原请求；设置签票另为Strong |
+| 凭证／执行端常设 | 直到撤销的T1范围 | 不覆盖 | Strong |
+| 全局T1 | 未来经SAS信任且未排除的执行端 | 不覆盖 | Strong＋未来设备提示 |
+| 逐执行端T2设置 | 显式范围、到期／常设，显示无人值守 | 可覆盖 | Strong＋精确标签；常设两轮确认；接收缺口未关闭 |
 
-手机优先的兜底：手机 App 还没装好或没带手机时，MacBook / Windows 弹窗 + 终端全部可用；手机丢了用另一台已配对设备或执行端本地 CLI，吊销不要 Touch ID；App Attest / Play Integrity 在自建 relay 上可关，不阻塞内测；公开上架是第二版的事，第一版用 TestFlight 与 Play 内部测试轨道分发。
+CLI unattended必须--until；常设T2为helper／手机签发逻辑，不能写成CLI已有--standing。finite/standing签名T2对象都应包含当前标签，global T2拒绝；实现冲突不降低这条已决规范。
 
-## 7. 功能清单与验收标准（第一版）
+### 6.2 界面现状与计划
 
-M 必须 / S 应该 / C 可以。
+手机先登录页（Google／Apple），登录后四页：待批／详情、设备／设置、活动、账户／退出及通知偏好。固定relay.keyvalet.dev不展示、不编辑；APK已在Pixel7正常安装，Android先完成核心流程，iOS仅有编译／模拟器证据。Debug APK不是Play签名AAB，未生成IPA或上传TestFlight。
 
-| 级 | 功能 | 验收标准 |
+| 入口 | 已实现 | 仍需验收／计划 |
 | --- | --- | --- |
-| M | 自托管 relay 一条命令部署 | `keyvalet relay install` 在 Ubuntu 24.04 上 2 分钟内完成；`/v1/health` 通过；重启自恢复 |
-| M | 配对（终端 ⇄ Mac 对话框，6 位 SAS） | 10 分钟内完成；SAS 不一致时两端都拒绝；token 10 分钟后失效 |
-| M | `unlock` / `use` / `admin` 三类远程审批，Quick/Strong 两档 | T2 用 Quick 键签 → 服务器拒绝；每次 Strong 都有 Touch ID |
-| M | 弹窗内容符合 §6 | 10 条随机真实请求人工核对：每条都能从弹窗判断「这是什么、谁发的、要不要批」 |
-| M | 在场判定与投递（§6.2） | 锁屏 / 解锁 / 拔显示器 / 2 分钟不碰键鼠 / RDP 断开 / 快速用户切换六种变化各一次，5 秒内状态正确；人在电脑前时手机不响、30 秒未批才响；人不在时手机立即响；在场状态不改变任何档位 |
-| M | 离线排队、超时、`approval_id` 重试且只执行一次 | 合盖 2 小时后醒来：积压送达、过期提示正确、无重复执行 |
-| M | 等待与恢复四层机制（调用内等待 + progress、`approval_pending` 结果、`credential_wait_approval`、Stop hook 兜底） | 六个运行时各跑「3 分钟后才批」：都能拿到结果、都没把超时报成拒绝；`wait_approval` 批准后返回原请求结果且只执行一次 |
-| M | 安装器为各运行时写入 KeyValet 自己的工具超时与 Stop hook | Claude `.mcp.json` `timeout`、Codex/Grok `tool_timeout_sec`、Gemini `timeout` 只改 KeyValet 条目；Stop hook 注册后无 pending 时输出为空 |
-| M | HTTP 路径挂连接 | OpenAI SDK 经网关发请求、用户 5 分钟后批：请求成功；未知主机 55 s 后得到 `429 + Retry-After` |
-| S | Claude Code channels 唤醒 | 开启标志后，空闲 session 在批准后 5 s 内被唤醒并拿到结果；未开启时无任何报错 |
-| M | 能力令牌：签发、使用、预算、吊销 | 预算 10 次的令牌第 11 次回到弹窗；吊销后 1 分钟内失效 |
-| M | 弹窗范围选项全集（§6.1）与统一的放行票 | 每个选项生成的票在服务器上行为与 §6.1 表一致；敏感操作弹窗只有「这一次」；「以后都允许」没有 Touch ID 时被服务器拒绝 |
-| M | 远程设置（J-R3b 全表） | 每条 5 秒内生效；放宽无 Touch ID 被服务器拒绝；两端审计一致；本地与远程改模式写同一份状态 |
-| M | 无人值守（含敏感操作）的安全栏 | 只能从设置路径开；缺二次确认被拒；开着时两端 `status` 与弹窗标题为红；每次被覆盖的敏感调用单独审计并可计数；`revoke-all` 一键关闭 |
-| M | 三平台执行端 | macOS / Linux / Windows 各自作为执行端被远程审批通过同一套 CI 测试；Windows 发包依赖签名就绪 |
-| M | 手机 App（Flutter，iOS + Android） | 扫码配对；锁屏 Quick 与生物识别 Strong 各一次；静默投递 30 秒后升级；设置页三步（切模式 / 签 1 小时票 / 全部收回）在 5 秒内生效；被篡改的 UI 层跳过生物识别后签名失败；iOS TestFlight 与 Android 内部测试轨道各出一个可安装包 |
-| M | macOS + Windows 审批端 | Touch ID 与 Hello 各自完成一次 Strong 审批与一次常设放行签发；Hello 的 RS256 票在 Linux 执行端验签通过 |
-| M | 云端口子只留接口 | 设备记录、请求、决定、票、指令里带未知的 `key.kind` / `attestation` / `iss_kind` 时能存能读能验签；协议版本号升级规则有测试 |
-| M | 设备吊销 | 吊销后其旧批准/令牌全部失效；relay 断连 |
-| M | 两端审计可对账 | `keyvalet audit --remote` 按 `approval_id` 100 % 对上 |
-| M | MCP 结构化错误 | agent 在 `approval_pending / denied / expired / no_approver` 四种情况下给出的下一步都正确（人工跑 Claude Code 验证） |
-| M | 文档 | linux.md、SECURITY.md、guide 更新；明确「不防服务器 root」 |
-| S | 「以后 24 小时自动放行只读」推荐项 | 接受后生成等价令牌并可在 `grant list` 看到 |
-| S | `keyvalet approvals --watch` 终端视图 | 能在终端完成批/拒（Strong 仍弹 Touch ID） |
-| S | `status --summary` 的远程字段 | 两端一致 |
-| C | `class: batch` 延长有效期 | 配置后请求 `exp` 变为 24 h |
-| C | 多审批设备 fan-out | 第二台 Mac 收到同一请求；一台批后另一台自动关闭 |
+| CLI | 配对、列表、批准／拒绝、设置票、Directive、audit／恢复 | Ubuntu×Mac完整原生旅程与时间指标 |
+| Mac原生弹窗 | 请求、范围、SAS、标签／全局提示；W6截图已核对 | 真实两端Touch ID配对／请求、锁屏、合盖 |
+| Windows原生TaskDialog／Hello | UI代码、PCP身份／Quick和RS256签名路径 | Hello等待PIN，完整点击／物理TPM矩阵未验 |
+| Android App／原生后台 | Google、扫码、Quick／指纹Strong、同ID升级、设置三步；原生后台由FCM→JobScheduler→Rust处理推送，不启动Dart isolate。 | relay恢复／远端退出未过，≤30 s横幅及各<5 s设置预算未过；Play发行待资源 |
+| iOS App／NSE | Flutter/Rust/native、App Group、C ABI、通知计划和构建 | Apple／SE／APNs／锁屏／匹配profiles／TestFlight待验 |
+| 桌面图形设置页 | 不做 | 托盘／菜单栏按需要为V2 |
+| Web／团队 | 接口保留 | V2：团队目录、服务信任根、quorum、Web |
 
-## 8. 第一版不做
+人在场策略用本用户图形会话、锁屏／屏保、输入idle、显示器／远程会话和审批通道五组信号；任一未知为away，变化五秒去抖、60秒刷新。它只改投递，不改授权：本机／桌面present令手机silent，away/idle/unknown令banner；执行端30秒未决发同ID升级。relay依据签名头的push.mode，不能把WS在线当人在桌前。手机“我不在电脑前”是本地呈现偏好，remote notify always-phone是另一条签名Directive。
 
-- 桌面图形设置页**永远不做**；瘦菜单栏/托盘第二版且按需；手机 App 公开上架（第一版走内测轨道）。
-- Mac 作为 Linux 的执行端（凭证只在 Mac、服务器借用）。
-- vault 密文跨设备同步——第一版凭证在执行端终端上添加（`keyvalet add`，隐藏输入或 OAuth 设备码流程），审批端只负责批和设置。
-- Linux 桌面作为审批端（第二版，polkit 作在场门，会标注「非硬件在场」）。
-- 云端密钥保护（KMS、Enclave）和服务型审批者的**实现**——协议和接口已经留位，第一版不做。
-- 团队、N-of-M、Web 控制台、计费、官方 relay 配额执行。
-- Telegram / Slack 作为审批通道：没有设备密钥就没有签名，顶多以后做「通知」而不是「批准」。
+Pixel7静默→升级声音与同tag/id通过，静默到横幅28.620 s、请求到横幅约35 s；真实Mac优先投递／锁屏away未测。iOSNSE不跑Flutter，后台验证／解密用同Rust库；AppAttest／PlayIntegrity只有原生适配器，验证归V2，不声称已有硬件证明。
 
-## 9. 安全承诺（大白话）与不承诺
+## 7. 功能状态（V1）
 
-承诺：
+每行将源码实现、实机验收和V2分开；“已实现”不表示整条旅程已通过。
 
-- 执行端上的 agent 从头到尾拿不到 key；它只能「申请」，批准必须来自你手上有 Touch ID / Hello 的那台设备。
-- 批准和具体请求是绑死的：批了「建 issue」就不能被拿去「删仓库」；一个批准只能用一次。放行票另算——但票也是你用 Touch ID 签的，范围只能比服务器给的选项更窄，默认永远盖不住敏感操作。
-- 放宽永远要 Touch ID / Hello，收紧和收回永远不要。agent 自己签不出票、改不了设置——它没有审批密钥。
-- 中转服务器只见密文，被攻破最多是丢消息、看元数据，伪造不了、解密不了、重放不了。
-- 审批设备丢了：锁着屏批不了；解锁着也批不了敏感操作、签不了常设票、放不了任何设置；执行端上一条命令吊销。
-- 你开了「无人值守（含敏感操作）」：两端随时看得见它开着、默认 7 天自动关、每一次被它放过去的敏感调用都单独记账、一键能关。
+| 功能 | 已实现 | 验收中 | V2／计划中 |
+| --- | --- | --- | --- |
+| relay／部署 | SQLite API、官方Cloudflare→nginx→loopback、WSS、桌面自托管资产 | 实际审批延迟未测；metrics边界S03 | Postgres／多实例、计费配额 |
+| 配对／身份 | 匿名＋恢复码、手机Google/Apple＋DK证明、双SAS／完整记录 | Ubuntu×Mac未完成、Apple未验 | 多用户团队、显式跨provider链接／账户删除 |
+| DK／签名 | Windowssplit DK、旧记录兼容、HPKE／ES256／RS256 | Hello等待PIN；物理TPM／全部ACL | 云KMS／隔离执行 |
+| 请求与等待 | digest/nonce、Quick/Strong、pending/wait、Stop、progress、活gateway响应恢复 | 真实凭证use n=0；Claude／第三家／channels未过 | 跨gateway重启恢复／新的响应契约 |
+| 远程控制面 | mode、Strong设置票、预算、逐目标撤销回执／pending、本地设置共享后端 | Mac三步n=0；手机三步预算未过 | 不同操作签名批授权、自动只读推荐 |
+| T2安全栏 | Strong准备令牌、有限一次／常设两轮标签，发行端拒global T2 | 接收验证S01/S02缺口待修，不计完成 | 无全局T2放宽计划 |
+| 推送／token | 独立kv-push、FCMdata、签名路由、CAS轮换／退出outbox | Android重启／远端退出未过；一小时离线未测 | — |
+| Android | Debug正常安装、Google／硬件门控、Quick／Strong／升级／设置功能 | 真Mac联动、稳定性与预算、Play签名发行 | 公开上架计划中 |
+| iOS | Rust与Runner/NSE构建、AppGroup／原生计划 | 真机SE／APNs／Apple、profile／IPA／TestFlight | 公开上架计划中 |
+| 审计／恢复 | 固定头分页、签名摘要对账、vaultAEAD检查点、recovery CLI | 真实双端对账／设备丢失恢复未测 | 硬件单调计数器／外部见证 |
+| 吊销／睡眠 | 墓碑、持久outbox、一次消费、过期处理 | 双向一分钟／真实两小时合盖未测 | — |
+| 新审批者 | 基础fan-out、两Strong设备记录交换／验签 | 完整多设备OS投递未验 | 产品多审批方／quorum、service/org信任根、attestation验证 |
+| 文档／CI | 四份R2报告；各快照工作区四项CI通过 | 当前M2–M5不完整，不能用计数推算 | 长期dogfooding后对外文案 |
 
-不承诺：
+## 8. V2 与未实现项
 
-- 执行端 root / SYSTEM 被攻破——与 macOS 现状一致，不防。远程审批**不**让任何平台的 helper 多出抵御 root 的能力。
-- 审批端上同用户的恶意程序伪造一个假弹窗骗你按 Touch ID——现有缓解不变（留意不是自己触发的弹窗、看审计），手机 App 本身就是独立于桌面的第二确认面；第二版的菜单栏项再加固定视觉锚点。
-- 「无人值守（含敏感操作）」开着期间被注入的 agent 做的事——这是你明示接受的风险，KeyValet 做到的是让它可见、有期限、可一键收回。
-- relay 永远在线。
-- 没有 TPM 的执行端上，身份密钥是文件（`software_key`），弹窗会一直提醒。
+Linux桌面审批、云密钥／隔离执行、Mac替Linux执行、vault同步／手机OAuth添加凭证、不同操作批承诺、团队quorum／服务审批者、硬件attestation验证为V2。Web随团队，托盘按需求。账号删除／解绑、跨provider显式链接、Apple code exchange／refresh生命周期与正式商店发行为计划中；不是同邮箱自动合并。
 
-## 10. 定价挂钩
+不通过聊天机器人代签，不让relay解密审批内容，不以Root外能力承诺保护服务器root。
 
-| 档 | 含什么 | 说明 |
+## 9. 安全规则与边界
+
+- agent只能申请，不持审批私钥；批准绑定完整原请求与一次性nonce，范围只能收窄，T3保持拒绝。
+- DK用于身份／信封和HPKE，不用于批准。Windows逻辑DK为两把PCP，任一失败报错；可选dk_sig只改身份验签选择，HPKE和AK算法不变。
+- 放宽、独立设置票和预授权Strong，有限票也一样；收紧／远程撤票Quick。T2只从明确设置路径签发，准备令牌与精确标签绑定，常设两次确认，全局T2拒绝。
+- **仍有已决安全要求未落实的接收缺口**：shared verify_grant对有限T2未强制confirm、对global T2无独立拒绝条件。发行端约束不能代替接收验证，OPEN S01/S02待负责人修复，不以文案解释为允许。
+- 登录不是批准：provider+subject认人，DK认设备，AK认审批；跳过AndroidCryptoObject不能签AK_s，实机负向门控已通过。iOS尚未测。
+- relay与Cloudflare能看路由／设备／人类身份和投递元数据，审批／授权正文为E2E密文；登录／恢复参数只由TLS保护。relay可丢消息或拒绝服务，不能替设备产生有效AK签名。
+- root／SYSTEM／被攻破helper或rootbroker不在模型内；不承诺relay永远在线、Quick防已解锁设备被拿在手中、或全备份硬件反回滚。MacuserPresence允许系统密码，不写成只认生物特征。
+- 授权一次领取不保证外部HTTP副作用exactly-once；流交付后断开、gateway/helper重启不能保证拿回原响应。
+
+## 10. 定价与托管边界
+
+| 档／方向 | 当前状态 | 范围 |
 | --- | --- | --- |
-| Free（开源） | 全部远程审批功能 + 自托管 relay 无限制 | 本文的全部第一版功能（含手机 App）都在 Free 里；这是口碑和安装量来源 |
-| Free 用官方 relay（后续） | 3 台设备、每月 2,000 次远程审批、待审批保留 7 天 | 沿用 strategy / 架构文档的合理使用额度 |
-| 个人远程档（待定，建议 $5–8/月） | 官方 relay 无额度上限、推送、更多设备、iPhone App 的高级项 | 原「Personal Cloud」被砍的理由是没有刚需；对无头机器用户，远程审批就是刚需。这是建议重新评估，不是已决定 |
-| Team | 共享凭证的所有者手机审批、N-of-M、组织策略、审计导出 | 阶段 2 |
+| 开源／桌面自托管 | 现有代码与部署资产 | 自托管relay只服务桌面审批端／CLI；不能写成包含手机接自建relay |
+| 官方relay与手机 | 已部署；Android核心验收，iOS待验 | 手机固定官方地址与Google／Apple登录；当前未执行套餐额度／计费 |
+| Free官方合理使用额度 | 计划中 | 3台、每月2,000次等为既有定价目标，非当前限额代码或服务承诺 |
+| 个人付费托管／Team | 计划中、价格未拍板 | 托管便利／团队治理；不按付费档降低设备验证与审批安全 |
 
-原则不变：安全能力不分档（Free 也有全部隔离与审批），收费的是托管、便利与团队治理。
+安全规则不因套餐改变。TestFlight／Play打包脚本不等于可安装发行包已交付；不会拿Debug签名替代Play应用签名或生产证书。
 
-## 11. 成功指标与验证
+## 11. 成功指标与真实结果
 
-**Dogfooding（作者自己，第一版 M5 之后两周）**
-
-| 指标 | 目标 | 说明 |
+| 指标 | 目标 | 两轮后的当前结果 |
 | --- | --- | --- |
-| 服务器上 `.env` / agent 配置里的明文 key 数 | 0 | `keyvalet scan` 为证 |
-| 每周人工远程审批次数 | 10–30 | 太少说明预授权开太大，太多说明产品不可用 |
-| 被令牌/grant 覆盖的调用占比 | > 80 % | |
-| 审批 p50 延迟（Mac 在线） | < 3 s | |
-| 因「等审批」而失败的 agent 任务数 | 每周 ≤ 1 且原因清楚 | |
-| 两周内有没有一次想「干脆全放行算了」 | 没有 | 有就记下是哪种请求，改策略或改产品 |
+| Ubuntu×Mac pair→首次use | <10分钟 | 未通过；209.526 s停止、use n=0 |
+| Mac公网审批p50/p95 | <3 s／<8 s、≥20次 | 未测，n=0 |
+| 吊销 | 双向1分钟内 | 未测 |
+| 两端audit | 100%对账 | 未测，不能以0请求计100% |
+| Mac合盖 | 2小时无重复、正确expired | 未测、未开始计时 |
+| Mac三步设置 | 各<5 s | 未测，各n=0 |
+| 手机三步设置 | 各<5 s | 功能通过，约5 s／≤16 s／<1 s，预算未过 |
+| 本机优先 | 真GUI／锁屏变化 | 未测 |
+| 一周／两周使用 | 预授权覆盖>80%、人工打扰可解释 | 未开始，不能从单测推算 |
 
-**外部验证（dogfooding 之后）**
+数字与证据路径以架构 §16、review顶部表及[R2-A](remote-approval-reports/R2-A-m2-acceptance.md)、[R2-B](remote-approval-reports/R2-B-windows.md)、[R2-C](remote-approval-reports/R2-C-mobile.md)、[R2-D](remote-approval-reports/R2-D-runtimes.md)为准。尚不进入“完整真机验收通过”的推广结论；后续外部试用／付费验证是计划。
 
-- 找 5–10 个「Linux 服务器 + Mac」的个人开发者试用，问三个问题：第一次弹窗看懂了吗；一周后还在用吗；为了手机审批愿不愿付 $5–8/月。
-- 投放渠道：OpenClaw / Hermes 社区的凭证相关 issue、Mac mini 常驻 agent 的几篇设置指南的「安全」一节、HN 上 Agent Vault 讨论里提过 root/同用户边界的人。
+## 12. 仍需处理的问题
 
-**不算证据的东西**：star、点赞、「这个思路很酷」。算证据的是：连续两周有远程审批记录、有人主动问价格。
+优先落实K4接收验证与metrics边界，再完成MacStrong配对、选定真实只读凭证请求和20次测量；安排吊销／审计／合盖。Android恢复relay HTTPS后复验重启与远端退出、安排离线窗口。Windows用户设置PIN后验Hello；iOS／Play补登录／推送／签名资源。运行时须有效Claude会话和第三家，复验channels及未测timeout／Stop。
 
-## 12. 风险与开放问题
-
-| 风险 | 应对 |
-| --- | --- |
-| CryptoKit HPKE 不接受 SE 密钥做解封 | W1 spike 先验；退路是 SE ECDH + Rust 侧 HKDF/AEAD |
-| 用户的 Ubuntu 没有 TPM | 软件模式可用，弹窗持续提示；不阻塞第一版 |
-| 审批疲劳导致用户签过大的令牌 | 令牌范围 ≤ T1、必须带预算与到期；`grant list` 常驻 status；推荐项只推只读 |
-| Mac 睡眠导致积压 | 过期丢弃 + 汇总提示；真正需要无人值守的用预授权 |
-| relay 同机部署的可用性耦合 | 文档写清；官方 relay 之后提供 |
-| 和「Mac 作执行端」路线的取舍被误解为放弃 | 架构文档 D1 写明保留为第二版 |
-| 手机 App 分发依赖 Apple / Google 开发者账号、APNs 密钥、FCM 项目 | 第一版只走 TestFlight 与内部测试轨道；账号与密钥归属列入开放问题 |
-| 多个 agent 并行开发互相踩文件 | 契约先行 + crate 级所有权 + 各自 target 目录（架构文档 §17.1） |
-| 各家 agent 的工具调用超时、hook 行为随版本变动（Codex 60→300 s、Claude Desktop 60 s bug、Cursor CLI 60 s 硬限） | 预算按 `clientInfo` 查表且可配置；被提前杀掉时自动降预算并审计；运行时实测清单随每次大版本复跑 |
-| Stop hook 兜底让 session 多转几轮、烧 token | 每个 approval 最多拦 3 次、到期即放行；可关闭 |
-
-需要作者决定（与架构文档 §18 相同）：服务器有无 TPM；relay 放哪、用哪个域名接 Cloudflare；服务器上跑哪些 agent、是否已分用户；`unlock_ttl` 与 `batch` 需求；调用内等待默认值；Stop hook 是否默认开；**「以后再也不管」是否允许包含敏感操作**（现设计：允许，但单独开、红色常驻、默认 7 天）；常设票默认是否收窄到只读；Apple / Google 开发者账号与推送密钥归属；并行 agent 的数量与合并方式。
+完整设计处置、外部资源和技术债在[OPEN-QUESTIONS](remote-approval-reports/OPEN-QUESTIONS.md)。K1–K4已决定，不再把Windows双用途方案、手机是否登录、固定地址或短期票Quick当待拍板选项。
 
 ## 13. FAQ
 
-**一分钟没批，为什么不直接当作「不批」？** 因为模型会把「不批」理解成权限问题，然后绕路——最典型的就是转头让用户把 key 粘到聊天里，这正是 KeyValet 要消灭的行为。所以超时只会得到「待批准」，agent 可以先干别的、随时回来等结果；「不」只能由你点拒绝产生。真正的「一分钟」体现在：一分钟内没批，agent 的那次调用不再傻等，把控制权交回模型。
+**为什么手机要登录？** 手机产品用Google／Apple的已验证provider+subject确定用户归属，DK证明把一次性登录尝试和ID token绑到本机；双方SAS完成才加入执行端账户。登录不替代Quick／Strong，也不让手机拿执行端凭证值。GoogleDebug已实测，Apple还待配置／验收。
 
-**批晚了，session 还能接上吗？** 能，分几种情况：session 还活着且在等 → 直接拿到结果；session 在做别的 → 下次它来要就有；session 准备结束 → KeyValet 的 Stop hook 拦一下让它去等（最多 3 次）；Claude Code 开了 channels → 直接推进去叫醒。session 进程已经退出 → 这次批准记成「已批未用」，第一版不自动续跑，Mac 上可以挂自己的命令。
+**手机能连自建relay吗？** 当前不能。手机地址固定relay.keyvalet.dev，不展示或提供编辑／API入口；自托管只服务桌面审批端和CLI。
 
-**各家 agent 都适配吗？** 原理上只依赖两样所有 MCP 客户端都有的东西：一次可以阻塞一会儿的工具调用，和一个能再去问结果的工具。各家差异（Cursor CLI 只给 60 秒、Claude Desktop 有 60 秒 bug、Codex 老版本 60 秒）都收进一张预算表，按 `clientInfo` 查；Stop hook 和 channels 是加分项，缺了也能用。走 HTTP 的 OpenClaw / Hermes / SDK 靠挂连接。
+**批得晚能续上吗？** 活session可用wait工具领取原结果；没有批准返回待批，过期后只能按需新建。Stop最多三次，Claudechannels live尚未测，不承诺所有客户端自动唤醒。HTTP恢复只限相同活gateway session及完整原绑定。
 
-**能不能「以后再也不管」？** 能，分两档。普通档：弹窗里选「这个凭证 / 这台机器以后都允许」，或设置里对所有机器开——只读和普通写入从此不问，删除、支付、IAM 这类敏感操作还是每次 Touch ID。狠档：设置里单独开「无人值守（含敏感操作）」，Touch ID 加再输一遍设备名，两端常驻红色，默认 7 天自动关。两档都能一键收回，收回不要 Touch ID。狠档就是把保险柜门敞着，KeyValet 做的是让你一直看得见门开着、到点自动关、随时能关——不是替你决定要不要开。
+**是不是所有agent都验完？** 没有。Codex和Devin托管模型四分钟／续等有证据；Claude、Gemini、Grok、Cursor及两个IDE还有登录／额度／安装缺口。Codexexec/TUI算同一家，未满足Claude加另外两家的门槛。
 
-**为什么放宽要 Touch ID，收紧不要？** 因为被注入的 agent 和偷到你解锁电脑的人，想做的都是放宽；而你在慌乱中想做的是收紧。把阻力放在正确的方向上。
+**可以以后不再问吗？** 普通常设／全局T1票可以，敏感操作仍要Strong。逐执行端T2设置需Strong与精确标签，常设两轮，不支持全局T2；接收验证缺口仍待修，不能当安全栏已验收完毕。
 
-**Windows 能当审批端吗？** 能（第一版）。Windows Hello 每次签名都要 PIN / 指纹 / 人脸，和 Touch ID 是同一档；它只支持 RSA-2048，所以票上写的是 RS256，执行端按设备记录的算法验，不影响其他设备。
+**Windows能当审批端吗？** PCP身份与Quick对软件执行端的互操作已通过。Strong代码用HelloRSA-2048/RS256，当前VMIsSupportedAsync=false，用户未设PIN；创建、签名、取消及跨端Strong都记等待PIN。
 
-**以后上云（KMS、Enclave）要重做吗？** 不要。钥匙保护、执行端、审批者、签票者四条线在第一版就是接口 + 枚举位；云端实现接上去，协议版本号不变，设备不用重新配对。第一版只留口子不做实现。
+**设备丢了能恢复什么？** 离线账户ID和恢复码可恢复relay账户并轮换新码／注销旧注册；不能恢复vault／凭证／硬件私钥，不能擦掉失联机器上的离线授权。audit的AEAD检查点也不是硬件反回滚。
 
-**为什么不直接 SSH 上去批？** 现在就可以（`keyvalet approve <pid>`），但要先知道 agent 卡住了、再开终端、再找 pid。远程审批是「它来找你」，而且弹窗上有真实请求。
+**为什么不直接SSH去批？** 本地owner的polkit后备仍可用；远程入口的价值是请求主动送到手边并显示真实操作。root/SYSTEM不在防护范围。
 
-**为什么不把凭证放 MacBook 上，让服务器来借？** 这条路保留（第二版），但 MacBook 合盖就离线，服务器上 7×24 的 agent 等不起；Secure Enclave 还要求 GUI 会话。第一版把凭证放服务器、把审批放 Mac，是可用性和安全性之间的取舍，代价是服务器 root 不在防护范围——这点和 macOS 现状一样。
-
-**relay 能不能不要？** 不行。没有 relay 就没有「Mac 睡着时排队」，而且 helper 不能开入站端口。relay 可以就装在这台服务器上，只见密文。
-
-**能不能用 Telegram 批？** 不能作为批准，因为手机上的 Telegram 没有你的审批密钥，任何能发 Telegram 消息的人都能批。可以以后做成通知。
-
-**和 Clawvisor / OneCLI 的审批有什么不同？** 它们的批准是网关进程里的一个状态位，网关和 agent 跑在同一个用户下；KeyValet 的批准是另一台设备上硬件密钥签的名，服务器上的 agent 既读不到 vault 也签不出批准。
-
-**官网文案草稿（一段）**
-
-> 把 agent 放在服务器上跑，把钥匙留在服务器的 TPM 里，把「允许」这个动作留在你手上的 Mac。每一次请求都带着真实的方法、主机和路径来找你；常规操作一天批一次，敏感操作每次 Touch ID；你不在的时候，它等，不放行。
+**手机和桌面发行都准备好了吗？** Android当前为正常Debug安装的实机证据；Play签名AAB／TestFlightIPA尚未生成或上传，iOS真机与Windows生产签名仍待完成。

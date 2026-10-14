@@ -1,0 +1,6 @@
+{
+  "connected": false,
+  "errno": 61,
+  "error_kind": "ECONNREFUSED",
+  "elapsed_s": 4.8e-05
+}

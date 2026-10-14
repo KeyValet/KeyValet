@@ -1,0 +1,33 @@
+{
+  "started_utc": "2026-10-14T00:39:01.727246+00:00",
+  "rust": "1.99.0",
+  "checks": {
+    "fmt": 0,
+    "clippy": 0,
+    "build": 0,
+    "test": 0
+  },
+  "space_checks": [
+    {
+      "check": "test",
+      "free_bytes": 16329175040
+    }
+  ],
+  "source_files": 516,
+  "minimum_free_bytes": 15000000000,
+  "secret_values_in_evidence": false,
+  "source_unchanged_during_checks": true,
+  "changed_source_files": [],
+  "passed": 1402,
+  "failed": 0,
+  "ignored": 10,
+  "groups": 69,
+  "finished_utc": "2026-10-14T00:45:12.030894+00:00",
+  "preceding_successful_checks": "r3a-se-closure-ci2-summary.json",
+  "checks_evidence": {
+    "fmt": "r3a-se-closure-ci2-fmt.log",
+    "clippy": "r3a-se-closure-ci2-clippy.log",
+    "build": "r3a-se-closure-ci2-build.log",
+    "test": "r3a-se-closure-final-ci-test.log"
+  }
+}

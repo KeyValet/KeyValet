@@ -29,6 +29,7 @@
         "remote.status",
         "remote.audit.list",
         "remote.relay.identity",
+        "remote.relay.config_presence",
         "remote.relay.outbound.ack",
         "remote.relay.control.poll",
         "remote.relay.control.complete",

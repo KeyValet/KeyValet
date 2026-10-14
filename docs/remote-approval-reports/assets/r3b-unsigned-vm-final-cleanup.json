@@ -1,0 +1,14 @@
+{
+  "owner_sid": "S-1-5-21-3283475767-415700631-2745889461-1002",
+  "installed_mcp_sha256": "4f82b0b121c5d77273b698f50af14b3ca1b2c503574d55b581d2ce6df751cde4",
+  "old_cache_directory_preserved": true,
+  "owned_profiles_remaining": 0,
+  "owned_tasks_remaining": 0,
+  "data_present": true,
+  "old_cache_archive_preserved": true,
+  "relay": "Stopped",
+  "helper": "Running",
+  "backup_preserved": true,
+  "protected_workers_remaining": 0,
+  "ssh_exit": 0
+}

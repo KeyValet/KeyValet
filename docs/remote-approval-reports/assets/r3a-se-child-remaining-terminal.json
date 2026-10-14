@@ -1,0 +1,9 @@
+{
+  "dispatched_utc": "2026-10-14T05:14:07.416567+00:00",
+  "window_id": 27753,
+  "tty": "/dev/ttys000",
+  "command": "/usr/bin/python3 /Users/guang/dev/keyvalet/docs/remote-approval-reports/assets/r3a-start-se-child-remaining.py",
+  "user_authorized_start": "开始",
+  "expected_successful_se_signatures": 2,
+  "secret_values_in_evidence": false
+}

@@ -14,6 +14,13 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  windows:
+    uses: ./.github/workflows/windows-package.yml
+    with:
+      tag: ${{ github.event_name == 'push' && github.ref_name || '' }}
+    permissions:
+      contents: read
+
   linux:
     uses: ./.github/workflows/linux-package.yml
     permissions:
@@ -160,7 +167,7 @@ jobs:
 
   publish:
     if: github.event_name == 'push'
-    needs: [release, linux]
+    needs: [release, linux, windows]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -185,8 +192,10 @@ jobs:
               raise SystemExit("Invalid release tag")
           expected = {f"keyvalet-{tag}-{platform}.tar.gz" for platform in
                       ("macos-arm64", "linux-x64", "linux-arm64")}
+          expected.update(f"keyvalet-{tag}-windows-{arch}.zip" for arch in ("x64", "arm64"))
           entries = []
-          checksum_files = [root / "SHA256SUMS", *sorted(root.glob("*.sha256"))]
+          checksum_files = [root / "SHA256SUMS", *sorted(root.glob("*.sha256")),
+                            *sorted(root.glob("SHA256SUMS-windows-*"))]
           for checksum in checksum_files:
               for line in checksum.read_text().splitlines():
                   digest, name = line.split()
@@ -195,7 +204,8 @@ jobs:
                   entries.append((digest, name))
           if len(entries) != len(expected) or {name for _, name in entries} != expected:
               raise SystemExit("Missing or duplicate release packages")
-          if {path.name for path in root.glob("*.tar.gz")} != expected:
+          archives = {path.name for pattern in ("*.tar.gz", "*.zip") for path in root.glob(pattern)}
+          if archives != expected:
               raise SystemExit("Unexpected release archives")
           for digest, name in entries:
               with (root / name).open("rb") as package:
@@ -204,13 +214,14 @@ jobs:
                   raise SystemExit(f"Checksum mismatch: {name}")
           (root / "SHA256SUMS").write_text("".join(
               f"{digest}  {name}\n" for digest, name in sorted(entries, key=lambda entry: entry[1])))
-          print("Verified macOS arm64 and Linux x64/arm64 packages")
+          print("Verified macOS arm64, Linux x64/arm64 and unsigned Windows x64/arm64 packages")
           PY
       - name: Create draft release
         env:
           GH_TOKEN: ${{ github.token }}
           PACKAGE_TAG: ${{ github.ref_name }}
         run: |
-          gh release create "$PACKAGE_TAG" dist/release/*.tar.gz dist/release/*.sha256 dist/release/SHA256SUMS \
+          gh release create "$PACKAGE_TAG" dist/release/*.tar.gz dist/release/*.zip \
+            dist/release/*.sha256 dist/release/SHA256SUMS dist/release/SHA256SUMS-windows-* \
             --draft --verify-tag --title "KeyValet $PACKAGE_TAG" \
             --notes-file ".github/release-notes/$PACKAGE_TAG.md"

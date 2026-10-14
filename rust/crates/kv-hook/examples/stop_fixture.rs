@@ -7,22 +7,41 @@ fn main() -> std::io::Result<()> {
     use std::io::{BufRead, Read, Write};
     let args: Vec<String> = std::env::args().collect();
     let input: Value = serde_json::from_reader(std::io::stdin())?;
-    let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_secs() as i64;
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap()
+        .as_secs() as i64;
     let ppid = std::os::unix::process::parent_id();
     let mut stream = std::io::BufReader::new(std::os::unix::net::UnixStream::connect(&args[2])?);
-    stream.get_mut().set_read_timeout(Some(std::time::Duration::from_secs(2)))?;
-    stream.get_mut().set_write_timeout(Some(std::time::Duration::from_secs(2)))?;
+    stream
+        .get_mut()
+        .set_read_timeout(Some(std::time::Duration::from_secs(2)))?;
+    stream
+        .get_mut()
+        .set_write_timeout(Some(std::time::Duration::from_secs(2)))?;
     let output = kv_hook::stop::handle_stop(&args[1], &input, ppid, now, |op, params| {
-        writeln!(stream.get_mut(), "{}", json!({"id": 1,"op":op,"params":params}))?;
+        writeln!(
+            stream.get_mut(),
+            "{}",
+            json!({"id": 1,"op":op,"params":params})
+        )?;
         let mut line = String::new();
         (&mut stream).take(64 * 1024).read_line(&mut line)?;
         let reply: Value = serde_json::from_str(&line)?;
-        if !line.ends_with('\n') || reply["ok"] != true { return Err(std::io::Error::other("Invalid fixture response")); }
+        if !line.ends_with('\n') || reply["ok"] != true {
+            return Err(std::io::Error::other("Invalid fixture response"));
+        }
         Ok(reply["result"].clone())
     });
     let record = json!({"fields": input.as_object().map(|o| o.keys().collect::<Vec<_>>()), "ppid":ppid,
         "stop_hook_active":input["stop_hook_active"], "loop_count":input["loop_count"], "output":output.value});
-    writeln!(std::fs::OpenOptions::new().append(true).create(true).open(&args[3])?, "{record}")?;
+    writeln!(
+        std::fs::OpenOptions::new()
+            .append(true)
+            .create(true)
+            .open(&args[3])?,
+        "{record}"
+    )?;
     println!("{}", output.value);
     Ok(())
 }

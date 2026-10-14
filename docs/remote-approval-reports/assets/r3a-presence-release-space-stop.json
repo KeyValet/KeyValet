@@ -1,0 +1,11 @@
+{
+  "observed_utc": "2026-10-13T22:13:39.135548+00:00",
+  "free_bytes": 15130701824,
+  "cache_cleanup_authorization_scope": [
+    "rust/target-r2a/release/deps",
+    "rust/target-r2a/release/build"
+  ],
+  "release_build_started": false,
+  "stopped_by_space_check": true,
+  "free_gb_decimal": 15.131
+}

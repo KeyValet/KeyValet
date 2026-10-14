@@ -1,0 +1,33 @@
+{
+  "observed_utc": "2026-10-14T01:16:10.558125+00:00",
+  "formatted_only_files_named_by_fmt_check": [
+    "/Users/guang/dev/keyvalet/rust/crates/kv-cli/src/remote/tests.rs",
+    "/Users/guang/dev/keyvalet/rust/crates/kv-core/tests/remote.rs",
+    "/Users/guang/dev/keyvalet/rust/crates/kv-helper/src/remote/engine.rs",
+    "/Users/guang/dev/keyvalet/rust/crates/kv-helper/src/remote/inbound.rs",
+    "/Users/guang/dev/keyvalet/rust/crates/kv-helper/src/remote/owner.rs",
+    "/Users/guang/dev/keyvalet/rust/crates/kv-helper/src/remote/tests.rs",
+    "/Users/guang/dev/keyvalet/rust/crates/kv-helper/src/remote/tests/inbound_recovery.rs"
+  ],
+  "before_hashes": {
+    "/Users/guang/dev/keyvalet/rust/crates/kv-cli/src/remote/tests.rs": "04a95aad47d757093147fe73966c1e99c28050bc52949cb959de0c8e6b5dc987",
+    "/Users/guang/dev/keyvalet/rust/crates/kv-core/tests/remote.rs": "5f1a9f30cfa1255b1d79e62b477030eca1187e45935c9428c99e858d660d8ede",
+    "/Users/guang/dev/keyvalet/rust/crates/kv-helper/src/remote/engine.rs": "db05eef7e7a701874bdcc4a674c2839af2a8bfb92a435b286d224336eae5d3f3",
+    "/Users/guang/dev/keyvalet/rust/crates/kv-helper/src/remote/inbound.rs": "31b78986b0a8593464901578b32467deec8ca05954436453c1dfa94be3faadb6",
+    "/Users/guang/dev/keyvalet/rust/crates/kv-helper/src/remote/owner.rs": "ec96e17b30ee1a75b9f87ad68d6843fe2beae216ae1299337a07b864c0130b7a",
+    "/Users/guang/dev/keyvalet/rust/crates/kv-helper/src/remote/tests.rs": "819f7d8b6ab5742642e8fa05bf105e37e0bb078a75a5d2899daa8011aadbcd0c",
+    "/Users/guang/dev/keyvalet/rust/crates/kv-helper/src/remote/tests/inbound_recovery.rs": "12f3b1a7718335b7178bc8223b48bd3480d41f7274e147f1008f69ef8b353c53"
+  },
+  "after_hashes": {
+    "/Users/guang/dev/keyvalet/rust/crates/kv-cli/src/remote/tests.rs": "d71a1f0e258d355cc0b174fbc88117ff244ddc745e23b9dd6f16148bfc34a902",
+    "/Users/guang/dev/keyvalet/rust/crates/kv-core/tests/remote.rs": "74413c1f8f9a31a5b95c653635089072ac9a96709263aa7564464fb267d8454d",
+    "/Users/guang/dev/keyvalet/rust/crates/kv-helper/src/remote/engine.rs": "690cc498c78e6c0f1010d5abe8ebda730cb5886db0af885a35a4f6e684df217b",
+    "/Users/guang/dev/keyvalet/rust/crates/kv-helper/src/remote/inbound.rs": "2f44bd7e35e05abce51630e24e6bb9839c55d944402226b29ec686de2f44c07f",
+    "/Users/guang/dev/keyvalet/rust/crates/kv-helper/src/remote/owner.rs": "9c03a42a44fefbd706c4cb8b5684345ccd5afd6ea77e1577e486fa42d64f3c3a",
+    "/Users/guang/dev/keyvalet/rust/crates/kv-helper/src/remote/tests.rs": "d6f7fd7ed33b8dc0ee1afd27b70d76d301fdc7efc4bff61e36a10ac474093b64",
+    "/Users/guang/dev/keyvalet/rust/crates/kv-helper/src/remote/tests/inbound_recovery.rs": "4e37517ca2e6292d71ddac0df993009322ac01be8536af6176b23bcd5969c52c"
+  },
+  "logical_fix_requested": false,
+  "prior_check": "r3a-se-child-closure-ci-summary.json",
+  "secret_values_in_evidence": false
+}

@@ -1,0 +1,51 @@
+[
+  {
+    "name": "kv-helper",
+    "original": "kv-helper.exe",
+    "sha256": "e4d5c69dcf9b0eb872f88a388d01b0bc1d4827aeb3c090f98b54f549c4fa389c",
+    "version": "0.3.0",
+    "product": "KeyValet"
+  },
+  {
+    "name": "kv-agent",
+    "original": "kv-agent.exe",
+    "sha256": "461db0d34648d7c7fb5b2f48c10aa5f4faf7bac768993e028c4cfe36b533e776",
+    "version": "0.3.0",
+    "product": "KeyValet"
+  },
+  {
+    "name": "kv-cli",
+    "original": "kv-cli.exe",
+    "sha256": "5ce7ef672b33d94c4bf8216c168092d1be980f42179affeacd775002d66724c4",
+    "version": "0.3.0",
+    "product": "KeyValet"
+  },
+  {
+    "name": "kv-mcp",
+    "original": "kv-mcp.exe",
+    "sha256": "f4b9273ba2b6f9decd0566abc253b94963e5dcd57d0a54a3682a22fe05a0e7a9",
+    "version": "0.3.0",
+    "product": "KeyValet"
+  },
+  {
+    "name": "kv-hook",
+    "original": "kv-hook.exe",
+    "sha256": "b51c487fb2f9e8b9660b4874932de47e7b29d531f0535599b22c4b36ab8f18b0",
+    "version": "0.3.0",
+    "product": "KeyValet"
+  },
+  {
+    "name": "kv-server",
+    "original": "kv-server.exe",
+    "sha256": "cf2afeba00487212a7baef66b382e3f312b66e65ce08abb9c47f2e15d3bdf180",
+    "version": "0.3.0",
+    "product": "KeyValet"
+  },
+  {
+    "name": "kv-relay-client",
+    "original": "kv-relay-client.exe",
+    "sha256": "d621c3bc51857dba56b28bacba94b2b55b3c57cf61688237f6124215a52173d3",
+    "version": "0.3.0",
+    "product": "KeyValet"
+  }
+]

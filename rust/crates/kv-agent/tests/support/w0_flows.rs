@@ -165,14 +165,17 @@ fn typed_w0_requests_and_all_decisions_share_the_current_contract() {
     let local: remote::DeviceRecord =
         remote::canonical::from_json(sample("DeviceRecord").to_string().as_bytes()).unwrap();
     for choice in &view.scopes {
-        let key = software(if choice.level == ui::Level::Strong {
-            "strong"
+        let level = if choice.level == ui::Level::Strong {
+            remote::ApprovalLevel::Strong
         } else {
-            "quick"
-        });
+            remote::ApprovalLevel::Quick
+        };
+        let alg = remote::validation::approval_key(&local, level).unwrap().alg;
+        let key = software(if alg == SignatureAlgorithm::RS256 { "rsa" }
+            else if level == remote::ApprovalLevel::Strong { "strong" } else { "quick" });
         let mut helper = SignedHelper {
             key: &key,
-            alg: SignatureAlgorithm::ES256,
+            alg,
             request: json.clone(),
             last: Value::Null,
         };

@@ -1,0 +1,32 @@
+{
+  "observed_utc": "2026-10-13T03:25:54.566060+00:00",
+  "calls": [
+    "initialize",
+    "credential_status"
+  ],
+  "authentication_calls": 0,
+  "results": [
+    {
+      "side": "Mac",
+      "initialized": true,
+      "server": {
+        "name": "keyvalet",
+        "version": "0.3.0"
+      },
+      "state": "locked",
+      "protection_error_present": false,
+      "remote_error_present": false
+    },
+    {
+      "side": "ndu",
+      "initialized": true,
+      "server": {
+        "name": "keyvalet",
+        "version": "0.3.0"
+      },
+      "state": "locked",
+      "protection_error_present": false,
+      "remote_error_present": false
+    }
+  ]
+}

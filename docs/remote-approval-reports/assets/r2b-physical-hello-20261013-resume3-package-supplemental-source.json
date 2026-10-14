@@ -1,0 +1,25 @@
+{
+  "files": [
+    {
+      "path": "LICENSE",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "README.md",
+      "sha256": "445d59652a84092f3e90b048bbdfab43566b70809a4f7157c31a4850ec2a5b76"
+    },
+    {
+      "path": "SECURITY.md",
+      "sha256": "45ddaebff22e64360c052c38e9168ed0bcf3c92afa33ad18fecd74c92df16a80"
+    },
+    {
+      "path": "docs/windows.md",
+      "sha256": "1da423d8583e01e769eb6a804c1d8a771b0f0ad35f3abfe917693e61a326113d"
+    },
+    {
+      "path": "docs/wsl.md",
+      "sha256": "274822038a0698416e571742eac60b3069c7e1a237710b3a8da36b588efe39b5"
+    }
+  ],
+  "purpose": "package documentation, no Rust source change"
+}

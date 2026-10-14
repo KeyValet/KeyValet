@@ -560,7 +560,7 @@ fi
 RELAY_MODE=0
 if [ "$DAEMON_MODE" = 1 ] && /usr/bin/codesign --verify --strict "$STAGE/bin/kv-relay-client" 2>/dev/null \
     && [ "$(team_of "$STAGE/bin/kv-relay-client")" = "$TEAM_ID" ] \
-    && /usr/bin/codesign -v -R 'identifier "dev.keyvalet.relay-client"' "$STAGE/bin/kv-relay-client" 2>/dev/null; then
+    && /usr/bin/codesign -v -R '=identifier "dev.keyvalet.relay-client"' "$STAGE/bin/kv-relay-client" 2>/dev/null; then
   RELAY_MODE=1
   if [ "$PREBUILT" = 1 ]; then
     KV_RELAY_PLIST="$SRC_DIR/service/relay-client/dev.keyvalet.relay.plist"
@@ -623,6 +623,8 @@ exec /usr/bin/sudo -k -- $INSTALL_DIR/bin/kv-cli --lang "\$KV_LANG" "\$@"
 EOF
 
 say "==> 安装到 ${INSTALL_DIR}（需要 sudo）" "==> Installing to ${INSTALL_DIR} (requires sudo)"
+KV_SETUP=1
+for option in "$@"; do [ "$option" != --no-setup ] || KV_SETUP=0; done
 sudo -k
 if [ -t 0 ]; then
   SUDO="sudo"
@@ -652,7 +654,7 @@ fi
 # This whole root script is ONE single-quoted string: never use a single quote (apostrophe)
 # anywhere inside it, not even in a comment -- it would end the string early.
 $SUDO /bin/sh -eu -c '
-  INSTALL_DIR="$1"; VAULT_DIR="$2"; CLI_LINK="$3"; STAGE="$4"; SUDOERS_FILE="$5"; KV_LANG="$6"; DAEMON_MODE="$7"; OWNER_UID="$8"; RELAY_MODE="$9"; OWNER_HOME="${10}"
+  INSTALL_DIR="$1"; VAULT_DIR="$2"; CLI_LINK="$3"; STAGE="$4"; SUDOERS_FILE="$5"; KV_LANG="$6"; DAEMON_MODE="$7"; OWNER_UID="$8"; RELAY_MODE="$9"; OWNER_HOME="${10}"; KV_SETUP="${11}"
   say() { if [ "$KV_LANG" = zh ]; then printf "%s\n" "$1"; else printf "%s\n" "$2"; fi; }
   rm -rf "$INSTALL_DIR.new"
   mkdir -p "$INSTALL_DIR.new"
@@ -692,8 +694,10 @@ $SUDO /bin/sh -eu -c '
 
   # macOS supports only hardware-protected vaults. The CLI directly collects the recovery
   # passphrase from a hidden terminal/native dialog, and never returns it to the installer.
-  say "==> 初始化或迁移 Secure Enclave 凭证库" "==> Initializing or migrating the Secure Enclave vault"
-  "$INSTALL_DIR/bin/kv-cli" --lang "$KV_LANG" setup-enclave
+  if [ "$KV_SETUP" = 1 ]; then
+    say "==> 初始化或迁移 Secure Enclave 凭证库" "==> Initializing or migrating the Secure Enclave vault"
+    "$INSTALL_DIR/bin/kv-cli" --lang "$KV_LANG" setup-enclave
+  fi
   "$INSTALL_DIR/bin/kv-cli" --lang "$KV_LANG" status --summary
   rm -rf "$INSTALL_DIR.old"
 
@@ -714,7 +718,7 @@ $SUDO /bin/sh -eu -c '
     rm -f /Library/LaunchAgents/dev.keyvalet.relay.plist
     say "远程 relay 需要签名的 daemon 与 relay-client" "Remote relay requires the signed daemon and relay-client"
   fi
-' sh "$INSTALL_DIR" "$VAULT_DIR" "$CLI_LINK" "$STAGE" "$SUDOERS_FILE" "$KV_LANG" "$DAEMON_MODE" "$(id -u)" "$RELAY_MODE" "$HOME"
+' sh "$INSTALL_DIR" "$VAULT_DIR" "$CLI_LINK" "$STAGE" "$SUDOERS_FILE" "$KV_LANG" "$DAEMON_MODE" "$(id -u)" "$RELAY_MODE" "$HOME" "$KV_SETUP"
 sudo -k
 
 # Verify the passwordless rule took effect: the helper exits immediately on reading EOF (no Touch ID prompt)

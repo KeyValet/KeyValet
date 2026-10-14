@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "failure": null,
+  "commands": [
+    {
+      "exit_code": 0,
+      "seconds": 85.5518691,
+      "command": "cargo test -p kv-core -p kv-helper -p kv-cli -p kv-agent -p kv-platform --locked"
+    },
+    {
+      "exit_code": 0,
+      "seconds": 21.3095669,
+      "command": "cargo build --locked -p kv-helper -p kv-agent -p kv-cli -p kv-mcp -p kv-hook -p kv-server -p kv-relay-client"
+    }
+  ],
+  "finished_utc": "2026-10-14T01:36:40.7522054Z",
+  "ssh_exit": 0
+}

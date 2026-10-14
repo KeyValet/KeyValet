@@ -1,0 +1,50 @@
+{
+  "claude": {
+    "command": [
+      "claude",
+      "--version"
+    ],
+    "output": "2.1.282 (Claude Code)"
+  },
+  "codex": {
+    "command": [
+      "codex",
+      "--version"
+    ],
+    "output": "codex-cli 0.162.1"
+  },
+  "gemini": {
+    "command": [
+      "gemini",
+      "--version"
+    ],
+    "output": "0.39.1"
+  },
+  "cursor-agent": {
+    "command": [
+      "cursor-agent",
+      "--version"
+    ],
+    "output": "2026.10.01-e373342"
+  },
+  "devin": {
+    "command": [
+      "devin",
+      "--version"
+    ],
+    "output": "devin 3000.11.3 (9c803229faa4)"
+  },
+  "grok": {
+    "command": [
+      "/Users/guang/dev/keyvalet/rust/target-w5/runtime-probes/grok-native",
+      "--version"
+    ],
+    "output": "grok 1.0.50 (c58f321264ba)"
+  },
+  "environment": {
+    "utc": "2026-10-12T16:10:31.088067+00:00",
+    "os": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+    "cargo_target_dir": "/Users/guang/dev/keyvalet/rust/target-r2d",
+    "rust": "rustc 1.99.0 (b940084d7 2026-09-28)"
+  }
+}

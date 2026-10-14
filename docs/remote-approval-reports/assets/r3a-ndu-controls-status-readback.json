@@ -1,0 +1,20 @@
+{
+  "observed_utc": "2026-10-13T11:18:22.124050+00:00",
+  "cli_exit": 0,
+  "public_status": {
+    "mode": "per_use",
+    "relay": "connected",
+    "pending_n": 0,
+    "grants_n": 2,
+    "unattended": false,
+    "approvers": [
+      {
+        "device_id": "01M4SM5QTRQKNQE1TD6FBJTG79",
+        "label": "keyvalet",
+        "online": true,
+        "presence": "away"
+      }
+    ]
+  },
+  "touch_id_requests": 0
+}

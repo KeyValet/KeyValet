@@ -1,0 +1,13 @@
+{
+  "source": "official @openai/codex Windows distribution",
+  "mcp_help_exit": 0,
+  "version": "0.162.1",
+  "mcp_add_available": true,
+  "mcp_get_available": true,
+  "mcp_list_available": true,
+  "sha256": "dd13bdb162a184fa04039488b234a8258ef9b76f84e926c505d5742b19249a6a",
+  "credential_values_logged": false,
+  "version_exit": 0,
+  "login_attempted": false,
+  "ssh_exit": 0
+}

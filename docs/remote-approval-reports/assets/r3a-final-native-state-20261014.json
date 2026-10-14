@@ -1,0 +1,58 @@
+{
+  "observed_utc": "2026-10-14T05:39:33.806763+00:00",
+  "read_only": true,
+  "touch_id_requests": 0,
+  "secret_values_in_evidence": false,
+  "mac_services": {
+    "system/dev.keyvalet.helper": {
+      "exit": 0,
+      "pid": 70041,
+      "running": true
+    },
+    "gui/501/dev.keyvalet.agent": {
+      "exit": 0,
+      "pid": 70043,
+      "running": true
+    },
+    "gui/501/dev.keyvalet.relay": {
+      "exit": 0,
+      "pid": 70045,
+      "running": true
+    }
+  },
+  "ndu": {
+    "snapshot_exit": 0,
+    "device": {
+      "id": "01M4S8KJ48BSMNK1S4BEGT07FC",
+      "os": "linux",
+      "revoked_at": 1791955093
+    },
+    "unused_approval": {
+      "id": "01M4WDEFV8J4NMV0MSMEF5DXCE",
+      "state": "cancelled",
+      "agent_pid": 1520637,
+      "exp": 1791955593,
+      "min_level": "quick",
+      "tier": "T1",
+      "delivery_mode": "banner",
+      "execution_started_n": 0,
+      "execution_completed_n": 0
+    },
+    "test_grant": {
+      "jti": "01M4WDGQ4G1Y5X2WSA6N33F4NC",
+      "iss": "01M4SM5QTRQKNQE1TD6FBJTG79",
+      "aud": "01M4S8KJ48BSMNK1S4BEGT07FC",
+      "exp": 1791958666,
+      "revoked_at": 1791955093
+    },
+    "active_phone_n": 0,
+    "forward_revocation_still_applied": true
+  },
+  "source_files": 522,
+  "changed_source_files": [
+    "rust/crates/kv-agent/src/remote/view.rs",
+    "rust/crates/kv-touchid/build.rs",
+    "rust/crates/kv-touchid/src/enclave.swift"
+  ],
+  "source_matches_final_ci": false
+}

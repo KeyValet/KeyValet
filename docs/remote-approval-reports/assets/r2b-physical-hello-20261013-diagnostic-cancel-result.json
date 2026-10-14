@@ -1,0 +1,17 @@
+{
+  "exit_code": 0,
+  "finished_utc": "2026-10-13T06:03:02.4749586Z",
+  "seconds": 155.2895389,
+  "session_id": 13,
+  "elevated": false,
+  "deletion_verified": true,
+  "test_binary_sha256": "f76a68c3c269659f1eb1e8422448a4a2a14fd5dbb495d9a2bb9c089bf70b0770",
+  "test": "existing::hello::remote_key::physical_acceptance::remote_hello_sign_cancellation",
+  "account": "春有约花不误\\11516",
+  "started_utc": "2026-10-13T06:00:26.9011604Z",
+  "hello_returned_user_canceled": false,
+  "stderr": "PHYSICAL_ACCEPTANCE stage=create_approve\nHELLO_WAIT begin site=crates\\kv-agent\\src\\hello\\remote_key.rs:30 cap_ms=90000\nHELLO_WAIT end site=crates\\kv-agent\\src\\hello\\remote_key.rs:30 elapsed_ms=14657 success=true hresult=None\nHELLO_REMOTE result_status=Ok(KeyCredentialStatus(0))\nPHYSICAL_ACCEPTANCE stage=created_waiting_for_cancel_instructions\nPHYSICAL_ACCEPTANCE stage=sign_cancel\nHELLO_WAIT begin site=crates\\kv-agent\\src\\hello\\remote_key.rs:62 cap_ms=90000\nHELLO_WAIT end site=crates\\kv-agent\\src\\hello\\remote_key.rs:62 elapsed_ms=18 success=true hresult=None\nHELLO_REMOTE result_status=Ok(KeyCredentialStatus(0))\nHELLO_WAIT begin site=crates\\kv-agent\\src\\hello\\remote_key.rs:84 cap_ms=90000\nHELLO_WAIT end site=crates\\kv-agent\\src\\hello\\remote_key.rs:84 elapsed_ms=90047 success=false hresult=Some(HRESULT(0x800705B4))\nPHYSICAL_ACCEPTANCE signing=rejected\nHELLO_WAIT begin site=crates\\kv-agent\\src\\hello\\remote_key\\physical_acceptance.rs:21 cap_ms=90000\nHELLO_WAIT end site=crates\\kv-agent\\src\\hello\\remote_key\\physical_acceptance.rs:21 elapsed_ms=104 success=true hresult=None\nPHYSICAL_ACCEPTANCE cleanup=deleted_and_not_found\n",
+  "phase": "cancel",
+  "passed": false,
+  "uses_installed_worker": false
+}

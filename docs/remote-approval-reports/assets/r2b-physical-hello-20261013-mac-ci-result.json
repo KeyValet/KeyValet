@@ -1,0 +1,33 @@
+{
+  "platform": "macOS Apple Silicon",
+  "toolchain": "rustc 1.99.0 (b940084d7 2026-09-28)",
+  "started_utc": "2026-10-13T06:31:08.585974+00:00",
+  "commands": [
+    {
+      "command": "cargo +1.99.0 fmt --all -- --check",
+      "exit_code": 0,
+      "seconds": 1.0284347909910139,
+      "log": "mac-ci-1.log"
+    },
+    {
+      "command": "cargo +1.99.0 clippy --workspace --all-targets -- -D warnings",
+      "exit_code": 0,
+      "seconds": 28.24783512498834,
+      "log": "mac-ci-2.log"
+    },
+    {
+      "command": "cargo +1.99.0 build --workspace --locked",
+      "exit_code": 0,
+      "seconds": 18.372254582995083,
+      "log": "mac-ci-3.log"
+    },
+    {
+      "command": "cargo +1.99.0 test --workspace --locked",
+      "exit_code": 0,
+      "seconds": 301.2068866250047,
+      "log": "mac-ci-4.log"
+    }
+  ],
+  "finished_utc": "2026-10-13T06:36:57.261862+00:00",
+  "passed": true
+}

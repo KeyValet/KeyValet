@@ -1,0 +1,14 @@
+{
+  "at_unix_ms": 1791847062523,
+  "package": "dev.keyvalet.mobile",
+  "notifications": [
+    {
+      "record": "NotificationRecord(0x0a32cae1: pkg=dev.keyvalet.mobile user=UserHandle{0} id=1873140361 tag=01M4S6GENGB78WHAEQFE9EY0YE importance=2 key=0|dev.keyvalet.mobile|1873140361|01M4S6GENGB78WHAEQFE9EY0YE|10315: Notification(channel=kv_silent shortcut=null contentView=null vibrate=null sound=null defaults=0 flags=ONLY_ALERT_ONCE|AUTO_CANCEL color=0x00000000 category=recommendation groupKey=01M4S6GENGB78WHAEQFE9EY0YE actions=2 vis=PRIVATE))",
+      "mCreationTimeMs": "1791847059866",
+      "mUpdateTimeMs": "1791847059866",
+      "mImportance": "LOW",
+      "channel": "NotificationChannel{mId='kv_silent', mName=静默审批, mDescription=, mImportance=2, mBypassDnd=false, mLockscreenVisibility=-1000, mSound=null, mLights=false, mLightColor=0, mVibrationPattern=null, mVibrationEffect=null, mUserLockedFields=0, mUserVisibleTaskShown=false, mVibrationEnabled=false, mShowBadge=true, mDeleted=false, mDeletedTimeMs=-1, mGroup='null', mAudioAttributes=null, mBlockableSystem=false, mAllowBubbles=-1, mImportanceLockedDefaultApp=false, mOriginalImp=2, mParent=null, mConversationId=null, mDemoted=false, mImportantConvo=false, mLastNotificationUpdateTimeMs=0}",
+      "actions": "[0] \"仅允许这次\" -> PendingIntent{51ea6c7: PendingIntentRecord{34768fb dev.keyvalet.mobile startForegroundService (allowlist: 461eceb:+30s0ms/0/NOTIFICATION_SERVICE/NotificationManagerService)}}\n                [1] \"拒绝\" -> PendingIntent{9c7d4f4: PendingIntentRecord{c657a8a dev.keyvalet.mobile startForegroundService (allowlist: 461eceb:+30s0ms/0/NOTIFICATION_SERVICE/NotificationManagerService)}}"
+    }
+  ]
+}

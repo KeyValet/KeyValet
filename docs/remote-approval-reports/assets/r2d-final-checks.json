@@ -1,0 +1,65 @@
+{
+  "env": {
+    "CARGO_TARGET_DIR": "/Users/guang/dev/keyvalet/rust/target-r2d",
+    "CARGO_INCREMENTAL": "0",
+    "CARGO_PROFILE_DEV_DEBUG": "0",
+    "CARGO_PROFILE_TEST_DEBUG": "0"
+  },
+  "checks": [
+    {
+      "check": "fmt",
+      "command": [
+        "cargo",
+        "+1.99.0",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exit": 0,
+      "elapsed_s": 1.167
+    },
+    {
+      "check": "clippy",
+      "command": [
+        "cargo",
+        "+1.99.0",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--locked",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit": 0,
+      "elapsed_s": 31.542
+    },
+    {
+      "check": "build",
+      "command": [
+        "cargo",
+        "+1.99.0",
+        "build",
+        "--workspace",
+        "--locked"
+      ],
+      "exit": 0,
+      "elapsed_s": 19.539
+    },
+    {
+      "check": "test",
+      "command": [
+        "cargo",
+        "+1.99.0",
+        "test",
+        "--workspace",
+        "--locked"
+      ],
+      "exit": 0,
+      "elapsed_s": 295.547
+    }
+  ],
+  "all_passed": true,
+  "complete": true
+}

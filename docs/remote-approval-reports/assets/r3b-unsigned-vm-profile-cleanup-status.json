@@ -1,0 +1,17 @@
+{
+  "relay": "Stopped",
+  "profiles": [
+    {
+      "sid": "S-1-5-21-3283475767-415700631-2745889461-1018",
+      "path": "C:\\Users\\KVSmokec1a0677e",
+      "loaded": true
+    },
+    {
+      "sid": "S-1-5-21-3283475767-415700631-2745889461-1017",
+      "path": "C:\\Users\\KVSmoke30cf425f",
+      "loaded": true
+    }
+  ],
+  "helper": "Running",
+  "ssh_exit": 0
+}

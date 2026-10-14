@@ -144,6 +144,54 @@ async fn malformed_pair_ciphertext_aborts_pairing_without_creating_directory_aut
 }
 
 #[tokio::test]
+async fn r3a_status_exposes_only_live_verified_approver_presence() {
+    let h = Harness::new();
+    h.helper.lock().unwrap().relay_connected = true;
+    for presence in [Presence::Present, Presence::Away] {
+        let hint = PresenceHint {
+            device_id: h.peer.device_id.clone(),
+            state: presence,
+            since: h.clock.now(),
+            sent_at: h.clock.now(),
+            extra: Extra::new(),
+        };
+        let id = if presence == Presence::Present {
+            "status-present"
+        } else {
+            "status-away"
+        };
+        h.helper
+            .inbound(h.envelope(EnvelopeType::PresenceHint, id, &hint))
+            .await
+            .unwrap();
+        let status = h.exchange(Caller::Mcp, Op::Status, json!({})).await;
+        assert_eq!(
+            status["result"]["approvers"][0]["presence"],
+            json!(presence)
+        );
+        h.clock.0.fetch_add(1, Ordering::SeqCst);
+    }
+    let hint = PresenceHint {
+        device_id: h.peer.device_id.clone(),
+        state: Presence::Present,
+        since: h.clock.now(),
+        sent_at: h.clock.now(),
+        extra: Extra::new(),
+    };
+    h.helper
+        .inbound(h.envelope(
+            EnvelopeType::PresenceHint,
+            "status-expiring-presence",
+            &hint,
+        ))
+        .await
+        .unwrap();
+    h.clock.0.fetch_add(121, Ordering::SeqCst);
+    let status = h.exchange(Caller::Mcp, Op::Status, json!({})).await;
+    assert_eq!(status["result"]["approvers"][0]["presence"], "away");
+}
+
+#[tokio::test]
 async fn pending_and_status_online_metadata_respect_hint_lifetime_and_presence_skips_self() {
     let h = Harness::new();
     let request = h.helper.submit(h.input(Tier::T1, "online")).unwrap();

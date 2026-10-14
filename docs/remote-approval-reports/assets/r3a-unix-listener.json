@@ -1,0 +1,18 @@
+{
+  "observed_utc": "2026-10-13T02:19:57.933572+00:00",
+  "header": [
+    "Active LOCAL (UNIX) domain sockets",
+    "Address          Type   Recv-Q Send-Q            Inode             Conn             Refs          Nextref Addr",
+    "60aa3abdf465bbb4 stream      0      0                0  eb1f63d32ebfeba                0                0"
+  ],
+  "helper_entries": 132,
+  "helper_receive_lengths": {
+    "28": 84,
+    "139": 44,
+    "0": 4
+  },
+  "listener_rows": [
+    "906b40f8292d93dc stream      0      0 de35e391d84f406b                0                0                0 /var/run/keyvalet/helper.sock",
+    "5343b80861668c3a stream      0      0 86055b9f9b6d0eff                0                0                0 /var/run/keyvalet/agent.sock"
+  ]
+}

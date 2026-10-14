@@ -1,0 +1,15 @@
+{
+  "started_utc": "2026-10-13T05:17:37.782568+00:00",
+  "runtime": "installed keyvalet run + curl",
+  "credential": "api_key/r3a-graph-readonly",
+  "method": "GET",
+  "url": "https://graph.microsoft.com/v1.0/me",
+  "credential_values_saved": false,
+  "http_statuses": [],
+  "fixed_errors": [
+    "Helper authentication failed"
+  ],
+  "run_exit": 1,
+  "elapsed_s": 0.826287,
+  "finished_utc": "2026-10-13T05:17:38.609134+00:00"
+}

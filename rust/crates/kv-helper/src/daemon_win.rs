@@ -3,15 +3,14 @@
 //! the foreground for debugging. Sessions arrive on HELPER_PIPE (one connection = one session,
 //! exactly like the macOS daemon's Unix socket); the per-user agent connects to AGENT_PIPE and
 //! is accepted only after its process SID matches the owner, its executable path is the
-//! installed `kv-agent.exe`, and its Authenticode signature verifies — or the ACL-trusted
-//! `allow-unsigned-agent` marker exists.
+//! installed `kv-agent.exe`, and its file and parent directories have privileged ownership
+//! and forbid unprivileged writes. Worker registration also checks the retained child process.
 //!
 //! Acceptance table (mirrors the macOS daemon's uid checks):
 //!   HELPER_PIPE: peer.sid == owner      -> credential session (serve)
 //!                peer.elevated          -> control query handler ({"sessions": N})
 //!                anything else          -> drop + audit `peer-rejected`
-//!   AGENT_PIPE:  sid==owner && exe==AGENT_BIN && signature ok         -> register ("signed")
-//!                sid==owner && exe==AGENT_BIN && allow-unsigned marker -> register ("unsigned")
+//!   AGENT_PIPE:  sid==owner && exe==AGENT_BIN && trusted path && service child -> register ("installed")
 //!                anything else          -> drop + audit `agent-rejected`
 
 use crate::{fatal, serve_with_remote, MAX_CLIENTS};
@@ -19,13 +18,12 @@ use kv_platform::agent::{
     read_hello, AgentAuthenticator, AgentConfirmer, AgentHub, AgentKey, AgentMasterKeyProvider,
 };
 use kv_platform::paths::{
-    AGENT_BIN, AGENT_PIPE, AGENT_PUBLISHER, ALLOW_UNSIGNED_AGENT, HELPER_PIPE, MCP_PIPE,
-    OWNER_SID_FILE, RELAY_PIPE, SERVICE_NAME, VAULT_DIR,
+    AGENT_BIN, AGENT_PIPE, HELPER_PIPE, MCP_PIPE, OWNER_SID_FILE, RELAY_PIPE, SERVICE_NAME,
+    VAULT_DIR,
 };
 use kv_platform::peer::{accept_client, sid_equal, sid_to_string};
 use kv_platform::trust::{
-    allow_unsigned_agent, load_owner_sid, same_file_path, trusted_path, untrusted_reason,
-    verify_publisher, verify_root_environment,
+    load_owner_sid, same_file_path, trusted_path, untrusted_reason, verify_root_environment,
 };
 use kv_vault::Vault;
 use serde_json::{json, Map};
@@ -97,11 +95,7 @@ async fn accept_loop(
     let mut agent_registered = false;
     let mut restart_tick = tokio::time::interval(std::time::Duration::from_secs(10));
     restart_tick.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
-    if pipe_name == AGENT_PIPE
-        && trusted_path(Path::new(AGENT_BIN))
-        && (verify_publisher(Path::new(AGENT_BIN), AGENT_PUBLISHER).is_ok()
-            || allow_unsigned_agent(Path::new(ALLOW_UNSIGNED_AGENT)))
-    {
+    if pipe_name == AGENT_PIPE && trusted_path(Path::new(AGENT_BIN)) {
         let session =
             unsafe { windows::Win32::System::RemoteDesktop::WTSGetActiveConsoleSessionId() };
         agent_process =
@@ -228,7 +222,6 @@ async fn accept_loop(
                     }
                 } else {
                     // AGENT_PIPE
-                    let mut unsigned = false;
                     let reason = match &identity {
                         None => Some("peer-identify-failed".to_string()),
                         Some(p) if !sid_equal(&p.sid, &owner_sid) => {
@@ -238,23 +231,7 @@ async fn accept_loop(
                             || !trusted_path(&p.exe_path) => {
                             Some(format!("bad-exe:{}", p.exe_path.display()))
                         }
-                        Some(p) => {
-                            match verify_publisher(&p.exe_path, AGENT_PUBLISHER) {
-                                Ok(()) => None,
-                                Err(e) => {
-                                    if allow_unsigned_agent(Path::new(ALLOW_UNSIGNED_AGENT)) {
-                                        unsigned = true;
-                                        audit_reject(
-                                            "agent-accepted-unsigned",
-                                            format!("unsigned accepted: {e}"),
-                                        );
-                                        None
-                                    } else {
-                                        Some(format!("untrusted-agent:{e}"))
-                                    }
-                                }
-                            }
-                        }
+                        Some(_) => None,
                     };
                     if let Some(reason) = reason {
                         audit_reject("agent-rejected", reason.clone());
@@ -300,7 +277,7 @@ async fn accept_loop(
                         continue;
                     }
                     if pipe.write_all(&kv_ipc::agent::encode_line(&kv_platform::agent::registration_reply())).await.is_ok() {
-                        hub.register(owner_key(&owner_sid), pipe, if unsigned { "unsigned" } else { "signed" });
+                        hub.register(owner_key(&owner_sid), pipe, "installed");
                         agent_registered = true;
                         if let Some(startup) = kv_helper::remote::startup::current() {
                             if let Err(error) = startup.load_existing().await { eprintln!("keyvalet: remote startup failed: {error}"); }
@@ -317,8 +294,6 @@ async fn accept_loop(
                         || (agent_registered && !hub.has_live_agent(&owner_key(&owner_sid)));
                     if restart
                         && trusted_path(Path::new(AGENT_BIN))
-                        && (verify_publisher(Path::new(AGENT_BIN), AGENT_PUBLISHER).is_ok()
-                            || allow_unsigned_agent(Path::new(ALLOW_UNSIGNED_AGENT)))
                     {
                         drop(agent_process.take());
                         agent_registered = false;
@@ -514,6 +489,9 @@ async fn run_daemon(stop_tx: tokio::sync::watch::Sender<bool>) {
     }
 
     let hub = AgentHub::new();
+    if let Err(error) = kv_platform::relay_peer_access::enable() {
+        fatal(&error.to_string());
+    }
     let startup = kv_helper::remote::startup::Startup::new(
         std::path::PathBuf::from(VAULT_DIR).join("remote"),
         Arc::new(kv_helper::remote::platform_keys::AgentKeys {

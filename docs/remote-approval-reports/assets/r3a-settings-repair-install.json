@@ -1,0 +1,46 @@
+{
+  "started_utc": "2026-10-13T13:36:22.405247+00:00",
+  "new_capabilities": [],
+  "same_service_uid": 994,
+  "same_service_groups": [
+    108,
+    986
+  ],
+  "expected_sha256": {
+    "kv-helper": "737b598b31704dbc17a095d9049fe043070f322c0dd0c595c29dc3c65dfbb256",
+    "kv-cli": "840fff5d4d0b551450aacf1dcdd309220dde2ce2d117478ea95581369337a4c6"
+  },
+  "old_sha256": {
+    "kv-helper": "d5a1cf70bfe155dcc864193fb9e6b5d7286a80cbd7401dd6f00c9d1e57234b93",
+    "kv-cli": "eade002e83350c16d89fa2e511b43b23402c6f8f817dd2f1d2c9f2f87d8d6046"
+  },
+  "secret_values_in_evidence": false,
+  "backup": "/var/backups/keyvalet-r3a-settings-20261013T133622Z",
+  "backup_sha256": "33cfd5ba19a084e14ceaf7c5cbcc0c5f1da54011249dd35477820d06ce4941db",
+  "checkpoint_repair": {
+    "after": {
+      "hash": "c72316c8b3720e802a8af1de3fd95df7954d1e42d0af1fd6f4c9f6a05dd147b2",
+      "seq": 1943
+    },
+    "apply": true,
+    "before": {
+      "hash": "ecfed0d505afcc9d386e95d470605e2d6375abd9fea502a572bcde76b6bfd3aa",
+      "seq": 1942
+    },
+    "ok": true,
+    "records_verified": 1943,
+    "secret_values_in_evidence": false
+  },
+  "installed_sha256": {
+    "kv-helper": "737b598b31704dbc17a095d9049fe043070f322c0dd0c595c29dc3c65dfbb256",
+    "kv-cli": "840fff5d4d0b551450aacf1dcdd309220dde2ce2d117478ea95581369337a4c6"
+  },
+  "service_start_exit": 0,
+  "services": {
+    "keyvalet": "active",
+    "keyvalet-peer": "active",
+    "keyvalet-relay": "active"
+  },
+  "capabilities": [],
+  "finished_utc": "2026-10-13T13:36:25.058041+00:00"
+}

@@ -1,0 +1,12 @@
+{
+  "observed_utc": "2026-10-14T01:05:01.467499+00:00",
+  "terminal_exit": 0,
+  "markers_seen": [
+    "退出屏保后",
+    "presence=present",
+    "AUTHENTICATION COMPLETE",
+    "在场投递／明确拒绝",
+    "Esc 用例"
+  ],
+  "fixed_errors": []
+}

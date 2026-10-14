@@ -1,0 +1,17 @@
+{
+  "verified_utc": "2026-10-14T00:49:51.811464+00:00",
+  "strict_requirements": {
+    "kv-helper": true,
+    "kv-cli": true,
+    "kv-touchid": true,
+    "kv-relay-client": true
+  },
+  "source_files": 516,
+  "source_unchanged_since_ci": true,
+  "ci_summary": "r3a-se-closure-final-ci-summary.json",
+  "signed_package": "r3a-se-signed-build.json",
+  "free_bytes": 21209899008,
+  "manual_started": false,
+  "keyvalet_approval_requests": 0,
+  "secret_values_in_evidence": false
+}

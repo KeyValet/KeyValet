@@ -1,0 +1,11 @@
+{
+  "observed_utc": "2026-10-13T21:34:35.866829+00:00",
+  "checked_source_files": 360,
+  "unchanged": false,
+  "changed_paths": [
+    "rust/crates/kv-agent/src/hello.rs",
+    "rust/crates/kv-agent/src/hello/async_wait.rs"
+  ],
+  "installed_mac_receipt": "r3a-revocations-mac-install-212600.json",
+  "t2_success_receipt": "r3a-controls-213127.json"
+}

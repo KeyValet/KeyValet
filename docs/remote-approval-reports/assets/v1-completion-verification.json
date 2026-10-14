@@ -1,0 +1,84 @@
+{
+  "date": "2026-10-13",
+  "rust": "1.99.0",
+  "ci": {
+    "fmt": true,
+    "clippy": true,
+    "build": true,
+    "test": true
+  },
+  "tests": {
+    "failed": 0,
+    "groups": 69,
+    "ignored": 10,
+    "passed": 1332
+  },
+  "rust_source_manifest_sha256": "46fdd45dd99db40afa23959e507a535f80cecc1e35a55029917070891b648852",
+  "rust_source_changed_during_ci": false,
+  "cli_logic_coverage": {
+    "lines": [
+      2373,
+      2373
+    ],
+    "functions": [
+      214,
+      214
+    ],
+    "regions": [
+      3968,
+      4073
+    ],
+    "scope": [
+      "remote.rs",
+      "remote/args.rs",
+      "remote/audit.rs",
+      "remote/output.rs",
+      "remote/relay.rs",
+      "remote/transport.rs"
+    ]
+  },
+  "cli_system_adapter": {
+    "lines": [
+      50,
+      444
+    ],
+    "functions": [
+      6,
+      51
+    ]
+  },
+  "relay": {
+    "public_health_status": 200,
+    "direct_origin_spoof_status": 403,
+    "listeners": [
+      "127.0.0.1:8787",
+      "127.0.0.1:8788"
+    ],
+    "push_unauthenticated_invalid_json_status": 401,
+    "fcm_provider_status": 202
+  },
+  "signing_tool_tests": 4,
+  "installer_tests": 8,
+  "mac_candidate": {
+    "team": "PWCRJPY7YC",
+    "signing": "Apple Development",
+    "verified_binaries": 7,
+    "installed": false,
+    "reason": "administrator_authentication_not_completed"
+  },
+  "ios": {
+    "registered_bundle_ids": [
+      "dev.keyvalet.mobile",
+      "dev.keyvalet.mobile.KeyValetNSE"
+    ],
+    "ipa_verified": false,
+    "pending": [
+      "app_group_binding",
+      "app_attest_and_time_sensitive",
+      "asc_app_record",
+      "distribution_provisioning",
+      "apns"
+    ]
+  },
+  "m5_complete": false
+}

@@ -11,7 +11,7 @@
         <a class="btn primary" href="#install">在 macOS 或 Linux 上安装</a>
         <a class="btn ghost" href="{{ config.extra.repo }}">查看源码</a>
       </div>
-      <p class="fine">开源（Apache-2.0），免费，不上云。Claude Code、Codex、Cursor、Gemini、Grok、Devin——任何 MCP 客户端或 HTTP SDK。</p>
+      <p class="fine">开源（Apache-2.0），<strong>完全免费</strong>，凭证库留在本机。API 调用与可选远程功能的数据流见<a href="/zh-CN/privacy/">隐私政策</a>。Claude Code、Codex、Cursor、Gemini、Grok、Devin——任何 MCP 客户端或 HTTP SDK。</p>
       {%- else -%}
       <h1>Keys in the chip. Approval in your hand.</h1>
       <p class="lede">Let AI agents use any API, on any machine, without ever holding a secret. KeyValet keeps your API keys and OAuth accounts in a Secure Enclave / TPM-protected vault that only a system service can read, and makes each call for the agent after you say yes — with the real request on screen.</p>
@@ -20,7 +20,7 @@
         <a class="btn primary" href="#install">Install on macOS or Linux</a>
         <a class="btn ghost" href="{{ config.extra.repo }}">Read the source</a>
       </div>
-      <p class="fine">Open source (Apache-2.0), free, nothing in the cloud. Claude Code, Codex, Cursor, Gemini, Grok, Devin — any MCP client or HTTP SDK.</p>
+      <p class="fine">Open source (Apache-2.0), <strong>completely free</strong>, vault stored on your device. See the <a href="/privacy/">Privacy policy</a> for API calls and optional remote services. Claude Code, Codex, Cursor, Gemini, Grok, Devin — any MCP client or HTTP SDK.</p>
       {%- endif %}
     </div>
 
@@ -288,7 +288,7 @@
     <h2>下一步：agent 跑在服务器上，批准在你手机上 <span class="badge">开发中</span></h2>
     <p class="intro">让 agent 跑在没人坐在旁边的机器上——Linux 服务器、无头 Mac mini、过夜任务——把「允许」留在你手边：手机 App（iOS + Android），或你正在用的笔记本。</p>
     <ul class="speaks">
-      <li><strong>钥匙不动，批准过来</strong><span>钥匙留在跑 agent 那台机器的芯片里；手机签一个绑定到这一次请求的批准；relay 只转发密文（手机走官方 relay，自托管 relay 配笔记本审批端）。</span></li>
+      <li><strong>钥匙不动，批准过来</strong><span>钥匙留在跑 agent 那台机器的芯片里；手机签一个绑定到这一次请求的批准；relay 传递加密消息，同时处理设备与路由元数据（手机走官方 relay，自托管 relay 配笔记本审批端）。</span></li>
       <li><strong>你定边界</strong><span>这一次、1 小时、本会话、这个凭证一直允许、这台机器一直允许；远程收紧、收回、锁定。放宽要 Face ID，收紧永远不要。</span></li>
       <li><strong>超时不等于「否」</strong><span>一分钟没批，agent 先干别的；你批了，它接着拿结果。人在电脑前，手机不响。</span></li>
     </ul>
@@ -297,7 +297,7 @@
     <h2>Next: agents on your server, approvals on your phone <span class="badge">In development</span></h2>
     <p class="intro">Run agents on machines nobody is sitting at — a Linux server, a headless Mac mini, an overnight job — and keep the “allow” in your hand: a phone app (iOS + Android), or the laptop you’re already using.</p>
     <ul class="speaks">
-      <li><strong>The key stays; the approval travels</strong><span>Keys remain in the chip of the machine that runs the agent. Your phone signs an approval bound to one request; the relay carries only ciphertext (the phone app uses the official relay; a self-hosted relay works with laptop approvers).</span></li>
+      <li><strong>The key stays; the approval travels</strong><span>Keys remain in the chip of the machine that runs the agent. Your phone signs an approval bound to one request; the relay carries encrypted messages and processes device and routing metadata (the phone app uses the official relay; a self-hosted relay works with laptop approvers).</span></li>
       <li><strong>You set the boundary</strong><span>This once, 1 hour, this session, this credential always, this machine always — tighten, revoke or lock remotely. Loosening needs Face ID; tightening never does.</span></li>
       <li><strong>A timeout is never a “no”</strong><span>No answer within a minute and the agent keeps working; approve later and it picks up the result. At your desk, the phone stays quiet.</span></li>
     </ul>
@@ -312,9 +312,9 @@
     <h2>安装</h2>
     <div class="install">
       <div>
-        <p>一条命令，macOS 和 Linux 通用：选对平台的签名发布包，要你输一次密码，配置好已安装的 Claude Code、Codex、Cursor、Grok、Devin CLI。重跑即升级。</p>
+        <p>一条命令，macOS 和 Linux 通用：选对平台的发布包（macOS 签名并公证，Linux 提供校验值），要你输一次密码，配置好已安装的 Claude Code、Codex、Cursor、Grok、Devin CLI。重跑即升级。</p>
         <pre><code>curl -fsSL https://keyvalet.dev/install.sh | sh</code></pre>
-        <p>macOS：Apple Silicon、macOS 14+。Linux：systemd、polkit、sudo，TPM 2.0（无 TPM 加 <code>--software</code>）。Windows 11 <a href="https://github.com/KeyValet/KeyValet/blob/main/docs/windows.md">开发预览</a>。详情见<a href="/zh-CN/guide/#安装">使用指南</a>。</p>
+        <p>macOS：Apple Silicon、macOS 14+。Linux：systemd、polkit、sudo，TPM 2.0（无 TPM 加 <code>--software</code>）。Windows 11 <a href="/zh-CN/download/">没有代码签名的正式包</a>。发布包见<a href="/zh-CN/download/">下载页</a>；签名状态见 <a href="/zh-CN/code-signing/">Code signing policy</a>。详情见<a href="/zh-CN/guide/#an-zhuang">使用指南</a>。</p>
       </div>
       <div>
         <p>然后直接对 agent 说：</p>
@@ -327,9 +327,9 @@
     <h2>Install</h2>
     <div class="install">
       <div>
-        <p>One command for macOS and Linux: it picks the signed release package for your platform, asks for your password once, and sets up Claude Code, Codex, Cursor, Grok and Devin CLI if they’re installed. Run it again to upgrade.</p>
+        <p>One command for macOS and Linux: it picks your platform's release package (signed and notarized on macOS; checksums on Linux), asks for your password once, and sets up Claude Code, Codex, Cursor, Grok and Devin CLI if they’re installed. Run it again to upgrade.</p>
         <pre><code>curl -fsSL https://keyvalet.dev/install.sh | sh</code></pre>
-        <p>macOS: Apple Silicon, macOS 14+. Linux: systemd, polkit, sudo, TPM 2.0 (or <code>--software</code> without one). Windows 11: <a href="https://github.com/KeyValet/KeyValet/blob/main/docs/windows.md">development preview</a>. Details in the <a href="/guide/#install">guide</a>.</p>
+        <p>macOS: Apple Silicon, macOS 14+. Linux: systemd, polkit, sudo, TPM 2.0 (or <code>--software</code> without one). Windows 11: <a href="/download/#windows-11">unsigned release packages</a>. See <a href="/download/">downloads</a> and the <a href="/code-signing/">Code signing policy</a> for release status. Details in the <a href="/guide/#install">guide</a>.</p>
       </div>
       <div>
         <p>Then just ask your agent:</p>

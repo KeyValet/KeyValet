@@ -29,7 +29,11 @@ rsa = "0.9"
 kv-core = { path = "../kv-core" }
 
 [target.'cfg(windows)'.dependencies]
+windows-reactor = "=0.100.0"
 kv-platform = { path = "../kv-platform" }
 windows-future = "0.3"
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "io-util", "time"] }
 windows = { version = "0.62", features = ["Security_Credentials", "Security_Cryptography", "Security_Cryptography_Core", "Storage_Streams", "Win32_System_WinRT"] }
+
+[target.'cfg(windows)'.build-dependencies]
+windows-reactor-setup = "=0.100.0"

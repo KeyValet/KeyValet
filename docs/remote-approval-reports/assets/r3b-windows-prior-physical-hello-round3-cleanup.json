@@ -1,0 +1,13 @@
+{
+    "hello_delete_independently_checked":  false,
+    "hello_cancel_receipt":  false,
+    "hello_signing_started":  true,
+    "hello_guard_delete_requested":  false,
+    "utc":  "2026-10-13T16:18:25.9143790Z",
+    "formal_agent_preserved":  true,
+    "temporary_tasks_removed":  true,
+    "hello_creation_completed":  true,
+    "runtime_preserved":  "C:\\ProgramData\\KeyValet-Backups\\r3b-hello-runtime-da6f565863724e73b366dafdded53162",
+    "owner_exit_hex":  "0xc000013a",
+    "pcp_remote_keys":  0
+}

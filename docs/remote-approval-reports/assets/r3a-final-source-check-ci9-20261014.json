@@ -1,0 +1,16 @@
+{
+  "observed_utc": "2026-10-14T06:04:13.770010+00:00",
+  "source_snapshot": "r3a-se-child-closure-ci9-source.json",
+  "checks_summary": "r3a-se-child-closure-ci9-summary.json",
+  "source_files": 526,
+  "source_unchanged": true,
+  "changed_source_files": [],
+  "free_bytes": 15366238208,
+  "minimum_free_bytes": 15000000000,
+  "lock_sha256": "125f599507fd53ad5c128d1b2f4b40f0325cc410e4ef529c3758ee7427953215",
+  "r3a_added_dependencies": false,
+  "r3a_edited_lockfile": false,
+  "installed_component_ci_provenance_unchanged": true,
+  "native_install_receipt": "r3a-se-child-mac-install-20261014T051422Z.json",
+  "secret_values_in_evidence": false
+}

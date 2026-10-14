@@ -2,7 +2,7 @@
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 $repo = Split-Path $PSScriptRoot -Parent
-$scripts = @('scripts/install.ps1', 'scripts/uninstall.ps1', 'scripts/package-windows.ps1', 'scripts/test-windows-service.ps1', 'site/static/install.ps1')
+$scripts = @('scripts/install.ps1', 'scripts/uninstall.ps1', 'scripts/package-windows.ps1', 'scripts/prepare-windows-signing.ps1', 'scripts/test-windows-desktop.ps1', 'scripts/test-windows-service.ps1', 'scripts/test-windows-hello-fixture.ps1', 'scripts/test-windows-remote-keys.ps1', 'site/static/install.ps1')
 foreach ($script in $scripts) {
     $tokens = $null; $errors = $null
     [void][Management.Automation.Language.Parser]::ParseFile((Join-Path $repo $script), [ref]$tokens, [ref]$errors)
@@ -12,7 +12,7 @@ foreach ($script in $scripts) {
 # top-level installer, UAC, network and service actions are never executed by this test.
 $tokens = $null; $errors = $null
 $ast = [Management.Automation.Language.Parser]::ParseFile("$repo/scripts/install.ps1", [ref]$tokens, [ref]$errors)
-foreach ($name in 'Write-Utf8', 'Show-ProtectionStatus', 'To-Map', 'Update-Json', 'Is-KeyValetHook', 'Keep-OtherHooks', 'Add-Hooks', 'Quote-Argument', 'Assert-PackageChecksum', 'Assert-PackageArchive', 'Assert-BinaryArchitecture', 'Assert-ServiceConfiguration', 'Assert-PrivilegedDescriptor') {
+foreach ($name in 'Write-Utf8', 'Show-ProtectionStatus', 'To-Map', 'Update-Json', 'Is-KeyValetHook', 'Keep-OtherHooks', 'Add-Hooks', 'Quote-Argument', 'Assert-PackageChecksum', 'Assert-PackageArchive', 'Assert-BinaryArchitecture', 'Assert-ServiceConfiguration', 'Assert-PrivilegedDescriptor', 'Read-NativeUiRuntime', 'Assert-NativeUiRuntime') {
     $definition = $ast.FindAll({ param($node) $node -is [Management.Automation.Language.FunctionDefinitionAst] }, $true) |
         Where-Object Name -eq $name | Select-Object -First 1
     if (!$definition) { throw "Missing helper: $name" }
@@ -24,6 +24,32 @@ function Assert-Throws([scriptblock]$Action, [string]$Message) {
     try { & $Action | Out-Null } catch { $threw = $true }
     Assert $threw $Message
 }
+# The native Windows shell tool must actually reach the secret detector. Evaluate the
+# installer's matcher as a regex rather than executing installation or reading user config.
+$claudeMatcher = $ast.FindAll({ param($node) $node -is [Management.Automation.Language.StringConstantExpressionAst] }, $true) |
+    Where-Object { $_.Value -match 'Bash' -and $_.Value -match 'Write' -and $_.Value -match 'Edit' } |
+    Select-Object -First 1 -ExpandProperty Value
+Assert ([bool]$claudeMatcher) 'Claude hook matcher missing.'
+foreach ($tool in 'Bash', 'PowerShell', 'Write', 'Edit', 'MultiEdit', 'NotebookEdit') {
+    Assert ($tool -match ('^(?:' + $claudeMatcher + ')$')) "Claude hook omitted $tool."
+}
+# A failed unlock with a locked session is not evidence that the user cancelled Windows
+# Security. Import only pure checks; the desktop/installed entry point is never executed.
+$desktopAst=[Management.Automation.Language.Parser]::ParseFile("$repo/scripts/test-windows-desktop.ps1",[ref]$tokens,[ref]$errors)
+foreach($name in 'Property','Assert-CancelEvidence') {
+    $definition=$desktopAst.FindAll({param($node) $node -is [Management.Automation.Language.FunctionDefinitionAst]},$true) |
+        Where-Object Name -eq $name | Select-Object -First 1
+    if(!$definition){throw "Missing desktop evidence validator: $name"}
+    Invoke-Expression $definition.Extent.Text
+}
+$failedUnlock='{"result":{"isError":true}}'|ConvertFrom-Json
+$lockedStatus=[pscustomobject]@{state='locked'}
+Assert-CancelEvidence $failedUnlock $lockedStatus ([pscustomobject]@{windows_security_cancelled=$true})
+Assert-Throws {Assert-CancelEvidence $failedUnlock $lockedStatus $null} 'A failure without an operator receipt was counted as cancellation.'
+Assert-Throws {Assert-CancelEvidence $failedUnlock $lockedStatus ([pscustomobject]@{windows_security_cancelled=$false})} 'No observed Windows Security prompt was counted as cancellation.'
+Assert-Throws {Assert-CancelEvidence $failedUnlock $lockedStatus ([pscustomobject]@{windows_security_cancelled='true'})} 'A string was accepted as cancellation evidence.'
+Assert-Throws {Assert-CancelEvidence ('{"result":{"isError":false}}'|ConvertFrom-Json) $lockedStatus ([pscustomobject]@{windows_security_cancelled=$true})} 'Successful authentication was counted as cancellation.'
+Assert-Throws {Assert-CancelEvidence $failedUnlock ([pscustomobject]@{state='unlocked'}) ([pscustomobject]@{windows_security_cancelled=$true})} 'An unlocked session was counted as a safe cancellation.'
 function New-TestArchive([string[]]$Names, [int]$LastAttributes = 0) {
     $path = Join-Path $temp ([guid]::NewGuid().ToString('N') + '.zip')
     $archive = [IO.Compression.ZipFile]::Open($path, [IO.Compression.ZipArchiveMode]::Create)
@@ -87,6 +113,28 @@ function New-TestExecutable([string]$Path, [uint16]$Machine) {
 $temp = Join-Path ([IO.Path]::GetTempPath()) ('keyvalet-config-test-' + [guid]::NewGuid().ToString('N'))
 New-Item $temp -ItemType Directory | Out-Null
 try {
+    $runtimeDirectory = Join-Path $temp 'native-ui'
+    New-Item $runtimeDirectory -ItemType Directory | Out-Null
+    Assert (@(Read-NativeUiRuntime $runtimeDirectory).Count -eq 0) 'Legacy packages should not require a WinUI manifest.'
+    $records = @('Microsoft.UI.Xaml.dll','Microsoft.UI.Xaml.Controls.dll','Microsoft.WindowsAppRuntime.dll','resources.pri') |
+        ForEach-Object { @{path=$_;sha256=('0'*64)} }
+    $runtimeManifest = @{schema=1;sdk_version='2.5.1';files=@($records)}
+    $manifestPath = Join-Path $runtimeDirectory 'native-ui-runtime.json'
+    Write-Utf8 $manifestPath ($runtimeManifest | ConvertTo-Json -Depth 5)
+    Assert (@(Read-NativeUiRuntime $runtimeDirectory).Count -eq 4) 'Valid native UI manifest was rejected.'
+    foreach ($unsafePath in '../escape.dll','C:/escape.dll','folder/../escape.dll','kv-agent.exe','keyvalet.ps1') {
+        $runtimeManifest.files = @($records) + @(@{path=$unsafePath;sha256=('0'*64)})
+        Write-Utf8 $manifestPath ($runtimeManifest | ConvertTo-Json -Depth 5)
+        Assert-Throws { Read-NativeUiRuntime $runtimeDirectory } 'Native runtime path escaped its directory or replaced an application.'
+    }
+    $runtimeManifest.files = @($records) + @(@{path='MICROSOFT.UI.XAML.DLL';sha256=('0'*64)})
+    Write-Utf8 $manifestPath ($runtimeManifest | ConvertTo-Json -Depth 5)
+    Assert-Throws { Read-NativeUiRuntime $runtimeDirectory } 'Case-insensitive native runtime duplicates were accepted.'
+    $runtimeManifest.files = @(@{path='resources.pri';sha256=('0'*64)})
+    Write-Utf8 $manifestPath ($runtimeManifest | ConvertTo-Json -Depth 5)
+    Assert-Throws { Read-NativeUiRuntime $runtimeDirectory } 'Incomplete native runtime was accepted.'
+    [IO.File]::WriteAllText((Join-Path $runtimeDirectory 'resources.pri'),'changed')
+    Assert-Throws { Assert-NativeUiRuntime $runtimeDirectory $runtimeManifest.files } 'Corrupted native UI resources were accepted.'
     # This fake CLI accepts only the public status operation and records its exact arguments.
     # The real installer, UAC, Hello setup, SYSTEM service and installed paths are never run.
     $fakeStatus = Join-Path $temp 'fake-status.ps1'

@@ -1,0 +1,48 @@
+{
+  "kv-helper": {
+    "Identifier": "dev.keyvalet.helper",
+    "TeamIdentifier": "PWCRJPY7YC",
+    "signature_valid": true
+  },
+  "kv-touchid": {
+    "Identifier": "dev.keyvalet.touchid",
+    "TeamIdentifier": "PWCRJPY7YC",
+    "signature_valid": true
+  },
+  "kv-relay-client": {
+    "Identifier": "dev.keyvalet.relay-client",
+    "TeamIdentifier": "PWCRJPY7YC",
+    "signature_valid": true
+  },
+  "kv-cli": {
+    "Identifier": "dev.keyvalet.cli",
+    "TeamIdentifier": "PWCRJPY7YC",
+    "signature_valid": true
+  },
+  "system/dev.keyvalet.helper": {
+    "loaded": true,
+    "summary": [
+      "state = running",
+      "program = /usr/local/lib/keyvalet/bin/kv-helper",
+      "pid = 84958",
+      "last exit code = (never exited)",
+      "state = active",
+      "state = active"
+    ]
+  },
+  "gui/501/dev.keyvalet.agent": {
+    "loaded": true,
+    "summary": [
+      "state = running",
+      "program = /usr/local/lib/keyvalet/bin/kv-touchid",
+      "pid = 84960",
+      "last exit code = (never exited)",
+      "state = active",
+      "state = active"
+    ]
+  },
+  "gui/501/dev.keyvalet.relay": {
+    "loaded": false,
+    "summary": []
+  }
+}

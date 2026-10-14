@@ -1,0 +1,12 @@
+{
+  "finished_utc": "2026-10-14T06:18:19.5514697Z",
+  "passed": false,
+  "commands": [
+    {
+      "command": "cargo fmt --all -- --check",
+      "seconds": 1.2902611,
+      "exit_code": 1
+    }
+  ],
+  "failure": "CI command 1 failed."
+}

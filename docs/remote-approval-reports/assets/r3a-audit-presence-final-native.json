@@ -1,0 +1,39 @@
+{
+  "observed_utc": "2026-10-13T23:48:40.324644+00:00",
+  "read_only": true,
+  "secret_values_in_evidence": false,
+  "ndu_status": {
+    "exit": 0,
+    "ok": true,
+    "pending_n": 0,
+    "grants_n": 0,
+    "unattended": false,
+    "mac_presence": [
+      "present"
+    ]
+  },
+  "services": {
+    "system/dev.keyvalet.helper": {
+      "exit": 0,
+      "running": true
+    },
+    "gui/501/dev.keyvalet.agent": {
+      "exit": 0,
+      "running": true
+    },
+    "gui/501/dev.keyvalet.relay": {
+      "exit": 0,
+      "running": true
+    }
+  },
+  "source_files": 514,
+  "source_unchanged_since_ci": true,
+  "changed_source_files": [],
+  "free_bytes": 15977541632,
+  "final_checked_utc": "2026-10-13T23:50:35.168078+00:00",
+  "r3a_observer_processes_running": 0,
+  "presence_cycle_verified": true,
+  "python_driver_regressions_passed": 3,
+  "evidence_links_checked": 295,
+  "missing_evidence_links": 0
+}

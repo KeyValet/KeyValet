@@ -1,0 +1,17 @@
+{
+  "utc": "2026-10-14T00:05:06.433073+00:00",
+  "project": "keyvalet",
+  "branch": "main",
+  "prior_deployment_id": "f3901246-bf5f-4c53-b4df-e6cc365090d1",
+  "prior_deployment_url": "https://f3901246.keyvalet.pages.dev",
+  "prior_deployment_retained": true,
+  "user_request": "Remove all paid prices; KeyValet is completely free now.",
+  "content_changes": [
+    "Both pricing pages now state all currently available KeyValet features are completely free.",
+    "Removed paid team plans, per-seat monthly/annual prices, trial offers and upgrade prompts.",
+    "Navigation and homepage now link to Free / 免费使用."
+  ],
+  "operational_limits_changed": false,
+  "source_or_binary_download_changed": false,
+  "github_actions_or_signpath_attestation_claimed": false
+}

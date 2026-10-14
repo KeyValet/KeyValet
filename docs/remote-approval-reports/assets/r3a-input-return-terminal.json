@@ -1,0 +1,14 @@
+{
+  "opened_utc": "2026-10-13T21:21:15.323968+00:00",
+  "window_id": 23753,
+  "tab_index": 1,
+  "checklist": "输入诊断已准备好。接下来约 2 分钟你要做的事：\n1. 回复「开始诊断」后，我打开新的 Mac Terminal。\n2. 如 Terminal 提示 sudo 密码，只在那里输入 Mac 管理员密码。\n3. 看到“Input diagnostic only”后，在同一 Terminal 输入 aaa 并回车。\n4. 等待“输入诊断结果”；fake_cli_exit 为 0、dummy_line_received 为 true 算成功。\n这段调用 KeyValet 和 Touch ID 的次数均为 0；验证通过后再安排真实审批。现在开始这段诊断吗？",
+  "user_start": "开始诊断",
+  "keyvalet_calls": 0,
+  "touch_id_requests": 0,
+  "secret_values_in_evidence": false,
+  "command_dispatched_utc": "2026-10-13T21:21:35.472833+00:00",
+  "terminal": "/dev/ttys002",
+  "ready_foreground_shell_verified": true,
+  "command_dispatched": true
+}

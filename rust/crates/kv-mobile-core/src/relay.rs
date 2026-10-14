@@ -445,13 +445,7 @@ impl Relay {
             .as_value()
             .filter(|s| !s.is_empty() && s.len() < 128)
             .ok_or(Error("relay_account_missing"))?;
-        let sas = remote::pairing::sas(
-            &token,
-            &completed.initiator.dk_pub,
-            &self.core.own.dk_pub,
-            self.core.own.ak_q.as_ref().map(|k| &k.r#pub),
-            self.core.own.ak_s.as_ref().map(|k| &k.r#pub),
-        )?;
+        let sas = remote::pairing::device_sas(&token, &completed.initiator, &self.core.own)?;
         let exp = completed
             .extra
             .get("expires_at")
@@ -890,6 +884,7 @@ impl Relay {
     }
     pub(crate) async fn sync_push_token(&self) -> Result<()> {
         self.core.ensure_login()?;
+        let uploading_session = self.core.login_session()?;
         let token: Option<serde_json::Value> = self
             .core
             .store
@@ -914,6 +909,13 @@ impl Relay {
         let _: serde_json::Value = self.post("v1/devices/push-token", &token, true).await?;
         self.core.store.transaction(|db| {
             self.core.ensure_login_in(db)?;
+            let current_session: Option<crate::account::Session> =
+                self.core.store.get(db, "meta", "account_session")?;
+            if current_session.as_ref().map(|s| &s.session_token)
+                != uploading_session.as_ref().map(|s| &s.session_token)
+            {
+                return Ok(());
+            }
             let current: Option<serde_json::Value> =
                 self.core.store.get(db, "meta", "push_token")?;
             if current.as_ref() != Some(&token) {
@@ -925,8 +927,32 @@ impl Relay {
         })
     }
     pub async fn sync_background(&self) -> Result<Vec<NotificationView>> {
+        Ok(self.sync_background_status().await?.0)
+    }
+    pub(crate) async fn sync_background_status(&self) -> Result<(Vec<NotificationView>, bool)> {
         let _ = self.retry_logouts().await;
         self.core.ensure_login()?;
+        // HTTPS inbox recovery must not depend on a WebSocket upgrade succeeding.
+        // A restored mobile network can allow the pull while WS is still unavailable.
+        match self.pull_waiting(true).await {
+            Ok(()) => {}
+            Err(error)
+                if matches!(
+                    error.0,
+                    "network_unavailable" | "rate_limited" | "relay_unavailable"
+                ) =>
+            {
+                return Ok((self.core.notifications()?, true));
+            }
+            Err(error) if error.0 == "authentication_failed" => {
+                // A refused HTTPS pull has the same fail-closed account boundary
+                // as a refused WS upgrade, including locally clearing a revoked login.
+                let _ = self.account_restore().await;
+                self.core.ensure_login()?;
+                return Err(error);
+            }
+            Err(error) => return Err(error),
+        }
         // Firebase can deliver while Flutter's foreground socket is alive. Opening
         // another socket would evict that connection and repeatedly race reconnects.
         let running = self
@@ -936,8 +962,7 @@ impl Relay {
             .as_ref()
             .is_some_and(|task| !task.is_finished());
         if running {
-            self.pull_waiting(true).await?;
-            return self.core.notifications();
+            return Ok((self.core.notifications()?, false));
         }
         let mut socket = match self.socket().await {
             Ok(socket) => socket,
@@ -949,12 +974,11 @@ impl Relay {
             {
                 // A push can arrive after the transport becomes unavailable. Cached display
                 // plans were already authenticated by Rust and retain their original expiry.
-                return self.core.notifications();
+                return Ok((self.core.notifications()?, true));
             }
             Err(error) => return Err(error),
         };
         let mut notifications = Vec::new();
-        self.pull_waiting(true).await?;
         let deadline = tokio::time::Instant::now() + Duration::from_secs(10);
         loop {
             let timeout = deadline
@@ -979,14 +1003,14 @@ impl Relay {
         }
         let _ = socket.close(None).await;
         // An unrelated outbound retry must not suppress a newly authenticated notification.
-        let _ = self.flush().await;
+        let retry = self.flush().await.is_err();
         for cached in self.core.notifications()? {
             // The transaction snapshot wins over intermediate frames: request -> cancel
             // or request -> escalate can arrive before an ack transport failure.
             notifications.retain(|v| v.approval_id != cached.approval_id);
             notifications.push(cached);
         }
-        Ok(notifications)
+        Ok((notifications, retry))
     }
     pub fn start(self: &Arc<Self>) {
         if self.core.ensure_login().is_err() {

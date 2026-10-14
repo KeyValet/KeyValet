@@ -1,0 +1,50 @@
+{
+  "target": "x86_64-pc-windows-msvc",
+  "profile": "release",
+  "seconds": 295.3793426,
+  "blocker": "Company has not obtained a Windows production code-signing certificate",
+  "utc": "2026-10-13T22:58:09.6476506Z",
+  "public_windows_workflow_passed": false,
+  "binaries": [
+    {
+      "sha256": "5a4baa886ba96a4cd979f71a0e1d2b7726377ab0d82fc8f153bd0ca26ad713f2",
+      "name": "kv-helper.exe",
+      "bytes": 14404096
+    },
+    {
+      "sha256": "f829006280708177d35633b347f1175bb665702f67c88ac67f36b39f88a48e87",
+      "name": "kv-agent.exe",
+      "bytes": 1022464
+    },
+    {
+      "sha256": "728ca02b0f4ebf6ff287ffd7498ac3fe0939326d92c798e1919f6c23cc2540ce",
+      "name": "kv-cli.exe",
+      "bytes": 8035328
+    },
+    {
+      "sha256": "aeafcc0e6b834728175cc4d093389dca86012a40d3a17c5d0bcb0714c0cbb613",
+      "name": "kv-mcp.exe",
+      "bytes": 9232896
+    },
+    {
+      "sha256": "fee0ca1a61a97ec27db17953aa60d5e5244e5ce382c04fa14fc3dadb715806cd",
+      "name": "kv-hook.exe",
+      "bytes": 1926144
+    },
+    {
+      "sha256": "1a1fa4e9de00588833fd6296b5e84ba3e56287daf1abf957dbb9fe586bae0e48",
+      "name": "kv-server.exe",
+      "bytes": 7774208
+    },
+    {
+      "sha256": "de65e728767c34d05f9f5bbde248bd0b53a53371838f85e1877a6b7426cdd55c",
+      "name": "kv-relay-client.exe",
+      "bytes": 5974528
+    }
+  ],
+  "production_signing_performed": false,
+  "source_fingerprint": "fbf22e994313d82d246b96ccc8e480441f4c048b4ad715f8f8c5bd828f87bf0b",
+  "build_exit": 0,
+  "stage": "C:\\kv-r3b-windows-20261013\\production-signing-ready",
+  "installed": false
+}

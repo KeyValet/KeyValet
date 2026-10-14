@@ -1,0 +1,933 @@
+{
+  "agent_pid": 1370451,
+  "approvals": [
+    {
+      "id": "01M4T7Y4580D69S99XAG3FPKPQ",
+      "kind": "use",
+      "state": "executed",
+      "agent_pid": 1370451,
+      "level": "quick",
+      "scope_mode": "per_use",
+      "tier": "T1",
+      "digest": "6a4ec482d30abf99a5546c15595ec4867d07557bec193333aa9d5874c8b8a9a8",
+      "delivery_mode": "banner",
+      "helper_request_to_decision_s": 3.741,
+      "execution_started_count": 1,
+      "execution_completed_count": 1,
+      "touch_id_user_time_s": 0
+    },
+    {
+      "id": "01M4T7Y91GB571P4SWKW447M43",
+      "kind": "use",
+      "state": "executed",
+      "agent_pid": 1370451,
+      "level": "quick",
+      "scope_mode": "per_use",
+      "tier": "T1",
+      "digest": "5a5d7cd1b23de2de3adda7360b7722d368449630ce49940b605e523d852e96a4",
+      "delivery_mode": "banner",
+      "helper_request_to_decision_s": 3.907,
+      "execution_started_count": 1,
+      "execution_completed_count": 1,
+      "touch_id_user_time_s": 0
+    },
+    {
+      "id": "01M4T7YEX0NXJS55XEHZRR0JWW",
+      "kind": "use",
+      "state": "executed",
+      "agent_pid": 1370451,
+      "level": "quick",
+      "scope_mode": "per_use",
+      "tier": "T1",
+      "digest": "69f9a4667240b94d7fb96dad9b307e4783c3aedede26ed3e4a6fa04384a3e64f",
+      "delivery_mode": "banner",
+      "helper_request_to_decision_s": 4.529,
+      "execution_started_count": 1,
+      "execution_completed_count": 1,
+      "touch_id_user_time_s": 0
+    },
+    {
+      "id": "01M4T7YMRG28827AQPYB7AV1ZN",
+      "kind": "use",
+      "state": "executed",
+      "agent_pid": 1370451,
+      "level": "quick",
+      "scope_mode": "per_use",
+      "tier": "T1",
+      "digest": "f33eba815a730f50e6b5bccc30f314b918c8ad19b3a67da9d895ce8ce39507cf",
+      "delivery_mode": "banner",
+      "helper_request_to_decision_s": 6.02,
+      "execution_started_count": 1,
+      "execution_completed_count": 1,
+      "touch_id_user_time_s": 0
+    },
+    {
+      "id": "01M4T7YWJGSKGWFKQR2FMXHZ8D",
+      "kind": "use",
+      "state": "executed",
+      "agent_pid": 1370451,
+      "level": "quick",
+      "scope_mode": "per_use",
+      "tier": "T1",
+      "digest": "b566216dc49cd2ba6430ca1900eca0005c641a04fdc3645f367543a545f69471",
+      "delivery_mode": "banner",
+      "helper_request_to_decision_s": 2.839,
+      "execution_started_count": 1,
+      "execution_completed_count": 1,
+      "touch_id_user_time_s": 0
+    },
+    {
+      "id": "01M4T7Z0FGV6BQMQM4T6AR2F6T",
+      "kind": "use",
+      "state": "executed",
+      "agent_pid": 1370451,
+      "level": "quick",
+      "scope_mode": "per_use",
+      "tier": "T1",
+      "digest": "5eb268ed792cdeb8e8eedc1e76b6df06a53cb52e8d71207b49b82e9159d2eb5e",
+      "delivery_mode": "banner",
+      "helper_request_to_decision_s": 6.094,
+      "execution_started_count": 1,
+      "execution_completed_count": 1,
+      "touch_id_user_time_s": 0
+    },
+    {
+      "id": "01M4T7Z89GX32M48P43D5XFHFN",
+      "kind": "use",
+      "state": "executed",
+      "agent_pid": 1370451,
+      "level": "quick",
+      "scope_mode": "per_use",
+      "tier": "T1",
+      "digest": "a237fb14935e48809051874e7f77a66d50a0e842911325f3ca7b8e0690510edf",
+      "delivery_mode": "banner",
+      "helper_request_to_decision_s": 5.647,
+      "execution_started_count": 1,
+      "execution_completed_count": 1,
+      "touch_id_user_time_s": 0
+    },
+    {
+      "id": "01M4T7ZF48VYJ2GDX2MK6213B1",
+      "kind": "use",
+      "state": "executed",
+      "agent_pid": 1370451,
+      "level": "quick",
+      "scope_mode": "per_use",
+      "tier": "T1",
+      "digest": "a97f60ebdec5a52487e566c463898837fd33efba8522e052cf8e436c4837cea0",
+      "delivery_mode": "banner",
+      "helper_request_to_decision_s": 2.84,
+      "execution_started_count": 1,
+      "execution_completed_count": 1,
+      "touch_id_user_time_s": 0
+    },
+    {
+      "id": "01M4T7ZM0GG2NM4SG1PBFZWKD9",
+      "kind": "use",
+      "state": "executed",
+      "agent_pid": 1370451,
+      "level": "quick",
+      "scope_mode": "per_use",
+      "tier": "T1",
+      "digest": "f5bcd307419192554b9f44b7d28ca796203618fb03a46fd668d6c73000b8b5cf",
+      "delivery_mode": "banner",
+      "helper_request_to_decision_s": 2.83,
+      "execution_started_count": 1,
+      "execution_completed_count": 1,
+      "touch_id_user_time_s": 0
+    },
+    {
+      "id": "01M4T7ZQXGJPHY6MVTNARNQYGH",
+      "kind": "use",
+      "state": "executed",
+      "agent_pid": 1370451,
+      "level": "quick",
+      "scope_mode": "per_use",
+      "tier": "T1",
+      "digest": "c341326d556a9ee5d9b77a46f130c602043ddd6b2dd3b7d208ea01d286179466",
+      "delivery_mode": "banner",
+      "helper_request_to_decision_s": 3.453,
+      "execution_started_count": 1,
+      "execution_completed_count": 1,
+      "touch_id_user_time_s": 0
+    },
+    {
+      "id": "01M4T7ZWSR3T7VF9WXQA0Z4A0F",
+      "kind": "use",
+      "state": "executed",
+      "agent_pid": 1370451,
+      "level": "quick",
+      "scope_mode": "per_use",
+      "tier": "T1",
+      "digest": "7b5b3e12b9529e4499fdd66dfb98ef14c6a6c12f71187783190411bbc9f00012",
+      "delivery_mode": "banner",
+      "helper_request_to_decision_s": 2.91,
+      "execution_started_count": 1,
+      "execution_completed_count": 1,
+      "touch_id_user_time_s": 0
+    },
+    {
+      "id": "01M4T800PRQHNC10YN8SKKN7P9",
+      "kind": "use",
+      "state": "executed",
+      "agent_pid": 1370451,
+      "level": "quick",
+      "scope_mode": "per_use",
+      "tier": "T1",
+      "digest": "e4672f2780d3e81bd9efd9d7899896d3df9f70bb9698c5da085d85951283cb8f",
+      "delivery_mode": "banner",
+      "helper_request_to_decision_s": 2.64,
+      "execution_started_count": 1,
+      "execution_completed_count": 1,
+      "touch_id_user_time_s": 0
+    },
+    {
+      "id": "01M4T805K04P9Q4Q4AQW8XNGYY",
+      "kind": "use",
+      "state": "executed",
+      "agent_pid": 1370451,
+      "level": "quick",
+      "scope_mode": "per_use",
+      "tier": "T1",
+      "digest": "10aa40e8fc25fd67d72e4e37eca44d6bb7552b079c6546a4754a40688937d0da",
+      "delivery_mode": "banner",
+      "helper_request_to_decision_s": 2.378,
+      "execution_started_count": 1,
+      "execution_completed_count": 1,
+      "touch_id_user_time_s": 0
+    },
+    {
+      "id": "01M4T808GRF294W79WW1FRY8CP",
+      "kind": "use",
+      "state": "executed",
+      "agent_pid": 1370451,
+      "level": "quick",
+      "scope_mode": "per_use",
+      "tier": "T1",
+      "digest": "ab49615b3b5f413467c50b211ec43d416bf7eec9fa30bbd18470e44604dc5a84",
+      "delivery_mode": "banner",
+      "helper_request_to_decision_s": 3.061,
+      "execution_started_count": 1,
+      "execution_completed_count": 1,
+      "touch_id_user_time_s": 0
+    },
+    {
+      "id": "01M4T80DD039A5XXZQSJXG38GC",
+      "kind": "use",
+      "state": "executed",
+      "agent_pid": 1370451,
+      "level": "quick",
+      "scope_mode": "per_use",
+      "tier": "T1",
+      "digest": "590374ba33d205f5dfd1bfa92d1d993b1b0854f0886c1992d2a2df7b0314abc4",
+      "delivery_mode": "banner",
+      "helper_request_to_decision_s": 2.812,
+      "execution_started_count": 1,
+      "execution_completed_count": 1,
+      "touch_id_user_time_s": 0
+    },
+    {
+      "id": "01M4T80HA0DYYG7ESAJT8EZKH0",
+      "kind": "use",
+      "state": "executed",
+      "agent_pid": 1370451,
+      "level": "quick",
+      "scope_mode": "per_use",
+      "tier": "T1",
+      "digest": "149d9d807b3e47fe5739e7f398582b382b332b48d72fc2243792ede93bdc8316",
+      "delivery_mode": "banner",
+      "helper_request_to_decision_s": 3.186,
+      "execution_started_count": 1,
+      "execution_completed_count": 1,
+      "touch_id_user_time_s": 0
+    },
+    {
+      "id": "01M4T80N70E7272H4PBWV3SZAZ",
+      "kind": "use",
+      "state": "executed",
+      "agent_pid": 1370451,
+      "level": "quick",
+      "scope_mode": "per_use",
+      "tier": "T1",
+      "digest": "e78eb6db931a3cf211acfa37ed2566e5ae5a68868fece8948e273d11ecf6a92d",
+      "delivery_mode": "banner",
+      "helper_request_to_decision_s": 3.161,
+      "execution_started_count": 1,
+      "execution_completed_count": 1,
+      "touch_id_user_time_s": 0
+    },
+    {
+      "id": "01M4T80T380Y3RT4Y2BRSBMTQS",
+      "kind": "use",
+      "state": "executed",
+      "agent_pid": 1370451,
+      "level": "quick",
+      "scope_mode": "per_use",
+      "tier": "T1",
+      "digest": "26f6342513bde20b63f285073d870a5064f8b29df56dcb0d1a4a1b88f3c17329",
+      "delivery_mode": "banner",
+      "helper_request_to_decision_s": 2.767,
+      "execution_started_count": 1,
+      "execution_completed_count": 1,
+      "touch_id_user_time_s": 0
+    },
+    {
+      "id": "01M4T80Y08CAD13G6F3XWVKWBD",
+      "kind": "use",
+      "state": "executed",
+      "agent_pid": 1370451,
+      "level": "quick",
+      "scope_mode": "per_use",
+      "tier": "T1",
+      "digest": "a0ab7a0f26565299107a0e772d3588d1cf3bccc5b48d5ebf728df65234e23e57",
+      "delivery_mode": "banner",
+      "helper_request_to_decision_s": 2.644,
+      "execution_started_count": 1,
+      "execution_completed_count": 1,
+      "touch_id_user_time_s": 0
+    },
+    {
+      "id": "01M4T811X82MH1Q5X3354AC2W6",
+      "kind": "use",
+      "state": "executed",
+      "agent_pid": 1370451,
+      "level": "quick",
+      "scope_mode": "per_use",
+      "tier": "T1",
+      "digest": "a620d7be001f0b1446d0dbc82edf99d75d15abe59e4cef3f9beecc59fe5b1218",
+      "delivery_mode": "banner",
+      "helper_request_to_decision_s": 3.12,
+      "execution_started_count": 1,
+      "execution_completed_count": 1,
+      "touch_id_user_time_s": 0
+    },
+    {
+      "id": "01M4T816SG2KH7WHYD24X0PEVQ",
+      "kind": "use",
+      "state": "executed",
+      "agent_pid": 1370451,
+      "level": "quick",
+      "scope_mode": "per_use",
+      "tier": "T1",
+      "digest": "08ab03d20403585560c8eae9f0f5e813d309302514eac89694f87df60d4495ca",
+      "delivery_mode": "banner",
+      "helper_request_to_decision_s": 2.819,
+      "execution_started_count": 1,
+      "execution_completed_count": 1,
+      "touch_id_user_time_s": 0
+    }
+  ],
+  "events": [
+    {
+      "agent_pid": 1370451,
+      "approval_id": "01M4T7Y4580D69S99XAG3FPKPQ",
+      "digest": "6a4ec482d30abf99a5546c15595ec4867d07557bec193333aa9d5874c8b8a9a8",
+      "op": "approval_requested",
+      "ts": "2026-10-13T09:01:45.435Z"
+    },
+    {
+      "approval_id": "01M4T7Y4580D69S99XAG3FPKPQ",
+      "approval_level": "quick",
+      "approver_device": "01M4SM5QTRQKNQE1TD6FBJTG79",
+      "decision": "allow",
+      "decision_hash": "dbd585d7407ca83ab0310dd63a489647117132e69b914842ed32d84aaeb51f6b",
+      "digest": "6a4ec482d30abf99a5546c15595ec4867d07557bec193333aa9d5874c8b8a9a8",
+      "op": "remote_approval_accepted",
+      "state": "approved",
+      "ts": "2026-10-13T09:01:49.176Z"
+    },
+    {
+      "approval_id": "01M4T7Y4580D69S99XAG3FPKPQ",
+      "digest": "6a4ec482d30abf99a5546c15595ec4867d07557bec193333aa9d5874c8b8a9a8",
+      "op": "approval_execution_started",
+      "ts": "2026-10-13T09:01:49.649Z"
+    },
+    {
+      "approval_id": "01M4T7Y4580D69S99XAG3FPKPQ",
+      "op": "approval_execution_completed",
+      "ts": "2026-10-13T09:01:50.207Z"
+    },
+    {
+      "agent_pid": 1370451,
+      "approval_id": "01M4T7Y91GB571P4SWKW447M43",
+      "digest": "5a5d7cd1b23de2de3adda7360b7722d368449630ce49940b605e523d852e96a4",
+      "op": "approval_requested",
+      "ts": "2026-10-13T09:01:50.677Z"
+    },
+    {
+      "approval_id": "01M4T7Y91GB571P4SWKW447M43",
+      "approval_level": "quick",
+      "approver_device": "01M4SM5QTRQKNQE1TD6FBJTG79",
+      "decision": "allow",
+      "decision_hash": "005871848fdbefce117e3cf146c35edac976cb30d9b737dd34ca0ee0ce42a911",
+      "digest": "5a5d7cd1b23de2de3adda7360b7722d368449630ce49940b605e523d852e96a4",
+      "op": "remote_approval_accepted",
+      "state": "approved",
+      "ts": "2026-10-13T09:01:54.584Z"
+    },
+    {
+      "approval_id": "01M4T7Y91GB571P4SWKW447M43",
+      "digest": "5a5d7cd1b23de2de3adda7360b7722d368449630ce49940b605e523d852e96a4",
+      "op": "approval_execution_started",
+      "ts": "2026-10-13T09:01:55.055Z"
+    },
+    {
+      "approval_id": "01M4T7Y91GB571P4SWKW447M43",
+      "op": "approval_execution_completed",
+      "ts": "2026-10-13T09:01:55.980Z"
+    },
+    {
+      "agent_pid": 1370451,
+      "approval_id": "01M4T7YEX0NXJS55XEHZRR0JWW",
+      "digest": "69f9a4667240b94d7fb96dad9b307e4783c3aedede26ed3e4a6fa04384a3e64f",
+      "op": "approval_requested",
+      "ts": "2026-10-13T09:01:56.459Z"
+    },
+    {
+      "approval_id": "01M4T7YEX0NXJS55XEHZRR0JWW",
+      "approval_level": "quick",
+      "approver_device": "01M4SM5QTRQKNQE1TD6FBJTG79",
+      "decision": "allow",
+      "decision_hash": "3f8df7fa614b7f38ff93b7e5a51aaace06550a7ddd1687da6cd79dd0c0f72f16",
+      "digest": "69f9a4667240b94d7fb96dad9b307e4783c3aedede26ed3e4a6fa04384a3e64f",
+      "op": "remote_approval_accepted",
+      "state": "approved",
+      "ts": "2026-10-13T09:02:00.988Z"
+    },
+    {
+      "approval_id": "01M4T7YEX0NXJS55XEHZRR0JWW",
+      "digest": "69f9a4667240b94d7fb96dad9b307e4783c3aedede26ed3e4a6fa04384a3e64f",
+      "op": "approval_execution_started",
+      "ts": "2026-10-13T09:02:01.458Z"
+    },
+    {
+      "approval_id": "01M4T7YEX0NXJS55XEHZRR0JWW",
+      "op": "approval_execution_completed",
+      "ts": "2026-10-13T09:02:02.194Z"
+    },
+    {
+      "agent_pid": 1370451,
+      "approval_id": "01M4T7YMRG28827AQPYB7AV1ZN",
+      "digest": "f33eba815a730f50e6b5bccc30f314b918c8ad19b3a67da9d895ce8ce39507cf",
+      "op": "approval_requested",
+      "ts": "2026-10-13T09:02:02.672Z"
+    },
+    {
+      "approval_id": "01M4T7YMRG28827AQPYB7AV1ZN",
+      "approval_level": "quick",
+      "approver_device": "01M4SM5QTRQKNQE1TD6FBJTG79",
+      "decision": "allow",
+      "decision_hash": "722a94e5501fc72df85b79de717176993a9734be1031f8b1115cf3a172d3f897",
+      "digest": "f33eba815a730f50e6b5bccc30f314b918c8ad19b3a67da9d895ce8ce39507cf",
+      "op": "remote_approval_accepted",
+      "state": "approved",
+      "ts": "2026-10-13T09:02:08.692Z"
+    },
+    {
+      "approval_id": "01M4T7YMRG28827AQPYB7AV1ZN",
+      "digest": "f33eba815a730f50e6b5bccc30f314b918c8ad19b3a67da9d895ce8ce39507cf",
+      "op": "approval_execution_started",
+      "ts": "2026-10-13T09:02:09.158Z"
+    },
+    {
+      "approval_id": "01M4T7YMRG28827AQPYB7AV1ZN",
+      "op": "approval_execution_completed",
+      "ts": "2026-10-13T09:02:10.025Z"
+    },
+    {
+      "agent_pid": 1370451,
+      "approval_id": "01M4T7YWJGSKGWFKQR2FMXHZ8D",
+      "digest": "b566216dc49cd2ba6430ca1900eca0005c641a04fdc3645f367543a545f69471",
+      "op": "approval_requested",
+      "ts": "2026-10-13T09:02:10.498Z"
+    },
+    {
+      "approval_id": "01M4T7YWJGSKGWFKQR2FMXHZ8D",
+      "approval_level": "quick",
+      "approver_device": "01M4SM5QTRQKNQE1TD6FBJTG79",
+      "decision": "allow",
+      "decision_hash": "2afba32c210437d6d7c94ffe3f93e0a53acc8935581da72c45e907717946e957",
+      "digest": "b566216dc49cd2ba6430ca1900eca0005c641a04fdc3645f367543a545f69471",
+      "op": "remote_approval_accepted",
+      "state": "approved",
+      "ts": "2026-10-13T09:02:13.337Z"
+    },
+    {
+      "approval_id": "01M4T7YWJGSKGWFKQR2FMXHZ8D",
+      "digest": "b566216dc49cd2ba6430ca1900eca0005c641a04fdc3645f367543a545f69471",
+      "op": "approval_execution_started",
+      "ts": "2026-10-13T09:02:13.769Z"
+    },
+    {
+      "approval_id": "01M4T7YWJGSKGWFKQR2FMXHZ8D",
+      "op": "approval_execution_completed",
+      "ts": "2026-10-13T09:02:14.433Z"
+    },
+    {
+      "agent_pid": 1370451,
+      "approval_id": "01M4T7Z0FGV6BQMQM4T6AR2F6T",
+      "digest": "5eb268ed792cdeb8e8eedc1e76b6df06a53cb52e8d71207b49b82e9159d2eb5e",
+      "op": "approval_requested",
+      "ts": "2026-10-13T09:02:14.907Z"
+    },
+    {
+      "approval_id": "01M4T7Z0FGV6BQMQM4T6AR2F6T",
+      "approval_level": "quick",
+      "approver_device": "01M4SM5QTRQKNQE1TD6FBJTG79",
+      "decision": "allow",
+      "decision_hash": "7d1854370174d692c0bdea8c146ebe0c762f421a42efe7882ba3a106b097cc80",
+      "digest": "5eb268ed792cdeb8e8eedc1e76b6df06a53cb52e8d71207b49b82e9159d2eb5e",
+      "op": "remote_approval_accepted",
+      "state": "approved",
+      "ts": "2026-10-13T09:02:21.001Z"
+    },
+    {
+      "approval_id": "01M4T7Z0FGV6BQMQM4T6AR2F6T",
+      "digest": "5eb268ed792cdeb8e8eedc1e76b6df06a53cb52e8d71207b49b82e9159d2eb5e",
+      "op": "approval_execution_started",
+      "ts": "2026-10-13T09:02:21.482Z"
+    },
+    {
+      "approval_id": "01M4T7Z0FGV6BQMQM4T6AR2F6T",
+      "op": "approval_execution_completed",
+      "ts": "2026-10-13T09:02:22.227Z"
+    },
+    {
+      "agent_pid": 1370451,
+      "approval_id": "01M4T7Z89GX32M48P43D5XFHFN",
+      "digest": "a237fb14935e48809051874e7f77a66d50a0e842911325f3ca7b8e0690510edf",
+      "op": "approval_requested",
+      "ts": "2026-10-13T09:02:22.689Z"
+    },
+    {
+      "approval_id": "01M4T7Z89GX32M48P43D5XFHFN",
+      "approval_level": "quick",
+      "approver_device": "01M4SM5QTRQKNQE1TD6FBJTG79",
+      "decision": "allow",
+      "decision_hash": "397607d5f21ba4dbcba3e96244061559c513024c04b8906d441372ba4d622f95",
+      "digest": "a237fb14935e48809051874e7f77a66d50a0e842911325f3ca7b8e0690510edf",
+      "op": "remote_approval_accepted",
+      "state": "approved",
+      "ts": "2026-10-13T09:02:28.336Z"
+    },
+    {
+      "approval_id": "01M4T7Z89GX32M48P43D5XFHFN",
+      "digest": "a237fb14935e48809051874e7f77a66d50a0e842911325f3ca7b8e0690510edf",
+      "op": "approval_execution_started",
+      "ts": "2026-10-13T09:02:28.802Z"
+    },
+    {
+      "approval_id": "01M4T7Z89GX32M48P43D5XFHFN",
+      "op": "approval_execution_completed",
+      "ts": "2026-10-13T09:02:29.875Z"
+    },
+    {
+      "agent_pid": 1370451,
+      "approval_id": "01M4T7ZF48VYJ2GDX2MK6213B1",
+      "digest": "a97f60ebdec5a52487e566c463898837fd33efba8522e052cf8e436c4837cea0",
+      "op": "approval_requested",
+      "ts": "2026-10-13T09:02:30.311Z"
+    },
+    {
+      "approval_id": "01M4T7ZF48VYJ2GDX2MK6213B1",
+      "approval_level": "quick",
+      "approver_device": "01M4SM5QTRQKNQE1TD6FBJTG79",
+      "decision": "allow",
+      "decision_hash": "284f73be3ba33c198e1028d2232d2ada1a59bf0b9600385a8a89d82c8663f4c9",
+      "digest": "a97f60ebdec5a52487e566c463898837fd33efba8522e052cf8e436c4837cea0",
+      "op": "remote_approval_accepted",
+      "state": "approved",
+      "ts": "2026-10-13T09:02:33.151Z"
+    },
+    {
+      "approval_id": "01M4T7ZF48VYJ2GDX2MK6213B1",
+      "digest": "a97f60ebdec5a52487e566c463898837fd33efba8522e052cf8e436c4837cea0",
+      "op": "approval_execution_started",
+      "ts": "2026-10-13T09:02:33.618Z"
+    },
+    {
+      "approval_id": "01M4T7ZF48VYJ2GDX2MK6213B1",
+      "op": "approval_execution_completed",
+      "ts": "2026-10-13T09:02:34.062Z"
+    },
+    {
+      "agent_pid": 1370451,
+      "approval_id": "01M4T7ZM0GG2NM4SG1PBFZWKD9",
+      "digest": "f5bcd307419192554b9f44b7d28ca796203618fb03a46fd668d6c73000b8b5cf",
+      "op": "approval_requested",
+      "ts": "2026-10-13T09:02:34.571Z"
+    },
+    {
+      "approval_id": "01M4T7ZM0GG2NM4SG1PBFZWKD9",
+      "approval_level": "quick",
+      "approver_device": "01M4SM5QTRQKNQE1TD6FBJTG79",
+      "decision": "allow",
+      "decision_hash": "fe102251c07a75fb9010d1ff30b4a5b067fa3f4e3e6b586fbd1da0748f4873e4",
+      "digest": "f5bcd307419192554b9f44b7d28ca796203618fb03a46fd668d6c73000b8b5cf",
+      "op": "remote_approval_accepted",
+      "state": "approved",
+      "ts": "2026-10-13T09:02:37.401Z"
+    },
+    {
+      "approval_id": "01M4T7ZM0GG2NM4SG1PBFZWKD9",
+      "digest": "f5bcd307419192554b9f44b7d28ca796203618fb03a46fd668d6c73000b8b5cf",
+      "op": "approval_execution_started",
+      "ts": "2026-10-13T09:02:37.886Z"
+    },
+    {
+      "approval_id": "01M4T7ZM0GG2NM4SG1PBFZWKD9",
+      "op": "approval_execution_completed",
+      "ts": "2026-10-13T09:02:38.378Z"
+    },
+    {
+      "agent_pid": 1370451,
+      "approval_id": "01M4T7ZQXGJPHY6MVTNARNQYGH",
+      "digest": "c341326d556a9ee5d9b77a46f130c602043ddd6b2dd3b7d208ea01d286179466",
+      "op": "approval_requested",
+      "ts": "2026-10-13T09:02:38.847Z"
+    },
+    {
+      "approval_id": "01M4T7ZQXGJPHY6MVTNARNQYGH",
+      "approval_level": "quick",
+      "approver_device": "01M4SM5QTRQKNQE1TD6FBJTG79",
+      "decision": "allow",
+      "decision_hash": "45e796f3d84f479109f6ef56736dcbe1261412763c82276558cbfa7d2b4083fb",
+      "digest": "c341326d556a9ee5d9b77a46f130c602043ddd6b2dd3b7d208ea01d286179466",
+      "op": "remote_approval_accepted",
+      "state": "approved",
+      "ts": "2026-10-13T09:02:42.300Z"
+    },
+    {
+      "approval_id": "01M4T7ZQXGJPHY6MVTNARNQYGH",
+      "digest": "c341326d556a9ee5d9b77a46f130c602043ddd6b2dd3b7d208ea01d286179466",
+      "op": "approval_execution_started",
+      "ts": "2026-10-13T09:02:42.699Z"
+    },
+    {
+      "approval_id": "01M4T7ZQXGJPHY6MVTNARNQYGH",
+      "op": "approval_execution_completed",
+      "ts": "2026-10-13T09:02:43.265Z"
+    },
+    {
+      "agent_pid": 1370451,
+      "approval_id": "01M4T7ZWSR3T7VF9WXQA0Z4A0F",
+      "digest": "7b5b3e12b9529e4499fdd66dfb98ef14c6a6c12f71187783190411bbc9f00012",
+      "op": "approval_requested",
+      "ts": "2026-10-13T09:02:43.673Z"
+    },
+    {
+      "approval_id": "01M4T7ZWSR3T7VF9WXQA0Z4A0F",
+      "approval_level": "quick",
+      "approver_device": "01M4SM5QTRQKNQE1TD6FBJTG79",
+      "decision": "allow",
+      "decision_hash": "b29ab8a5b993ffe4d930878f17133d7aa00be6889fc73d7c0e86a0080ead5a54",
+      "digest": "7b5b3e12b9529e4499fdd66dfb98ef14c6a6c12f71187783190411bbc9f00012",
+      "op": "remote_approval_accepted",
+      "state": "approved",
+      "ts": "2026-10-13T09:02:46.583Z"
+    },
+    {
+      "approval_id": "01M4T7ZWSR3T7VF9WXQA0Z4A0F",
+      "digest": "7b5b3e12b9529e4499fdd66dfb98ef14c6a6c12f71187783190411bbc9f00012",
+      "op": "approval_execution_started",
+      "ts": "2026-10-13T09:02:47.050Z"
+    },
+    {
+      "approval_id": "01M4T7ZWSR3T7VF9WXQA0Z4A0F",
+      "op": "approval_execution_completed",
+      "ts": "2026-10-13T09:02:47.470Z"
+    },
+    {
+      "agent_pid": 1370451,
+      "approval_id": "01M4T800PRQHNC10YN8SKKN7P9",
+      "digest": "e4672f2780d3e81bd9efd9d7899896d3df9f70bb9698c5da085d85951283cb8f",
+      "op": "approval_requested",
+      "ts": "2026-10-13T09:02:47.952Z"
+    },
+    {
+      "approval_id": "01M4T800PRQHNC10YN8SKKN7P9",
+      "approval_level": "quick",
+      "approver_device": "01M4SM5QTRQKNQE1TD6FBJTG79",
+      "decision": "allow",
+      "decision_hash": "b4b5c770b5d54164ab2cc5f348ad7210c1231eaccba9335b779b2344df9bf74a",
+      "digest": "e4672f2780d3e81bd9efd9d7899896d3df9f70bb9698c5da085d85951283cb8f",
+      "op": "remote_approval_accepted",
+      "state": "approved",
+      "ts": "2026-10-13T09:02:50.592Z"
+    },
+    {
+      "approval_id": "01M4T800PRQHNC10YN8SKKN7P9",
+      "digest": "e4672f2780d3e81bd9efd9d7899896d3df9f70bb9698c5da085d85951283cb8f",
+      "op": "approval_execution_started",
+      "ts": "2026-10-13T09:02:51.068Z"
+    },
+    {
+      "approval_id": "01M4T800PRQHNC10YN8SKKN7P9",
+      "op": "approval_execution_completed",
+      "ts": "2026-10-13T09:02:52.019Z"
+    },
+    {
+      "agent_pid": 1370451,
+      "approval_id": "01M4T805K04P9Q4Q4AQW8XNGYY",
+      "digest": "10aa40e8fc25fd67d72e4e37eca44d6bb7552b079c6546a4754a40688937d0da",
+      "op": "approval_requested",
+      "ts": "2026-10-13T09:02:52.493Z"
+    },
+    {
+      "approval_id": "01M4T805K04P9Q4Q4AQW8XNGYY",
+      "approval_level": "quick",
+      "approver_device": "01M4SM5QTRQKNQE1TD6FBJTG79",
+      "decision": "allow",
+      "decision_hash": "e4ae2d5738e66b55b88544ea3327e11e4307638fb575f254f53221ea85197ab9",
+      "digest": "10aa40e8fc25fd67d72e4e37eca44d6bb7552b079c6546a4754a40688937d0da",
+      "op": "remote_approval_accepted",
+      "state": "approved",
+      "ts": "2026-10-13T09:02:54.871Z"
+    },
+    {
+      "approval_id": "01M4T805K04P9Q4Q4AQW8XNGYY",
+      "digest": "10aa40e8fc25fd67d72e4e37eca44d6bb7552b079c6546a4754a40688937d0da",
+      "op": "approval_execution_started",
+      "ts": "2026-10-13T09:02:55.275Z"
+    },
+    {
+      "approval_id": "01M4T805K04P9Q4Q4AQW8XNGYY",
+      "op": "approval_execution_completed",
+      "ts": "2026-10-13T09:02:55.745Z"
+    },
+    {
+      "agent_pid": 1370451,
+      "approval_id": "01M4T808GRF294W79WW1FRY8CP",
+      "digest": "ab49615b3b5f413467c50b211ec43d416bf7eec9fa30bbd18470e44604dc5a84",
+      "op": "approval_requested",
+      "ts": "2026-10-13T09:02:56.230Z"
+    },
+    {
+      "approval_id": "01M4T808GRF294W79WW1FRY8CP",
+      "approval_level": "quick",
+      "approver_device": "01M4SM5QTRQKNQE1TD6FBJTG79",
+      "decision": "allow",
+      "decision_hash": "a01571d65dc10f82079c356d53a4c149d8c552cd4972b87ba6c60b93eebb0d21",
+      "digest": "ab49615b3b5f413467c50b211ec43d416bf7eec9fa30bbd18470e44604dc5a84",
+      "op": "remote_approval_accepted",
+      "state": "approved",
+      "ts": "2026-10-13T09:02:59.291Z"
+    },
+    {
+      "approval_id": "01M4T808GRF294W79WW1FRY8CP",
+      "digest": "ab49615b3b5f413467c50b211ec43d416bf7eec9fa30bbd18470e44604dc5a84",
+      "op": "approval_execution_started",
+      "ts": "2026-10-13T09:02:59.753Z"
+    },
+    {
+      "approval_id": "01M4T808GRF294W79WW1FRY8CP",
+      "op": "approval_execution_completed",
+      "ts": "2026-10-13T09:03:00.212Z"
+    },
+    {
+      "agent_pid": 1370451,
+      "approval_id": "01M4T80DD039A5XXZQSJXG38GC",
+      "digest": "590374ba33d205f5dfd1bfa92d1d993b1b0854f0886c1992d2a2df7b0314abc4",
+      "op": "approval_requested",
+      "ts": "2026-10-13T09:03:00.672Z"
+    },
+    {
+      "approval_id": "01M4T80DD039A5XXZQSJXG38GC",
+      "approval_level": "quick",
+      "approver_device": "01M4SM5QTRQKNQE1TD6FBJTG79",
+      "decision": "allow",
+      "decision_hash": "b26ef26a4cb7a96d088a63cc52929ff9ed0f4e771ca529b79694c80a73751608",
+      "digest": "590374ba33d205f5dfd1bfa92d1d993b1b0854f0886c1992d2a2df7b0314abc4",
+      "op": "remote_approval_accepted",
+      "state": "approved",
+      "ts": "2026-10-13T09:03:03.484Z"
+    },
+    {
+      "approval_id": "01M4T80DD039A5XXZQSJXG38GC",
+      "digest": "590374ba33d205f5dfd1bfa92d1d993b1b0854f0886c1992d2a2df7b0314abc4",
+      "op": "approval_execution_started",
+      "ts": "2026-10-13T09:03:03.957Z"
+    },
+    {
+      "approval_id": "01M4T80DD039A5XXZQSJXG38GC",
+      "op": "approval_execution_completed",
+      "ts": "2026-10-13T09:03:04.340Z"
+    },
+    {
+      "agent_pid": 1370451,
+      "approval_id": "01M4T80HA0DYYG7ESAJT8EZKH0",
+      "digest": "149d9d807b3e47fe5739e7f398582b382b332b48d72fc2243792ede93bdc8316",
+      "op": "approval_requested",
+      "ts": "2026-10-13T09:03:04.733Z"
+    },
+    {
+      "approval_id": "01M4T80HA0DYYG7ESAJT8EZKH0",
+      "approval_level": "quick",
+      "approver_device": "01M4SM5QTRQKNQE1TD6FBJTG79",
+      "decision": "allow",
+      "decision_hash": "a4d6ecb9e54abee76da21fe385fddb55e587d8a19a0037c0eb6850b42dd0812b",
+      "digest": "149d9d807b3e47fe5739e7f398582b382b332b48d72fc2243792ede93bdc8316",
+      "op": "remote_approval_accepted",
+      "state": "approved",
+      "ts": "2026-10-13T09:03:07.919Z"
+    },
+    {
+      "approval_id": "01M4T80HA0DYYG7ESAJT8EZKH0",
+      "digest": "149d9d807b3e47fe5739e7f398582b382b332b48d72fc2243792ede93bdc8316",
+      "op": "approval_execution_started",
+      "ts": "2026-10-13T09:03:08.319Z"
+    },
+    {
+      "approval_id": "01M4T80HA0DYYG7ESAJT8EZKH0",
+      "op": "approval_execution_completed",
+      "ts": "2026-10-13T09:03:08.820Z"
+    },
+    {
+      "agent_pid": 1370451,
+      "approval_id": "01M4T80N70E7272H4PBWV3SZAZ",
+      "digest": "e78eb6db931a3cf211acfa37ed2566e5ae5a68868fece8948e273d11ecf6a92d",
+      "op": "approval_requested",
+      "ts": "2026-10-13T09:03:09.374Z"
+    },
+    {
+      "approval_id": "01M4T80N70E7272H4PBWV3SZAZ",
+      "approval_level": "quick",
+      "approver_device": "01M4SM5QTRQKNQE1TD6FBJTG79",
+      "decision": "allow",
+      "decision_hash": "5ced979e1300a9d74af5a5f36f52690026f589058dd8475a1697cea14efbd3c4",
+      "digest": "e78eb6db931a3cf211acfa37ed2566e5ae5a68868fece8948e273d11ecf6a92d",
+      "op": "remote_approval_accepted",
+      "state": "approved",
+      "ts": "2026-10-13T09:03:12.535Z"
+    },
+    {
+      "approval_id": "01M4T80N70E7272H4PBWV3SZAZ",
+      "digest": "e78eb6db931a3cf211acfa37ed2566e5ae5a68868fece8948e273d11ecf6a92d",
+      "op": "approval_execution_started",
+      "ts": "2026-10-13T09:03:12.957Z"
+    },
+    {
+      "approval_id": "01M4T80N70E7272H4PBWV3SZAZ",
+      "op": "approval_execution_completed",
+      "ts": "2026-10-13T09:03:13.526Z"
+    },
+    {
+      "agent_pid": 1370451,
+      "approval_id": "01M4T80T380Y3RT4Y2BRSBMTQS",
+      "digest": "26f6342513bde20b63f285073d870a5064f8b29df56dcb0d1a4a1b88f3c17329",
+      "op": "approval_requested",
+      "ts": "2026-10-13T09:03:14.008Z"
+    },
+    {
+      "approval_id": "01M4T80T380Y3RT4Y2BRSBMTQS",
+      "approval_level": "quick",
+      "approver_device": "01M4SM5QTRQKNQE1TD6FBJTG79",
+      "decision": "allow",
+      "decision_hash": "4fec5e1f2934fab08f10af5c831077777e7abb5ab120eb62b36c50338c1e1fc6",
+      "digest": "26f6342513bde20b63f285073d870a5064f8b29df56dcb0d1a4a1b88f3c17329",
+      "op": "remote_approval_accepted",
+      "state": "approved",
+      "ts": "2026-10-13T09:03:16.775Z"
+    },
+    {
+      "approval_id": "01M4T80T380Y3RT4Y2BRSBMTQS",
+      "digest": "26f6342513bde20b63f285073d870a5064f8b29df56dcb0d1a4a1b88f3c17329",
+      "op": "approval_execution_started",
+      "ts": "2026-10-13T09:03:17.251Z"
+    },
+    {
+      "approval_id": "01M4T80T380Y3RT4Y2BRSBMTQS",
+      "op": "approval_execution_completed",
+      "ts": "2026-10-13T09:03:17.726Z"
+    },
+    {
+      "agent_pid": 1370451,
+      "approval_id": "01M4T80Y08CAD13G6F3XWVKWBD",
+      "digest": "a0ab7a0f26565299107a0e772d3588d1cf3bccc5b48d5ebf728df65234e23e57",
+      "op": "approval_requested",
+      "ts": "2026-10-13T09:03:18.160Z"
+    },
+    {
+      "approval_id": "01M4T80Y08CAD13G6F3XWVKWBD",
+      "approval_level": "quick",
+      "approver_device": "01M4SM5QTRQKNQE1TD6FBJTG79",
+      "decision": "allow",
+      "decision_hash": "7c28b1c97a7a484d4f6dbf46617a6de12e7e0c9c8409f5810c626bdbf21baf13",
+      "digest": "a0ab7a0f26565299107a0e772d3588d1cf3bccc5b48d5ebf728df65234e23e57",
+      "op": "remote_approval_accepted",
+      "state": "approved",
+      "ts": "2026-10-13T09:03:20.804Z"
+    },
+    {
+      "approval_id": "01M4T80Y08CAD13G6F3XWVKWBD",
+      "digest": "a0ab7a0f26565299107a0e772d3588d1cf3bccc5b48d5ebf728df65234e23e57",
+      "op": "approval_execution_started",
+      "ts": "2026-10-13T09:03:21.243Z"
+    },
+    {
+      "approval_id": "01M4T80Y08CAD13G6F3XWVKWBD",
+      "op": "approval_execution_completed",
+      "ts": "2026-10-13T09:03:21.739Z"
+    },
+    {
+      "agent_pid": 1370451,
+      "approval_id": "01M4T811X82MH1Q5X3354AC2W6",
+      "digest": "a620d7be001f0b1446d0dbc82edf99d75d15abe59e4cef3f9beecc59fe5b1218",
+      "op": "approval_requested",
+      "ts": "2026-10-13T09:03:22.251Z"
+    },
+    {
+      "approval_id": "01M4T811X82MH1Q5X3354AC2W6",
+      "approval_level": "quick",
+      "approver_device": "01M4SM5QTRQKNQE1TD6FBJTG79",
+      "decision": "allow",
+      "decision_hash": "e16ddda5df5ead99103c965dacdc40e3d5aaadc3ea040fdfaeb9198dabe1c17d",
+      "digest": "a620d7be001f0b1446d0dbc82edf99d75d15abe59e4cef3f9beecc59fe5b1218",
+      "op": "remote_approval_accepted",
+      "state": "approved",
+      "ts": "2026-10-13T09:03:25.371Z"
+    },
+    {
+      "approval_id": "01M4T811X82MH1Q5X3354AC2W6",
+      "digest": "a620d7be001f0b1446d0dbc82edf99d75d15abe59e4cef3f9beecc59fe5b1218",
+      "op": "approval_execution_started",
+      "ts": "2026-10-13T09:03:25.842Z"
+    },
+    {
+      "approval_id": "01M4T811X82MH1Q5X3354AC2W6",
+      "op": "approval_execution_completed",
+      "ts": "2026-10-13T09:03:26.370Z"
+    },
+    {
+      "agent_pid": 1370451,
+      "approval_id": "01M4T816SG2KH7WHYD24X0PEVQ",
+      "digest": "08ab03d20403585560c8eae9f0f5e813d309302514eac89694f87df60d4495ca",
+      "op": "approval_requested",
+      "ts": "2026-10-13T09:03:26.832Z"
+    },
+    {
+      "approval_id": "01M4T816SG2KH7WHYD24X0PEVQ",
+      "approval_level": "quick",
+      "approver_device": "01M4SM5QTRQKNQE1TD6FBJTG79",
+      "decision": "allow",
+      "decision_hash": "8df6c6daac7bdc8b875145de4a3c775b99a073bc33635f55e12c2602f09e1113",
+      "digest": "08ab03d20403585560c8eae9f0f5e813d309302514eac89694f87df60d4495ca",
+      "op": "remote_approval_accepted",
+      "state": "approved",
+      "ts": "2026-10-13T09:03:29.651Z"
+    },
+    {
+      "approval_id": "01M4T816SG2KH7WHYD24X0PEVQ",
+      "digest": "08ab03d20403585560c8eae9f0f5e813d309302514eac89694f87df60d4495ca",
+      "op": "approval_execution_started",
+      "ts": "2026-10-13T09:03:30.124Z"
+    },
+    {
+      "approval_id": "01M4T816SG2KH7WHYD24X0PEVQ",
+      "op": "approval_execution_completed",
+      "ts": "2026-10-13T09:03:30.665Z"
+    }
+  ],
+  "measurement": "same helper millisecond audit ts: approval_requested to accepted/denied",
+  "observed_utc": "2026-10-13T09:03:31.357432+00:00"
+}

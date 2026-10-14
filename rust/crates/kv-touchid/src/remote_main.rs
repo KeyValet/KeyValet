@@ -2,10 +2,18 @@
 mod existing;
 #[cfg(target_os = "macos")]
 mod remote_agent;
+#[cfg(target_os = "macos")]
+mod remote_auth;
 
 #[cfg(target_os = "macos")]
 fn main() {
     match std::env::args().nth(1).as_deref() {
+        Some("--remote-authenticate") => {
+            if user_session().is_err() {
+                std::process::exit(1);
+            }
+            remote_auth::authenticate();
+        }
         Some("--remote-dialog") | Some("--remote-preview") => {
             if let Err(error) = remote_dialog() {
                 eprintln!("{error}");
@@ -57,13 +65,23 @@ fn remote_dialog() -> kv_touchid::remote::Result<()> {
     } else {
         Mode::Dialog
     };
-    stdio::run(
+    let result = stdio::run(
         &mut std::io::stdin().lock(),
         &mut std::io::stdout().lock(),
         mode,
         Platform::Macos,
         &mut NativeDialog::default(),
-    )
+    );
+    match result {
+        Err(error @ (Error::Cancelled | Error::Expired)) => {
+            use std::io::Write;
+            let reply = kv_touchid::remote::agent::ui_reply(0, Err(error));
+            serde_json::to_writer(std::io::stdout().lock(), &reply)
+                .map_err(|_| Error::UiUnavailable)?;
+            std::io::stdout().flush().map_err(|_| Error::UiUnavailable)
+        }
+        result => result,
+    }
 }
 
 #[cfg(not(target_os = "macos"))]

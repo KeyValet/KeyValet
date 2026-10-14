@@ -1,10 +1,10 @@
-# Build a Windows x64/arm64 package. Unsigned archives are development artifacts only.
+# Build a Windows x64/arm64 release package. Authenticode signing is optional.
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)][ValidatePattern('^v\d+\.\d+\.\d+$')][string]$Tag,
     [ValidateSet('x64', 'arm64')][string]$Architecture = 'x64',
     [string]$SigningCertificateThumbprint,
-    [switch]$AllowUnsigned,
+    [switch]$AllowUnsigned, # Compatibility option; unsigned releases are the default.
     [string]$BinaryDirectory
 )
 $ErrorActionPreference = 'Stop'
@@ -13,8 +13,7 @@ $repo = Split-Path $PSScriptRoot -Parent
 if ($env:OS -ne 'Windows_NT') { throw 'Build the Windows package on Windows with the MSVC toolchain.' }
 $version = [regex]::Match((Get-Content "$repo/rust/crates/kv-cli/Cargo.toml" -Raw), '(?m)^version\s*=\s*"([^"]+)"').Groups[1].Value
 if ($Tag -ne "v$version") { throw "Tag must be v$version." }
-if (!$SigningCertificateThumbprint -and !$AllowUnsigned) { throw 'Provide -SigningCertificateThumbprint, or explicitly use -AllowUnsigned for development.' }
-if ($BinaryDirectory -and (!$AllowUnsigned -or $SigningCertificateThumbprint)) { throw 'Prebuilt binaries are only supported for unsigned development/test packages.' }
+if ($BinaryDirectory -and $SigningCertificateThumbprint) { throw 'Build signed packages from source; prebuilt binaries are supported for unsigned packages.' }
 $target = if ($Architecture -eq 'arm64') { 'aarch64-pc-windows-msvc' } else { 'x86_64-pc-windows-msvc' }
 if (!$BinaryDirectory) {
     Push-Location "$repo/rust"
@@ -37,6 +36,41 @@ New-Item "$stage/bin", "$stage/templates", "$stage/scripts", "$stage/docs", "$st
 foreach ($binary in 'kv-helper', 'kv-agent', 'kv-cli', 'kv-mcp', 'kv-hook', 'kv-server', 'kv-relay-client') {
     Copy-Item -LiteralPath "$BinaryDirectory/$binary.exe" "$stage/bin/"
 }
+# WinUI is self-contained: copy only the pinned SDK files, not the rest of a Cargo
+# target directory. Microsoft runtime DLLs keep their original Microsoft signatures.
+foreach ($required in 'Microsoft.UI.Xaml.dll','Microsoft.UI.Xaml.Controls.dll','Microsoft.WindowsAppRuntime.dll','resources.pri') {
+    if (!(Test-Path -LiteralPath "$BinaryDirectory/$required" -PathType Leaf)) {
+        throw "Missing WinUI runtime: $required. Rebuild kv-agent before packaging."
+    }
+}
+$runtimeFiles = @()
+$runtimeList = Get-Content "$repo/rust/crates/kv-agent/winui-runtime.txt" | Where-Object { $_ -and !$_.StartsWith('#') }
+foreach ($entry in $runtimeList) {
+    $source = Join-Path $BinaryDirectory $entry
+    if (!(Test-Path -LiteralPath $source)) { continue }
+    $files = if (Test-Path -LiteralPath $source -PathType Container) {
+        @(Get-ChildItem -LiteralPath $source -Recurse -File)
+    } else { @(Get-Item -LiteralPath $source) }
+    foreach ($file in $files) {
+        if ($file.Attributes -band [IO.FileAttributes]::ReparsePoint) { throw 'WinUI runtime cannot contain reparse points.' }
+        $relative = $file.FullName.Substring($BinaryDirectory.Length + 1).Replace('\','/')
+        $destination = Join-Path "$stage/bin" $relative
+        New-Item -ItemType Directory -Path (Split-Path $destination -Parent) -Force | Out-Null
+        Copy-Item -LiteralPath $file.FullName -Destination $destination
+        if ($file.Extension -ieq '.dll') {
+            $signature = Get-AuthenticodeSignature -LiteralPath $destination
+            $publisher = if ($signature.SignerCertificate) {
+                $signature.SignerCertificate.GetNameInfo([Security.Cryptography.X509Certificates.X509NameType]::SimpleName,$false)
+            } else { '' }
+            if ($signature.Status -ne 'Valid' -or $publisher -notin @('Microsoft Corporation','Microsoft Windows')) {
+                throw "Untrusted WinUI runtime DLL: $relative"
+            }
+        }
+        $runtimeFiles += @{path=$relative;sha256=(Get-FileHash -LiteralPath $destination -Algorithm SHA256).Hash.ToLowerInvariant()}
+    }
+}
+$runtimeManifest = @{schema=1;sdk_version='2.5.1';files=$runtimeFiles} | ConvertTo-Json -Depth 5
+[IO.File]::WriteAllText("$stage/bin/native-ui-runtime.json",$runtimeManifest,[Text.UTF8Encoding]::new($false))
 if ($SigningCertificateThumbprint) {
     $certificate = Get-Item "Cert:/CurrentUser/My/$SigningCertificateThumbprint"
     if ($certificate.GetNameInfo([System.Security.Cryptography.X509Certificates.X509NameType]::SimpleName, $false) -cne 'Simvito Limited') {
@@ -58,7 +92,7 @@ if ($SigningCertificateThumbprint) {
         }
     }
 } else {
-    Set-Content "$stage/UNSIGNED-DEVELOPMENT-BUILD.txt" 'Unsigned development build. Install only with explicit -AllowUnsignedAgent. Not a production release.'
+    Set-Content "$stage/WINDOWS-RELEASE.txt" 'This Windows release has no Authenticode signature. Install with scripts/install.ps1. Signing is not required for local or remote KeyValet features. Windows application control policies may still affect execution.'
 }
 Copy-Item "$repo/templates/catalog.json" "$stage/templates/"
 Copy-Item "$repo/scripts/install.ps1", "$repo/scripts/uninstall.ps1" "$stage/scripts/"

@@ -1,0 +1,21 @@
+{
+  "started_utc": "2026-10-13T22:48:25.425345+00:00",
+  "read_only_keyvalet": true,
+  "keyvalet_approval_requests": 0,
+  "keyvalet_touch_id_requests": 0,
+  "secret_values_in_evidence": false,
+  "samples": [],
+  "os_events": [
+    {
+      "event": "observer_check",
+      "observed_utc": "2026-10-13T22:48:25.456644+00:00",
+      "elapsed_s": 0.031397,
+      "callback_on_main_thread": true
+    }
+  ],
+  "phases": [],
+  "observer_self_check_only": true,
+  "events_before_main_loop_pump": 0,
+  "observer_self_check_passed": true,
+  "finished_utc": "2026-10-13T22:48:25.456692+00:00"
+}

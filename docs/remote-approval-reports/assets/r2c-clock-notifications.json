@@ -1,0 +1,47 @@
+{
+  "at_unix_ms": 1791847630749,
+  "package": "dev.keyvalet.mobile",
+  "notifications": [
+    {
+      "record": "NotificationRecord(0x05177212: pkg=dev.keyvalet.mobile user=UserHandle{0} id=0 tag=0|dev.keyvalet.mobile|g:Aggregate_AlertingSection importance=4 key=0|dev.keyvalet.mobile|0|0|dev.keyvalet.mobile|g:Aggregate_AlertingSection|10315|0|dev.keyvalet.mobile|g:Aggregate_AlertingSection: Notification(channel=kv_banner shortcut=null contentView=null vibrate=null sound=null defaults=0 flags=AUTO_CANCEL|LOCAL_ONLY|GROUP_SUMMARY|AUTOGROUP_SUMMARY color=0x00000000 groupKey=0|dev.keyvalet.mobile|g:Aggregate_AlertingSection vis=PRIVATE))",
+      "mCreationTimeMs": "1791847615343",
+      "mUpdateTimeMs": "1791847615343",
+      "mImportance": "HIGH",
+      "mSound": "content://settings/system/notification_sound",
+      "mVibration": "Composed{segments=[Step{amplitude=0.0, frequencyHz=0.0, duration=0}, Step{amplitude=-1.0, frequencyHz=0.0, duration=350}, Step{amplitude=0.0, frequencyHz=0.0, duration=250}, Step{amplitude=-1.0, frequencyHz=0.0, duration=350}], repeat=-1}",
+      "mIntercept": "false",
+      "mSuppressedVisualEffects": "0",
+      "channel": "NotificationChannel{mId='kv_banner', mName=审批提醒, mDescription=, mImportance=4, mBypassDnd=false, mLockscreenVisibility=-1000, mSound=content://settings/system/notification_sound, mLights=false, mLightColor=0, mVibrationPattern=null, mVibrationEffect=null, mUserLockedFields=0, mUserVisibleTaskShown=false, mVibrationEnabled=true, mShowBadge=true, mDeleted=false, mDeletedTimeMs=-1, mGroup='null', mAudioAttributes=AudioAttributes: usage=USAGE_NOTIFICATION content=CONTENT_TYPE_UNKNOWN flags=0x800 tags= bundle=null, mBlockableSystem=false, mAllowBubbles=-1, mImportanceLockedDefaultApp=false, mOriginalImp=4, mParent=null, mConversationId=null, mDemoted=false, mImportantConvo=false, mLastNotificationUpdateTimeMs=1791847612344}"
+    },
+    {
+      "record": "NotificationRecord(0x0b270699: pkg=dev.keyvalet.mobile user=UserHandle{0} id=-477428290 tag=01M4S71BP04XE6ATP179ZQ6VT3 importance=4 key=0|dev.keyvalet.mobile|-477428290|01M4S71BP04XE6ATP179ZQ6VT3|10315: Notification(channel=kv_banner shortcut=null contentView=null vibrate=null sound=null defaults=0 flags=AUTO_CANCEL|SILENT color=0x00000000 category=recommendation groupKey=01M4S71BP04XE6ATP179ZQ6VT3 actions=2 vis=PRIVATE))",
+      "mCreationTimeMs": "1791847612112",
+      "mUpdateTimeMs": "1791847612112",
+      "mImportance": "HIGH",
+      "mSound": "content://settings/system/notification_sound",
+      "mVibration": "Composed{segments=[Step{amplitude=0.0, frequencyHz=0.0, duration=0}, Step{amplitude=-1.0, frequencyHz=0.0, duration=350}, Step{amplitude=0.0, frequencyHz=0.0, duration=250}, Step{amplitude=-1.0, frequencyHz=0.0, duration=350}], repeat=-1}",
+      "mIntercept": "false",
+      "mSuppressedVisualEffects": "0",
+      "channel": "NotificationChannel{mId='kv_banner', mName=审批提醒, mDescription=, mImportance=4, mBypassDnd=false, mLockscreenVisibility=-1000, mSound=content://settings/system/notification_sound, mLights=false, mLightColor=0, mVibrationPattern=null, mVibrationEffect=null, mUserLockedFields=0, mUserVisibleTaskShown=false, mVibrationEnabled=true, mShowBadge=true, mDeleted=false, mDeletedTimeMs=-1, mGroup='null', mAudioAttributes=AudioAttributes: usage=USAGE_NOTIFICATION content=CONTENT_TYPE_UNKNOWN flags=0x800 tags= bundle=null, mBlockableSystem=false, mAllowBubbles=-1, mImportanceLockedDefaultApp=false, mOriginalImp=4, mParent=null, mConversationId=null, mDemoted=false, mImportantConvo=false, mLastNotificationUpdateTimeMs=1791847612344}",
+      "actions": "[0] \"仅允许这次\" -> PendingIntent{fa7d53f: PendingIntentRecord{cfcdca0 dev.keyvalet.mobile startForegroundService (allowlist: 461eceb:+30s0ms/0/NOTIFICATION_SERVICE/NotificationManagerService)}}\n                [1] \"拒绝\" -> PendingIntent{b292e0c: PendingIntentRecord{a6191a3 dev.keyvalet.mobile startForegroundService (allowlist: 461eceb:+30s0ms/0/NOTIFICATION_SERVICE/NotificationManagerService)}}"
+    },
+    {
+      "record": "NotificationRecord(0x05d87355: pkg=dev.keyvalet.mobile user=UserHandle{0} id=883313075 tag=01M4S70N78YFYG6D1X26868MEF importance=4 key=0|dev.keyvalet.mobile|883313075|01M4S70N78YFYG6D1X26868MEF|10315: Notification(channel=kv_banner shortcut=null contentView=null vibrate=null sound=null defaults=0 flags=AUTO_CANCEL|SILENT color=0x00000000 category=recommendation groupKey=01M4S70N78YFYG6D1X26868MEF actions=2 vis=PRIVATE))",
+      "mCreationTimeMs": "1791847590333",
+      "mUpdateTimeMs": "1791847590333",
+      "mImportance": "HIGH",
+      "mSound": "content://settings/system/notification_sound",
+      "mVibration": "Composed{segments=[Step{amplitude=0.0, frequencyHz=0.0, duration=0}, Step{amplitude=-1.0, frequencyHz=0.0, duration=350}, Step{amplitude=0.0, frequencyHz=0.0, duration=250}, Step{amplitude=-1.0, frequencyHz=0.0, duration=350}], repeat=-1}",
+      "mIntercept": "false",
+      "mSuppressedVisualEffects": "0",
+      "channel": "NotificationChannel{mId='kv_banner', mName=审批提醒, mDescription=, mImportance=4, mBypassDnd=false, mLockscreenVisibility=-1000, mSound=content://settings/system/notification_sound, mLights=false, mLightColor=0, mVibrationPattern=null, mVibrationEffect=null, mUserLockedFields=0, mUserVisibleTaskShown=false, mVibrationEnabled=true, mShowBadge=true, mDeleted=false, mDeletedTimeMs=-1, mGroup='null', mAudioAttributes=AudioAttributes: usage=USAGE_NOTIFICATION content=CONTENT_TYPE_UNKNOWN flags=0x800 tags= bundle=null, mBlockableSystem=false, mAllowBubbles=-1, mImportanceLockedDefaultApp=false, mOriginalImp=4, mParent=null, mConversationId=null, mDemoted=false, mImportantConvo=false, mLastNotificationUpdateTimeMs=1791847612344}",
+      "actions": "[0] \"仅允许这次\" -> PendingIntent{4ce865b: PendingIntentRecord{8286b4e dev.keyvalet.mobile startForegroundService (allowlist: 461eceb:+30s0ms/0/NOTIFICATION_SERVICE/NotificationManagerService)}}\n                [1] \"拒绝\" -> PendingIntent{e411ef8: PendingIntentRecord{9d0f450 dev.keyvalet.mobile startForegroundService (allowlist: 461eceb:+30s0ms/0/NOTIFICATION_SERVICE/NotificationManagerService)}}"
+    }
+  ],
+  "notification_history": [
+    "StatusBarNotification(pkg=dev.keyvalet.mobile user=UserHandle{0} id=-1970646448 tag=01M4S6QDAG740777TXRQCVYB8A key=0|dev.keyvalet.mobile|-1970646448|01M4S6QDAG740777TXRQCVYB8A|10315: Notification(channel=kv_banner shortcut=null contentView=null vibrate=null sound=null defaults=0 flags=AUTO_CANCEL color=0x00000000 category=recommendation groupKey=01M4S6QDAG740777TXRQCVYB8A actions=2 vis=PRIVATE))",
+    "StatusBarNotification(pkg=dev.keyvalet.mobile user=UserHandle{0} id=-1970646448 tag=01M4S6QDAG740777TXRQCVYB8A key=0|dev.keyvalet.mobile|-1970646448|01M4S6QDAG740777TXRQCVYB8A|10315: Notification(channel=kv_silent shortcut=null contentView=null vibrate=null sound=null defaults=0 flags=AUTO_CANCEL color=0x00000000 category=recommendation groupKey=01M4S6QDAG740777TXRQCVYB8A actions=2 vis=PRIVATE))",
+    "StatusBarNotification(pkg=dev.keyvalet.mobile user=UserHandle{0} id=1873140361 tag=01M4S6GENGB78WHAEQFE9EY0YE key=0|dev.keyvalet.mobile|1873140361|01M4S6GENGB78WHAEQFE9EY0YE|10315: Notification(channel=kv_banner shortcut=null contentView=null vibrate=null sound=null defaults=0 flags=ONLY_ALERT_ONCE|AUTO_CANCEL color=0x00000000 category=recommendation groupKey=01M4S6GENGB78WHAEQFE9EY0YE actions=2 vis=PRIVATE))",
+    "StatusBarNotification(pkg=dev.keyvalet.mobile user=UserHandle{0} id=1873140361 tag=01M4S6GENGB78WHAEQFE9EY0YE key=0|dev.keyvalet.mobile|1873140361|01M4S6GENGB78WHAEQFE9EY0YE|10315: Notification(channel=kv_silent shortcut=null contentView=null vibrate=null sound=null defaults=0 flags=ONLY_ALERT_ONCE|AUTO_CANCEL color=0x00000000 category=recommendation groupKey=01M4S6GENGB78WHAEQFE9EY0YE actions=2 vis=PRIVATE))"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "updated_utc": "2026-10-14T00:43:04.589972+00:00",
+  "installed_test_started": false,
+  "root_administrator_auth_required_for_install": true,
+  "expected_successful_se_signatures": 2,
+  "mac_cancelled_se_attempts": 1,
+  "get_approvals": {
+    "deny": 1,
+    "escape": 1,
+    "allow_only_after_original_actor_exit": 1
+  },
+  "reverse_executor_revoke": "blocked: pure Execute, no AK_s; no substituted DK/polkit signature",
+  "physical_lid_test_cancelled": true,
+  "source_error_mapping_authorized": "r3a-se-failure-scope-authorization.json",
+  "no_credentials_or_tokens_in_evidence": true
+}

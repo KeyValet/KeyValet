@@ -1,0 +1,19 @@
+{
+    "backup":  "C:\\ProgramData\\KeyValet-Backups\\pre-r3b-upgrade-20261013T133410Z",
+    "services":  [
+                     {
+                         "Name":  "KeyValetHelper",
+                         "StartMode":  "Auto",
+                         "State":  "Running",
+                         "StartName":  "LocalSystem"
+                     },
+                     {
+                         "Name":  "KeyValetRelay",
+                         "StartMode":  "Manual",
+                         "State":  "Stopped",
+                         "StartName":  "NT SERVICE\\KeyValetRelay"
+                     }
+                 ],
+    "owner_sid":  "S-1-5-21-3283475767-415700631-2745889461-1002",
+    "vault_sddl":  "O:BAG:S-1-5-21-3283475767-415700631-2745889461-513D:PAI(A;OICI;FA;;;SY)(A;OICI;FA;;;BA)"
+}

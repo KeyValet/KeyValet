@@ -1,0 +1,11 @@
+{
+  "apps": [
+    "codex",
+    "claude",
+    "cursor-agent"
+  ],
+  "launched": true,
+  "runlevel": "Limited",
+  "login_attempted": false,
+  "ssh_exit": 0
+}

@@ -1,0 +1,59 @@
+{
+  "checks": [
+    {
+      "check": "fmt",
+      "command": [
+        "cargo",
+        "+1.99.0",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exit": 0,
+      "elapsed_s": 1.107
+    },
+    {
+      "check": "clippy",
+      "command": [
+        "cargo",
+        "+1.99.0",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--locked",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit": 0,
+      "elapsed_s": 19.202
+    },
+    {
+      "check": "build",
+      "command": [
+        "cargo",
+        "+1.99.0",
+        "build",
+        "--workspace",
+        "--locked"
+      ],
+      "exit": 101,
+      "elapsed_s": 26.578
+    },
+    {
+      "check": "test",
+      "command": [
+        "cargo",
+        "+1.99.0",
+        "test",
+        "--workspace",
+        "--locked"
+      ],
+      "exit": 101,
+      "elapsed_s": 5.151
+    }
+  ],
+  "all_passed": false,
+  "complete": true
+}

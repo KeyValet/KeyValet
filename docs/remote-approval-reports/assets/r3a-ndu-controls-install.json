@@ -1,0 +1,43 @@
+{
+  "started_utc": "2026-10-13T11:10:47.215087+00:00",
+  "backup": "/var/backups/keyvalet-r3a-controls-20261013T111047Z",
+  "runtime_config_changed": false,
+  "vault_changed": false,
+  "new_capabilities": false,
+  "new_sha256": "d5a1cf70bfe155dcc864193fb9e6b5d7286a80cbd7401dd6f00c9d1e57234b93",
+  "old_sha256": "694f296cc9407695525d6ea1ae2e3233b4aa4e47cea078009295569ed97c9ab8",
+  "old_cli_sha256": "743507578dc51142023f26c6d1d365392771da76d8e523babc504f57885e823e",
+  "new_cli_sha256": "eade002e83350c16d89fa2e511b43b23402c6f8f817dd2f1d2c9f2f87d8d6046",
+  "installed_sha256": "d5a1cf70bfe155dcc864193fb9e6b5d7286a80cbd7401dd6f00c9d1e57234b93",
+  "installed_cli_sha256": "eade002e83350c16d89fa2e511b43b23402c6f8f817dd2f1d2c9f2f87d8d6046",
+  "services": {
+    "keyvalet-relay.service": {
+      "MainPID": "1701949",
+      "CapabilityBoundingSet": "",
+      "AmbientCapabilities": "",
+      "User": "keyvalet-relay",
+      "ActiveState": "active"
+    },
+    "keyvalet.service": {
+      "MainPID": "1701948",
+      "CapabilityBoundingSet": "",
+      "AmbientCapabilities": "",
+      "User": "keyvalet",
+      "ActiveState": "active"
+    },
+    "keyvalet-peer.service": {
+      "MainPID": "1701946",
+      "CapabilityBoundingSet": "cap_sys_ptrace",
+      "AmbientCapabilities": "cap_sys_ptrace",
+      "User": "root",
+      "ActiveState": "active"
+    }
+  },
+  "device_ids": [
+    "01M4S8KJ48BSMNK1S4BEGT07FC",
+    "01M4SM5QTRQKNQE1TD6FBJTG79"
+  ],
+  "finished_utc": "2026-10-13T11:10:47.870534+00:00",
+  "install_exit": 0,
+  "observed_utc": "2026-10-13T11:10:47.722734+00:00"
+}

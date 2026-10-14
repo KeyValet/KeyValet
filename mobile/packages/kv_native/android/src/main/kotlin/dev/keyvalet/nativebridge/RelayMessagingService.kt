@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import org.json.JSONArray
@@ -30,7 +31,11 @@ class RelayMessagingService: FirebaseMessagingService() {
     override fun onDeletedMessages() { PushSyncJob.enqueue(this, false) }
 }
 object Notifications {
-    fun clear(context: Context) { context.getSystemService(NotificationManager::class.java).cancelAll() }
+    private data class Plan(val channel: String, val title: String, val body: String, val expiresAt: Long, val quick: Boolean)
+    private val posted = mutableMapOf<String, Plan>()
+    @Synchronized
+    fun clear(context: Context) { posted.clear(); context.getSystemService(NotificationManager::class.java).cancelAll() }
+    @Synchronized
     fun refresh(context: Context) {
         try { val updates = NativeRuntime.call(context, JSONObject().put("op", "notifications")) as JSONArray
             val manager = context.getSystemService(NotificationManager::class.java)
@@ -43,14 +48,16 @@ object Notifications {
             for (active in manager.activeNotifications) {
                 if (active.tag != null && active.tag !in waiting) manager.cancel(active.tag, active.id)
             }
+            posted.keys.retainAll(waiting)
         } catch (error: IllegalStateException) {
             if (error.message == "login_required") clear(context)
         }
     }
+    @Synchronized
     fun show(context: Context, view: JSONObject) {
         val manager = context.getSystemService(NotificationManager::class.java)
         val id = view.getString("approval_id"); val numericId = id.hashCode()
-        if (view.getBoolean("cancel")) { manager.cancel(id, numericId); return }
+        if (view.getBoolean("cancel")) { posted.remove(id); manager.cancel(id, numericId); return }
         manager.createNotificationChannel(NotificationChannel("kv_silent", context.getString(R.string.kv_silent), NotificationManager.IMPORTANCE_LOW).apply { setSound(null, null); enableVibration(false) })
         manager.createNotificationChannel(NotificationChannel("kv_banner", context.getString(R.string.kv_banner), NotificationManager.IMPORTANCE_HIGH).apply {
             setSound(android.provider.Settings.System.DEFAULT_NOTIFICATION_URI,
@@ -59,6 +66,19 @@ object Notifications {
         })
         val channel = if (view.getBoolean("banner")) "kv_banner" else "kv_silent"
         val previous = manager.activeNotifications.firstOrNull { it.tag == id && it.id == numericId }
+        val plan = Plan(channel, view.getString("title"), view.getString("body"), view.getLong("expires_at"), view.getBoolean("quick_allowed"))
+        // A Firebase sync is followed by refresh, and a foreground refresh can race
+        // it. Do not immediately replace a new audible notification with a quiet
+        // ONLY_ALERT_ONCE update while Android is still enqueuing the first post.
+        if (posted[id] == plan) return
+        val old = previous?.notification
+        if (old?.channelId == channel && old.extras.getCharSequence(Notification.EXTRA_TITLE)?.toString() == plan.title
+            && old.extras.getCharSequence(Notification.EXTRA_BIG_TEXT)?.toString() == plan.body
+            && old.extras.getLong("kv_expires_at", -1) == plan.expiresAt
+            && old.extras.getBoolean("kv_quick_allowed") == plan.quick) {
+            posted[id] = plan
+            return
+        }
         // Android notification channels are immutable. Repost on escalation using
         // the same tag/id so there is one approval notification, with audible upgrade.
         if (previous != null && previous.notification.channelId != channel) manager.cancel(id, numericId)
@@ -66,11 +86,12 @@ object Notifications {
         app.putExtra("approval_id", id).setData(android.net.Uri.parse("keyvalet://approval/$id/open"))
         val open = PendingIntent.getActivity(context, numericId, app, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         val notification = Notification.Builder(context, channel)
-            .setSmallIcon(android.R.drawable.ic_lock_lock).setContentTitle(view.getString("title")).setContentText(view.getString("body"))
-            .setStyle(Notification.BigTextStyle().bigText(view.getString("body"))).setContentIntent(open).setAutoCancel(true)
+            .setSmallIcon(android.R.drawable.ic_lock_lock).setContentTitle(plan.title).setContentText(plan.body)
+            .setStyle(Notification.BigTextStyle().bigText(plan.body)).setContentIntent(open).setAutoCancel(true)
+            .addExtras(Bundle().apply { putLong("kv_expires_at", plan.expiresAt); putBoolean("kv_quick_allowed", plan.quick) })
             .setVisibility(Notification.VISIBILITY_PRIVATE).setGroup(id).setOnlyAlertOnce(previous?.notification?.channelId == channel)
             .setCategory(Notification.CATEGORY_RECOMMENDATION).setTimeoutAfter((view.getLong("expires_at")*1000-System.currentTimeMillis()).coerceAtLeast(1))
-        if (view.getBoolean("quick_allowed")) {
+        if (plan.quick) {
             for (allow in listOf(true, false)) {
                 val intent = Intent(context, QuickApprovalService::class.java).putExtra("approval_id", id).putExtra("allow", allow)
                     .setData(android.net.Uri.parse("keyvalet://approval/$id/${if (allow) "allow" else "deny"}"))
@@ -78,6 +99,6 @@ object Notifications {
                 notification.addAction(Notification.Action.Builder(null, context.getString(if (allow) R.string.kv_allow else R.string.kv_deny), action).setAuthenticationRequired(true).build())
             }
         } else notification.addAction(Notification.Action.Builder(null, context.getString(R.string.kv_open), open).build())
-        try { manager.notify(id, numericId, notification.build()) } catch (_: SecurityException) { }
+        try { manager.notify(id, numericId, notification.build()); posted[id] = plan } catch (_: SecurityException) { }
     }
 }

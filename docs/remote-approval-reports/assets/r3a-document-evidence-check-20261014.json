@@ -1,0 +1,14 @@
+{
+  "observed_utc": "2026-10-14T05:41:56.594213+00:00",
+  "checked_docs": [
+    "docs/remote-approval-reports/R3-A-m2-closure.md",
+    "docs/review-2026-10.zh-CN.md",
+    "docs/remote-approval-architecture-2026-10.zh-CN.md",
+    "docs/linux.md"
+  ],
+  "local_links_checked": 502,
+  "missing_local_links": [],
+  "native_receipt_consistent": true,
+  "revocation_before_request_and_grant_expiry": true,
+  "secret_values_in_evidence": false
+}

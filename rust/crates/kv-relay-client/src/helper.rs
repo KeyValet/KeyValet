@@ -178,6 +178,18 @@ impl Helper {
         }
         Ok(result)
     }
+
+    #[cfg(any(windows, test))]
+    pub(crate) async fn config_exists(&self) -> Result<bool> {
+        let result: remote::RelayConfigPresenceResult = self
+            .request(
+                Op::RelayConfigPresence,
+                serde_json::json!({}),
+                Duration::ZERO,
+            )
+            .await?;
+        Ok(result.exists)
+    }
     pub async fn control_poll(
         &self,
     ) -> Result<kv_core::remote::relay_control::RelayControlPollResult> {

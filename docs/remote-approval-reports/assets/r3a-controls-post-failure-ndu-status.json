@@ -1,0 +1,17 @@
+{
+  "observed_utc": "2026-10-13T15:04:45.062419+00:00",
+  "read_only": true,
+  "touch_id_requests": 0,
+  "secret_values_in_evidence": false,
+  "exit": 0,
+  "ok": true,
+  "remote": {
+    "device_id": "01M4S8KJ48BSMNK1S4BEGT07FC",
+    "account_id": "acct_zeP4_V8iHJdLbzJrDU3rfQ",
+    "relay": "connected",
+    "mode": "per_use",
+    "pending_n": 0,
+    "grants_n": 0,
+    "unattended": false
+  }
+}

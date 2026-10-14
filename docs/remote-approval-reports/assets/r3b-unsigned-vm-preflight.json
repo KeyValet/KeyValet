@@ -1,0 +1,10 @@
+{
+  "rust_exists": true,
+  "free_bytes": 66260267008,
+  "rust_path": "C:\\Users\\win\\.cargo\\bin\\rustc.exe",
+  "source": false,
+  "pwsh_exists": true,
+  "rust_version": "rustc 1.99.0 (b940084d7 2026-09-28)",
+  "cargo_exists": true,
+  "ssh_exit": 0
+}

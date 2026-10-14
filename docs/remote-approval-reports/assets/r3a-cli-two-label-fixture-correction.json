@@ -1,0 +1,6 @@
+{
+  "first_after_assertion_actual": "user_cancelled",
+  "first_after_assertion_expected": "cancelled",
+  "correction": "Use the existing CLI user_cancelled error code; no product error contract change.",
+  "initial_after_failure_was_a_test_expectation_error": true
+}

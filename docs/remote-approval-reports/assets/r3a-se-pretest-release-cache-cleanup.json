@@ -1,0 +1,12 @@
+{
+  "observed_utc": "2026-10-14T00:15:44.162463+00:00",
+  "authorization": "previous explicit release deps/build cleanup plus autonomous cache cleanup",
+  "removed": [
+    "rust/target-r2a/release/deps",
+    "rust/target-r2a/release/build"
+  ],
+  "free_before_bytes": 15752298496,
+  "free_after_bytes": 16250843136,
+  "free_increase_bytes": 498544640,
+  "kept_installed_programs_signed_packages_backups_evidence": true
+}

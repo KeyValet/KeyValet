@@ -5,7 +5,7 @@
 // Keep its format detection consistent with rust/crates/kv-hook.
 //
 //   secrets.mjs prompt   UserPromptSubmit: the user pasted a key → tell Claude to store it in KeyValet
-//   secrets.mjs tool     PreToolUse (Write/Edit/MultiEdit/NotebookEdit/Bash): a literal key is about to be
+//   secrets.mjs tool     PreToolUse (file edits/Bash/PowerShell): a literal key is about to be
 //                        written to a file or a command → ask the user first and point Claude to KeyValet
 //
 // Hooks recognize secret formats without reading or retaining returned credential values.
@@ -120,6 +120,7 @@ export function toolText(toolName, input) {
     case "NotebookEdit":
       return String(input.new_source ?? "");
     case "Bash":
+    case "PowerShell":
       return String(input.command ?? "");
     default:
       return "";
@@ -127,7 +128,7 @@ export function toolText(toolName, input) {
 }
 
 export function toolReason(toolName, hits) {
-  const where = toolName === "Bash" ? "this shell command" : "this file";
+  const where = ["Bash", "PowerShell"].includes(toolName) ? "this shell command" : "this file";
   return `${where} contains a literal secret — ${hits.map((h) => `${h.label} (${h.preview})`).join(", ")}. ` +
     "Keep secrets in KeyValet: call APIs with credential_http_request, run SDKs/scripts with credential_gateway (env file with a local base URL and a gateway token), " +
     "and read env vars in code instead of hard-coding keys. Approve only if you really want this.";

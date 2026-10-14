@@ -1,0 +1,21 @@
+{
+  "started_utc": "2026-10-13T05:27:21.802823+00:00",
+  "runtime": "installed keyvalet run + curl",
+  "credential": "api_key/r3a-graph-readonly",
+  "method": "GET",
+  "url": "https://graph.microsoft.com/v1.0/me",
+  "credential_values_saved": false,
+  "http_statuses": [
+    401
+  ],
+  "run_process": {
+    "pid": 816116,
+    "start_time": 52677481,
+    "uid": 1000
+  },
+  "http_result_utc": "2026-10-13T05:27:39.945055+00:00",
+  "elapsed_to_http_result_s": 18.141896,
+  "run_exit": 0,
+  "elapsed_s": 18.15087,
+  "finished_utc": "2026-10-13T05:27:39.954062+00:00"
+}

@@ -19,6 +19,10 @@ class StrongSigningGateTest {
         assertTrue(!account.has("keys") && !account.has("session_token") && !account.has("envelope"))
         try { NativeRuntime.call(context, JSONObject().put("op", "snapshot")); fail("Snapshot bypassed account sign-in") }
         catch (expected: IllegalStateException) { assertTrue(expected.message?.contains("login_required") == true) }
+        // The synchronous worker must enter Tokio before constructing its deadline,
+        // and signed-out background delivery must fail closed before displaying data.
+        try { NativeRuntime.call(context, JSONObject().put("op", "background_sync")); fail("Background delivery bypassed account sign-in") }
+        catch (expected: IllegalStateException) { assertTrue(expected.message == "login_required") }
     }
     @Test fun tamperedUiCannotSignWithoutCryptoObjectAuthentication() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext

@@ -1,0 +1,35 @@
+{
+  "built_utc": "2026-10-13T02:33:08.967671+00:00",
+  "team": "PWCRJPY7YC",
+  "source": "/Users/guang/dev/keyvalet/rust/target-r2a/release",
+  "binaries": {
+    "kv-helper": {
+      "stage_path": "/Users/guang/dev/keyvalet/rust/target-r2a/r3a-native-staging/bin/kv-helper",
+      "sign_exit": 0,
+      "requirement_exit": 0,
+      "sha256": "7b171bf52b52a1f68d1fa59e838037ab13ba75e08d676f41783ba22ca3afada8",
+      "strict_verify_exit": 0
+    },
+    "kv-cli": {
+      "stage_path": "/Users/guang/dev/keyvalet/rust/target-r2a/r3a-native-staging/bin/kv-cli",
+      "sign_exit": 0,
+      "requirement_exit": 0,
+      "sha256": "ec0150f96dbfcd2b800611f2ad0c403e16b76e1ef7bdf3b1e1d6b8a6914982fc"
+    },
+    "kv-touchid": {
+      "stage_path": "/Users/guang/dev/keyvalet/rust/target-r2a/r3a-native-staging/bin/kv-touchid",
+      "sign_exit": 0,
+      "requirement_exit": 0,
+      "sha256": "559de7dd8419beecd98c0123b6dfe4a16b719755307374558e1f7a759c419e39",
+      "strict_verify_exit": 0
+    },
+    "kv-relay-client": {
+      "stage_path": "/Users/guang/dev/keyvalet/rust/target-r2a/r3a-native-staging/bin/kv-relay-client",
+      "sign_exit": 0,
+      "requirement_exit": 0,
+      "sha256": "accc5f6a0cff09b049a0697f4c048eeebd13f495749e6703b68926f18c4ab91c"
+    }
+  },
+  "updated_utc": "2026-10-13T03:47:46.086000+00:00",
+  "non_http_fix_signed": true
+}

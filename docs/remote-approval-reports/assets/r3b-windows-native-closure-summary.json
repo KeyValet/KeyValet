@@ -1,0 +1,51 @@
+{
+  "date": "2026-10-14",
+  "physical_host": "192.168.1.182",
+  "source_fingerprint": "fbf22e994313d82d246b96ccc8e480441f4c048b4ad715f8f8c5bd828f87bf0b",
+  "package_sha256": "aaf1f851dcdd5d54bea8c7480049db71b6808b10e9e36a9b6977aa1ae163fbfc",
+  "single_integrated_round_passed": false,
+  "integrated_round6": {
+    "owner_exit": 101,
+    "system_exit": 101,
+    "failed_stage": "cancel_sign",
+    "cancel_1_status": 0,
+    "cancel_2_status": null,
+    "cancel_2_wait_hresult": "800705b4",
+    "cancel_2_ms": 90110.4324
+  },
+  "strong_t2_software_executor": {
+    "accepted_nonces": 1,
+    "alg": "RS256",
+    "digest_tamper_rejected": true,
+    "hpke_roundtrip": true,
+    "milliseconds": 223640.2759,
+    "quick_t2_rejected": true,
+    "replay_rejected": true,
+    "signature_bytes": 256,
+    "status": "passed",
+    "tier": "T2",
+    "verification_ms": 119.6296,
+    "wrong_record_alg_rejected": true
+  },
+  "native_repeat_round5": {
+    "milliseconds": 23760.1423,
+    "native_repeat": true,
+    "source_fingerprint": "fc8203f9e1c8bc5a20e0422731617337d11a7abde5c76d4982bdf87e26501d8e"
+  },
+  "native_cancel_only": {
+    "create_ms": 10984.262700000001,
+    "sign_ms": 2221.7225,
+    "signature_returned": false,
+    "status": 3,
+    "supported": true,
+    "user_cancelled": true
+  },
+  "cancel_only_test_exit": 0,
+  "cancel_only_delete_async": true,
+  "cancel_only_open_async_not_found": true,
+  "cancel_only_uses_installed_worker": false,
+  "actual_http_credential_use_tested": false,
+  "public_relay_pairing_tested": false,
+  "original_vm_waiting_for_pin": true,
+  "key_provider_acceptance_parts_passed": true
+}

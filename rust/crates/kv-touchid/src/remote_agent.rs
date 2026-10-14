@@ -179,6 +179,12 @@ impl Connection for MacConnection {
             &mut self.writer,
             super::existing::remote_child,
             |input| {
+                if input["op"] == "authenticate" {
+                    return (
+                        super::remote_auth::reply(input, super::remote_auth::child),
+                        None,
+                    );
+                }
                 if input["op"] == "remote_identity" {
                     if let Some(id) = input["device_id"].as_str().filter(|id| {
                         !id.is_empty() && id.len() <= 256 && !id.chars().any(char::is_control)
@@ -214,13 +220,113 @@ impl ConnectionSource for MacSource {
     }
 }
 pub fn run() -> i32 {
-    kv_touchid::remote::agent::run(&mut MacSource, Duration::from_secs(5))
+    run_with_dispatcher(
+        || kv_touchid::remote::agent::run(&mut MacSource, Duration::from_secs(5)),
+        dispatch_macos_notifications,
+    )
+}
+
+fn run_with_dispatcher(
+    work: impl FnOnce() -> i32 + Send + 'static,
+    mut dispatch: impl FnMut(Duration),
+) -> i32 {
+    let (finished, completion) = std::sync::mpsc::channel();
+    let Ok(worker) = std::thread::Builder::new()
+        .name("kv-agent-ipc".into())
+        .spawn(move || {
+            let code = work();
+            let _ = finished.send(code);
+        })
+    else {
+        return 1;
+    };
+    loop {
+        match completion.recv_timeout(Duration::from_millis(10)) {
+            Ok(code) => return worker.join().map_or(1, |_| code),
+            Err(std::sync::mpsc::RecvTimeoutError::Timeout) => {
+                dispatch(Duration::from_millis(10));
+            }
+            Err(std::sync::mpsc::RecvTimeoutError::Disconnected) => {
+                let _ = worker.join();
+                return 1;
+            }
+        }
+    }
+}
+
+fn dispatch_macos_notifications(duration: Duration) {
+    // Distributed notifications use the main thread's common-mode run loop even
+    // when their observer was registered from another thread. Socket reads and
+    // authentication subprocesses must not keep this thread from dispatching them.
+    #[link(name = "CoreFoundation", kind = "framework")]
+    unsafe extern "C" {
+        static kCFRunLoopDefaultMode: *const std::ffi::c_void;
+        fn CFRunLoopRunInMode(
+            mode: *const std::ffi::c_void,
+            seconds: f64,
+            return_after_source: u8,
+        ) -> i32;
+    }
+    unsafe {
+        CFRunLoopRunInMode(kCFRunLoopDefaultMode, duration.as_secs_f64(), 1);
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use std::io::Read;
+
+    #[test]
+    fn r3a_main_thread_notifications_progress_while_private_transport_waits() {
+        let main_thread = std::thread::current().id();
+        let (notification_tx, notification_rx) = std::sync::mpsc::channel();
+        let (delivered_tx, delivered_rx) = std::sync::mpsc::channel();
+        let dispatched = Arc::new(AtomicBool::new(false));
+        let observed = dispatched.clone();
+        let code = run_with_dispatcher(
+            move || {
+                notification_tx.send("locked").unwrap();
+                // A fake socket worker cannot finish until the notification queue is serviced.
+                if delivered_rx
+                    .recv_timeout(Duration::from_millis(200))
+                    .is_ok()
+                {
+                    0
+                } else {
+                    3
+                }
+            },
+            move |_| {
+                assert_eq!(std::thread::current().id(), main_thread);
+                if let Ok(event) = notification_rx.try_recv() {
+                    assert_eq!(event, "locked");
+                    observed.store(true, Ordering::SeqCst);
+                    delivered_tx.send(()).unwrap();
+                }
+            },
+        );
+        assert_eq!(
+            code, 0,
+            "the transport blocked the main-thread notification queue"
+        );
+        assert!(dispatched.load(Ordering::SeqCst));
+    }
+
+    #[test]
+    fn r3a_agent_worker_exit_keeps_the_owner_and_failure_status() {
+        for status in [0, 1, 6] {
+            assert_eq!(run_with_dispatcher(move || status, |_| {}), status);
+        }
+    }
+
+    #[test]
+    fn r3a_agent_worker_panic_cannot_be_a_successful_owner_exit() {
+        assert_eq!(
+            run_with_dispatcher(|| panic!("fake worker failure"), |_| {}),
+            1
+        );
+    }
     fn fixed(bytes: &[u8]) -> wire::EnclavePayload {
         let mut output = wire::EnclavePayload::new([0; wire::MAX_ENCLAVE_PAYLOAD + 1]);
         output[..bytes.len()].copy_from_slice(bytes);

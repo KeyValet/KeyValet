@@ -1,0 +1,45 @@
+{
+  "relay": "connected",
+  "pairing": {
+    "candidate": {
+      "ak_q": {
+        "alg": "ES256",
+        "pub": {
+          "crv": "P-256",
+          "kty": "EC",
+          "x": "-mH8sxloLalgnnParzu5776BZo_lTR97HATqe2NPKpU",
+          "y": "Ww6UrnQUlnZzCZGDScjNC4DqcwqkirvfQsCZ3UV7Yuk"
+        }
+      },
+      "ak_s": {
+        "alg": "ES256",
+        "pub": {
+          "crv": "P-256",
+          "kty": "EC",
+          "x": "20tVTIZibRdaXptKDsOwzfGVqOy9bqDpIGrPDCthhYI",
+          "y": "Gc4QMGgsJLMr__GVGJ5GEyt-2m2uPLTUNkk5rdZ96-o"
+        }
+      },
+      "attestation": null,
+      "caps": [
+        "execute",
+        "approve_quick",
+        "approve_strong"
+      ],
+      "device_id": "01M4S8KQ0GQ0GAJS06ZC7A8H17",
+      "dk_pub": {
+        "crv": "P-256",
+        "kty": "EC",
+        "x": "1ZOB080bFYtXaaX2osuEss8tEK28W5vhNNpmidnt2ow",
+        "y": "Ra4YTPNMhYYgvzH9s6lyeep3-Ok7reTD-jnzAkcQpqg"
+      },
+      "key_kind": "secure_enclave",
+      "label": "keyvalet",
+      "os": "macos"
+    },
+    "expires_at": 1791849855,
+    "global_grants": 0,
+    "sas": "486472",
+    "terminal_confirmed": true
+  }
+}

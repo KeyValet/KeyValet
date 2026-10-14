@@ -1,0 +1,25 @@
+{
+  "observed_utc": "2026-10-13T22:43:44.422848+00:00",
+  "owner_authorization": "\u4f60\u81ea\u5df1\u53bb\u817e\u7a7a\u95f4\u554a",
+  "paths": [
+    "rust/target-r2a/debug/deps",
+    "rust/target-r2a/debug/build",
+    "rust/target-r2a/debug/examples",
+    "rust/target-r2a/debug/.fingerprint",
+    "rust/target-r2a/debug/incremental"
+  ],
+  "cargo_target_locks_held": [
+    "debug",
+    "release"
+  ],
+  "compiler_and_test_processes_running": false,
+  "files_removed": 9344,
+  "allocated_bytes_before": 4419325952,
+  "before_free_bytes": 14238052352,
+  "after_free_bytes": 18209705984,
+  "freed_bytes": 3971653632,
+  "after_free_gb_decimal": 18.21,
+  "minimum_free_bytes": 15000000000,
+  "signed_packages_installed_runtime_backups_and_evidence_preserved": true,
+  "secret_values_in_evidence": false
+}

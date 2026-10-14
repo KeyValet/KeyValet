@@ -41,6 +41,18 @@ pub fn ui_reply(id: u64, result: super::Result<Value>) -> Value {
             reply["id"] = json!(id);
             reply
         }
+        Err(error @ (Error::Cancelled | Error::Expired)) => {
+            json!({"id":id,"ok":false,"error":error.to_string()})
+        }
+        Ok(reply)
+            if reply["ok"] == false
+                && matches!(
+                    reply["error"].as_str(),
+                    Some("remote_action_cancelled" | "remote_request_expired")
+                ) =>
+        {
+            json!({"id":id,"ok":false,"error":reply["error"]})
+        }
         _ => json!({"id":id,"ok":false,"error":Error::UiUnavailable.to_string()}),
     }
 }

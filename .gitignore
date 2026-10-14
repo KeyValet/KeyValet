@@ -6,10 +6,17 @@ marketing/
 site/public/
 __pycache__/
 
-# Rust build and coverage artifacts
-rust/target-*/
+# Rust build and coverage artifacts.
+# `target-*` directories hold Cargo output. `target`, `target-w8` and
+# `target-r2c` are symlinks into those directories, so a directory-only
+# rule does not match them.
+rust/target
+rust/target-*
 rust/**/*.profraw
 rust/**/*.profdata
+
+# Local unsigned preview archives. Published packages come from GitHub Releases.
+site/static/downloads/
 
 # Local system and Python artifacts
 .DS_Store

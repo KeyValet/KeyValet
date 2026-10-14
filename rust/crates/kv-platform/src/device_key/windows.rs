@@ -332,17 +332,24 @@ pub struct PcpDeviceKey {
 impl PcpDeviceKey {
     // Invoke after service startup, from LocalSystem's worker context, never StartService.
     pub fn create(role: KeyRole) -> Result<Self> {
+        Self::create_with(role, create_pcp_key)
+    }
+
+    fn create_with(
+        role: KeyRole,
+        mut create_key: impl FnMut(&Provider, KeyRole, PCWSTR) -> Result<(PendingKey, String)>,
+    ) -> Result<Self> {
         system_context()?;
         if role == KeyRole::Strong {
             return Err(DeviceKeyError::UnsupportedAlgorithm);
         }
         let provider = hardware_provider()?;
         let agreement = if role == KeyRole::Identity {
-            Some(create_pcp_key(&provider, role, BCRYPT_ECDH_P256_ALGORITHM)?)
+            Some(create_key(&provider, role, BCRYPT_ECDH_P256_ALGORITHM)?)
         } else {
             None
         };
-        let (signing, signing_name) = create_pcp_key(&provider, role, BCRYPT_ECDSA_P256_ALGORITHM)?;
+        let (signing, signing_name) = create_key(&provider, role, BCRYPT_ECDSA_P256_ALGORITHM)?;
         let signing_public = typed_public(signing.key(), BCRYPT_ECDSA_PUBLIC_P256_MAGIC)?;
         sign(
             signing.key(),
@@ -501,12 +508,16 @@ pub fn identity_key_status() -> Value {
                 return Err(DeviceKeyError::OperationFailed);
             }
             let entry = unsafe { &*name };
-            let text = unsafe { entry.pszName.to_string() }.map_err(failure)?;
+            let text =
+                unsafe { entry.pszName.to_string() }.map_err(|_| DeviceKeyError::InvalidKey)?;
             if key_name_valid(&text, KeyRole::Identity) {
-                let algorithm = unsafe { entry.pszAlgid.to_string() }.map_err(failure)?;
-                match algorithm.as_str() {
-                    "ECDH_P256" => ecdh = true,
-                    "ECDSA_P256" => ecdsa = true,
+                // PCP enumeration can return generic algorithm names. Check the actual P-256 blob.
+                let key = open_pcp_key(&provider, &text, KeyRole::Identity)?;
+                let blob = export(&key, BCRYPT_ECCPUBLIC_BLOB)?;
+                public(&key)?;
+                match u32::from_le_bytes(blob[..4].try_into().unwrap()) {
+                    BCRYPT_ECDH_PUBLIC_P256_MAGIC => ecdh = true,
+                    BCRYPT_ECDSA_PUBLIC_P256_MAGIC => ecdsa = true,
                     _ => {}
                 }
             }
@@ -836,6 +847,35 @@ mod tests {
                 .len(),
             64
         );
+    }
+
+    /// LocalSystem TPM VM: verifies rollback of a real first key if the second creation fails.
+    #[test]
+    #[ignore = "Requires Windows 11 TPM 2.0 and LocalSystem; creates/deletes a disposable PCP key"]
+    fn pcp_partial_creation_cleans_up_without_fallback() {
+        let mut names = Vec::new();
+        let result = PcpDeviceKey::create_with(KeyRole::Identity, |provider, role, algorithm| {
+            if !names.is_empty() {
+                return Err(DeviceKeyError::OperationFailed);
+            }
+            let (key, name) = create_pcp_key(provider, role, algorithm)?;
+            names.push(name.clone());
+            Ok((key, name))
+        });
+        match result {
+            Err(error) => assert_eq!(error, DeviceKeyError::OperationFailed),
+            Ok(key) => {
+                key.delete().unwrap();
+                panic!("Failed PCP creation returned a provider");
+            }
+        }
+        assert_eq!(names.len(), 1);
+        let provider = hardware_provider().unwrap();
+        if let Ok(mut key) = open_pcp_key(&provider, &names[0], KeyRole::Identity) {
+            key.delete().unwrap();
+            panic!("The first PCP key remained after second-key creation failure");
+        }
+        println!("partial_creation=error; software_fallback=false; first_key_cleanup=pass");
     }
 
     /// Run from LocalSystem on Windows 11 + TPM 2.0 with --ignored --exact.

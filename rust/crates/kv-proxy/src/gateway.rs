@@ -33,6 +33,8 @@ use tokio::net::TcpListener;
 use tokio::sync::{mpsc, watch, OwnedSemaphorePermit, Semaphore};
 use tokio::task::{JoinHandle, JoinSet};
 
+mod recovery;
+
 const MAX_IN_FLIGHT: usize = 16;
 const MAX_CONNECTIONS: usize = 64;
 const MAX_REQUEST_BODY: usize = 20 * 1024 * 1024;
@@ -65,6 +67,7 @@ struct Inner {
     port: Mutex<u16>,
     in_flight: Arc<Semaphore>,
     connections: Arc<Semaphore>,
+    recoveries: Mutex<Vec<Arc<recovery::Entry>>>,
     /// Bumped (under the `routes` lock) whenever tokens are revoked. A request records the epoch
     /// it was authorized under. The watch channel also wakes requests stalled on uploads,
     /// upstream responses or downstream backpressure, so revocation cancels them promptly.
@@ -75,6 +78,9 @@ impl Inner {
     fn revoke(&self) {
         let mut routes = self.routes.lock().unwrap();
         routes.clear();
+        for entry in self.recoveries.lock().unwrap().drain(..) {
+            entry.abort();
+        }
         self.epoch
             .send_modify(|epoch| *epoch = epoch.wrapping_add(1));
     }
@@ -122,6 +128,7 @@ impl Gateway {
                 port: Mutex::new(0),
                 in_flight: Arc::new(Semaphore::new(MAX_IN_FLIGHT)),
                 connections: Arc::new(Semaphore::new(MAX_CONNECTIONS)),
+                recoveries: Mutex::new(Vec::new()),
                 epoch: watch::channel(0).0,
             }),
             vault,
@@ -455,6 +462,7 @@ async fn handle(
     let upstream_host = segments.next().unwrap_or_default().to_lowercase();
     let rest = segments.next().unwrap_or_default();
     let method = req.method().clone();
+    let http_version = req.version();
     let target = format!("{} {}/{}", method, upstream_host, rest)
         .chars()
         .take(300)
@@ -464,6 +472,7 @@ async fn handle(
         let mut e = serde_json::Map::new();
         e.insert("ok".into(), ok.into());
         e.insert("status".into(), status.into());
+        e.insert("http_version".into(), format!("{http_version:?}").into());
         if let Some(r) = reason {
             e.insert("reason".into(), r.into());
         }
@@ -483,9 +492,22 @@ async fn handle(
         .headers()
         .get("host")
         .and_then(|v| v.to_str().ok())
+        .or_else(|| {
+            (req.version() == hyper::Version::HTTP_2)
+                .then(|| req.uri().authority().map(|authority| authority.as_str()))
+                .flatten()
+        })
         .unwrap_or("")
         .to_lowercase();
-    if host_header != format!("127.0.0.1:{port}") && host_header != format!("localhost:{port}") {
+    let local_host =
+        |host: &str| host == format!("127.0.0.1:{port}") || host == format!("localhost:{port}");
+    if !local_host(&host_header)
+        || (req.version() == hyper::Version::HTTP_2
+            && !req
+                .uri()
+                .authority()
+                .is_some_and(|authority| local_host(&authority.as_str().to_ascii_lowercase())))
+    {
         record_audit(false, 421, Some("host_header"), None);
         return fail(StatusCode::MISDIRECTED_REQUEST, "Misdirected request");
     }
@@ -589,7 +611,7 @@ fn revoked_error() -> (StatusCode, String, String) {
 #[allow(clippy::too_many_arguments)]
 async fn handle_authorized(
     req: Request<Incoming>,
-    vault: &Vault,
+    vault: &Arc<Vault>,
     route: &Route,
     (inner, epoch, permit): (&Arc<Inner>, u64, OwnedSemaphorePermit),
     upstream_host: &str,
@@ -637,14 +659,13 @@ async fn handle_authorized(
 
     let scheme = if test_loopback { "http" } else { "https" };
     let qs = query.map(|q| format!("?{q}")).unwrap_or_default();
-    let mut url =
-        url::Url::parse(&format!("{scheme}://{upstream_host}/{rest}{qs}")).map_err(|_| {
-            (
-                StatusCode::BAD_REQUEST,
-                "url".to_string(),
-                "Invalid URL".to_string(),
-            )
-        })?;
+    let url = url::Url::parse(&format!("{scheme}://{upstream_host}/{rest}{qs}")).map_err(|_| {
+        (
+            StatusCode::BAD_REQUEST,
+            "url".to_string(),
+            "Invalid URL".to_string(),
+        )
+    })?;
 
     let method = req.method().clone();
     let request_headers = req.headers().clone();
@@ -734,17 +755,75 @@ async fn handle_authorized(
                     .flatten()
             })
             .or_else(|| kv_protocols::template_timeout::host_timeout_hint(bare_host));
-        let decision = approval
-            .authorize(request, hint)
-            .await
-            .map_err(|error| (StatusCode::BAD_GATEWAY, "approval".into(), error))?;
-        if let Some(response) = crate::approval::http_response(&decision)
-            .map_err(|error| (error.status, "approval".into(), error.to_string()))?
-        {
-            return Ok(crate::approval::boxed_response(response));
-        }
+        let retry = request_headers
+            .get("x-keyvalet-approval-id")
+            .map(|value| value.to_str().map(str::to_owned))
+            .transpose()
+            .map_err(|_| {
+                (
+                    StatusCode::BAD_REQUEST,
+                    "approval_id".into(),
+                    "Invalid approval_id header".into(),
+                )
+            })?;
+        let vault = vault.clone();
+        let forwarding_inner = inner.clone();
+        return recovery::dispatch(
+            inner.clone(),
+            epoch,
+            request,
+            retry,
+            approval.clone(),
+            hint,
+            move || {
+                forward_approved(
+                    vault,
+                    ty,
+                    name,
+                    record,
+                    request_headers,
+                    body_bytes,
+                    url,
+                    method,
+                    forwarding_inner,
+                    epoch,
+                    permit,
+                )
+            },
+        )
+        .await;
     }
 
+    forward_approved(
+        vault.clone(),
+        ty,
+        name,
+        record,
+        request_headers,
+        body_bytes,
+        url,
+        method,
+        inner.clone(),
+        epoch,
+        permit,
+    )
+    .await
+}
+
+#[allow(clippy::too_many_arguments)]
+async fn forward_approved(
+    vault: Arc<Vault>,
+    ty: String,
+    name: String,
+    record: kv_vault::CredentialRecord,
+    request_headers: hyper::HeaderMap,
+    body_bytes: Bytes,
+    mut url: url::Url,
+    method: hyper::Method,
+    inner: Arc<Inner>,
+    epoch: u64,
+    permit: OwnedSemaphorePermit,
+) -> recovery::Reply {
     let pinned = vault.pin_record(&ty, &name).map_err(|_| revoked_error())?;
     // Compare and execute through the same authenticated record view.
     if serde_json::to_value(
@@ -916,6 +995,7 @@ fn drop_request_header(lk: &str) -> bool {
             | "accept-encoding"
             // SDK retry metadata is removed from both the approval and upstream request.
             | "x-stainless-retry-count"
+            | "x-keyvalet-approval-id"
     ) || lk.starts_with("x-forwarded-")
         || lk.starts_with("sec-")
         || lk.starts_with("proxy-")

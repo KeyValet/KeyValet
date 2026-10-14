@@ -1,0 +1,10 @@
+{
+  "wsl_distros": 0,
+  "vm_feature": 0,
+  "firmware_virtualization": [
+    true
+  ],
+  "hypervisor": false,
+  "wsl_feature": 0,
+  "ssh_exit": 0
+}

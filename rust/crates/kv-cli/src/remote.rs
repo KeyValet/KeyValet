@@ -351,7 +351,7 @@ fn issue_grant(
         if let Some(peer) = peer {
             // Strong happens in the helper first. Its one-use token binds this exact draft;
             // preparing never signs, sends or installs a Grant.
-            let prepared: GrantConfirmation = call(host, Op::GrantIssue, json!(intent))?;
+            let mut prepared: GrantConfirmation = call(host, Op::GrantIssue, json!(intent))?;
             if prepared.confirmation_token.is_empty() || prepared.confirmation_token.len() > 256 {
                 return Err(Error::protocol());
             }
@@ -373,6 +373,9 @@ fn issue_grant(
                     "Secondary confirmation has expired",
                 ));
             }
+            if prepared.confirmations_left != 2 {
+                return Err(Error::protocol());
+            }
             let label = output::terminal_text(&prepared.label);
             let prompt = kv_i18n::t(
                 &format!("无人值守（含敏感操作）：请输入执行端标签 {label} 确认："),
@@ -382,7 +385,11 @@ fn issue_grant(
             if answer.as_deref() != Some(prepared.label.as_str()) {
                 return Err(Error::cancelled());
             }
-            if host.now() >= prepared.expires_at {
+            if host.now() >= prepared.expires_at
+                || intent
+                    .exp
+                    .is_some_and(|expiration| host.now() >= expiration)
+            {
                 return Err(Error::new(
                     "expired",
                     "二次确认已过期",
@@ -391,7 +398,43 @@ fn issue_grant(
             }
             intent.confirm = Some(prepared.label);
             intent.confirmation_token = Some(prepared.confirmation_token);
-            expirations.push(prepared.expires_at);
+            let first_expiration = prepared.expires_at;
+            prepared = call(host, Op::GrantIssue, json!(intent))?;
+            if prepared.confirmations_left != 1
+                || prepared.expires_at != first_expiration
+                || prepared.device_id != peer.device_id
+                || Some(&prepared.label) != intent.confirm.as_ref()
+                || prepared.confirmation_token.is_empty()
+                || prepared.confirmation_token.len() > 256
+                || Some(&prepared.confirmation_token) == intent.confirmation_token.as_ref()
+            {
+                return Err(Error::protocol());
+            }
+            let remaining = first_expiration.saturating_sub(host.now());
+            if remaining <= 0 {
+                return Err(Error::new(
+                    "expired",
+                    "二次确认已过期",
+                    "Secondary confirmation has expired",
+                ));
+            }
+            let prompt = kv_i18n::t(
+                &format!("无人值守（含敏感操作）：请再次输入执行端标签 {label} 确认（2/2）："),
+                &format!("Unattended (including sensitive operations): type executor label {label} again (2/2): "),
+            );
+            let answer = host.confirmation(&prompt, Duration::from_secs(remaining as u64))?;
+            if answer.as_deref() != Some(prepared.label.as_str()) {
+                return Err(Error::cancelled());
+            }
+            if host.now() >= first_expiration {
+                return Err(Error::new(
+                    "expired",
+                    "二次确认已过期",
+                    "Secondary confirmation has expired",
+                ));
+            }
+            intent.confirmation_token = Some(prepared.confirmation_token);
+            expirations.push(first_expiration);
         }
         intents.push(intent);
     }
@@ -442,10 +485,14 @@ struct PairStarted {
     global_grants: u64,
 }
 
-fn pair(host: &mut impl Host, uri: Option<&str>, json: bool) -> Result<Success> {
+fn pair(host: &mut impl Host, uri: Option<&str>, rejoin: bool, json: bool) -> Result<Success> {
     let mut started: PairStarted = if let Some(uri) = uri {
         // The helper parses the token and owns all key generation and Strong confirmation.
-        call(host, Op::PairComplete, json!({"uri":uri}))?
+        let mut intent = json!({"uri":uri});
+        if rejoin {
+            intent["rejoin"] = json!(true);
+        }
+        call(host, Op::PairComplete, intent)?
     } else {
         let config = relay::Config::read(&host.config_path()?)?;
         call(host, Op::PairStart, json!({"relay_url":config.relay_url}))?
@@ -489,6 +536,64 @@ fn pair(host: &mut impl Host, uri: Option<&str>, json: bool) -> Result<Success> 
     } else {
         return Err(Error::protocol());
     }
+    let wait_for_completion = started.binding.is_some();
+    confirm_pair(host, started, json, wait_for_completion)
+}
+
+fn pair_resume(host: &mut impl Host, json: bool) -> Result<Success> {
+    let status: Value = call(host, Op::Status, json!({}))?;
+    let pairing = &status["pairing"];
+    if let Some(code) = pairing["error"].as_str() {
+        return Err(Error {
+            code: code.into(),
+            message: output::error_message(code),
+            completed_devices: Vec::new(),
+        });
+    }
+    if pairing["state"] == "completed" {
+        return Ok(Success::Pair {
+            uri: None,
+            sas: None,
+            paired: true,
+        });
+    }
+    let expires = pairing["expires_at"].as_i64().ok_or_else(|| {
+        Error::new(
+            "pair_not_pending",
+            "没有可以继续的配对",
+            "There is no pending pairing to resume",
+        )
+    })?;
+    let sas = pairing["sas"]
+        .as_str()
+        .filter(|sas| sas.len() == 6 && sas.bytes().all(|b| b.is_ascii_digit()))
+        .ok_or_else(|| {
+            Error::new(
+                "pair_not_pending",
+                "配对安全码尚未就绪",
+                "The pending pairing safety code is not ready",
+            )
+        })?;
+    let started = PairStarted {
+        sas: sas.into(),
+        expires_at: Some(expires),
+        uri: None,
+        binding: None,
+        recovery_code: None,
+        pair_error: None,
+        global_grants: pairing["global_grants"].as_u64().unwrap_or(0),
+    };
+    // This is the same trusted owner confirmation and hardware signing path.
+    // Never redeem a consumed token or extend the helper's original expiration.
+    confirm_pair(host, started, json, true)
+}
+
+fn confirm_pair(
+    host: &mut impl Host,
+    mut started: PairStarted,
+    json: bool,
+    wait_for_completion: bool,
+) -> Result<Success> {
     let expires = started
         .expires_at
         .unwrap_or_else(|| host.now().saturating_add(600))
@@ -566,7 +671,7 @@ fn pair(host: &mut impl Host, uri: Option<&str>, json: bool) -> Result<Success> 
         }
     }
     let _: Extra = call(host, Op::PairConfirm, confirmation)?;
-    if started.binding.is_some() {
+    if wait_for_completion {
         loop {
             let status: Value = call(host, Op::Status, json!({}))?;
             if status["pairing"]["state"] == "completed" {
@@ -718,7 +823,13 @@ fn execute(host: &mut impl Host, invocation: &Invocation) -> Result<Success> {
             })?;
             let code = zeroize::Zeroizing::new(
                 host.secret(&kv_i18n::t("账户恢复码：", "Account recovery code: "))?
-                    .ok_or_else(Error::cancelled)?,
+                    .ok_or_else(|| {
+                        Error::new(
+                            "user_cancelled",
+                            "账户恢复已取消",
+                            "Account recovery cancelled",
+                        )
+                    })?,
             );
             if kv_core::remote::keys::decode_b64(&code).map_or(true, |bytes| bytes.len() != 32) {
                 return Err(Error::argument(
@@ -726,11 +837,14 @@ fn execute(host: &mut impl Host, invocation: &Invocation) -> Result<Success> {
                     "The recovery code must be a 32-byte base64url value",
                 ));
             }
-            let recovered: kv_ipc::remote::AccountRecoverResult = call(
-                host,
-                Op::AccountRecover,
-                json!({"account_id":account_id,"relay_url":base,"recovery_code":code.as_str(),"software":software}),
-            )?;
+            let intent = kv_ipc::remote::AccountRecoverIntent {
+                account_id: account_id.clone(),
+                recovery_code: code.to_string(),
+                relay_url: base.clone(),
+                software: *software,
+            };
+            let recovered: kv_ipc::remote::AccountRecoverResult =
+                call(host, Op::AccountRecover, json!(intent))?;
             if recovered.binding.account_id != *account_id
                 || recovered.binding.device_id.is_empty()
                 || recovered.binding.relay_url != base
@@ -743,7 +857,8 @@ fn execute(host: &mut impl Host, invocation: &Invocation) -> Result<Success> {
             host.set_binding(&path, &recovered.binding)?;
             Ok(Success::RelayRecovered(recovered))
         }
-        Command::Pair { uri } => pair(host, uri.as_deref(), invocation.json),
+        Command::Pair { uri, rejoin } => pair(host, uri.as_deref(), *rejoin, invocation.json),
+        Command::PairResume => pair_resume(host, invocation.json),
         Command::DevicesList => Ok(Success::Devices(devices(host)?)),
         Command::DevicesRevoke { id } => {
             let _: Extra = call(host, Op::DevicesRevoke, json!({"device_id":id}))?;
@@ -875,8 +990,8 @@ pub(super) fn handles(argv: &[String]) -> bool {
 
 pub(super) fn usage() -> String {
     kv_i18n::t(
-        "\n远程审批：\n  relay install|status|set-url       部署或指向 relay\n  pair --new | pair <kv-pair://...> 配对设备\n  devices list|revoke|rename        管理设备目录\n  approvals [--watch]               查看待处理审批\n  approve <id> | deny <id>          发送审批决定\n  grant ...|list|revoke|revoke-all  管理授权\n  remote <device|label|*> ...      远程设置；完整选项见 remote --help\n  audit --remote [--since 24h]      核对跨端审计，发现差异时退出码 3\n  所有远程命令支持 --json。",
-        "\nRemote approval:\n  relay install|status|set-url       Deploy or select a relay\n  pair --new | pair <kv-pair://...> Pair devices\n  devices list|revoke|rename        Manage the device directory\n  approvals [--watch]               View pending approvals\n  approve <id> | deny <id>          Send an approval decision\n  grant ...|list|revoke|revoke-all  Manage grants\n  remote <device|label|*> ...      Remote settings; see remote --help\n  audit --remote [--since 24h]      Check audits across devices; findings exit with code 3\n  All remote commands support --json.",
+        "\n远程审批：\n  relay install|status|set-url|recover 部署或指向 relay\n  pair --new | pair <kv-pair://...> 配对设备\n  devices list|revoke|rename        管理设备目录\n  approvals [--watch]               查看待处理审批\n  approve <id> | deny <id>          发送审批决定\n  grant ...|list|revoke|revoke-all  管理授权\n  remote <device|label|*> ...      远程设置；完整选项见 remote --help\n  audit --remote [--since 24h]      核对跨端审计，发现差异时退出码 3\n  所有远程命令支持 --json。",
+        "\nRemote approval:\n  relay install|status|set-url|recover Deploy or select a relay\n  pair --new | pair <kv-pair://...> Pair devices\n  devices list|revoke|rename        Manage the device directory\n  approvals [--watch]               View pending approvals\n  approve <id> | deny <id>          Send an approval decision\n  grant ...|list|revoke|revoke-all  Manage grants\n  remote <device|label|*> ...      Remote settings; see remote --help\n  audit --remote [--since 24h]      Check audits across devices; findings exit with code 3\n  All remote commands support --json.",
     )
 }
 

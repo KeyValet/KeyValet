@@ -1,0 +1,17 @@
+{
+  "utc": "2026-10-13T23:57:58.064922+00:00",
+  "zola_version": "0.23.6",
+  "build_exit": 0,
+  "html_files_checked": 22,
+  "local_links_checked": 472,
+  "markdown_table_rows_checked": 150,
+  "new_pages_checked": 6,
+  "contact": "support@simvito.com",
+  "artifact_sha256": {
+    "keyvalet-v0.3.0-windows-x64-unsigned-preview.zip": "3cd969a332bb6eb1678ac48fb0e4d300bb12075e104c4bc13b0e0651acf344aa",
+    "keyvalet-windows-preview-source-20261014.tar.gz": "28835465cc41383311f7d41476393f6202de6e2852ea8cfae866547c0f834872",
+    "preview-manifest.json": "59e9a34313e6217328619a33093b1cad5930ce7e1867a668391024b9a74cda6c"
+  },
+  "issues": [],
+  "passed": true
+}

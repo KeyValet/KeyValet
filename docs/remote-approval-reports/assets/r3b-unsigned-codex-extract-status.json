@@ -1,0 +1,54 @@
+{
+  "tar_processes": [],
+  "files": [
+    {
+      "bytes": 14582272,
+      "name": "codex-code-mode-host.exe"
+    },
+    {
+      "bytes": 1695536,
+      "name": "gio-2.0-0.dll"
+    },
+    {
+      "bytes": 1390896,
+      "name": "glib-2.0-0.dll"
+    },
+    {
+      "bytes": 34608,
+      "name": "gmodule-2.0-0.dll"
+    },
+    {
+      "bytes": 348464,
+      "name": "gobject-2.0-0.dll"
+    },
+    {
+      "bytes": 100144,
+      "name": "gstapp-1.0-0.dll"
+    },
+    {
+      "bytes": 25384,
+      "name": "gstapp.dll"
+    },
+    {
+      "bytes": 512304,
+      "name": "gstaudio-1.0-0.dll"
+    },
+    {
+      "bytes": 48432,
+      "name": "gstaudioconvert.dll"
+    },
+    {
+      "bytes": 45360,
+      "name": "gstaudioresample.dll"
+    },
+    {
+      "bytes": 484144,
+      "name": "gstbase-1.0-0.dll"
+    },
+    {
+      "bytes": 409896,
+      "name": "gstcoreelements.dll"
+    }
+  ],
+  "ssh_exit": 0
+}

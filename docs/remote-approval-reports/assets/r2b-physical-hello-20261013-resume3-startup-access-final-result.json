@@ -1,0 +1,355 @@
+{
+  "supervisor": {
+    "psexec_exit": 0,
+    "service_remaining": false,
+    "publisher_verified": true
+  },
+  "case": {
+    "access": [
+      {
+        "object_type": "process",
+        "id": 35424,
+        "rights": "0x00101000",
+        "allowed": true,
+        "error": 0
+      },
+      {
+        "object_type": "process",
+        "id": 35424,
+        "rights": "0x00000001",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "process",
+        "id": 35424,
+        "rights": "0x00000002",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "process",
+        "id": 35424,
+        "rights": "0x00000008",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "process",
+        "id": 35424,
+        "rights": "0x00000010",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "process",
+        "id": 35424,
+        "rights": "0x00000020",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "process",
+        "id": 35424,
+        "rights": "0x00000200",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "process",
+        "id": 35424,
+        "rights": "0x00000400",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "process",
+        "id": 35424,
+        "rights": "0x00040000",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "process",
+        "id": 35424,
+        "rights": "0x00080000",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "thread",
+        "id": 27868,
+        "rights": "0x00000001",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "thread",
+        "id": 27868,
+        "rights": "0x00000002",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "thread",
+        "id": 27868,
+        "rights": "0x00000008",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "thread",
+        "id": 27868,
+        "rights": "0x00000010",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "thread",
+        "id": 27868,
+        "rights": "0x00000020",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "thread",
+        "id": 27868,
+        "rights": "0x00000080",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "thread",
+        "id": 27868,
+        "rights": "0x00001000",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "thread",
+        "id": 27868,
+        "rights": "0x00040000",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "thread",
+        "id": 27868,
+        "rights": "0x00080000",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "thread",
+        "id": 14728,
+        "rights": "0x00000001",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "thread",
+        "id": 14728,
+        "rights": "0x00000002",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "thread",
+        "id": 14728,
+        "rights": "0x00000008",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "thread",
+        "id": 14728,
+        "rights": "0x00000010",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "thread",
+        "id": 14728,
+        "rights": "0x00000020",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "thread",
+        "id": 14728,
+        "rights": "0x00000080",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "thread",
+        "id": 14728,
+        "rights": "0x00001000",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "thread",
+        "id": 14728,
+        "rights": "0x00040000",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "thread",
+        "id": 14728,
+        "rights": "0x00080000",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "thread",
+        "id": 27336,
+        "rights": "0x00000001",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "thread",
+        "id": 27336,
+        "rights": "0x00000002",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "thread",
+        "id": 27336,
+        "rights": "0x00000008",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "thread",
+        "id": 27336,
+        "rights": "0x00000010",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "thread",
+        "id": 27336,
+        "rights": "0x00000020",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "thread",
+        "id": 27336,
+        "rights": "0x00000080",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "thread",
+        "id": 27336,
+        "rights": "0x00001000",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "thread",
+        "id": 27336,
+        "rights": "0x00040000",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "thread",
+        "id": 27336,
+        "rights": "0x00080000",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "token",
+        "id": 35424,
+        "rights": "0x00000008",
+        "allowed": true,
+        "error": 0
+      },
+      {
+        "object_type": "token",
+        "id": 35424,
+        "rights": "0x00000001",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "token",
+        "id": 35424,
+        "rights": "0x00000002",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "token",
+        "id": 35424,
+        "rights": "0x00000004",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "token",
+        "id": 35424,
+        "rights": "0x00000010",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "token",
+        "id": 35424,
+        "rights": "0x00000020",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "token",
+        "id": 35424,
+        "rights": "0x00000040",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "token",
+        "id": 35424,
+        "rights": "0x00000080",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "token",
+        "id": 35424,
+        "rights": "0x00000100",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "token",
+        "id": 35424,
+        "rights": "0x00040000",
+        "allowed": false,
+        "error": 5
+      },
+      {
+        "object_type": "token",
+        "id": 35424,
+        "rights": "0x00080000",
+        "allowed": false,
+        "error": 5
+      }
+    ],
+    "variant": "system_stamped_per_worker_claim",
+    "exit_code": 0,
+    "exit_hex": "0x00000000",
+    "timed_out": false,
+    "error": null
+  },
+  "utc": "2026-10-13T09:23:28.1862657Z",
+  "changes_installed_security": false,
+  "application": "Windows cmd.exe exit 0"
+}

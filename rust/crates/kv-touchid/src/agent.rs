@@ -225,6 +225,22 @@ pub fn handle_request(
                     wire::reply(id, &[("ok", json!(true)), ("len", json!(n))]),
                     Some((payload, n)),
                 ),
+                Ok((Some(code), 0, false))
+                    if matches!(
+                        code,
+                        super::device_key::CANCELLED_EXIT | super::device_key::AUTH_FAILED_EXIT
+                    ) =>
+                {
+                    let error = if code == super::device_key::CANCELLED_EXIT {
+                        "key_operation_cancelled"
+                    } else {
+                        "key_authentication_failed"
+                    };
+                    (
+                        wire::reply(id, &[("ok", json!(false)), ("error", json!(error))]),
+                        None,
+                    )
+                }
                 _ => (
                     wire::reply(
                         id,
@@ -532,6 +548,80 @@ mod tests {
         let calls = fake.calls.lock().unwrap();
         assert_eq!(calls[0].0, TOUCHID_BIN);
         assert_eq!(calls[0].1[..2], ["--enclave", "derive"]);
+    }
+
+    #[test]
+    fn r3a_se_child_exit_preserves_failure_facts_without_payload() {
+        let request =
+            json!({"id":9,"op":"device_key","role":"strong","operation":"sign","data":"AA"});
+        for (code, expected) in [
+            (
+                super::super::device_key::CANCELLED_EXIT,
+                "key_operation_cancelled",
+            ),
+            (
+                super::super::device_key::AUTH_FAILED_EXIT,
+                "key_authentication_failed",
+            ),
+            (1, "key_operation_failed"),
+            (99, "key_operation_failed"),
+        ] {
+            let fake = Fake {
+                calls: Mutex::new(vec![]),
+                code: Some(code),
+                stdout: vec![],
+            };
+            let (reply, payload) = handle_request(&request, &fake);
+            assert_eq!(reply, json!({"id":9,"ok":false,"error":expected}));
+            assert!(payload.is_none());
+            assert_eq!(fake.calls.lock().unwrap()[0].1, ["--device-key"]);
+            let nonempty = Fake {
+                calls: Mutex::new(vec![]),
+                code: Some(code),
+                stdout: vec![42; 64],
+            };
+            let (reply, payload) = handle_request(&request, &nonempty);
+            assert_eq!(
+                reply,
+                json!({"id":9,"ok":false,"error":"key_operation_failed"})
+            );
+            assert!(payload.is_none());
+        }
+    }
+
+    #[test]
+    fn r3a_se_child_exit_timeout_does_not_report_an_owner_cancel() {
+        struct Timeout;
+        impl Runner for Timeout {
+            fn run(
+                &self,
+                _: &str,
+                _: &[&str],
+                _: Option<&[u8]>,
+                _: Duration,
+            ) -> io::Result<RunOut> {
+                panic!("device keys require the bounded capture runner");
+            }
+            fn run_capture(
+                &self,
+                _: &str,
+                _: &[&str],
+                _: Option<&[u8]>,
+                _: Duration,
+                _: &mut [u8],
+            ) -> io::Result<(Option<i32>, usize, bool)> {
+                Ok((Some(super::super::device_key::CANCELLED_EXIT), 0, true))
+            }
+        }
+        let (reply, payload) = handle_request(
+            &json!({"id":9,"op":"device_key","role":"strong","operation":"sign"}),
+            &Timeout,
+        );
+        assert_eq!(
+            reply,
+            json!({"id":9,"ok":false,"error":"key_operation_failed"})
+        );
+        assert!(payload.is_none());
     }
 
     #[test]

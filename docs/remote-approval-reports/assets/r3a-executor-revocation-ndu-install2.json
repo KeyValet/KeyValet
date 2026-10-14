@@ -1,0 +1,59 @@
+{
+  "started_utc": "2026-10-13T17:24:04.687148+00:00",
+  "backup": "/var/backups/keyvalet-r3a-revocations-20261013T172404Z",
+  "expected_sha256": "296ea14dcd320d96cbcb8a6936971d6086ce7613d10b7a77147dd0d8e53a685a",
+  "old_sha256": "737b598b31704dbc17a095d9049fe043070f322c0dd0c595c29dc3c65dfbb256",
+  "cli_sha256_before": "840fff5d4d0b551450aacf1dcdd309220dde2ce2d117478ea95581369337a4c6",
+  "vault_sha256_before": "5737b4e27e88d8041fac2f8a779197914c1efc294350c6e73ea5816c53a940d3",
+  "before": {
+    "device_id": "01M4S8KJ48BSMNK1S4BEGT07FC",
+    "account_id": "acct_zeP4_V8iHJdLbzJrDU3rfQ",
+    "mode": "per_use",
+    "pending_n": 0,
+    "grants_n": 0,
+    "unattended": false,
+    "relay": "connected"
+  },
+  "authentication_requests_started": 0,
+  "secret_values_in_evidence": false,
+  "backup_sha256": "2ad1580536c14938316362df19f481952e6c00208f1c255ec8a665925a3e71b2",
+  "after": {
+    "device_id": "01M4S8KJ48BSMNK1S4BEGT07FC",
+    "account_id": "acct_zeP4_V8iHJdLbzJrDU3rfQ",
+    "mode": "per_use",
+    "pending_n": 0,
+    "grants_n": 0,
+    "unattended": false,
+    "relay": "offline"
+  },
+  "installed_sha256": "296ea14dcd320d96cbcb8a6936971d6086ce7613d10b7a77147dd0d8e53a685a",
+  "cli_sha256_after": "840fff5d4d0b551450aacf1dcdd309220dde2ce2d117478ea95581369337a4c6",
+  "vault_sha256_after": "5737b4e27e88d8041fac2f8a779197914c1efc294350c6e73ea5816c53a940d3",
+  "services": {
+    "keyvalet-relay.service": {
+      "MainPID": "2659144",
+      "CapabilityBoundingSet": "",
+      "AmbientCapabilities": "",
+      "User": "keyvalet-relay",
+      "ActiveState": "active"
+    },
+    "keyvalet.service": {
+      "MainPID": "2659143",
+      "CapabilityBoundingSet": "",
+      "AmbientCapabilities": "",
+      "User": "keyvalet",
+      "ActiveState": "active"
+    },
+    "keyvalet-peer.service": {
+      "MainPID": "2659141",
+      "CapabilityBoundingSet": "cap_sys_ptrace",
+      "AmbientCapabilities": "cap_sys_ptrace",
+      "User": "root",
+      "ActiveState": "active"
+    }
+  },
+  "installed": true,
+  "finished_utc": "2026-10-13T17:24:05.517192+00:00",
+  "install_exit": 0,
+  "observed_utc": "2026-10-13T17:24:05.361616+00:00"
+}

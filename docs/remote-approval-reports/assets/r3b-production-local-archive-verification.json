@@ -1,0 +1,13 @@
+{
+  "local_archive": "/Users/guang/dev/keyvalet/rust/target-r2b/windows-public-20261014/keyvalet-v0.3.0-windows-x64-unsigned-preview.zip",
+  "sha256": "3cd969a332bb6eb1678ac48fb0e4d300bb12075e104c4bc13b0e0651acf344aa",
+  "bytes": 22168175,
+  "entries": 28,
+  "binary_count": 7,
+  "archive_structure_and_binary_hashes_passed": true,
+  "zip_path_normalization": "Windows backslash to slash before path/hash inspection",
+  "mac_free_after_bytes": 17061404672,
+  "local_cargo_build_performed": false,
+  "published": false,
+  "production_signed": false
+}

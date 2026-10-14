@@ -1,0 +1,13 @@
+{
+  "observed_utc": "2026-10-13T05:34:01.401280+00:00",
+  "authentication_requests": 0,
+  "credential_requests": 0,
+  "touch_id_requests": 0,
+  "process_identity": {
+    "pid": 833563,
+    "start_time": 52717397,
+    "uid": 1000
+  },
+  "native_mcp_ready": true,
+  "status_request_succeeded": true
+}

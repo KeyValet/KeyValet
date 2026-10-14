@@ -114,6 +114,9 @@ impl RemoteHelper {
     }
 
     pub async fn handle(self: &Arc<Self>, context: CallerContext, request: Request) -> Response {
+        if request.op == Op::RelayConfigPresence {
+            return super::relay_config::handle(context.role, request.params);
+        }
         if super::relay_control::is_control(request.op) {
             return super::relay_control::handle(context.role, request.op, request.params).await;
         }
@@ -129,6 +132,20 @@ impl RemoteHelper {
                 );
             }
             return Response::err("forbidden", "forbidden");
+        }
+        if self.lock().is_ok_and(|state| {
+            state.management_only
+                || state
+                    .store
+                    .device(&self.local.device_id, &self.account)
+                    .is_err_and(|error| error.code() == "revoked_device")
+        }) && !(context.role == Caller::CliOwner
+            && matches!(
+                request.op,
+                Op::Status | Op::AuditList | Op::DevicesList | Op::PairComplete
+            ))
+        {
+            return Response::err("revoked_device", "revoked_device");
         }
         let op = request.op;
         match self.handle_allowed(context, request).await {
@@ -163,16 +180,14 @@ impl RemoteHelper {
             Op::AuditList => {
                 let args: QueryAuditArgs = parse(value)?;
                 let state = self.lock()?;
-                Ok(serde_json::to_value(state.store.audit_page(
-                    &args,
-                    &self.account,
-                    &self.local.device_id,
-                    self.services.audit.as_ref(),
+                Ok(serde_json::to_value(super::rejoin::audit_page(
+                    self, &state, &args,
                 )?)?)
             }
-            Op::RelayControlPoll | Op::RelayControlComplete | Op::RelayControlSign => {
-                Err(Error("forbidden"))
-            }
+            Op::RelayControlPoll
+            | Op::RelayControlComplete
+            | Op::RelayControlSign
+            | Op::RelayConfigPresence => Err(Error("forbidden")),
             Op::RelayInbound => {
                 let params: kv_core::remote::ipc::RelayInboundParams = match parse(value) {
                     Ok(params) => params,
@@ -183,9 +198,19 @@ impl RemoteHelper {
                 };
                 // inbound audits rejection before returning. Transient provider/storage/audit
                 // failures stay unacked; a durably audited terminal rejection cannot poison replay.
+                let pairing_message = matches!(
+                    params.envelope.r#type,
+                    kv_core::remote::EnvelopeType::PairAccept
+                        | kv_core::remote::EnvelopeType::PairConfirm
+                );
                 match self.inbound(params.envelope).await {
                     Ok(()) => Ok(json!({"ack": true})),
-                    Err(error) if terminal_delivery(error) => Ok(json!({"ack": true})),
+                    Err(error)
+                        if terminal_delivery(error)
+                            || pairing_message && error.code() == "unknown_token" =>
+                    {
+                        Ok(json!({"ack": true}))
+                    }
                     Err(error) => Err(error),
                 }
             }
@@ -275,6 +300,15 @@ impl RemoteHelper {
                 self.changed.notify_waiters();
                 drop(state);
                 if woke && self.services.runner.has_private_ui() {
+                    let pending = self
+                        .lock()?
+                        .inbound_requests
+                        .keys()
+                        .cloned()
+                        .collect::<Vec<_>>();
+                    for id in pending {
+                        self.present_incoming(&id, false)?;
+                    }
                     let helper = self.clone();
                     tokio::spawn(async move {
                         let _ = helper
@@ -764,6 +798,13 @@ impl RemoteHelper {
         let peer = state
             .store
             .device(&request.requester.device_id, &self.account)?;
+        let (saved, status) = state
+            .store
+            .inbound_approval(&request.approval_id)?
+            .ok_or(Error("inbound_state_mismatch"))?;
+        if status != "waiting" || saved.request != request {
+            return Err(Error("not_waiting"));
+        }
         let transaction = state.store.transaction(self.services.audit.as_ref())?;
         transaction.execute("INSERT INTO issued_approvals (approval_id, peer, kind, digest, decision, level, scope_json, issued_at, summary_text) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
             params![decision.approval_id, peer.device_id, encode(&request.kind)?.trim_matches('"'), decision.digest,
@@ -782,8 +823,10 @@ impl RemoteHelper {
         )?)?;
         self.audit(&state, "remote_approval_issued", json!({"approval_id": decision.approval_id, "digest": decision.digest, "peer": peer.device_id,
             "approval_level": decision.level, "decision": decision.decision, "decision_hash": sha256_hex(&jcs(&decision)?)}))?;
+        self.save_inbound_state(&state, &saved, "issued")?;
         transaction.commit()?;
         state.inbound_requests.remove(&params.approval_id);
+        state.inbound_escalated.remove(&params.approval_id);
         self.changed.notify_waiters();
         Ok(())
     }
@@ -1017,6 +1060,21 @@ impl RemoteHelper {
                 return Ok(result);
             }
             if tokio::time::Instant::now() >= deadline {
+                let mut state = self.lock()?;
+                // A result can arrive between the first lookup and the deadline check.
+                if let Some((_, result)) = state.directive_results.remove(&directive.id) {
+                    return Ok(result);
+                }
+                // This describes the caller's wait, not the executor's outcome. Keep the
+                // queued object and result_ok untouched so a late authenticated result can
+                // still be accepted. Export only fields already in the audit allowlist.
+                self.audit(
+                    &state,
+                    "directive_wait_timeout",
+                    json!({"id": directive.id, "peer": peers[0].device_id,
+                        "directive_op": directive.op, "directive_hash": sha256_hex(&jcs(&directive)?),
+                        "reason": "directive_result_timeout", "state": "unconfirmed"}),
+                )?;
                 return Err(Error("directive_result_timeout"));
             }
             tokio::select! { _ = &mut notified => {}, _ = tokio::time::sleep_until(deadline) => {} }

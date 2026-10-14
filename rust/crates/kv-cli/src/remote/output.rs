@@ -170,6 +170,20 @@ pub(super) fn render_error(error: &super::Error, json: bool) -> String {
     text
 }
 
+fn pairing_qr(uri: &str) -> String {
+    match qrcode::QrCode::new(uri.as_bytes()) {
+        Ok(code) => code
+            .render::<qrcode::render::unicode::Dense1x2>()
+            .dark_color(qrcode::render::unicode::Dense1x2::Light)
+            .light_color(qrcode::render::unicode::Dense1x2::Dark)
+            .build(),
+        Err(_) => kv_i18n::t(
+            "无法生成二维码；请使用上面的配对地址。",
+            "Unable to render the QR code; use the pairing URI above.",
+        ),
+    }
+}
+
 pub(super) fn render(value: &Success, color: bool, summary: bool) -> String {
     let clean = terminal_text;
     match value {
@@ -179,6 +193,15 @@ pub(super) fn render(value: &Success, color: bool, summary: bool) -> String {
                 report.comparison.matched,report.comparison.findings.len(),report.unavailable.len())];
             for finding in &report.comparison.findings {
                 lines.push(format!("{} {} {} → {}: {} {}", clean(&finding.kind),clean(&finding.id),clean(&finding.issuer),clean(&finding.receiver),clean(&finding.problem),finding.fields.join(", ")));
+            }
+            for outcome in &report.directive_outcomes {
+                let detail = match outcome.result_ok {
+                    Some(true) => kv_i18n::t("发出端收到成功回执，执行端审计记录仍缺失。", "The issuer received a successful result, but the executor audit record is missing."),
+                    Some(false) => kv_i18n::t("发出端收到失败回执，执行端审计记录仍缺失。", "The issuer received a failed result, but the executor audit record is missing."),
+                    None if outcome.wait_timeout_recorded => kv_i18n::t("等待指令结果曾超时，执行结果未确认；请先查询远端状态与审计，再决定是否重试。", "The directive wait timed out; execution is unconfirmed. Check remote state and audit before deciding whether to retry."),
+                    None => kv_i18n::t("缺少执行端记录，执行结果未确认；请先查询远端状态与审计，再决定是否重试。", "The executor record is missing; execution is unconfirmed. Check remote state and audit before deciding whether to retry."),
+                };
+                lines.push(format!("{}: {detail}", clean(&outcome.id)));
             }
             for (device,code) in &report.unavailable { lines.push(format!("{}: {}",clean(device),clean(code))); }
             lines.push(kv_i18n::t("检查点不提供整套备份的硬件反回滚保证。", "Checkpoints do not provide hardware protection against restoring a complete backup."));
@@ -197,7 +220,7 @@ pub(super) fn render(value: &Success, color: bool, summary: bool) -> String {
         Success::RelaySetUrl { relay_url, config } => format!("{} {}\n{}", kv_i18n::t("relay 地址已设置为", "Relay URL set to"), clean(relay_url), config.display()),
         Success::Pair { uri, sas, paired } => {
             if *paired { kv_i18n::t("配对完成。", "Pairing complete.") }
-            else if let Some(uri) = uri { format!("{uri}\n{}", kv_i18n::t("请在另一台设备运行 keyvalet pair <此地址>。", "Run keyvalet pair <this URI> on the other device.")) }
+            else if let Some(uri) = uri { format!("{uri}\n{}\n{}", pairing_qr(uri), kv_i18n::t("请用手机扫码，或在另一台设备运行 keyvalet pair <此地址>。", "Scan with your phone, or run keyvalet pair <this URI> on the other device.")) }
             else { format!("{} {}", kv_i18n::t("安全码：", "Safety code:"), sas.as_deref().unwrap_or("")) }
         }
         Success::PairRecovery { recovery_code,account_id } => {
@@ -242,7 +265,8 @@ pub(super) fn render(value: &Success, color: bool, summary: bool) -> String {
 
 pub(super) fn error_message(code: &str) -> String {
     match code {
-        "expired" | "pair_timeout" | "timeout" | "directive_result_timeout" => kv_i18n::t("操作超时或已过期；请重试，配对请重新运行 pair --new", "The operation timed out or expired; retry, or run pair --new for pairing"),
+        "directive_result_timeout" => kv_i18n::t("等待指令结果超时，执行结果未确认；请先查询远程 status/grants 或 audit，再决定是否重试", "Timed out waiting for the directive result; execution is unconfirmed. Check remote status/grants or audit before deciding whether to retry"),
+        "expired" | "pair_timeout" | "timeout" => kv_i18n::t("操作超时或已过期；请重试，配对请重新运行 pair --new", "The operation timed out or expired; retry, or run pair --new for pairing"),
         "pair_sas_mismatch" => kv_i18n::t("两端安全码不一致；配对已拒绝，请重新运行 pair --new", "Safety codes do not match; pairing was rejected, run pair --new again"),
         "unknown_token" => kv_i18n::t("配对 token 未知或已使用；请重新运行 pair --new", "The pairing token is unknown or used; run pair --new again"),
         "user_cancelled" | "strong_cancelled" | "authentication_cancelled" | "secondary_confirmation_required" => kv_i18n::t("用户取消认证或缺少二次确认；未发出授权", "Authentication was cancelled or secondary confirmation is missing; no authorization was issued"),

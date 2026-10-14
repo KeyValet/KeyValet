@@ -44,7 +44,8 @@ pub async fn run(
     helper: Helper,
     shutdown: watch::Receiver<bool>,
 ) -> Result<()> {
-    let prepared = Config::load_optional(config_path)?
+    let prepared = Config::load_for_service(config_path, &helper)
+        .await?
         .map(|config| -> Result<(Config, Client)> {
             Ok((
                 config.clone(),
@@ -70,12 +71,15 @@ async fn run_bound(
     mut prepared: Option<(Config, Client)>,
     mut shutdown: watch::Receiver<bool>,
 ) -> Result<()> {
+    #[cfg(windows)]
+    let mut reported_binding = None;
     // Pairing itself creates the first binding. Keep the authenticated control worker alive
     // while no configuration exists; never invent a device/account or contact a default relay.
     loop {
         let bound = match prepared.take() {
             Some(bound) => Some(bound),
-            None => Config::load_optional(config_path)?
+            None => Config::load_for_service(config_path, &helper)
+                .await?
                 .map(|config| -> Result<(Config, Client)> {
                     Ok((
                         config.clone(),
@@ -88,6 +92,11 @@ async fn run_bound(
                 })
                 .transpose()?,
         };
+        #[cfg(windows)]
+        if reported_binding != Some(bound.is_some()) {
+            crate::windows::report_binding(bound.is_some());
+            reported_binding = Some(bound.is_some());
+        }
         if let Some((config, client)) = bound {
             let (stop, child_shutdown) = watch::channel(false);
             let running = client.run(child_shutdown);
@@ -101,7 +110,7 @@ async fn run_bound(
                         return running.await;
                     },
                     _ = reload.tick() => {
-                        if Config::load_optional(config_path)?.as_ref() != Some(&config) {
+                        if Config::load_for_service(config_path, &helper).await?.as_ref() != Some(&config) {
                             let _ = stop.send(true);
                             running.await?;
                             break;

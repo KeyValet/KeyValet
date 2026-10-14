@@ -1,0 +1,27 @@
+{
+  "observed_utc": "2026-10-13T13:33:49.489867+00:00",
+  "exit": 0,
+  "maintenance_sha256": "5f6e3aa9a084500f01e4c97644dfb16fdaf148f82bc033344de848b6526d1075",
+  "same_service_uid": 994,
+  "same_service_groups": [
+    108,
+    986
+  ],
+  "new_capabilities": [],
+  "result": {
+    "after": {
+      "hash": "c72316c8b3720e802a8af1de3fd95df7954d1e42d0af1fd6f4c9f6a05dd147b2",
+      "seq": 1943
+    },
+    "apply": false,
+    "before": {
+      "hash": "ecfed0d505afcc9d386e95d470605e2d6375abd9fea502a572bcde76b6bfd3aa",
+      "seq": 1942
+    },
+    "ok": true,
+    "records_verified": 1943,
+    "secret_values_in_evidence": false
+  },
+  "product_state_changed": false,
+  "secret_values_in_evidence": false
+}

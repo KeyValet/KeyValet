@@ -1,0 +1,72 @@
+{
+  "started_utc": "2026-10-13T03:16:19.887534+00:00",
+  "commands": [
+    "ndu: keyvalet pair --new --json",
+    "Mac: keyvalet pair <redacted URI> --json"
+  ],
+  "safety_code_equal": true,
+  "owner_confirmed": true,
+  "confirmation_elapsed_s": 138.084913,
+  "mac_directory": {
+    "exit": 0,
+    "ok": true,
+    "devices": [
+      {
+        "device_id": "01M4S8KJ48BSMNK1S4BEGT07FC",
+        "label": "keyvalet",
+        "os": "linux",
+        "caps": [
+          "execute"
+        ],
+        "revoked": false
+      },
+      {
+        "device_id": "01M4SM5QTRQKNQE1TD6FBJTG79",
+        "label": "keyvalet",
+        "os": "macos",
+        "caps": [
+          "execute",
+          "approve_quick",
+          "approve_strong"
+        ],
+        "revoked": false
+      }
+    ]
+  },
+  "ndu_directory": {
+    "exit": 0,
+    "ok": true,
+    "devices": [
+      {
+        "device_id": "01M4S8KJ48BSMNK1S4BEGT07FC",
+        "label": "keyvalet",
+        "os": "linux",
+        "caps": [
+          "execute"
+        ],
+        "revoked": false
+      },
+      {
+        "device_id": "01M4SM5QTRQKNQE1TD6FBJTG79",
+        "label": "keyvalet",
+        "os": "macos",
+        "caps": [
+          "execute",
+          "approve_quick",
+          "approve_strong"
+        ],
+        "revoked": false
+      }
+    ]
+  },
+  "both_devices_visible": true,
+  "elapsed_to_both_devices_s": 144.164769,
+  "paired_cli_sides": [
+    "Mac",
+    "ndu"
+  ],
+  "finished_utc": "2026-10-13T03:18:44.054001+00:00",
+  "total_elapsed_s": 144.165646,
+  "ndu_cli_exit": 0,
+  "mac_cli_exit": 0
+}

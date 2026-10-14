@@ -263,6 +263,43 @@ fn recover_directory(vault: &Vault, store: &Store) -> Result<()> {
     Ok(())
 }
 
+pub(crate) fn verify_revoked_archive(
+    vault: Arc<Vault>,
+    store: &Store,
+) -> Result<(DeviceRecord, String)> {
+    let identity: Identity = serde_json::from_value(
+        vault
+            .authenticated_metadata("remote_identity")
+            .map_err(|_| Error("remote_metadata_unavailable"))?
+            .ok_or(Error("remote_identity_missing"))?,
+    )?;
+    let directory: Directory = serde_json::from_value(
+        vault
+            .authenticated_metadata("remote_directory")
+            .map_err(|_| Error("remote_metadata_unavailable"))?
+            .ok_or(Error("device_directory_mismatch"))?,
+    )?;
+    if identity.version != 1
+        || directory.version != 1
+        || identity.account != directory.account
+        || !directory.records.iter().any(|(record, revoked)| {
+            *revoked && super::directory::same_authority(&identity.local, record)
+        })
+        || read_directory_journal(&vault)?.is_some()
+    {
+        return Err(Error("rejoin_requires_revoked_device"));
+    }
+    store.verify_audit()?;
+    super::AuditSink::verify_checkpoint(vault.as_ref(), &store.audit_head()?)?;
+    super::AuditSink::verify_records(vault.as_ref(), &store.audit_records()?)?;
+    let mirror = VaultMirror {
+        vault,
+        directory: Mutex::new(directory),
+    };
+    mirror.verify(&identity.account, &super::engine::directory(store)?)?;
+    Ok((identity.local.clone(), identity.account.clone()))
+}
+
 pub struct Options<'a> {
     pub path: &'a Path,
     pub initialize: Option<(&'a str, &'a str, &'a str, Os)>,
@@ -301,7 +338,19 @@ pub trait Registrar: Send + Sync {
 /// The metadata vault has a separate master key; caching it never caches the credential UMK.
 /// Initial creation is explicit. Missing or corrupt identity metadata is never regenerated.
 pub fn open(options: Options<'_>, environment: Environment<'_>) -> Result<Backend> {
-    open_inner(options, environment, None).map(|(backend, _)| backend)
+    open_inner(options, environment, None, false).map(|(backend, _)| backend)
+}
+
+/// A tombstoned identity may expose owner status/audit and prepare a fresh pairing.
+/// IPC restricts this backend to those maintenance operations; authority is not restored.
+pub(crate) fn open_for_management(
+    options: Options<'_>,
+    environment: Environment<'_>,
+) -> Result<Backend> {
+    if options.initialize.is_some() {
+        return Err(Error("invalid_bootstrap"));
+    }
+    open_inner(options, environment, None, true).map(|(backend, _)| backend)
 }
 
 pub fn open_registered(
@@ -312,13 +361,14 @@ pub fn open_registered(
     Backend,
     Option<kv_core::remote::relay::RegisterDeviceResponse>,
 )> {
-    open_inner(options, environment, Some(registrar))
+    open_inner(options, environment, Some(registrar), false)
 }
 
 fn open_inner(
     options: Options<'_>,
     environment: Environment<'_>,
     registrar: Option<&dyn Registrar>,
+    management: bool,
 ) -> Result<(
     Backend,
     Option<kv_core::remote::relay::RegisterDeviceResponse>,
@@ -481,7 +531,7 @@ fn open_inner(
         || directory.version != 1
         || identity.account != directory.account
         || !directory.records.iter().any(|(record, revoked)| {
-            !revoked && super::directory::same_authority(&identity.local, record)
+            (management || !revoked) && super::directory::same_authority(&identity.local, record)
         })
     {
         return Err(Error("device_directory_mismatch"));
@@ -551,6 +601,9 @@ fn open_inner(
         runner,
         clock,
     };
+    let local_revoked = records.iter().any(|(record, revoked)| {
+        *revoked && super::directory::same_authority(&identity.local, record)
+    });
     let helper = RemoteHelper::new(
         store,
         identity.local.clone(),
@@ -558,6 +611,7 @@ fn open_inner(
         config,
         services,
     )?;
+    helper.lock()?.management_only = local_revoked;
     helper.services.audit.append(
         json!({"op":"remote_bootstrap","ok":true})
             .as_object()
@@ -638,7 +692,7 @@ pub(crate) fn freeze_unpaired(helper: &RemoteHelper) -> Result<()> {
 }
 
 pub(crate) fn resume_unpaired(helper: &RemoteHelper) {
-    if let Ok(mut state) = helper.state.lock() {
+    if let Ok(mut state) = super::engine::blocking_lock(&helper.state) {
         state.retired = false;
     }
 }
@@ -650,9 +704,7 @@ pub(crate) fn rebind_backend(
     path: &Path,
     account: &str,
 ) -> Result<Arc<RemoteHelper>> {
-    if !helper
-        .state
-        .lock()
+    if !super::engine::blocking_lock(&helper.state)
         .map_err(|_| Error("state_unavailable"))?
         .retired
     {

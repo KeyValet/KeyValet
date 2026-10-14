@@ -7,12 +7,12 @@ use std::{
     os::windows::io::{AsRawHandle, FromRawHandle, OwnedHandle},
 };
 use windows::core::{PCWSTR, PWSTR};
-use windows::Win32::Foundation::{LocalFree, HANDLE, HLOCAL};
+use windows::Win32::Foundation::{LocalFree, HANDLE, HLOCAL, UNICODE_STRING};
 use windows::Win32::Security::Authorization::ConvertStringSecurityDescriptorToSecurityDescriptorW;
 use windows::Win32::Security::{
     DuplicateTokenEx, GetSecurityDescriptorDacl, SecurityImpersonation, SetTokenInformation,
-    TokenDefaultDacl, TokenPrimary, ACL, PSECURITY_DESCRIPTOR, SECURITY_ATTRIBUTES,
-    TOKEN_ALL_ACCESS, TOKEN_DEFAULT_DACL,
+    TokenDefaultDacl, TokenPrimary, TokenSecurityAttributes, ACL, PSECURITY_DESCRIPTOR,
+    SECURITY_ATTRIBUTES, TOKEN_ALL_ACCESS, TOKEN_DEFAULT_DACL,
 };
 use windows::Win32::System::Environment::{CreateEnvironmentBlock, DestroyEnvironmentBlock};
 use windows::Win32::System::JobObjects::{
@@ -22,10 +22,11 @@ use windows::Win32::System::JobObjects::{
 use windows::Win32::System::RemoteDesktop::WTSQueryUserToken;
 use windows::Win32::System::Threading::{
     CreateProcessAsUserW, DeleteProcThreadAttributeList, InitializeProcThreadAttributeList,
-    TerminateProcess, UpdateProcThreadAttribute, WaitForSingleObject, CREATE_NO_WINDOW,
-    CREATE_UNICODE_ENVIRONMENT, EXTENDED_STARTUPINFO_PRESENT, LPPROC_THREAD_ATTRIBUTE_LIST,
-    PROCESS_INFORMATION, PROC_THREAD_ATTRIBUTE_JOB_LIST, PROC_THREAD_ATTRIBUTE_MITIGATION_POLICY,
-    STARTUPINFOEXW, STARTUPINFOW,
+    OpenProcessToken, ResumeThread, TerminateProcess, UpdateProcThreadAttribute,
+    WaitForSingleObject, CREATE_NO_WINDOW, CREATE_SUSPENDED, CREATE_UNICODE_ENVIRONMENT,
+    EXTENDED_STARTUPINFO_PRESENT, LPPROC_THREAD_ATTRIBUTE_LIST, PROCESS_INFORMATION,
+    PROC_THREAD_ATTRIBUTE_JOB_LIST, PROC_THREAD_ATTRIBUTE_MITIGATION_POLICY, STARTUPINFOEXW,
+    STARTUPINFOW,
 };
 
 struct Descriptor(PSECURITY_DESCRIPTOR);
@@ -69,20 +70,96 @@ unsafe fn owned(handle: HANDLE) -> OwnedHandle {
     OwnedHandle::from_raw_handle(handle.0)
 }
 
-fn worker_descriptors(owner: &str) -> io::Result<[Descriptor; 4]> {
+const WORKER_ATTRIBUTE: &str = "KeyValetWorker";
+
+// TokenSecurityAttributes uses the native UNICODE_STRING layout, not the PWSTR
+// CLAIM_SECURITY_ATTRIBUTE_V1 layout. SetTokenInformation requires SeTcbPrivilege.
+// The ABI is also exercised by Chromium's base/win/access_token.cc.
+#[repr(C)]
+struct TokenAttribute {
+    name: UNICODE_STRING,
+    value_type: u16,
+    reserved: u16,
+    flags: u32,
+    count: u32,
+    strings: *const UNICODE_STRING,
+}
+#[repr(C)]
+struct TokenAttributes {
+    version: u16,
+    reserved: u16,
+    count: u32,
+    attributes: *const TokenAttribute,
+}
+#[repr(C)]
+struct TokenAttributeOperations {
+    attributes: *const TokenAttributes,
+    operations: *const u32,
+}
+
+fn stamp_worker_token(token: HANDLE, marker: &str) -> io::Result<()> {
+    fn unicode(buffer: &mut [u16]) -> io::Result<UNICODE_STRING> {
+        Ok(UNICODE_STRING {
+            Length: ((buffer.len() - 1) * 2).try_into().map_err(error)?,
+            MaximumLength: (buffer.len() * 2).try_into().map_err(error)?,
+            Buffer: PWSTR(buffer.as_mut_ptr()),
+        })
+    }
+    let mut name = wide(WORKER_ATTRIBUTE);
+    let mut value = wide(marker);
+    let string = unicode(&mut value)?;
+    let attribute = TokenAttribute {
+        name: unicode(&mut name)?,
+        value_type: 3, // TOKEN_SECURITY_ATTRIBUTE_TYPE_STRING
+        reserved: 0,
+        flags: 0x20, // MANDATORY: unprivileged token filtering cannot remove the claim.
+        count: 1,
+        strings: &string,
+    };
+    let attributes = TokenAttributes {
+        version: 1,
+        reserved: 0,
+        count: 1,
+        attributes: &attribute,
+    };
+    let operation = 2; // TOKEN_SECURITY_ATTRIBUTE_OPERATION_ADD
+    let operations = TokenAttributeOperations {
+        attributes: &attributes,
+        operations: &operation,
+    };
+    unsafe {
+        SetTokenInformation(
+            token,
+            TokenSecurityAttributes,
+            &operations as *const _ as _,
+            std::mem::size_of_val(&operations) as u32,
+        )
+    }
+    .map_err(io::Error::other)
+}
+
+fn worker_descriptors(owner: &str, marker: &str) -> io::Result<[Descriptor; 4]> {
+    if marker.len() != 32 || !marker.bytes().all(|b| b.is_ascii_hexdigit()) {
+        return Err(error("invalid worker marker"));
+    }
+    // The service stamps this per-launch claim using SeTcbPrivilege. The worker needs access to
+    // its own objects during Windows/WinRT initialization; other owner processes,
+    // including other protected workers, retain only their public metadata rights.
+    let private = format!("(XA;;GA;;;{owner};({WORKER_ATTRIBUTE} == \"{marker}\"))");
     Ok([
         Descriptor::new(&format!(
-            "O:SYG:SYD:P(A;;GA;;;SY)(A;;GA;;;BA)(A;;0x00101000;;;{owner})"
+            "O:SYG:SYD:P(A;;GA;;;SY)(A;;GA;;;BA)(A;;0x00101000;;;{owner}){private}"
         ))?,
-        Descriptor::new("O:SYG:SYD:P(A;;GA;;;SY)(A;;GA;;;BA)")?,
         Descriptor::new(&format!(
-            "O:SYG:SYD:P(A;;GA;;;SY)(A;;GA;;;BA)(A;;0x0002001e;;;{owner})"
+            "O:SYG:SYD:P(A;;GA;;;SY)(A;;GA;;;BA){private}"
         ))?,
-        // TokenDefaultDacl applies to many object types. Do not reuse PROCESS_QUERY_LIMITED_
-        // INFORMATION (0x1000): on a thread that bit grants THREAD_RESUME. Only standard
-        // READ_CONTROL + SYNCHRONIZE are allowed, and OWNER RIGHTS removes implicit WRITE_DAC.
         Descriptor::new(&format!(
-            "O:{owner}G:{owner}D:P(A;;GA;;;SY)(A;;GA;;;BA)(A;;RC;;;OW)(A;;0x00120000;;;{owner})"
+            // An outsider must not duplicate/impersonate the claim-bearing token.
+            "O:SYG:SYD:P(A;;GA;;;SY)(A;;GA;;;BA)(A;;0x00020008;;;{owner}){private}"
+        ))?,
+        Descriptor::new(&format!(
+            // OWNER RIGHTS blocks the ordinary owner's implicit WRITE_DAC on new threads.
+            "O:{owner}G:{owner}D:P(A;;GA;;;SY)(A;;GA;;;BA)(A;;RC;;;OW)(A;;0x00120000;;;{owner}){private}"
         ))?,
     ])
 }
@@ -230,12 +307,8 @@ impl ProtectedProcess {
         }
         let owner =
             crate::peer::sid_to_string(owner_sid).ok_or_else(|| error("invalid owner SID"))?;
-        // The worker needs token queries/duplication for WinRT, but another same-user process
-        // must not change its token default DACL and thereby expose subsequently created threads.
-        // New worker threads inherit this protected default. OWNER RIGHTS overrides the
-        // ordinary owner's implicit WRITE_DAC, preventing a same-user process from granting
-        // itself thread-context/VM access after launch.
-        let [process_sd, thread_sd, token_sd, default_sd] = worker_descriptors(&owner)?;
+        let marker = new_worker_marker()?;
+        let [process_sd, thread_sd, token_sd, default_sd] = worker_descriptors(&owner, &marker)?;
         unsafe {
             let mut raw = HANDLE::default();
             WTSQueryUserToken(session, &mut raw).map_err(error)?;
@@ -274,6 +347,9 @@ impl ProtectedProcess {
             )
             .map_err(error)?;
             let primary_handle = owned(primary);
+            // Complete identity and DACL setup before the child's first instruction.
+            // A failure denies launch; never retry with an unmarked or ordinary token.
+            stamp_worker_token(primary, &marker)?;
             let mut acl: *mut ACL = std::ptr::null_mut();
             let mut present = windows::core::BOOL::default();
             let mut defaulted = windows::core::BOOL::default();
@@ -326,7 +402,10 @@ impl ProtectedProcess {
                 Some(&process_sd.attributes()),
                 Some(&thread_sd.attributes()),
                 false,
-                CREATE_NO_WINDOW | CREATE_UNICODE_ENVIRONMENT | EXTENDED_STARTUPINFO_PRESENT,
+                CREATE_NO_WINDOW
+                    | CREATE_SUSPENDED
+                    | CREATE_UNICODE_ENVIRONMENT
+                    | EXTENDED_STARTUPINFO_PRESENT,
                 Some(env),
                 PCWSTR(directory.as_ptr()),
                 &startup.StartupInfo,
@@ -335,6 +414,27 @@ impl ProtectedProcess {
             .map_err(error)?;
             let handle = owned(process.hProcess);
             let _thread = owned(process.hThread);
+            // Windows derives the actual child token object's DACL from TokenDefaultDacl.
+            // Set its distinct query-only public policy before any child instruction runs.
+            // Otherwise authenticated ordinary IPC clients cannot inspect the worker's SID.
+            let mut child_token = HANDLE::default();
+            OpenProcessToken(
+                process.hProcess,
+                windows::Win32::Security::TOKEN_ACCESS_MASK(0x000c0000), // WRITE_DAC | WRITE_OWNER
+                &mut child_token,
+            )
+            .map_err(error)?;
+            let _child_token = owned(child_token);
+            windows::Win32::Security::SetKernelObjectSecurity(
+                child_token,
+                windows::Win32::Security::DACL_SECURITY_INFORMATION
+                    | windows::Win32::Security::OWNER_SECURITY_INFORMATION,
+                token_sd.0,
+            )
+            .map_err(error)?;
+            if ResumeThread(process.hThread) != 1 {
+                return Err(error("protected worker could not resume"));
+            }
             Ok(Self {
                 handle,
                 _job: job,
@@ -361,7 +461,7 @@ fn worker_job() -> io::Result<OwnedHandle> {
     }
 }
 
-pub fn new_mcp_channel() -> io::Result<String> {
+fn new_worker_marker() -> io::Result<String> {
     use windows::Win32::Security::Cryptography::{
         BCryptGenRandom, BCRYPT_USE_SYSTEM_PREFERRED_RNG,
     };
@@ -369,13 +469,14 @@ pub fn new_mcp_channel() -> io::Result<String> {
     unsafe { BCryptGenRandom(None, &mut random, BCRYPT_USE_SYSTEM_PREFERRED_RNG) }
         .ok()
         .map_err(error)?;
+    Ok(random.iter().map(|b| format!("{b:02x}")).collect())
+}
+
+pub fn new_mcp_channel() -> io::Result<String> {
     Ok(format!(
         "{}{}",
         kv_ipc::mcp_worker::CHANNEL_PREFIX,
-        random
-            .iter()
-            .map(|b| format!("{b:02x}"))
-            .collect::<String>()
+        new_worker_marker()?
     ))
 }
 impl Drop for ProtectedProcess {
@@ -388,7 +489,7 @@ impl Drop for ProtectedProcess {
 mod tests {
     use super::*;
     use windows::Win32::Security::{
-        AccessCheck, CreateRestrictedToken, DuplicateToken, GetSecurityDescriptorControl,
+        AccessCheck, CreateRestrictedToken, GetSecurityDescriptorControl, TokenImpersonation,
         DISABLE_MAX_PRIVILEGE, GENERIC_MAPPING, PSID, SE_DACL_PROTECTED, SID_AND_ATTRIBUTES,
         TOKEN_DUPLICATE, TOKEN_QUERY,
     };
@@ -420,7 +521,15 @@ mod tests {
             .unwrap();
             let _filtered = owned(filtered);
             let mut impersonation = HANDLE::default();
-            DuplicateToken(filtered, SecurityImpersonation, &mut impersonation).unwrap();
+            DuplicateTokenEx(
+                filtered,
+                TOKEN_ALL_ACCESS,
+                None,
+                SecurityImpersonation,
+                TokenImpersonation,
+                &mut impersonation,
+            )
+            .unwrap();
             (owned(impersonation), owner)
         }
     }
@@ -445,10 +554,170 @@ mod tests {
             status.as_bool() && granted & access == access
         }
     }
+
+    struct ClaimContext {
+        context: windows::Win32::Security::Authorization::AUTHZ_CLIENT_CONTEXT_HANDLE,
+        manager: windows::Win32::Security::Authorization::AUTHZ_RESOURCE_MANAGER_HANDLE,
+    }
+    impl ClaimContext {
+        fn new(token: &OwnedHandle, marker: &str) -> Self {
+            use windows::Win32::Security::Authorization::*;
+            unsafe {
+                let mut manager = AUTHZ_RESOURCE_MANAGER_HANDLE::default();
+                AuthzInitializeResourceManager(1, None, None, None, PCWSTR::null(), &mut manager)
+                    .unwrap();
+                let mut context = AUTHZ_CLIENT_CONTEXT_HANDLE::default();
+                AuthzInitializeContextFromToken(
+                    0,
+                    HANDLE(token.as_raw_handle() as _),
+                    manager,
+                    None,
+                    Default::default(),
+                    None,
+                    &mut context,
+                )
+                .unwrap();
+                let result = Self { context, manager };
+                // A synthetic authorization context models the OS-issued claim. This API
+                // changes only this test context, never a real token or installed process.
+                let mut name = wide("KeyValetWorker");
+                let mut value = wide(marker);
+                let mut value_ptr = PWSTR(value.as_mut_ptr());
+                let mut attribute = AUTHZ_SECURITY_ATTRIBUTE_V1 {
+                    pName: PWSTR(name.as_mut_ptr()),
+                    ValueType: 3,
+                    ValueCount: 1,
+                    Values: AUTHZ_SECURITY_ATTRIBUTE_V1_0 {
+                        ppString: &mut value_ptr,
+                    },
+                    ..Default::default()
+                };
+                let attributes = AUTHZ_SECURITY_ATTRIBUTES_INFORMATION {
+                    Version: 1,
+                    AttributeCount: 1,
+                    Attribute: AUTHZ_SECURITY_ATTRIBUTES_INFORMATION_0 {
+                        pAttributeV1: &mut attribute,
+                    },
+                    ..Default::default()
+                };
+                AuthzModifySecurityAttributes(
+                    context,
+                    &AUTHZ_SECURITY_ATTRIBUTE_OPERATION_ADD,
+                    Some(&attributes),
+                )
+                .unwrap();
+                result
+            }
+        }
+        fn allows(&self, descriptor: &Descriptor, access: u32) -> bool {
+            use windows::Win32::Security::Authorization::*;
+            unsafe {
+                // Authz receives object-specific masks, unlike the kernel object manager,
+                // which expands generic rights itself. Map the private test descriptor.
+                let mut acl = std::ptr::null_mut();
+                let mut present = Default::default();
+                let mut defaulted = Default::default();
+                GetSecurityDescriptorDacl(descriptor.0, &mut present, &mut acl, &mut defaulted)
+                    .unwrap();
+                let mapping = GENERIC_MAPPING {
+                    GenericAll: 0x001fffff,
+                    ..Default::default()
+                };
+                for index in 0..u32::from((*acl).AceCount) {
+                    let mut ace = std::ptr::null_mut();
+                    windows::Win32::Security::GetAce(acl, index, &mut ace).unwrap();
+                    let ace = &mut *ace.cast::<windows::Win32::Security::ACCESS_ALLOWED_ACE>();
+                    windows::Win32::Security::MapGenericMask(&mut ace.Mask, &mapping);
+                }
+                let request = AUTHZ_ACCESS_REQUEST {
+                    DesiredAccess: access,
+                    ..Default::default()
+                };
+                let mut granted = 0;
+                let mut code = 0;
+                let mut reply = AUTHZ_ACCESS_REPLY {
+                    ResultListLength: 1,
+                    GrantedAccessMask: &mut granted,
+                    Error: &mut code,
+                    ..Default::default()
+                };
+                AuthzAccessCheck(
+                    AUTHZ_ACCESS_CHECK_FLAGS(0),
+                    self.context,
+                    &request,
+                    None,
+                    descriptor.0,
+                    None,
+                    &mut reply,
+                    None,
+                )
+                .unwrap();
+                code == 0 && granted & access == access
+            }
+        }
+    }
+    impl Drop for ClaimContext {
+        fn drop(&mut self) {
+            unsafe {
+                let _ = windows::Win32::Security::Authorization::AuthzFreeContext(self.context);
+                let _ =
+                    windows::Win32::Security::Authorization::AuthzFreeResourceManager(self.manager);
+            }
+        }
+    }
+
+    #[test]
+    fn worker_can_initialize_private_objects_without_granting_another_worker_access() {
+        let (token, owner) = ordinary_token();
+        let descriptors = worker_descriptors(&owner, "0123456789abcdef0123456789abcdef").unwrap();
+        let own = ClaimContext::new(&token, "0123456789abcdef0123456789abcdef");
+        let other = ClaimContext::new(&token, "abcdef0123456789abcdef0123456789");
+        for descriptor in &descriptors {
+            for access in [0x10, 0x40000] {
+                assert!(
+                    own.allows(descriptor, access),
+                    "worker cannot initialize its own object"
+                );
+                assert!(
+                    !other.allows(descriptor, access),
+                    "other worker can access a private object"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn ordinary_owner_cannot_forge_the_service_issued_worker_attribute() {
+        use windows::Win32::Security::{ImpersonateLoggedOnUser, RevertToSelf};
+        let (token, _) = ordinary_token();
+        struct Restore;
+        impl Drop for Restore {
+            fn drop(&mut self) {
+                unsafe { RevertToSelf().unwrap() };
+            }
+        }
+        unsafe { ImpersonateLoggedOnUser(HANDLE(token.as_raw_handle() as _)).unwrap() };
+        let _restore = Restore;
+        // The handle permits TOKEN_ADJUST_DEFAULT, so this tests the privilege boundary,
+        // rather than just a missing handle permission. No SYSTEM session is needed.
+        let failure = stamp_worker_token(
+            HANDLE(token.as_raw_handle() as _),
+            "0123456789abcdef0123456789abcdef",
+        )
+        .unwrap_err();
+        let code = failure
+            .get_ref()
+            .unwrap()
+            .downcast_ref::<windows::core::Error>()
+            .unwrap()
+            .code();
+        assert_eq!(code.0 as u32, 0x80070522); // ERROR_PRIVILEGE_NOT_HELD
+    }
     #[test]
     fn worker_descriptors_deny_invasive_access_to_an_ordinary_owner() {
         let (token, owner) = ordinary_token();
-        let [process, thread, token_sd, defaults] = worker_descriptors(&owner).unwrap();
+        let [process, thread, token_sd, defaults] =
+            worker_descriptors(&owner, "0123456789abcdef0123456789abcdef").unwrap();
         assert!(allowed(&process, &token, 0x00101000)); // Query limited + wait.
         for access in [
             0x0001, 0x0002, 0x0008, 0x0010, 0x0020, 0x0200, 0x0400, 0x40000, 0x80000,
@@ -471,8 +740,10 @@ mod tests {
             );
         }
         assert!(allowed(&defaults, &token, 0x00120000)); // Read control + wait only.
-        assert!(allowed(&token_sd, &token, 0x0002001e)); // WinRT query/duplicate/impersonate.
-        for access in [0x0001, 0x0020, 0x0040, 0x0080, 0x0100, 0x40000, 0x80000] {
+        assert!(allowed(&token_sd, &token, 0x00020008)); // Public token metadata only.
+        for access in [
+            0x0001, 0x0002, 0x0004, 0x0010, 0x0020, 0x0040, 0x0080, 0x0100, 0x40000, 0x80000,
+        ] {
             assert!(
                 !allowed(&token_sd, &token, access),
                 "token unexpectedly grants {access:#x}"
@@ -481,7 +752,10 @@ mod tests {
     }
     #[test]
     fn worker_dacls_are_protected_from_parent_inheritance() {
-        for descriptor in worker_descriptors("S-1-5-21-11-22-33-1001").unwrap() {
+        for descriptor in
+            worker_descriptors("S-1-5-21-11-22-33-1001", "0123456789abcdef0123456789abcdef")
+                .unwrap()
+        {
             let mut control = 0;
             let mut revision = 0;
             unsafe {

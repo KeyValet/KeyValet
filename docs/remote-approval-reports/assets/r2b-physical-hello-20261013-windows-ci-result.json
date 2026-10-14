@@ -1,0 +1,33 @@
+{
+  "toolchain": "rustc 1.99.0 (b940084d7 2026-09-28)",
+  "platform": "Windows 11 VM MSVC x64",
+  "commands": [
+    {
+      "log": "windows-ci-1.log",
+      "command": "cargo fmt --all -- --check",
+      "seconds": 3.0753896,
+      "exit_code": 0
+    },
+    {
+      "log": "windows-ci-2.log",
+      "command": "cargo clippy --workspace --all-targets -- -D warnings",
+      "seconds": 113.400587,
+      "exit_code": 101
+    },
+    {
+      "log": "windows-ci-3.log",
+      "command": "cargo build --workspace --locked",
+      "seconds": 70.9116025,
+      "exit_code": 0
+    },
+    {
+      "log": "windows-ci-4.log",
+      "command": "cargo test --workspace --locked",
+      "seconds": 370.2273733,
+      "exit_code": 0
+    }
+  ],
+  "started_utc": "2026-10-13T06:32:28.3479239Z",
+  "finished_utc": "2026-10-13T06:52:40.7766578Z",
+  "passed": false
+}

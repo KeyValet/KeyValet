@@ -1,0 +1,16 @@
+{
+  "started_utc": "2026-10-13T03:52:25.302322+00:00",
+  "source_credential": "oauth2/outlook-hhstuhacker-graph",
+  "test_credential": "api_key/r3a-graph-readonly",
+  "method": "GET",
+  "url": "https://graph.microsoft.com/v1.0/me",
+  "credential_values_saved": false,
+  "refresh_token_transferred": false,
+  "native_tool_calls": [],
+  "http_statuses": [],
+  "mac_token_elapsed_s": 23.113006,
+  "mac_token_authorized": true,
+  "driver_error": "mcp_tool_rejected",
+  "finished_utc": "2026-10-13T03:52:55.270137+00:00",
+  "elapsed_s": 29.967368
+}

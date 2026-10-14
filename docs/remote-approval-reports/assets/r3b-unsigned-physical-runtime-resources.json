@@ -1,0 +1,20 @@
+{
+  "npm.cmd": false,
+  "pwsh.exe": false,
+  "config_presence": {
+    ".cursor\\mcp.json": true,
+    ".claude\\settings.json": true,
+    ".claude.json": true,
+    ".codex\\config.toml": true,
+    ".cursor\\hooks.json": true
+  },
+  "node.exe": false,
+  "winget.exe": true,
+  "wsl.exe": true,
+  "agent.cmd": false,
+  "wsl_distros": [],
+  "cursor.exe": false,
+  "codex.exe": false,
+  "claude.exe": false,
+  "ssh_exit": 0
+}

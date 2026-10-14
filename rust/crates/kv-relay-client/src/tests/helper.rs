@@ -50,6 +50,28 @@ impl Serialize for Unserializable {
     }
 }
 
+#[cfg(unix)]
+#[tokio::test]
+async fn config_presence_requires_a_typed_boolean_and_never_accepts_an_error_as_absence() {
+    for exists in [false, true] {
+        let server = Unary::start(
+            serde_json::json!({"ok":true,"result":{"exists":exists}}),
+            None,
+        )
+        .await;
+        assert_eq!(server.helper.config_exists().await.unwrap(), exists);
+    }
+    for response in [
+        serde_json::json!({"ok":false,"error":{"code":"forbidden","message":"forbidden"}}),
+        serde_json::json!({"ok":true,"result":{}}),
+        serde_json::json!({"ok":true,"result":{"exists":null}}),
+        serde_json::json!({"ok":true,"result":{"exists":false,"path":"untrusted"}}),
+    ] {
+        let server = Unary::start(response, None).await;
+        assert!(server.helper.config_exists().await.is_err());
+    }
+}
+
 #[tokio::test]
 async fn json_lines_handle_serialization_limits_io_failures_and_eof() {
     let mut writer = tokio::io::sink();

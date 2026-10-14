@@ -1,0 +1,13 @@
+{
+  "dispatched_utc": "2026-10-13T23:46:49.117688+00:00",
+  "window_id": 26052,
+  "terminal": "/dev/ttys000",
+  "command_dispatched": true,
+  "checklist": "锁屏观察脚本已修正，3 项假进程回归通过。接下来约 2–3 分钟你要做的事：\n1. 回复「开始锁屏验证」后，我在 Mac Terminal 启动观察，无需 sudo、安装或 KeyValet Touch ID。\n2. 等 baseline=present 后，按 Control+Command+Q 锁屏，保持 10 秒再正常解锁。\n3. 回到同一 Terminal 按一次回车，等“在场信号诊断结束”；脚本会等真实锁屏、解锁和 ndu 状态读回，提前回车也不会结束。\n现在开始这轮锁屏观察吗？",
+  "user_start": "开始锁屏验证",
+  "keyvalet_touch_id_requests": 0,
+  "credential_operations": 0,
+  "reinstall": false,
+  "sudo_requests": 0,
+  "secret_values_in_evidence": false
+}

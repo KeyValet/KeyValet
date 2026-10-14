@@ -1,10 +1,10 @@
 # 远程审批与多设备配对：架构设计
 
-- 版本：第二版（2026-10-11，评审后）。第一版写于同日，评审时把手机 App 纳入第一版、把实施计划改成可并行的工作流，并补齐附录里的接口契约。
-- 范围：把审批动作从「agent 所在的机器」搬到「用户手边的设备」，让多台机器互相认识，并把审批端做成执行端的远程控制面（授权边界与设置）。**第一版（V1）**：执行端覆盖 macOS / Linux / Windows；审批端覆盖 **手机 App（Flutter，iOS + Android）**、macOS（Touch ID）与 Windows（Hello）的原生弹窗 + 终端。首个 dogfooding 实例是 **Ubuntu 服务器（vault + 执行端）+ MacBook / iPhone（审批端）+ 自托管 relay**。云端密钥保护与隔离执行只留接口。
-- 怎么读：§0–§13 是设计；§14–§16 是失败模式、代码落点、测试；§17 是**按工作流拆分的 V1 实施计划**（给多个并行 agent 用，配套 prompt 见 [remote-approval-agent-prompts-2026-10.zh-CN.md](remote-approval-agent-prompts-2026-10.zh-CN.md)）；附录 A–F 是各工作流之间的**接口契约**（JSON 形状、relay API、IPC 消息、DDL、CLI/MCP 面、crate 布局）。契约与正文冲突时以附录为准。
+- 版本：V1 实现与验收回写（2026-10-13）。第一轮 W0–W9、后续接口收口与第二轮 R2-A/B/C/D 的事实合并于本文；原报告保留各自测试快照。
+- 范围：执行端代码覆盖 macOS / Linux / Windows，审批端代码覆盖 macOS 原生弹窗、Windows PCP/Hello 与手机 App。Ubuntu × MacBook 使用官方 relay 联调，真实批准/执行与 20 次计时已通过实测，完整 M2 尚未完成；Android Pixel 7 对软件执行端的核心审批已通过，iOS 尚未完成真机验收。云端密钥保护与隔离执行为 V2。
+- 怎么读：正文与附录描述当前契约，明确标为「目标」「验收中」「V2／计划中」的内容不代表已通过；§16 是实测验收表，§17 保留实施分工及当前里程碑，§18 汇总已决与仍开放事项。接口核对以当前代码为准；实现违背已决安全要求时，在 §18 与 OPEN-QUESTIONS 留下冲突，不用旧附录覆盖 K1–K4。
 - 与现有文档的关系：本文是 [architecture-2026-10.md](architecture-2026-10.md) §7.4（Approver）、§8.1（设备密钥）、§8.3（配对）、§9（路由）、§10.3（relay）的细化与修订。冲突处以本文为准，并在落地时回写总架构文档。产品侧见 [remote-approval-product-2026-10.zh-CN.md](remote-approval-product-2026-10.zh-CN.md)。
-- 现状：**以下全部尚未实现**。Linux 现有实现见 [linux.md](linux.md)（systemd 服务、polkit、TPM 2.0、SSH `keyvalet approve <pid>`）；macOS 现有实现见 README 与 SECURITY.md。
+- 实施状态：**M0/M1 完成，M2–M5 未完成。** Windows LocalSystem 双 PCP 键、安装／升级／卸载与真机 Hello 分项已有通过记录，签名现为可选，新版无签名整包与完整公网双角色仍待验；Pixel 7 配对、锁屏 Quick、App 指纹 Strong、同 ID 升级与设置三步通过，但重启拉取及远端退出清理未通过。Mac/ndu Strong 配对=1，真实 GET=27（401×1/403×26），n=20 p50=3.0905 s/p95=6.0237 s，冻结 audit=37/37；T2 两轮已通过并撤回；Mac→ndu 正向吊销 10.583576 s、SE 取消保真与 Mac 实际投递已验，反向吊销/保留历史的重新配对、手机通知和原生 biometric failure 仍待验收；ndu 当前已吊销，present 已恢复，完整锁屏周期已测 8.160/6.782 s；两小时合盖由本人取消并改为源码 review，最新 audit 53/54、差异 1。运行时只有 Codex 和 Devin 的托管模型实测完成，Claude/channels 门槛未过。证据见 [R2-A](remote-approval-reports/R2-A-m2-acceptance.md)、[R2-B](remote-approval-reports/R2-B-windows.md)、[R2-C](remote-approval-reports/R2-C-mobile.md)、[R2-D](remote-approval-reports/R2-D-runtimes.md)。
 
 ---
 
@@ -14,15 +14,15 @@
 | --- | --- | --- |
 | D1 | 凭证留在 Ubuntu 服务器的 vault 里，由服务器上的 helper 注入执行；MacBook 只做审批，不做执行端 | 服务器上的 agent 要 7×24 跑，MacBook 合盖就离线；Secure Enclave 又要求 GUI 会话。总架构 §9 的「Linux 调 Mac 执行」保留为后续可选路由，不是第一版 |
 | D2 | 第一天就有 relay，不做 Mac↔Ubuntu 直连 | 直连无法在 MacBook 睡眠时排队；helper 不能开入站端口 |
-| D3 | relay 先自托管（可以就装在这台 Ubuntu 上），官方 relay 之后 | 用户已有服务器；relay 只见密文，和 vault 同机不扩大泄露面，只耦合可用性 |
+| D3 | 官方 relay 已部署到 `relay.keyvalet.dev`；自托管只服务桌面审批端 | K2/K3 要求手机登录及固定官方地址；桌面／CLI 仍支持匿名自托管 |
 | D4 | MacBook、Windows 与手机 App 共用总架构里的「审批设备」模型：同一套设备密钥、HPKE 信封、Quick/Strong 两档 | 任何一种审批端都只是多一台设备，协议不变 |
 | D5 | 每台设备的**身份密钥**与**审批密钥**是不同的密钥对象 | 身份密钥要无人值守签名（relay 认证、信封签名），审批密钥要求用户在场（Touch ID）。总架构 §8.1 已有此要求 |
-| D6 | 审批决定签名覆盖 `digest ‖ nonce ‖ decision ‖ scope`，执行端重算 digest；一次性 nonce 落库 | 防重放、防「批了 A 执行 B」。沿用总架构 §7.2–7.3 |
-| D7 | 预授权能力令牌（§7.5）是第一版必备，不是可选 | 无人值守机器上「每次都弹」等于逼用户开全放行；没有预授权就没有产品 |
+| D6 | 审批决定签名覆盖除 `sig` 外完整对象的 JCS，包括 digest、nonce、decision、scope 与扩展；执行端重算 digest，一次性 nonce 落库 | 防重放、防「批了 A 执行 B」，未知字段也不能被替换 |
+| D7 | Grant 预授权（§7.1、§7.4）已实现，设置票始终 Strong | K4/D03 不因短有效期降低签发或验签要求 |
 | D8 | 任何一环拿不到合法批准都 fail closed；没有确认码、没有软件回退 | 与 Linux 现有实现一致 |
 | D9 | 服务器 root 不在威胁模型内，与 macOS 一致 | 远程审批不给普通 Linux helper 增加抵御 root 的隔离；文档、状态、弹窗都要如实写 |
-| D10 | 审批超时只产生「待批准」，永不映射成「拒绝」；agent 侧用「调用内等待 → 放手 → 续等工具 → Stop hook / channels 唤醒」四层保证每个运行时都有路走 | 各家 agent 的工具调用超时从 60 s 到 28 h 不等、推送能力只有 Claude Code 有；把「不」留给用户，把等待交给可阻塞的工具调用（§6.9） |
-| D11 | 审批端不只是「批/拒」，还是执行端的**远程控制面**：所有授权边界（这一次 / 1 小时 / 本会话 / 这个凭证一直允许 / 这台机器一直允许 / 全局无人值守）和设置（模式、锁定、吊销、会话寿命）都是审批端用审批密钥**签名的 Grant / Directive 对象**，经 relay 下发，执行端只认签名不认来源 | 一套对象模型同时覆盖弹窗里的范围选择、预授权令牌和设置页；收紧用 Quick，放宽必须 Strong；以后 iPhone App、Web 控制台、团队策略都是同一条路（§7.4–7.6） |
+| D10 | 审批超时只产生「待批准」，永不映射成「拒绝」；agent 侧用「调用内等待 → 放手 → 续等工具 → Stop hook / channels 唤醒」四层提供等待与续等入口；各运行时实测仍按 §16 验收 | 各家 agent 的工具调用超时从 60 s 到 28 h 不等、推送能力只有 Claude Code 有；把「不」留给用户，把等待交给可阻塞的工具调用（§6.9） |
+| D11 | 审批端不只是「批/拒」，还是执行端的**远程控制面**：所有授权边界（这一次 / 1 小时 / 本会话 / 这个凭证一直允许 / 这台机器一直允许 / 全局 T1 / 逐执行端 T2）和设置（模式、锁定、吊销、会话寿命）由签名 ApprovalDecision 衍生内部授权，或由审批密钥签独立 Grant / Directive 对象，经 relay 下发，执行端只认签名不认来源 | 一套对象模型同时覆盖弹窗里的范围选择、预授权令牌和设置页；收紧用 Quick，放宽必须 Strong；以后 iPhone App、Web 控制台、团队策略都是同一条路（§7.4–7.6） |
 | D12 | 第一版只实现本地硬件密钥，但密钥保护、执行端、审批者、授权签发者四条线都在 V1 就留出接口与枚举位，云 KMS、Nitro Enclave、Web 设备密钥、服务型审批者只加实现不改协议 | 协议字段一旦上线就难改；接口与保留字段的成本很低（§13） |
 | D13 | 执行端第一版就覆盖 macOS / Linux / Windows；审批端第一版覆盖**手机 App（Flutter，iOS + Android）**以及 macOS（Touch ID）与 Windows（Hello）的原生弹窗 + 终端；手机 App 是唯一的图形审批/控制面，桌面不做图形设置页，Web 只随 Team 服务 Lead | 用户与 Team 买家都是混合 OS；无头机器的用户只有手机在手边；Windows Hello 只有 RSA-2048，所以签名算法按密钥记录决定（`ES256` / `RS256`），而不是写死 |
 | D14 | V1 按**工作流**并行实施，不按时间串行：先冻结附录里的接口契约与测试向量，再让 relay、relay-client、设备密钥、helper、MCP/hook/proxy、桌面 agent、CLI、手机 App、安装器各自独立推进，最后一个集成工作流收口 | 要让多个 agent 同时干活，唯一可行的协作方式是「契约先行 + crate 级所有权」；谁都不能改别人的 crate，契约变更只能由契约所有者改并同步测试向量（§17） |
@@ -33,9 +33,9 @@
 
 ### 1.1 问题
 
-KeyValet 现在的审批发生在 agent 所在机器上：macOS 弹 Touch ID，Linux 走 polkit（桌面 agent 或 SSH 上的 `pkttyagent`）。当 agent 跑在无人值守的机器上——Ubuntu 服务器、拔了显示器的 Mac mini、CI runner——没有人在旁边按，结果只有两个：agent 卡死，或者用户被迫把一切设成自动放行。
+既有本地审批使用 macOS Touch ID 和 Linux polkit；无人值守执行端需要把审批送到用户手边。V1 的签名／HPKE、等待恢复和远程控制面已接线，实机完成度以 §16 为准。
 
-### 1.2 第一版要做到
+### 1.2 第一版目标与验收边界
 
 1. Ubuntu 服务器上的 agent（Claude Code / Codex / OpenClaw / Hermes / cron 脚本）发起凭证使用请求时，用户在 MacBook 上收到带完整真实请求的审批弹窗，Touch ID 一下，服务器上的 helper 才注入执行。
 2. MacBook 和 Ubuntu 通过一次配对互相认识；之后可以再加第二台 Mac，也可以吊销任一台。
@@ -43,13 +43,13 @@ KeyValet 现在的审批发生在 agent 所在机器上：macOS 弹 Touch ID，L
 4. MacBook 合盖、离线、relay 不可达时，行为可预期：请求排队或超时，绝不放行。
 5. 两端都有审计：服务器记「谁批的、多久批的」，MacBook 记「我批了什么给哪台机器」。
 6. 用户没有立刻批时，Claude Code、Codex、Cursor、Gemini、Devin、Grok 以及走 HTTP 的 OpenClaw / Hermes / SDK 上的 agent 都不会把超时当成拒绝，并且在用户随后批准时能在不重新下指令的情况下拿到结果（§6.9）。
-7. 审批端连上之后就是执行端的遥控器：在弹窗里选「这一次 / 1 小时 / 本会话 / 这个凭证一直允许 / 这台机器一直允许 / 全局无人值守」，在设置页改模式、锁定、吊销、看审计；收紧立刻生效，放宽必须 Touch ID / Hello（§7.4–7.6）。
+7. 审批端的弹窗／CLI／手机设置共用签名 Grant／Directive 控制面；收紧 Quick、放宽和设置票 Strong，T2 需单独确认且不得全局继承（§7.4–§7.6）。
 8. 执行端在 macOS / Linux / Windows 上都能跑；审批端是手机 App（iOS + Android）加 macOS / Windows 的原生弹窗 + 终端（§2.3、§3.1、§9.2）。手机 App 在 V1 内：锁屏 Quick / 生物识别 Strong 审批、每台执行端的设置页、放行票与一键收回、无人值守开关、扫码配对、活动摘要、推送与静默/升级投递。
 9. 云 KMS、Nitro Enclave、Web 控制台、服务型审批者在协议与接口上已经有位置，第一版不实现（§13）。
 
 ### 1.3 第一版不做
 
-- Linux 桌面作为审批端（V2）；桌面图形设置页（不做）；瘦菜单栏/托盘（V2，按需）；Mac 作为 Linux 的执行端（§9 路由，V2）；vault 密文跨设备同步与「在手机上走 OAuth 添加凭证」（V2，V1 在执行端终端添加凭证）；团队 N-of-M 审批与 Web 控制台（随 Team）；官方托管 relay 的计费与配额执行（接口保留）；App Store / Play 公开上架（V1 走 TestFlight 与内部测试轨道）。
+- Linux 桌面作为审批端（V2）；桌面图形设置页（不做）；瘦菜单栏/托盘（V2，按需）；Mac 替 Linux 执行凭证操作（总架构 §9 路由，V2）；vault 密文跨设备同步与手机 OAuth 添加凭证（V2）；团队 N-of-M、服务／组织审批者与 Web 控制台（V2）；不同操作的签名批量授权（V2）；官方计费／配额执行及 App Store / Play 公开上架（计划中）。TestFlight／Play 内部测试打包脚本已实现，发行包和上传尚未完成。
 - 云端密钥保护与隔离执行的**实现**（只留接口，§13）。
 - 不改变 Linux / Windows helper 的隔离边界：远程审批不让它防 root / SYSTEM。
 
@@ -61,17 +61,20 @@ KeyValet 现在的审批发生在 agent 所在机器上：macOS 弹 Touch ID，L
 ┌─ Ubuntu 服务器（vault + 执行端）──────────────────────────────────────────────┐
 │  agent 进程（普通用户 u，例如 claude / codex / openclaw / cron）                  │
 │     │  kv-mcp · kv-hook · keyvalet run / 网关（用户 u，不持任何秘密）              │
-│     │  IPC v4：Unix socket，SO_PEERCRED                                           │
+│     │  IPC v4：Unix socket；helper 将已连接 FD 交给 peer broker 验证调用方          │
 │     ▼                                                                             │
 │  kv-helper（systemd，系统用户 keyvalet，/var/lib/keyvalet 0700，无入站、无长连接）  │
 │     vault 密文 · TPM 主密钥 · TPM 身份密钥 DK_srv · devices · nonces · grants      │
 │     Approver 选择：polkit（本地）│ remote-device（新）│ capability token │ auto    │
-│     │  IPC：/var/run/keyvalet/relay.sock（仅允许 keyvalet-relay 用户）              │
+│  keyvalet-peer.service（root，仅 CAP_SYS_PTRACE、AF_UNIX）                       │
+│     SO_PEERCRED + SO_PEERPIDFD（Linux 6.5+）；执行文件 inode／UID／角色证明       │
+│     无网络、无 vault 路径、无密钥操作；helper/client 的 capability 集合为空      │
+│     │  IPC：/run/keyvalet/relay.sock（仅允许 keyvalet-relay 用户）                  │
 │     ▼                                                                             │
 │  kv-relay-client（systemd，系统用户 keyvalet-relay，唯一出站进程）                 │
-│     WS 长连接到 relay · HPKE 封装/解封 · 请签名时经 IPC 请 helper 用 DK_srv 签       │
+│     relay HTTP/WS、control transport、密文队列；签名／HPKE 委托 helper          │
 │                                                                                   │
-│  kv-server --features relay（可选同机部署；SQLite；只见密文）                       │
+│  kv-server（可选桌面自托管；SQLite；路由密文）                                    │
 └──────────────────────────────┬────────────────────────────────────────────────────┘
                                │ TLS：Cloudflare（橙色云代理）→ nginx（Origin CA 证书）→ 127.0.0.1:8787
 ┌──────────────────────────────▼────────────────────────────────────────────────────┐
@@ -97,7 +100,7 @@ KeyValet 现在的审批发生在 agent 所在机器上：macOS 弹 Touch ID，L
 | --- | --- | --- | --- | --- |
 | agent 及 `kv-mcp` / `kv-hook` / 网关 | Ubuntu | 普通用户 `u` | IPC 连接；approval_id | 任何秘密、任何私钥、vault 文件读权限 |
 | `kv-helper` | Ubuntu | 系统用户 `keyvalet` | vault 密文、TPM 密钥句柄、设备目录、nonce/grant/令牌表、审计链 | 出站网络、长连接 |
-| `kv-relay-client` | Ubuntu | 新系统用户 `keyvalet-relay` | relay 会话令牌、对端公钥缓存、待发/待收信封 | 任何私钥、任何秘密明文（信封内容对它是密文：它只做 HPKE 封装，解封在 helper 内） |
+| `kv-relay-client` | Ubuntu | 新系统用户 `keyvalet-relay` | relay 会话令牌、对端公钥缓存、待发/待收信封 | 任何私钥、任何审批明文；HPKE 封解均由 helper 完成 |
 | `keyvalet-peer.service` | Ubuntu（Linux 6.5+） | root，仅 `CAP_SYS_PTRACE` | Unix socket 的内核 PID/UID、安装执行文件与角色映射 | 不处理 vault、私钥、网络连接、批准或执行操作 |
 | `kv-server`（relay） | Ubuntu 或别处 | 容器 / 系统用户 | 设备公钥、账户、密文 blob、时间戳 | 明文、UMK、凭证元数据 |
 | `kv-relay-client` | Mac | 当前用户（LaunchAgent） | 同上 | 同上 |
@@ -105,11 +108,13 @@ KeyValet 现在的审批发生在 agent 所在机器上：macOS 弹 Touch ID，L
 | `dev.keyvalet.agent` + `kv-touchid` | Mac | 当前用户（GUI 会话） | SE 密钥操作、审批对话框 | 任何明文（远程审批不涉及 Mac 本地凭证） |
 | 手机 App 主进程（Flutter + `kv-mobile-core` + `kv_native`） | iPhone / Android | App 沙箱 | 设备密钥句柄（SE / Keystore）、peers、待批队列、签发记录（SQLite） | 任何凭证值；Dart 层不持私钥、不验签 |
 | iOS NSE / Android 消息服务 | 手机 | 扩展 / 服务进程 | 同一 Rust 库、App Group 里的密文队列与设备密钥加密表示 | 审批密钥的使用权（Quick/Strong 签名只在主 App 内发生） |
-| `kv-push` | 云（美国） | 容器 | APNs 密钥、FCM 服务账号、设备推送令牌 | 审批内容（只转发 `approval_id` 与 `delivery.mode`） |
+| `kv-push` | simvito | 专用无登录系统用户 `keyvalet-push` | 提供商凭据、设备推送 token、目标与投递模式 | 审批内容、密文、设备审批私钥；仅监听 `127.0.0.1:8788` |
 
-**信封的加解密在哪一侧完成是关键细节。** 为了让 `kv-relay-client` 不持私钥，HPKE 解封（需要身份私钥做 ECDH）在 helper 内完成：relay-client 收到信封 → 原样经 IPC 交给 helper → helper 用 TPM/SE 做 ECDH、解封、验签。封装方向只需要对方公钥，relay-client 可以自己做，但为统一审计路径，第一版也交给 helper。relay-client 退化为「带重连的管道 + 本地队列」。
+**信封的加解密在哪一侧完成是关键细节。** 为了让 `kv-relay-client` 不持私钥，HPKE 解封（需要身份私钥做 ECDH）在 helper 内完成：relay-client 收到信封 → 原样经 IPC 交给 helper → helper 用 TPM/SE 做 ECDH、解封、验签。封装也由 helper 完成。relay-client 负责经过认证的 control transport、重连和持久密文队列，不处理授权策略。helper 已移除 reqwest、rustls、tokio-tungstenite、futures-util 的直接生产依赖；全部 relay HTTP/WS 都在客户端执行。
 
-注册、配对和吊销的 HTTP/临时 WS 也由 relay-client 执行。尚未配对时服务先运行控制 worker，经附录 C 的有界控制队列领取 helper 已构造的请求；helper 自己签 DK challenge 和 Strong 证明，不接收 relay 会话令牌。完整配置绑定出现或改变后，客户端启动或重建长连接。
+注册、配对和吊销的 HTTP/临时 WS 也由 relay-client 执行。Linux/macOS 尚未配对时先运行控制 worker，经附录 C 的有界控制队列领取 helper 已构造的请求；helper 自己签 DK challenge 和 Strong 证明，不接收 relay 会话令牌。完整配置绑定出现或改变后，客户端启动或重建长连接。Windows 的受保护配置缺失证明与无绑定 control worker 已接线；临时可信 VM 签名下 Auto/Running 等待绑定和不可读配置拒绝有历史通过记录。当前源码默认无签名发行，relay 自动运行并等待绑定，以 OS 身份、固定安装文件身份与受保护 ACL 认证；旧未签名包 Manual/Stopped 不代表当前策略。新整包及实际绑定公网链路仍需验收，见 [Windows 发行策略](windows.md#windows-release-identity-policy)与 [R3-B 续验](remote-approval-reports/R3-B-unsigned-acceptance.md)。
+
+审批端的已验证入站请求在 relay ACK 前写入 SQLite `inbound_approvals`，与 vault AEAD 审计收据同事务提交。重启核对最新收据哈希、信封身份签名与当前设备权限后恢复；取消／已签发不重新呈现，过期拒绝，升级提示单独保留。恢复不重新做硬件 ECDH，也不提供硬件反回滚或外部 HTTP exactly-once。见 [R3-B 无签名验收](remote-approval-reports/R3-B-unsigned-acceptance.md)。
 
 Linux helper 的跨 UID 调用方检查通过独立 root broker 完成：传递已连接 socket 的 FD，使用 `SO_PEERCRED`、`SO_PEERPIDFD`、受信安装文件 inode 和进程存活检查确定身份，helper 再核对 owner/relay UID。broker 只接受安装的 helper 服务进程，不接受客户端声明的 PID、路径或角色。远程认证要求内核支持 `SO_PEERPIDFD`，不支持时失败关闭；Mac 的 audit token 和 Windows 的管道身份规则保留。实测边界见 [认证与网络隔离报告](remote-approval-reports/linux-auth-relay-isolation.md)。
 
@@ -126,10 +131,10 @@ Ubuntu + MacBook 只是第一个 dogfooding 实例。协议里没有「Linux 是
 | | macOS | Linux | Windows 11 | iOS / Android（手机 App） |
 | --- | --- | --- | --- | --- |
 | 执行端（vault + 注入） | V1。`dev.keyvalet.helper`（root）+ `dev.keyvalet.agent`；SE 主密钥（现有） | V1。`keyvalet` 系统用户 + systemd；TPM 2.0 或显式软件（现有） | V1。`KeyValetHelper` 服务（LocalSystem）+ 受保护的 `kv-agent.exe`；Hello 主密钥（现有开发预览）。无人值守（RDP 断开、无登录会话）时与 Linux 服务器同样走远程审批 | 不做 |
-| 审批端 | V1。Touch ID；Quick/Strong 两把 SE 键 | V2。桌面 polkit `auth_self` 作在场门，TPM/软件键签名；状态永远标 `presence: polkit`（非硬件在场） | V1。Hello `KeyCredentialManager` RSA-2048 作 Strong 键（每次签名要求在场）；PCP TPM P-256 作 Quick 与身份键 | **V1**。iOS：SE 三把键（§3.1）；Android：Keystore（StrongBox 优先）三把键，`AK_s` 生物绑定；锁屏 Quick / 生物识别 Strong；唯一的图形设置面 |
-| `kv-relay-client` | per-user LaunchAgent `dev.keyvalet.relay`，helper 以 audit token + code requirement 校验 | systemd `keyvalet-relay.service`，专用系统用户，`SO_PEERCRED` 校验 | Windows 服务 `KeyValetRelay`，虚拟服务账户 `NT SERVICE\KeyValetRelay`，经 `\\.\pipe\keyvalet-relay` 连 helper，管道 DACL 只给该 SID + SYSTEM，helper 用 `GetNamedPipeClientProcessId` 校验 | 内置于 `kv-mobile-core`（前台 WS）；后台靠 APNs / FCM 唤醒后拉取 |
+| 审批端 | V1。Touch ID；Quick/Strong 两把 SE 键 | V2。桌面 polkit `auth_self` 作在场门，TPM/软件键签名；状态永远标 `presence: polkit`（非硬件在场） | V1。Hello `KeyCredentialManager` RSA-2048 作 Strong 键（每次签名要求在场）；PCP TPM P-256 作 Quick，独立 ECDH／ECDSA 双键组成逻辑身份 DK | **V1**。iOS：SE 三把键（§3.1）；Android：Keystore（StrongBox 优先）三把键，`AK_s` 生物绑定；锁屏 Quick / 生物识别 Strong；唯一的图形设置面 |
+| `kv-relay-client` | per-user LaunchAgent `dev.keyvalet.relay`，helper 以 audit token + code requirement 校验 | systemd `keyvalet-relay.service`，专用系统用户；root `keyvalet-peer.service` 用 `SO_PEERPIDFD` 固定进程并核对执行文件，要求 Linux 6.5+ | Windows 服务 `KeyValetRelay`，虚拟服务账户 `NT SERVICE\KeyValetRelay`，经 `\\.\pipe\keyvalet-relay` 连 helper，管道 DACL 只给该 SID + SYSTEM，helper 用 `GetNamedPipeClientProcessId` 校验 | 内置于 `kv-mobile-core`（前台 WS）；后台靠 APNs / FCM 唤醒后拉取 |
 | 本地审批后备 | Touch ID 对话框 | SSH `keyvalet approve <pid>` | 登录会话内 Hello；无会话则无后备（只能远程） | 不适用（手机不是执行端） |
-| 安装器 | `install.sh` | `install.sh` | `install.ps1` + winget；依赖 Authenticode 签名就绪（见总架构 §8.1.1） | TestFlight / Play 内部测试轨道（V1）；公开上架 V2 |
+| 安装器 | `install.sh` | `install.sh` | `install.ps1` 旧包原生安装／升级／卸载通过；当前无签名发行接线已实现，新整包回归中；Authenticode可选 | Android Debug APK 真机通过核心流程；Play 签名发行和 iOS TestFlight／真机验收待资源；公开上架计划中 |
 
 ---
 
@@ -141,7 +146,7 @@ Ubuntu + MacBook 只是第一个 dogfooding 实例。协议里没有「Linux 是
 
 | 密钥 | Linux（TPM 2.0） | Linux（显式软件） | macOS（Secure Enclave） | Windows 11 | iOS / Android（手机 App） | 用途 | 用户在场 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 身份密钥 `DK`（P-256） | 新建 TPM ECC 对象，`sign`+`decrypt`，`fixedTPM`/`fixedParent`，与现有 vault 主密钥是**不同对象** | `0600` 文件，状态报 `software_key` | 新建 SE `P256`，`kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`，无生物 ACL | NCrypt Platform Crypto Provider（TPM）P-256，ECDH + ECDSA；无 TPM 则 DPAPI 保护的软件键，状态报 `software_key` | iOS：SE `P256`，`AfterFirstUnlockThisDeviceOnly`；Android：Keystore EC P-256，StrongBox 优先、回退 TEE 并上报 `key_kind` | relay 会话认证；信封签名；HPKE 接收 | 否（无人值守） |
+| 身份密钥 `DK`（P-256） | 新建 TPM ECC 对象，`sign`+`decrypt`，`fixedTPM`/`fixedParent`，与现有 vault 主密钥是**不同对象** | `0600` 文件，状态报 `software_key` | 新建 SE `P256`，`kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`，无生物 ACL | 两把 PCP TPM P-256：ECDH 专用键 `dk_pub` + ECDSA 身份键 `dk_sig`；任一键失败报错，无自动软件回退 | iOS：SE `P256`，`AfterFirstUnlockThisDeviceOnly`；Android：Keystore EC P-256，StrongBox 优先、回退 TEE 并上报 `key_kind` | relay 会话认证；信封签名；HPKE 接收 | 否（无人值守） |
 | 审批密钥 Quick `AK_q` | （V2 审批端）TPM P-256，在场 = polkit | — | SE `P256`，`WhenUnlockedThisDeviceOnly`，无生物 ACL | PCP TPM P-256（与 `DK` 不同对象），在场 = 已登录桌面会话里的点击 | iOS：SE `P256`，`WhenUnlockedThisDeviceOnly`，无生物 ACL（锁屏动作 `authenticationRequired` 保证已解锁）；Android：Keystore P-256，`setUnlockedDeviceRequired(true)` | 签 T0/T1 的「点一下允许」 | 屏幕解锁即可 |
 | 审批密钥 Strong `AK_s` | （V2）同上，状态标 `presence: polkit` | — | SE `P256`，`userPresence` ACL | Hello `KeyCredentialManager` RSA-2048（`RS256`），每次 `RequestSignAsync` 都要 PIN / 指纹 / 人脸 | iOS：SE `P256`，`.biometryCurrentSet`；Android：Keystore P-256，`setUserAuthenticationRequired(true)` + `setUserAuthenticationParameters(0, AUTH_BIOMETRIC_STRONG)` + `setInvalidatedByBiometricEnrollment(true)`，签名经 `BiometricPrompt.CryptoObject` | 签 T2、unlock、admin、Directive | 每次 Touch ID / Hello / Face ID / 指纹 / polkit |
 
@@ -152,85 +157,77 @@ Ubuntu + MacBook 只是第一个 dogfooding 实例。协议里没有「Linux 是
 - TPM / PCP 无用户在场机制：执行端 root / SYSTEM 可以静默用 `DK` 发请求——这只是「能发请求」，不是「能批准」，威胁模型不变。
 - Mac 的 SE 操作与现有一样经 `dev.keyvalet.helper → dev.keyvalet.agent → kv-touchid`。W1 spike 的实测范围见下表；生产使用 SE ECDH 的 32 字节共享点，由 W0 的 Rust 实现完成 HKDF/AEAD。
 - Linux TPM 侧：`tpm2_create` 带 `sign|decrypt` 的非受限 ECC 密钥，ECDSA 用 `tpm2_sign`，ECDH 用 `tpm2_ecdhzgen`，均通过现有的受信 `tpm2-tools` 路径与 `/dev/tpmrm0`；blob 放进 vault 的 AEAD 认证元数据，与现有主密钥 blob 同样处理。
-- Windows 侧：PCP 的 P-256 ECDH/ECDSA 走 `NCryptSecretAgreement` / `NCryptSignHash`；Hello 走现有 `KeyCredentialManager` 路径（总架构 §8.1.1 已验证 PKCS#1 v1.5/SHA-256）。**W1 spike**：PCP 密钥在 LocalSystem 服务上下文下的创建与持久化、以及 HPKE 解封所需的原始共享点能否从 `NCryptDeriveKey` 以 `BCRYPT_KDF_RAW_SECRET` 取出。
-- `DeviceKeyProvider` trait（§13.1）把以上全部收口：`sign(alg)`, `ecdh()`, `public_jwk()`, `presence_kind()`。
+- Windows 侧：逻辑 DK 由两把独立持久 PCP TPM P-256 对象组成：ECDH 键用于 HPKE，`dk_pub` 是其公钥；ECDSA 键用于所有设备身份签名，公钥以 `dk_sig: {pub, alg: "ES256"}` 发布。已验证的 Windows 11 PCP 不允许同一把 P-256 键兼作 ECDH/ECDSA：设置 `NCRYPT_KEY_USAGE_PROPERTY` 返回 `0x80090029`，generic usage 同样失败；K1 因此采用两个独立硬件对象。PCP 的 ECDH／签名走 `NCryptSecretAgreement`／`NCryptSignHash`；`BCRYPT_KDF_RAW_SECRET` 得到的 32 字节共享点进入既有 RFC 9180 流程。旧设备无 `dk_sig` 时仍用 `dk_pub` 验身份签名；存在但无效的 `dk_sig` 拒绝，不回退。Quick 是另一把 PCP ECDSA 对象；Hello Strong 仍为独立 RS256。双键原生创建／重开／清理及 HPKE、Quick 互操作已经通过；物理 x64 Hello 初始化／解锁、Strong、真正重复签名和独立取消已通过。VM 仍等待 PIN，生产 bound relay／真实客户端闭环待验，见 [R3-B](remote-approval-reports/R3-B-security-closure.md) 与 [无签名修复验收](remote-approval-reports/R3-B-unsigned-acceptance.md)。
+- protection/status --summary 单独列出 pcp_ecdh／pcp_ecdsa 的 present、absent 或 unknown；只有双键实际存在才报告 remote_identity.ready。R2-B 在创建及清理前后分别核对两项，不把半套或错误状态标为硬件可用。
+- 底层 `DeviceKeyProvider` 位于 `kv-ipc::remote`，core 提供 typed adapter，platform 实现硬件 provider。`public_jwk()` 返回 HPKE 的 `dk_pub`，`identity_sign_jwk()` 默认 `None`，Windows DK 返回 ECDSA 身份公钥；`ecdh()`／`sign()` 各用专用 PCP 句柄。审批仍按 AK 的 alg 选 ES256／RS256。
 
-**W1 事实表（2026-10-12 回填，不代表三平台硬件验收完成）**：
+**硬件事实表（W1 与后续验收，不代表完整产品链路通过）**：
 
 | 项目 | 实测环境与结果 | 尚未验证 |
 | --- | --- | --- |
-| SE HPKE / 双用途 | Apple Silicon、macOS 26.5.1、Swift 6.2.3 / SDK 26.2；`hpke_recipient=pass`、`raw_ecdh=pass length=32`、`same_key_es256=pass signature_length=64`；DK/Quick 与 W0 HPKE 和签名互操作通过 | macOS 14、锁屏后的 ACL、Strong 交互与取消 |
-| PCP RAW_SECRET / 双用途 | Windows 目标交叉编译通过；原生 LocalSystem + TPM 2.0 spike 尚未执行 | 创建/持久化、ECDH+ES256 双用途、RAW_SECRET 导出与字节序 |
+| SE HPKE / 双用途 | Apple Silicon、macOS 26.5.1、Swift 6.2.3 / SDK 26.2；`hpke_recipient=pass`、`raw_ecdh=pass length=32`、`same_key_es256=pass signature_length=64`；DK/Quick 与 W0 HPKE 和签名互操作通过 | 后续独立 Strong userPresence 签名 1 项通过、3.66 s；macOS 14、锁屏 ACL、重复／取消与已安装两端链路仍未验 |
+| PCP RAW_SECRET / 双键 | Windows 11 VM、LocalSystem、模拟 TPM 2.0；双 PCP 键创建／持久化重开、身份 ES256、32 字节 raw ECDH、HPKE + Quick 互操作和清理通过。使用显式 split identity 契约，不声称同一 PCP 键双用途 | 物理 TPM、Hello Strong 交互、完整远程审批 |
 | macOS 在场初始值 | 实测 console/input/display 可取，screensaver 初值未知；代码保守返回 Away | 完整锁屏/屏保/显示器转换及启动可用性 |
 
-证据与命令：[W1 报告](remote-approval-reports/W1.md)。SE 加密表示只绑定设备；PCP 不提供用户在场审批门。硬件失败不自动切换软件键。
+证据与命令：[W1](remote-approval-reports/W1.md)、[后续硬件验收](remote-approval-reports/v1-completion.md)、[R2-B](remote-approval-reports/R2-B-windows.md)。SE 加密表示只绑定设备；PCP 不提供用户在场审批门。硬件失败不自动切换软件键。
 
 ### 3.2 密钥材料存放
 
 | 内容 | Linux | macOS | Windows | 手机 |
 | --- | --- | --- | --- | --- |
-| 自己的 `DK` 私钥 | TPM blob（或 0600 软件文件）→ vault 元数据 | SE 加密表示 → root-only 文件（与主密钥同机制） | PCP 持久化句柄名（或 DPAPI 软件键）→ `C:\ProgramData\KeyValet`（SYSTEM + Administrators DACL） | iOS：SE 加密表示放 App Group 容器（NSE 也要用）；Android：Keystore 别名 |
-| 自己的 `AK_q` / `AK_s` | （V2）同上 | 同上 | `AK_q` 同上；`AK_s` 是 Hello 凭据，归属用户账户，由 `kv-agent.exe` 使用 | iOS：Keychain（`ThisDeviceOnly`，不进 iCloud）；Android：Keystore 别名；只有主 App 能用 |
-| 对端设备记录（公钥、`alg`、能力、标签、信任来源） | vault 元数据 `devices`（AEAD 认证） | `/var/db/keyvalet/peers.json`（root-only，AEAD 认证） | 同目录 `peers.json`（同 DACL，AEAD 认证） | Rust 侧 SQLite（App Group / 应用私有目录），AEAD 认证 |
-| relay 会话令牌 | relay-client 内存 | 同上 | 同上 | `kv-mobile-core` 内存；后台由推送唤醒后重新挑战 |
+| 自己的 DK | TPM blob 或显式软件文件，保存于 vault AEAD 元数据 | SE opaque representation 与 provider metadata，独立加密 remote metadata | PCP metadata v2 同时 pin ECDH／ECDSA 句柄名与公钥；SYSTEM/Administrators DACL，vault AEAD 认证 | iOS DK 放 App Group，AfterFirstUnlockThisDeviceOnly；Android Keystore 别名 |
+| AK_q / AK_s | 远程审批者为 V2 | 各自 SE 表示与 ACL，Strong 为 userPresence | Quick 为第三把 PCP ECDSA；Strong 为 owner Hello RSA-2048／RS256 | iOS 批准键留主 App Keychain，NSE 只读公钥缓存；Android Keystore |
+| 对端 DeviceRecord | 加密目录与 SQLite 完整 record_json | 同左，root-only | 同左，受保护 DACL | 硬件派生 AEAD 的 SQLite，App Group／应用私有目录 |
+| relay 会话 | 设备 session token 仅在 relay-client | 同左 | 同左 | 人类会话加密保存，设备会话内存；登录到期／退出后拒绝私有操作 |
 
-修改 `devices` / `peers` 属于 **admin** 类操作，需要 Strong 审批（见 §7.1）。
+目录修改由已认证 owner 控制面负责，使用加密 prepare 日志与 SQLite directory_commits 标记恢复一致提交，保留 tombstone。Windows 半套 DK 创建失败会清理已创建的那把；删除尝试两把并使用 `NCryptDeleteKey(handle, 0)`。旧的不成功 PCP v1 metadata 不静默迁移。显式 DPAPI 软件 provider 单独标为 software，不是 PCP 创建失败的回退。跨库一致性不提供硬件反回滚（§11）。
 
-### 3.3 账户模型（沿用总架构 §10.2 Free 档）
+### 3.3 账户模型（K2/K3）
 
-- 第一台向某个 relay 注册的设备创建一个**匿名账户**（`account_id` 随机），之后的设备通过配对加入同一账户。无邮箱、无密码。手机 App 也是普通设备：首次扫码即注册 + 配对，不需要先「登录」。
+- 桌面／执行端的第一台设备创建**匿名账户**（`account_id` 随机），之后通过配对加入同一账户。设备会话以 DK 证明持有者，Google／Apple 登录不能代替 DK、Quick 或 Strong。
+- 手机产品必须先用 Google／Apple 登录，并固定连接 `https://relay.keyvalet.dev/`。DK 对一次性 attempt、state、设备 ID 和精确 ID token 的 SHA-256 签名绑定，relay 用官方 JWKS 验证 ID token；用户以 `provider + subject` 标识，不按邮箱合并。人类会话与设备会话分别保存 token hash，双方 SAS 确认完成后才建立账户归属。桌面自托管保持独立支持，手机不自动迁入自建 relay。具体扩展见 [账户登录契约](../mobile/docs/account-login.md)。
 - relay 只认「同账户设备之间」的消息。
-- 账户恢复码：注册时生成一次，用于所有设备丢失时在 relay 上吊销/重建。自托管 relay 的管理员也可以直接在服务器上操作。
+- 账户恢复码：首次注册时显示账户 ID 与恢复码，须一起离线保存。全部设备会话丢失时用 `POST /v1/recovery` 和新 DK 签名证明恢复；原子撤销旧注册／会话、取消请求并轮换恢复码。`keyvalet relay recover <account-id>` 从隐藏输入或 stdin 读取旧码，helper 先持久保存新 DK 与加密的新码，再经 relay-client 发送；中断后凭同一 DK 续接。此接口恢复 relay 账户，不恢复 vault、硬件私钥或丢失机器上的离线授权。见 [恢复与审计](remote-recovery-audit.zh-CN.md)。
 - Team（阶段 2）在同一模型上加「组织」维度，不在本文范围。
 
 ### 3.4 轮换与吊销
 
-- 吊销设备：任一仍受信的审批设备（Strong）或服务器本地 polkit 发起；两端删除记录、relay 删除注册并断开其 presence；该设备签过的尚未使用的批准与能力令牌全部失效（按 `device_id` 过滤）。
+- owner 吊销设备生成 AK_s 的 Strong `DeviceDeleteProof`；helper 先撤销本机权威、保存 tombstone 与逐 peer 密文，再投递 DeviceRevoke 及 relay DELETE。relay 注销会话并断开 WS；peer 收到有效证明后废止该设备尚未消费的批准与 Grant。网络失败保留待办，状态显示 `device_revocations_pending`，需要新 relay challenge 时由 owner 重试。已安装两端「一分钟内失效」尚未测；离线设备不能保证即时清除。
 - 若已启用 V2 的 vault 同步，吊销后还要按总架构 §8.2 旋转 UMK；第一版不同步，所以不涉及。
 - 轮换身份密钥 = 吊销旧设备 + 重新配对，不做原地轮换。
+- 全部设备会话丢失时，`POST /v1/recovery` 不需要旧 Device 会话，要求离线保存的账户 ID／恢复码和新 DK 身份签名（按 `dk_sig` 选择）。新码在发送前保存；同事务比较旧 hash、撤销旧设备与设备／人类会话、清 push token、取消审批／配对、删旧消息、注册新设备并轮换码。失败原子保留旧状态，并发恢复仅一个成功。它只恢复 relay 账户，不恢复 vault、旧私钥或丢失设备上的离线 Grant；手机仍须 Google／Apple 登录。
 
 ---
 
 ## 4. 配对协议
 
-目标：在**不信任 relay** 的前提下，让两台设备拿到对方真实公钥，并且用户亲眼确认过。
+配对在不信任 relay 的前提下建立双方公钥与能力的信任。HTTP 返回只是候选记录，SAS 与已签名 E2E 确认都完成后才写入目录。
 
-```
-Ubuntu（服务器，终端经 SSH）                     relay                         MacBook
-keyvalet pair --new
-  helper 生成 token（128 bit，一次性，10 分钟）
-  若尚无账户：POST /v1/devices 注册 DK_srv → account_id
-  POST /v1/pair/start {token_hash, DK_srv_pub, meta(hostname, os, caps=[execute])}
-  终端打印：
-    kv-pair://relay.example.net/<base32(token)>
-    （以及同内容二维码，给以后的 iPhone 用）
-                                                                keyvalet pair kv-pair://…
-                                                                  relay-client 解析 relay_url + token
-                                                                  helper 生成/读取 DK_mac, AK_q, AK_s
-                                                                  POST /v1/pair/complete
-                                                                    {token, DK_mac_pub, AK_q_pub, AK_s_pub,
-                                                                     meta(hostname, os, caps=[approve_quick, approve_strong])}
-  ◀── relay 把对方公钥集合转发给双方（WS）──▶
-  两端各自计算
-    sas = SHA-256("keyvalet-pair-v1" ‖ token ‖ sort(DK_srv_pub, DK_mac_pub) ‖ AK_q_pub ‖ AK_s_pub)
-    取前 6 位十进制
-  终端显示 6 位数，等待 y/N                                       对话框显示 6 位数 + Touch ID「确认配对」（用 AK_s 签 sas）
-  用户核对两边一致后在服务器按 y
-  helper 校验 Mac 发来的 sas 签名（AK_s）→ 写入 devices
-                                                                  helper 写入 peers（Ubuntu 的 DK_srv_pub, caps）
-  POST /v1/pair/finish {token}（两端各一次；relay 把 pairing 标记完成并删除 token）
+```text
+执行端 owner                      relay                     审批端 owner
+pair --new                                                   pair <kv-pair://…> / 手机扫码
+helper 创建／重开 DK                                         helper／手机原生读取 DK、AK_q、AK_s
+首次匿名注册 → account_id、一次性恢复码                       手机先 Google／Apple 登录
+生成 raw token 16 字节，冻结最多 600 s 的 exp
+POST pair/start {token_hash, initiator: DeviceRecord, exp}
+显示 URI 与 Unicode QR                                       helper 解析 URI，POST pair/complete
+                                                             {token, joiner: DeviceRecord}
+                         候选记录、pairing_id、account_id、expires_at
+两端 DK 身份签名与 HPKE 交换 PairAccept；各自计算 SAS
+终端核对六位码 y/N                                           核对 SAS，AK_s 签 PairConfirm 的 JCS
+双方交换原始 PairConfirm 信封，核对 pairing_id／完整记录／期限
+本端 owner 确认 + 对端有效确认 → 原子提交信任目录
+POST pair/finish {pairing_id, confirm}，双方 finish 后 relay 标 finished
 ```
 
-细节与边界：
-
-- token 只用一次、10 分钟过期；relay 只存 `token_hash`，`start` 后任何一方未在 10 分钟内 `complete` 就作废。
-- SAS 绑定 token、双方 DK 和审批端 AK。优先采用加入方的 AK；加入方是纯执行端时采用发起审批端的 AK，保持既有执行端发起的测试向量不变。两端都是审批端时，确认对象还必须携带本端完整 DeviceRecord 并由本端 AK_s 签名，接收方核对全部密钥与能力；不能只凭 SAS 信任另一组 AK。6 位数对「只能尝试一次」的在线攻击足够；不做更长的码。
-- Mac 侧用 `AK_s` 对 sas 签名并发给服务器，服务器据此确认「这把 Strong 审批键确实在用户按过 Touch ID 的设备上」；服务器侧没有用户在场机制，所以服务器端的确认是终端里的 `y`——这条终端必须是 vault owner 的 SSH 会话（与现有 `keyvalet approve` 同要求）。
-- 第二台审批设备（另一台 Mac、以后的 iPhone）重复同一流程；也允许由**已配对的审批设备**代替服务器终端做 `--new`（它用 `AK_s` 签发 token），这样以后加 iPhone 不必再 SSH。
-- 配对信息写入后，服务器把 Mac 标为 `approver`，默认策略：T0/T1 可由 Quick 批，T2/unlock/admin 必须 Strong。
-- 失败处理：6 位数不一致 → 两端都丢弃，审计 `pair_sas_mismatch`；超时 → 丢弃；relay 返回未知 token → 提示重新 `--new`。
-- `/pair/complete` 只取得路由和候选公钥，不能建立信任。加入方发送 DK 签名、HPKE 加密的 PairAccept，双方发送 PairConfirm；本端 owner 确认、对端确认验签和原始期限均满足后才提交目录。配对信封的 `id` 为 relay 的 `pairing_id`；后台轮询绑定这一轮 ID，旧配对消息不能使新配对失败。移动端持久保存原始信封供断网重试，不延长期限。
-- 加入新执行端前显示账户内将生效的未过期全局授权数量，并提供排除此设备的选择。任一端选择排除，就把 `exclude_global: true` 放入签名确认对象；双方提交排除状态，阻止已有授权补发及未来全局授权投递，逐设备授权仍可使用。
+- token 为一次性随机 128 bit，URI 使用 base32；relay 仅存 hash 与重放墓碑。期限从首次创建计算，Strong 提示或重试不延长它。URI／二维码与恢复码不写日志；恢复码只向 owner 显示，并提示连同账户 ID 离线保存。
+- 初次注册先保存加密身份，注册失败重用原密钥。已注册单例加入须以自己的 DK 会话证明同一设备，且不能已有信任／墓碑／审批／授权状态；迁移有加密恢复日志。安装器不编造 account/device ID。
+- PairConfirm 的最小签名载荷是 **JCS `{sas}`**，不是六位 ASCII 数字。现代 owner／手机确认还包含 `device: DeviceRecord`、`exclude_global`；签名覆盖整个确认对象去掉顶层 `sig` 后的 JCS，包含未知字段。缩成 `{sas}` 验证现代确认会丢失密钥／能力／排除标志的绑定，必须拒绝。Strong 一方使用 AK_s 及其 alg；纯执行端以 owner 终端确认并发送 DK 认证的空 AK 签名确认。双方都无 AK_s 时拒绝。
+- 旧 SAS 输入为 `ASCII("keyvalet-pair-v1") || raw_token_16 || sorted_JCS(DK_1, DK_2) || JCS(approver.ak_q.pub 或 null) || JCS(approver.ak_s.pub)`。任一记录有 `dk_sig` 时使用 `keyvalet-pair-v1-split-identity` 新域，双方身份改为 JCS `{dk_pub, dk_sig}`，缺失 dk_sig 在该输入中编码 null；按 JCS 字节排序并保留嵌套扩展。SHA256 按无符号大端整数转十进制、至少左补到六位，取前六位。加入方有 AK_s 时选加入方，否则选发起方。旧记录和向量的字节保持。
+- 两个审批端也交换 AK_s 签名的完整本端 DeviceRecord，核对全部身份／审批键、算法、能力与扩展，不能仅凭单组 AK 的 SAS 信任对端。全部 DK 身份验证采用 §3.1 的 dk_sig 规则，HPKE 仍用 dk_pub。
+- 配对信封 id 为 pairing_id；收到旧轮确认返回 wrong_pairing，不能清空新一轮。移动端与 helper 重发同一签名／密文，不重签不同字段、不延长期限。finish 的同成员／同 SAS 有效重试幂等，伪签名或换 SAS 仍拒绝。
+- 新执行端展示将生效的未过期全局 T1 Grant 数量。任一端选择排除即签入 `exclude_global: true`，双方保存排除状态，阻止旧票补发及未来全局票投递；逐设备票不受影响。全局 T2 不属于该继承机制。
+- 不一致、过期或验证失败不能建立信任。真实模块的双端确认与重试已通过；ndu × Mac 安装后的 Strong 配对仍未完成，Pixel 7 × 软件 fixture 配对已通过，不能相互代替（§16）。
 
 ---
 
@@ -250,12 +247,12 @@ keyvalet pair --new
   "exp": 1760200300,
   "enc": "<HPKE 封装密钥 base64>",
   "ct": "<HPKE 密文 base64>",
-  "sig": "<ES256(from.DK, header_bytes ‖ ct)>"
+  "sig": "<ES256(from 的身份签名键, AAD || decoded_ct)>"
 }
 ```
 
-- AAD = `v ‖ type ‖ id ‖ account ‖ from ‖ to ‖ created_at ‖ exp` 的 JCS（RFC 8785）编码；篡改头部即解封失败。
-- `sig` 由发送方**身份密钥** `DK` 签（身份密钥恒为 P-256，所以信封签名恒为 ES256），覆盖头部和密文。relay 验 `sig` 并检查 `from`/`to` 同账户，否则拒收；接收端再次验签（不信任 relay 的验证）。信封**内部**的对象（ApprovalDecision、Grant、Directive）另有自己的签名，按签名密钥记录的 `alg` 验证（§3.1）。
+- AAD 为信封去掉 enc、ct、sig 后完整头对象的 JCS，包括未知扩展及已签名 push.mode；基础字段为 v/type/id/account/from/to/created_at/exp。签名覆盖 AAD 拼接解码后的 ct，不能用字段字符串串接代替。
+- `sig` 由发送方**身份密钥** `DK` 签（身份密钥恒为 P-256，所以信封签名恒为 ES256），覆盖头部和密文。relay 与接收端均调用 `verify_identity_signature(DeviceRecord, …)`：合法 dk_sig 存在时只用其 pub，缺失时用 dk_pub；坏 dk_sig 失败，不回退、不跳过。relay 还检查 from/to 同账户。信封**内部**的对象（ApprovalDecision、Grant、Directive）另有自己的签名，按签名密钥记录的 `alg` 验证（§3.1）。
 - 一次 HPKE 一个信封，不复用上下文；明文最大 64 KiB（审批请求的 body 摘要已截断，足够）。
 - 接收端用自己的时钟检查 `exp`；若 `created_at` 与本地时钟偏差 > 60 s，仍处理但在 UI 和审计里标注「发送方时钟偏差」。relay 的时间戳不用于安全判断。
 - 多审批设备：发送方对每个 approver 各封一个信封（fan-out 在 helper 内完成，密文不同、`id` 相同）。
@@ -269,7 +266,7 @@ keyvalet pair --new
 | 类别 | 触发 | 最低档位 | 产生什么 |
 | --- | --- | --- | --- |
 | `unlock` | 服务器 helper 为某个客户端进程开凭证会话（Linux 现有「每个新连接需要独立解锁授权」） | Strong | 一个会话，寿命 `session.unlock_ttl`（默认 12 h，上限 24 h；到期后下一次请求再触发 unlock） |
-| `use` | 某条凭证的某次具体使用，按风险档 T0–T3 与授权模式 | T0：auto / 预授权；T1：Quick 或预授权；T2：Strong，且不被任何 grant/令牌覆盖；T3：直接拒绝 | 一次性批准（`per_use`）或 grant（其他模式，见 §6.6） |
+| `use` | 某条凭证的某次具体使用，按风险档 T0–T3 与授权模式 | T0：auto / 预授权；T1：Quick 或预授权；T2：Strong；普通 Grant 不覆盖，只有显式设置签发的 T2 Grant 才可覆盖（§7.6；所有 T2 须逐执行端签入当前标签）；T3：直接拒绝 | 一次性批准（`per_use`）或 grant（其他模式，见 §6.6） |
 | `admin` | 新增/删除凭证、放宽授权模式、增删设备、签发能力令牌、修改策略 | Strong | 一次性批准 |
 
 `unlock` 是无人值守场景里最容易被忽略的一环：没有它，服务器上的 helper 根本开不了会话。它把「这台机器上的用户 `u` 的进程 X 想开始使用 vault」告诉用户，批一次管 12 小时。
@@ -289,9 +286,13 @@ canonical = JCS({
 digest = SHA-256(canonical)
 ```
 
-`unlock` 与 `admin` 的 `credential/method/...` 字段按类别填空或填操作名（如 `admin.add_device`）。
+`action` 的实际形状是 `{kind, ...扩展}`，credential 和无 HTTP 绑定字段使用显式 null；agent 为实际执行绑定，不能从展示用 ApprovalRequest 重建。host 仅 ASCII、小写；query_keys 按 UTF-16 顺序排序且保留重复；path 解码 unreserved 后移除点段，保留重复斜杠／保留字符分隔符，不做 Unicode 归一化。重复 JSON key、无效 Unicode、非有限数与超出 ±(2^53−1) 的整数拒绝。
+
+DeviceRecord 的完整 JCS 保留可选字段缺失与 null 的区别。dk_sig 缺失不序列化；合法值及嵌套未知字段进入所有覆盖记录的签名、摘要和 authority 比较。显式 null 虽可无损解析，但注册／身份验证拒绝；不能删除未知字段或无效 dk_sig 后再用旧 DK 验签。K1 没有改变 RFC 9180 suite、原 ECDH 字节或旧向量。
 
 ### 6.3 `ApprovalRequest`（信封明文）
+
+以下为协议展示形状；风险来自执行端策略，UI 不决定级别。当前生产适配器保守地把 GET／HEAD／TOTP 作为 T1，其余 use 为 T2、管理 T3 拒绝，不能用示例中的 POST/T1 组合推断所有实际 POST 都可 Quick。
 
 审批端要渲染、但不需要任何秘密：
 
@@ -342,7 +343,7 @@ digest = SHA-256(canonical)
 
 ### 6.5 执行端验证清单（顺序固定，任一失败即拒绝并审计原因）
 
-1. 信封：`to` 是自己、`from` 是已配对且未吊销的审批设备、`exp` 未过、`sig` 用该设备 `DK` 验证通过、HPKE 解封成功。
+1. 信封：`to` 是自己、`from` 是已配对且未吊销的审批设备、`exp` 未过、`sig` 用该记录的身份键（dk_sig 存在时只用它，否则 dk_pub）验证通过、HPKE 解封成功。
 2. `approval_id` 在 `pending_approvals` 中且状态为 `waiting`。
 3. `digest` 与 pending 记录一致；`nonce` 一致。
 4. `level` ≥ 该请求的 `min_level`；T2 必须 `strong`。
@@ -353,7 +354,7 @@ digest = SHA-256(canonical)
 
 ### 6.6 授权范围与 grant（沿用总架构 §7.6）
 
-远程批准的 `scope.mode` 映射到现有四种模式，`per_use` 不产生 grant；其余产生 `grant = {credential, max_tier: T1, allowed_hosts, methods, budget, until, mode, approver, approval_id}`。T2 永远不被 grant 覆盖。审批端只能从执行端给出的 `scope_options` 里选，不能放大。
+远程批准的 scope.mode 映射到现有授权模式，per_use 不产生 Grant；其他选项产生最多 T1 的 helper 内部授权，保留原 ApprovalDecision 的签名与完整请求证明，authority 为 approval_decision，不伪造新的 AK Grant 签名，不能拿它跨设备安装。普通票不覆盖 T2；显式设置签发的 T2 票受 §7.6 约束。审批端只能选 scope_options 提供的范围，不能放大。
 
 ### 6.7 时序
 
@@ -385,18 +386,18 @@ helper：审计 {approval_id, approver, level, latency_ms}
 
 **并发合并**
 
-- 同凭证 30 s 内的多条 T0/T1 请求合并为一个 ApprovalRequest（`merged_count`），批准后产生 `until=now+30s` 的临时 grant，与总架构 §7.6 一致；T2 从不合并。
+- 当前只合并同一 session／完整执行绑定相同的重试；method、URL、headers、body、凭证或进程绑定改变即成为独立审批。不同操作的一次批量批准需要新的签名批承诺，K4/D06 已划入 V2，不能用 merged_count 的 UI 字段宣称已授权多种操作。
 
 ### 6.8 Approver 选择顺序（修订总架构 §7.4）
 
 ```
 if 策略判定 auto（T0 且规则允许）                          → auto（审计 auto）
-elif 有效能力令牌覆盖且 tier ≤ T1                            → capability（审计 jti）
+elif 有效 Grant 覆盖（普通票 ≤T1；显式 T2 票受 §7.6 约束） → capability（审计 jti）
 elif 本机有可用的本地审批通道（Mac Touch ID / Linux polkit agent 已为该客户端注册）
      且 config.approval.prefer != "remote"                 → 本地
 elif 有已配对 approver（在线优先；离线也发，排队）           → remote-device
      · fan-out 到全部 approver；按 §6.10 的在场判定决定每个 approver 是横幅还是静默，静默 30 s 未决升级为横幅
-else                                                        → deny，原因 "no_approver"（不做 TTY 确认码）
+else                                                        → no_approver（不冒充用户拒绝，不做 TTY 确认码）
 ```
 
 Strong 只接受 Mac Touch ID（本地）或 remote `AK_s`；Linux 本地 polkit 对 `use` 的 T2 视为 Strong（现有行为），对 `unlock`/`admin` 同样。
@@ -411,7 +412,8 @@ Strong 只接受 Mac Touch ID（本地）或 remote `AK_s`；Linux 本地 polkit
 | --- | --- | --- | --- |
 | `approval_pending` | 请求已送出，用户还没决定，`exp` 未到 | 否 | 继续别的工作；有空就 `credential_wait_approval`；或等唤醒 |
 | `approval_denied` | 用户点了拒绝 | 是 | 不要重试、不要绕路（例如让用户直接粘 key）；把原因告诉用户 |
-| `approval_expired` | `exp` 已过且没有决定 | 是（对这次请求） | 再发一次会产生新弹窗；若非必要不要自动重发 |
+| `approval_expired` | `exp` 已过且没有决定 | 是（对这次请求） | 仍需要结果时可新建审批；非必要不自动重发 |
+| `approval_cancelled` | 明确本地取消，此次请求已结束且未获授权 | 是 | 先确认是否需要新请求；不当作拒绝，不索要 key |
 | `no_approver` | 没有任何可用审批通道 | 是 | 告诉用户配置设备或 SSH 本地审批 |
 
 超时只产生 `approval_pending`。把超时当成「否」会让模型把它理解成权限问题去绕，这正是我们要避免的行为。这些状态作为**正常工具结果**（`isError: false`，`status` 字段）返回，不作为协议错误——协议错误会让一些运行时直接把工具标红并终止思考。
@@ -432,7 +434,7 @@ Strong 只接受 Mac Touch ID（本地）或 remote `AK_s`；Linux 本地 polkit
 HTTP 路径（网关 / 透明代理 / keyvalet run）：挂连接到按目标主机估算的客户端超时之前
 ```
 
-**第一层：调用内等待。** 预算取 `min(policy.wait_in_call_s, runtime_budget − 10 s)`，默认 `wait_in_call_s = 60`。`runtime_budget` 由 `kv-mcp` 在 `initialize` 时根据 `clientInfo.name` 查表（§6.9.3），再叠加安装器为该运行时写入的每服务器超时。等待期间，如果客户端在请求 `_meta` 里给了 `progressToken`，每 15 s 发一次 `notifications/progress`（`message: "waiting for approval on MacBook (42 s)"`），这会重置 Claude Code 的空闲计时器与 Cursor IDE 的进度型超时；没给 token 就只能靠绝对预算。helper 侧 `pending_approvals` 把完整请求（参数与 body，仅内存、上限 1 MiB、到 `exp` 清除）留着，预算内批准就地执行并返回真实结果。
+**第一层：调用内等待。** 预算取 `min(policy.wait_in_call_s, runtime_budget − 10 s)`，默认 `wait_in_call_s = 60`。runtime_budget 根据实际 clientInfo.name/version 查表（§6.9.3），叠加显式 override 与已确认的 KEYVALET_TOOL_TIMEOUT_SEC 上限。安装器配置不会自动出现在 initialize，不能仅凭写入配置就提高未测客户端预算。等待期间，如果客户端在请求 `_meta` 里给了 `progressToken`，每 15 s 发一次 `notifications/progress`（`message: "waiting for approval on MacBook (42 s)"`），本轮没有证明它重置任何运行时计时器；无 token 时不伪造进度，仍受绝对预算约束。helper 侧 `pending_approvals` 把完整请求（参数与 body，仅内存、上限 1 MiB、到 `exp` 清除）留着，预算内批准就地执行并返回真实结果。
 
 **第二层：放手。** 预算用尽返回：
 
@@ -445,32 +447,38 @@ HTTP 路径（网关 / 透明代理 / keyvalet run）：挂连接到按目标主
 
 `next_steps` 是写给模型的 UI，与现有工具描述同一口径。
 
-**第三层：续等工具。** `credential_wait_approval(approval_id, max_wait_s?)`：长轮询 pending 状态，`max_wait_s` 同样被运行时预算封顶，期间发 progress。结果三选一：`approved` + 原请求的执行结果（helper 从内存里取出完整请求执行，一次性，关闭 pending）；`denied`；`still_pending`（再等或放弃由模型决定）。helper 重启导致内存里的请求丢失时，返回 `approved_retry_required`，此时模型用相同参数 + `approval_id` 重发原调用，helper 比对除 `nonce/exp` 外的全部规范化字段（含 `body_sha256`）一致才执行。
+**第三层：续等工具。** `credential_wait_approval(approval_id, max_wait_s?)`：长轮询 pending 状态，`max_wait_s` 同样被运行时预算封顶，期间发 progress。正常结果为 ok（原结果、只领取一次）、approval_denied、approval_cancelled、approval_expired 或 still_pending；已领取返回 already_consumed。helper 重启导致内存里的请求丢失时，返回 `approved_retry_required`，此时模型用相同参数 + `approval_id` 重发原调用，helper 比对除 `nonce/exp` 外的全部规范化字段（含 `body_sha256`）一致才执行。
 
-**第四层 a：唤醒（Claude Code channels）。** `kv-mcp` 声明 `capabilities.experimental["claude/channel"]`；批准到达时发 `notifications/claude/channel`，`content` 为「approval 01J… for GitHub POST repos/… granted; call credential_wait_approval("01J…") to get the result」，`meta.approval_id`。空闲 session 会被唤醒，忙碌时下一轮合并送达。约束：research preview；自定义服务器要 `claude --dangerously-load-development-channels server:keyvalet` 或组织 allowlist；未启用时 Claude Code **静默丢弃**且不报错——所以它只是加速器，任何正确性都不建立在它之上。安装器不替用户加这个标志，只在文档里给出。
+**第四层 a：唤醒（Claude Code channels）。** `kv-mcp` 声明 `capabilities.experimental["claude/channel"]`；批准到达时发 `notifications/claude/channel`，`content` 为「approval 01J… for GitHub POST repos/… granted; call credential_wait_approval("01J…") to get the result」，`meta.approval_id`。服务端能力声明和发送已有 CI；空闲唤醒、busy 合并及未启用时丢弃三项在 R2-D 均未测，是待验收的客户端行为。约束：research preview；自定义服务器要 `claude --dangerously-load-development-channels server:keyvalet` 或组织 allowlist；官方契约描述未启用时静默丢弃，R2-D 尚无有效交互会话复验——所以它只是加速器，任何正确性都不建立在它之上。安装器不替用户加这个标志，只在文档里给出。
 
 **第四层 b：Stop hook 兜底。** `kv-hook` 新增 `stop` 模式（Claude Code `Stop`、Devin `Stop`、Codex `Stop`、Cursor `stop`、Gemini `AfterAgent`）。流程：hook 从 stdin 拿到 `session_id`，用自己的父进程 pid（= agent 进程）向 helper 查「这个 agent pid 有没有未到期、未被领取的 pending」；有，且该 approval 被此 hook 阻止的次数 < 3，且 `stop_hook_active`/`loop_count` 未触顶，则返回「别停，去 `credential_wait_approval(01J…)`」（Claude/Devin/Codex：`{"decision":"block","reason":…}`；Cursor：`{"followup_message":…}`；Gemini：`{"decision":"deny","reason":…}`）；否则放行。阻止次数计在 pending 记录上，`exp` 过后一律放行。这一层的代价是每次阻止多一轮模型调用，等待本身在工具调用里阻塞、不耗 token。
 
-**HTTP 路径。** 网关与透明代理没有「返回 pending 再续等」的余地——SDK 等的是 HTTP 响应。做法：挂连接到 `min(policy.http_wait_s, host_hint − 60 s)`，`host_hint` 来自模板（OpenAI / Anthropic SDK 默认 600 s → 挂 540 s；未知主机默认 55 s）；期间每 20 s 发送一个 TCP keepalive，不发应用层字节（HTTP/1.1 不能在状态行前发心跳；`102 Processing` 兼容性差，不用）。超出后返回 `429` + `Retry-After: 30` + JSON `{error: {type: "keyvalet_approval_pending", approval_id}}` + 响应头 `X-KeyValet-Approval: pending; id=01J…`。OpenAI/Anthropic SDK 对 429 会按 `Retry-After` 自动重试（默认最多 2 次），足够覆盖「用户正在掏手机」的几十秒；更长的等待靠挂连接本身。`keyvalet run` 包裹的子进程走同一代理，但 wrapper 额外在子进程的 stderr 打一行「KeyValet: waiting for approval on MacBook」。
+**HTTP 路径。** 网关与透明代理没有「返回 pending 再续等」的余地——SDK 等的是 HTTP 响应。做法：挂连接到 `min(policy.http_wait_s, host_hint − 60 s)`，`host_hint` 来自模板（OpenAI / Anthropic SDK 默认 600 s → 挂 540 s；未知主机默认 55 s）；期间每 20 s 发送一个 TCP keepalive，不发应用层字节（HTTP/1.1 不能在状态行前发心跳；`102 Processing` 兼容性差，不用）。超出后返回 `429` + `Retry-After: 30` + JSON `{error: {type: "keyvalet_approval_pending", approval_id}}` + 响应头 `X-KeyValet-Approval: pending; id=01J…`。OpenAI/Anthropic SDK 对 429 会按 `Retry-After` 自动重试（默认最多 2 次），默认重试次数有限，不能承诺任意等待都能续上；同一活 session 的恢复边界见下文。`keyvalet run` 包裹的子进程走同一代理，但 wrapper 额外在子进程的 stderr 打一行「KeyValet: waiting for approval on MacBook」。
 
-#### 6.9.3 运行时预算与能力表（2026-10-12 回填 W5，须随版本复核）
+本地结果细化：拒绝为 `approval_denied`，明确取消为 `approval_cancelled`；旧 IPC `approval_expired + reason=cancelled` 做明确兼容适配，不猜英文错误。对话框等待超时而 exp 未到仍为 pending；到期才为 expired。HTTP 拒绝／取消／到期分别 403／409／410，并带 `x-should-retry: false`；等待预算用尽仍为 429＋Retry-After。
+
+连接断开后，独立任务继续等同一许可。批准后只执行原始二进制 body；仅相同活会话的 route token、epoch、凭证、method、URL、过滤后 headers、body 可领取保留响应。`X-KeyValet-Approval-Id` 及 SDK retry-count 不进入上游或 digest；不带 ID 的同一活绑定重试也可合并。每条请求 ≤1 MiB，最多 16 个 ticket，detached response ≤8 MiB；超限／中断返回 response_unavailable，不再次执行。响应在 exp／gateway revoke／shutdown 清除；gateway 重启或原始流交付后断流不保证恢复，单次许可不等于外部 HTTP exactly-once。实测见 R2-D。
+
+#### 6.9.3 运行时预算与能力表（2026-10-13 回填 R2-D，须随版本复核）
 
 | 运行时 | 工具调用超时（默认） | progress 续命 | 安装器写入 | 唤醒 | Stop 兜底 | 调用内预算 |
 | --- | --- | --- | --- | --- | --- | --- |
-| Claude Code CLI（stdio） | 文档约 28 h / 空闲 30 min；2.1.282 在合成本地模型接口下两组均完成 240 s，不证明上界 | 实测有 token、15 次标准进度；空闲上界未测 | `.mcp.json` / `~/.claude.json` KeyValet `timeout: 900000` | channels 声明/发送有 CI；交互式运行时提示不可用，空闲唤醒未通过 | 实测 `Stop` block 后续调工具，active 防循环 | 180 s |
-| Claude Code Desktop | 60 s 硬超时（已知 bug，忽略 `MCP_TOOL_TIMEOUT`） | 否 | 同上（不生效） | 同上 | 同上 | 50 s |
-| Codex | 0.162.1 TUI/exec 两组均完成 240 s；精确默认上限未证实，旧版按 60 s 保守处理 | 两组均提供 token；有进度完成，不证明续命语义 | `[mcp_servers.keyvalet] tool_timeout_sec = 900` | 无 | TUI 与 exec 均实测触发 `Stop`，block 后继续，active 防循环 | 默认 60 s；显式确认硬超时后 180 s |
-| Gemini CLI | 600 s | 代码有 progressReporter，未实测 | 每服务器 `timeout: 900000` | 无 | `AfterAgent` deny=重试 | 180 s |
-| Cursor IDE | 空闲型，进度重置 | 能 | 无接口 | 无 | `stop` followup | 120 s |
-| Cursor CLI / ACP | 2026.10.01 两组约 60 s cancellation；clientInfo 为 `Cursor` | 未提供 progressToken，未实际发送进度，不能推断续命是否有效 | 无接口 | 无 | stop 解析有 CI；未观察到真实输入 | 50 s |
-| Grok Build | 文档 6000 s；1.0.50 因未登录未进入工具，未实测 | 未确认 | `[mcp_servers.keyvalet] tool_timeout_sec = 900` | 无 | Stop 未确认，不注册未验证的变体 | 180 s |
-| Devin CLI | 3000.11.3 两组均完成 240 s，精确上限未知 | 实测有 token、15 次标准进度 | 未确认额外超时字段 | 无 | 实测 `Stop` block 后继续，active 防循环 | 默认 50 s；实际 clientInfo 为通用 `rmcp`，不能全局提额 |
-| OpenClaw / Hermes / SDK（HTTP） | 客户端决定：OpenAI/Anthropic SDK 600 s，curl/requests 无限 | 不适用 | 不适用 | 不适用（它们有自己的 cron/heartbeat） | 不适用 | 挂连接 55–540 s |
-| 未知 MCP 客户端 | 按 MCP TS SDK 默认 60 s 假设 | 否 | — | — | — | 50 s |
+| Claude Code CLI（stdio） | 文档约 28 h / 空闲 30 min；W5 合成本地模型两组 240 s 是历史证据。R2-D 托管 OAuth 过期、日常第三方 provider 未回复，未进入工具 | W5 有 token／标准进度；真实托管续命语义未测 | `.mcp.json` / `~/.claude.json` KeyValet `timeout: 900000` | 声明／发送有 CI；idle 唤醒、busy 合并、无 flag 静默丢弃均未测；须交互会话 | W5 block 后续调工具，active 防循环 | 180 s |
+| Claude Code Desktop | 历史 60 s bug；本轮未安装、未测 | 未测 | 写入与实际效果分开，未复验 | 未测 | 未测 | 50 s |
+| Codex | R2-D 托管 exec 240.015 / 240.006 s、TUI 240.007 / 240.012 s；是实测下界，不是精确上界 | 四组均有 token；有进度组完成，不推断续命语义 | `tool_timeout_sec` 生效：5 s 配置在 5 s 超时，900 s 允许 240 s 完成 | 无 | exec 捕获九字段并在 block 后续等；最终结果受模型 stream 错误／监督结束影响 | `codex-mcp-client / 0.162.1` 默认 180 s；未测 name/version 50 s；显式确认硬限 ≥190 s 可用 180 s，更小确认／override 优先 |
+| Gemini CLI | 600 s 为契约／源码值；R2-D 登录中止，未进入工具 | progressReporter 未实测 | 每服务器 `timeout: 900000` | 无 | `AfterAgent` 输入／行为未实测 | 180 s |
+| Cursor IDE | 文档描述空闲型超时；本轮未安装、未测 | 续命未测 | 无已确认额外字段 | 无 V1 channels | stop followup schema 有 CI，live 未测 | 明确 IDE 标识 120 s |
+| Cursor CLI / ACP | W5 2026.10.01 两组约 60 s cancellation；R2-D usage limit，未进入工具，不计为工具时限 | W5 未提供 token，未推断续命 | 无接口 | 无 | stop 有 CI，实际输入仍未测 | 50 s |
+| Grok Build | 文档 6000 s；R2-D native 1.0.50 仍 NotSignedIn，未进入工具 | 未测 | `tool_timeout_sec = 900` 的实际效果未测 | 无 | 未确认，不注册未验证变体 | 180 s |
+| Devin CLI | R2-D 托管模型、有效隔离两组 240.006 / 240.007 s，精确上界未测 | token=1，标准通知 16 / 0 | 未确认额外字段 | 无 | R2-D 五字段；block 后 wait 得原结果、active 放行 | 默认 50 s；实际 clientInfo 通用 `rmcp / 3.1.0`，不全局提额 |
+| OpenClaw / Hermes / SDK（HTTP） | Python OpenAI 3.29.0 / Anthropic 1.13.0 实测 read timeout=600、max_retries=2；实际 gateway HTTP/1.1、h2-only、wildcard 边界与终态已验证 | 不适用 | 不适用 | 不适用 | 不适用 | 挂连接 55–540 s |
+| 未知 MCP 客户端 | 上限未测，使用保守预算 | 有 token 才发，不推断续命 | — | — | — | 50 s |
 
-`clientInfo.name` 查不到的客户端一律按最后一行处理。表中「未确认」项是 W5 的实测清单（§16）。
+未测 clientInfo.name/version 按保守预算处理；实测 profile、显式 override 和较小确认上限的优先级以代码为准。四分钟完成只证明 ≥240 s，不证明精确上界或 progress 续命；R2-D 的实验显式用 300 s 预算，不是产品默认。
 
 W5 的联网 Claude OAuth、Gemini 浏览器登录、Grok NotSignedIn 均在工具前失败，不计为工具超时；Claude Desktop 和 Cursor IDE 未测。原始版本、字段名与三分钟批准结果见 [W5 报告](remote-approval-reports/W5.md)。安装器写入只针对 KeyValet 条目，不代表客户端必然接受该字段，也不自动替代 MCP 端保守预算。
+
+R2-D 的真实托管、超时配置与登录限制见 [运行时报告](remote-approval-reports/R2-D-runtimes.md)。Codex exec 与 TUI 是同一运行时的两种模式，不计作两家来满足 §16 的「Claude + 另外两家」。channels 三项仍须可用的已登录交互会话；不以 `-p` 或软件通知测试代替。
 
 #### 6.9.4 session 与 approval 的关联
 
@@ -518,35 +526,32 @@ away     = 其余一切：无图形会话、锁屏、屏保、显示器休眠、
 
 实现为 `kv-platform::PresenceProbe` trait（`fn state(&self) -> PresenceState { Present | Idle | Away, since, signals }`），每个平台一个实现；任何信号取不到 → 该项按最保守值处理。agent 在状态变化时（去抖 5 s）经 IPC 告诉本机 helper，helper 缓存；没有 agent 的机器（无头服务器、Windows 服务无登录会话）恒为 `away`。
 
-#### 6.10.2 用在两处
+#### 6.10.2 实际投递路由
 
-**（a）执行端选本机还是远程（§6.8 的「本机优先」分支）**
+人在场判定由执行端完成，桌面通过签名、加密的 PresenceHint 更新执行端缓存；状态变化经五秒去抖立即发送，未变化每 60 秒刷新。缺失信号为 away，WS 在线不等于人在场。Linux 精确可配置 idle 来源与 macOS 启动屏保初值仍需补验。
 
-```
-执行端本机 present            → 本机弹窗为主；远程 approver 收「静默」投递
-执行端本机 idle 或 away       → 远程 approver 收「横幅」投递；若本机有图形会话仍同时弹本机框（人回来就能看到）
-```
+| 本机／桌面状态或消息 | 执行端签名的 push.mode | relay 调度（手机 WS 在线／离线均相同） |
+| --- | --- | --- |
+| 本机或桌面 approver present | silent | Silent |
+| idle／away／unknown | banner | Banner |
+| notify always-phone | banner | Banner |
+| 旧审批没有 hint | 无 | 保守 Banner |
+| 30 秒仍未决的 approval_escalate | banner | 同 approval_id 的 Banner |
+| cancel、Grant、Directive/Result、DeviceRevoke | silent 或无 | Silent 控制更新 |
 
-**（b）多个审批端之间谁先响**
+PresenceHint 正文是 E2E 密文；relay 只读取已签名 Envelope 扩展 push.mode。该扩展只给提供商选择唤醒方式，不参与最低审批级别或授权判断。手机解密后的 Rust 请求决定正文、强度和可用动作。本地「我不在电脑前」只把 verified silent 提示成 banner，不发送伪造在场信息。
 
-桌面审批端（MacBook、Windows 笔记本）把自己的状态作为 E2E 的 `presence_hint {state, since}` 发给同账户的执行端（变化时发送，最多每 60 s 一次；relay 只转发不存，relay 自己只知道「连着」）。执行端 fan-out 时为每个 approver 决定投递方式，写在**密文内**的 `delivery: { mode: banner | silent, escalate_after_s }`：
+kv-server 在信封提交事务中登记 push_jobs；kv-push 为独立 systemd 服务 keyvalet-push.service，专用无登录用户，仅监听 127.0.0.1:8788。relay 通过 bearer 调私有 POST /v1/push，nginx 不代理该入口，公网返回 404。内部请求仅为 `{device_push_token, approval_id, to, delivery:{mode}}`，拒绝正文、密文及未知字段。FCM 为 data-only 三字段元数据；APNs 仅通用唤醒，NSE 验证／解密后填实际通知内容。
 
-```
-有任一桌面审批端 present      → 该桌面端 banner；手机 silent，escalate_after_s = 30
-没有桌面审批端 present        → 手机 banner；idle 的桌面端也 banner
-```
+#### 6.10.3 投递升级、重试与 token 生命周期
 
-#### 6.10.3 投递升级（executor 驱动）
+执行端在静默请求 30 秒仍未决时发送同 ID 的签名 approval_escalate，决定收到后退休旧唤醒并发送签名取消；relay 不解密或自行提升审批强度。push job 初次发送加三次重试，退避 1/2/4 s，每次 lease 读取最新 token；HTTP 28 s、lease 30 s，job 最迟于 120 s 或信封 exp 结束。429 Retry-After 有界且超过 job 生命周期就放弃唤醒；推送失败不回滚审批，前台 WS／上线拉取继续可用。
 
-静默投递不是不投，是「进列表、不响、不亮屏」。升级由执行端的定时器驱动，不依赖手机端能否在后台计时：
+手机登录后、冷启动和 SDK token 轮换都登记当前 token，上传摘要绑定人类会话。退出先清本地登录／通知，远端清理请求保留加密 outbox；在线退出、会话到期／吊销／最后人类会话删除清 relay token 与 job。APNs 410／FCM UNREGISTERED 比较发送时旧 token 后删除，不能删并发轮换的新 token；权限／配置错误保留 token。迟到上传响应不能复活已退出会话。
 
-```
-t0          发 approval_request（手机：delivery.mode = silent）
-t0 + 30 s   仍 waiting → 发 approval_escalate{approval_id}（手机：横幅 + 声音；同一条，不重复显示）
-t0 + exp    过期 → approval_cancel
-```
+Android 后台由 FCM → JobScheduler → Rust 先拉 HTTPS 待批，20 s 预算后返回已验证缓存并要求重试，不启动 Dart isolate。Silent／Banner 使用独立渠道，同 tag/id 的升级取消旧渠道再投递；相同计划去重。Quick 仅对 per_use Quick 开放允许／拒绝，动作要求系统解锁，FGS 用 AK_q 签；Strong 通知仅打开主 App，由实际 BiometricPrompt CryptoObject 使用 AK_s。
 
-iOS 侧：NSE 解密后按 `delivery.mode` 设置 `interruptionLevel`（silent → `.passive`，banner → `.timeSensitive`）与声音；`approval_escalate` 用同一 `threadIdentifier` 更新已投递的通知。Android 侧：FCM data message → 原生服务解密 → 按模式选通知渠道（静默渠道 / 高优先级渠道）。两端都把 `delivery` 当提示，不当安全判断——内容仍然必须完整显示。
+iOS NSE 已实现 App Group／原生 Rust 解密与 passive/timeSensitive 通知，Quick 要求 authenticationRequired，Strong 进 App；只有编译／模拟器证据，SE、锁屏／APNs、Apple 登录未验。Pixel 7 真实核心流程通过；升级请求到横幅约 35 s、静默到升级 28.620 s，≤30 s 端到端目标未过。重启后新审批拉取及退出后的 relay 删除未通过，手机 relay HTTPS 访问仍需恢复；一小时离线尚未测。详见 R2-C，不能用 FCM 202 代替这些验收。
 
 #### 6.10.4 用户可覆盖
 
@@ -558,7 +563,7 @@ iOS 侧：NSE 解密后按 `delivery.mode` 设置 `interruptionLevel`（silent �
 | 手机 App「我不在电脑前」开关 | 手机侧强制把 silent 当 banner 处理，不发任何东西给执行端 | 手机本地 |
 | 勿扰时段 | 手机侧按系统 Focus；执行端侧 `class: batch` 让请求等更久而不是半夜响 | 各自本地 |
 
-#### 6.10.5 典型场景核对
+#### 6.10.5 策略场景（完整 OS 转换仍待实机验收）
 
 | 场景 | 判定 | 结果 |
 | --- | --- | --- |
@@ -573,7 +578,7 @@ iOS 侧：NSE 解密后按 `delivery.mode` 设置 `interruptionLevel`（silent �
 
 #### 6.10.6 隐私与安全边界
 
-- 在场状态是元数据。它只以 E2E 形式发给同账户设备，relay 不存；粒度只有三档，不含应用名、窗口标题或输入内容。
+- 在场状态是元数据。它只以 E2E 形式发给同账户设备，relay 不知道明文状态，但可持久保存该密文消息；签名头的 push.mode 是可见投递元数据。粒度只有三档，不含应用名、窗口标题或输入内容。
 - 在场状态**只影响投递方式，不影响授权**：present 不会让任何审批变成自动，away 不会降低任何档位。被注入的 agent 伪造不了它（由 agent 进程之外的用户态 KeyValet agent 计算，经 helper 下发）。
 - macOS 的 `CGEventSource` 空闲时间不需要辅助功能权限；`CGSessionCopyCurrentDictionary` 不需要特殊权限。Windows `GetLastInputInfo` 必须在会话内进程调用，这正是 `kv-agent.exe` 所在的位置。Linux 的 Wayland 空闲信号因合成器而异，拿不到就按 away——这是三平台里最不可靠的一项，V1 接受。
 
@@ -600,16 +605,16 @@ keyvalet grant --to srv \
 ### 7.2 使用（Ubuntu）
 
 - Policy 阶段匹配 `credential × host × method × path × agent`，命中则 debit 预算（`calls`、可选 `bytes`），执行，审计 `jti`。预算用完 → 回到正常审批。
-- 吊销：Mac 上 `keyvalet grant revoke <jti>`（Strong）→ `device_revoke`/`token_revoke` 信封 → 服务器 `revoked_jti`；服务器本地 polkit 也可吊销。
+- owner grant revoke 通过已签名 revoke_grant Directive 逐执行端撤销，并保存已认证回执／revocation_pending；没有 token_revoke 协议类型。remote grant revoke/revoke-all 为 Quick，owner 本地路径仍要求相应认证。
 - `keyvalet grant list` 两端都能看：剩余预算、到期时间、最近使用。
 
-### 7.3 推荐默认
+### 7.3 默认与 V2 推荐
 
-安装后不自动签发任何令牌。首次远程审批时，Mac 对话框提供「以后 24 小时内自动放行此凭证对此主机的只读请求」快捷项（只对 T0/T1、只对 `GET/HEAD`），接受即签发一张等价令牌——这是总架构 §6.4「从历史推荐规则」的远程版。
+普通票最多 T1；host/method/path/agent 与预算可收窄，未查询到的剩余预算显示未知。根据多次批准自动推荐「24 小时只读」尚未实现，属于 V2，不作为当前弹窗选项或验收通过项。
 
 ### 7.4 统一的授权对象：Grant
 
-弹窗里选的范围（§6.6）、上面的能力令牌（§7.1）、以及用户要的「这个凭证一直允许」「这台机器一直允许」「全局不用再管」，本质是同一种东西：**一张由审批密钥签名、描述「在什么范围内不必再问」的票**。第一版就把它们统一成一个对象，免得三套存储、三套吊销、三套 UI：
+弹窗里选的范围（§6.6）、上面的能力令牌（§7.1）、以及用户要的「这个凭证一直允许」「这台机器一直允许」「全局不用再管」，共用同一范围／预算／吊销模型。独立签发的 Grant 由 AK 签名；弹窗决定衍生的内部授权保存原 ApprovalDecision 证明，不伪造可传输的 Grant 签名（§6.6）。独立 Grant 形状如下：
 
 ```json
 {
@@ -645,25 +650,28 @@ keyvalet grant --to srv \
 | 这个凭证一直允许 | `level=credential`，`exp = null`，`max_tier = T1` | **Strong** |
 | 这台机器一直允许 | `level=device`，`exp = null`，`max_tier = T1` | **Strong** |
 | 全局一直允许（所有机器） | `aud = *`，`level=global`，`exp = null`，`max_tier = T1` | **Strong** |
-| 无人值守模式（含敏感操作） | 上面任一 + `max_tier = T2` | **Strong + 二次确认**（§7.6） |
+| 设置签发的短期票，包括 1 小时票 | origin=settings，明确到期及范围 | **Strong**（K4/D03） |
+| 无人值守模式（含敏感操作） | 逐执行端 max_tier=T2；不允许全局 T2 | **Strong + 两个一次性准备令牌 + 两轮精确标签确认**（桌面 helper/CLI，§7.6） |
 | 预授权能力令牌（`keyvalet grant …`） | `level=credential` + 收窄 + `budget` + `exp` | Strong |
 
 执行端的覆盖判定沿用总架构 §7.6：`同凭证（或 level 更宽）∧ tier ≤ max_tier ∧ host/method/path/agent 命中 ∧ 预算未超 ∧ 未过期 ∧ 未吊销 → 跳过审批，审计 jti`。多张 Grant 同时命中取**最窄的 max_tier 不放大、预算各自扣减**。T2 请求只有 `max_tier = T2` 的 Grant 能覆盖，且每次仍重算 digest 并审计 `unattended_t2`。
 
-存储：执行端 `grants` 表（替代原 `grants` + `capability_tokens` 两张表），审批端 `issued_grants`。吊销：`directive{op: revoke_grant, jti}`（§7.5），或执行端本地 polkit / Touch ID。
+执行端保存 grants/object_json/authority_json；审批端持久保存 issued_grants 和完整 issued_grant_objects，列表区分 installed／issued／approval_decision 来源。预算／uses_n／last_used_at 是经过签名 QueryGrants 回执获得的逐执行端快照，带 fetched_at；未查到显示 not_fetched，不假报零使用量。
+
+审批端撤销持久保存意图和目标列表，逐执行端发送签名 Directive；仅对应设备的已认证回执确认完成。离线、取消或未获回执时保留 revocation_pending；重试继续未完成目标，过期 Directive 需 owner 重签，不在后台绕过硬件授权。全局 T1 向未来经 SAS 信任、未排除的执行端补发；已撤销或待撤销的票不补发。Grant 列表按 jti 游标、每页 1–100（默认 50）和 48 KiB 分页，CLI 自动取完，手机以 QueryGrants 续页；列表元数据不能当新票安装。
 
 ### 7.5 远程设置：Directive（控制面）
 
-审批端对执行端的一切设置变更，都是一个签名的 **Directive**，经 relay 的 `directive` 信封下发，执行端执行后以 `directive_result` 回报。执行端只认签名与范围，不认「从哪台设备的哪个界面来」，所以 iPhone App、菜单栏 App、CLI、以后的 Web 控制台和团队策略下发走同一条路。
+审批端对执行端的一切设置变更，都是一个签名的 **Directive**，经 relay 的 `directive` 信封下发，执行端执行后以 `directive_result` 回报。执行端只认签名与范围，不认「从哪台设备的哪个界面来」，当前 CLI／手机共用该控制面；菜单栏、Web 和团队审批者为 V2。未知 service/org issuer 或 quorum 不能授权。CLI 的 * 展开为当前执行端的独立 Directive，V1 不提供单个全局 Directive 的广播回执对象。
 
 ```json
 {
   "kind": "directive",
   "id": "01J…",
   "iss": "dev_mac…", "iss_alg": "ES256",
-  "aud": "dev_srv… | *",
+  "aud": "dev_srv…",
   "op": "set_mode | revoke_grant | revoke_all_grants | lock | set_unlock_ttl | set_class | set_device_label |
-         revoke_device | query_status | query_pending | query_grants | query_audit | cancel_approval",
+         revoke_device | query_status | query_pending | query_grants | query_audit | cancel_approval | notify",
   "args": { … },
   "nonce": "…", "exp": 1760200300,
   "sig": "…"
@@ -676,24 +684,26 @@ keyvalet grant --to srv \
 | --- | --- | --- |
 | 收紧 | `lock`、`revoke_grant`、`revoke_all_grants`、`cancel_approval`、`set_mode` 变严、`set_unlock_ttl` 变短 | Quick（甚至锁屏通知上的一个按钮） |
 | 查询 | `query_*` | Quick；结果经信封回传，只含元数据与摘要，不含凭证值 |
-| 放宽 | `set_mode` 变松、`set_unlock_ttl` 变长、`set_class` 延长 `exp`、签发常设 Grant | Strong |
+| 放宽／目录变更 | set_mode 变松、set_unlock_ttl 变长、新建或扩大 class、set_device_label、设置签发 Grant（短期也包括） | Strong |
 | 危险 | `revoke_device`、`max_tier = T2` 的 Grant | Strong + §7.6 二次确认 |
 
 执行端对每条 Directive：验签（按 `iss` 的 `AK_q`/`AK_s`，`alg` 来自设备记录）→ 档位够 → `nonce` 一次性 → `exp` 未过 → 执行 → 审计 `directive_applied{op, iss}` → 回 `directive_result{id, ok, state_summary}`。失败也回报，附原因。
 
-`set_mode` 的取值就是现有四种授权模式（`per_use` / `per_credential` / `per_session` / `remember:<h>`），作用于执行端上该用户的会话；本地 `/keyvalet:mode` 与远程 `set_mode` 写同一份状态，最后写入者生效，两边都审计。
+set_mode 取值为 per_use／per_credential／per_session／remember:<h>。本地 /keyvalet:mode 经特权 remote_settings 与远程 SetMode 共用 helper 设置后端和 CAS；过时本地提案拒绝覆盖远程更新，成功变更均审计。该操作不向 MCP／relay-client 开放新的设置能力。notify 只影响投递，仍为 Quick，不改变审批最低级别。
 
 ### 7.6 审批边界的安全栏
 
-用户要的「以后再也不需要管」是合理需求，但它正是提示注入最想要的开关。第一版的栏：
+K4 已决定以下边界，不因 UI 或联调需要降低档位：
 
-1. **常设 Grant 的 `max_tier` 默认 T1**：只读与普通写入可以永远不问；删除、支付、IAM、发布、吊销这类 T2 默认仍然每次 Strong。这是现有产品决策（product-2026-10 J4「T2 永远弹窗」）的延续。
-2. **T2 纳入无人值守必须显式、分开、带红色状态**：`max_tier = T2` 的 Grant 只能从设置页签发，不出现在弹窗快捷项里；签发时 Strong 之后再输入执行端标签作二次确认；两端 `status` 与弹窗标题常驻红色「无人值守（含敏感操作）」；默认带 `exp`（建议 7 天），用户可改为常设但要再确认一次；每次被它覆盖的 T2 调用都单独审计 `unattended_t2` 并可在审批端设置页看到计数。
-3. **范围永远只能收窄不能放大**：弹窗里的选项由执行端在 `scope_options` 里给出，审批端选不出执行端没给的；设置页签发的 Grant 不能超过设备记录里的 `caps`。
-4. **全局（`aud = *`）Grant 对后加入的执行端也生效**，所以配对新设备时要提示「账户内有 N 张全局 Grant 将对此设备生效」，并允许一键排除。
-5. **任何 Grant 的吊销是 Quick**，而且 `revoke_all_grants` 永远在审批端的第一屏。
+1. 普通 Grant 最多 T1，T2 弹窗只允许 per_use。所有设置／预授权签发均为 Strong，包括有限期 1 小时票；弹窗衍生的有限 T1 会话／remember 范围可按原请求使用 Quick。
+2. 显式 T2 只能从设置意图签发。桌面 helper 先用 AK_s 完成独立准备签名，再返回最多 120 s 的一次性令牌；只保存 hash，绑定 caller UID/PID/role、完整意图和当前 DeviceRecord，准备不产生 Grant。R3-A 按用户确认将桌面 helper 的有限与常设 T2 均改为两个不同令牌、两次精确标签确认；两轮共用原期限，最终失败也消费令牌。CLI 要求 2→1，拒绝旧的一轮准备、令牌重复或截止时间变化；手机实现由 R3-C 单独核对，不从桌面结果推断。UI 布尔同意不能代替签名。
+3. 有限期与常设 T2 的签名 Grant 都必须包含 confirm=当前执行端标签（K4/D04）。共享接收验证、安装与使用前重验均执行该条件；missing/null/empty/wrong-label／签后篡改拒绝。启动升级把旧的缺当前标签 T2 票标失效并审计，防止重装；有效 T1／T2 保留。见 [R3-B 无签名验收 §2](remote-approval-reports/R3-B-unsigned-acceptance.md#2-安全修复)。
+4. 全局 T2 拒绝（K4/D05）。CLI 通配符 unattended 只对当前执行端逐个确认、逐张签发，不覆盖未来设备；发行端与共享接收验证器均拒绝 global 或 aud=* 的 T2。有限／常设负向向量与 Mac／Windows 原生 CI 已通过。
+5. 全局 T1 可覆盖未来经 SAS 信任的执行端；配对展示数量并允许签名排除，待撤销／已撤销票不能补发。scope_options、caps、模板主机和策略限制不能被放大。
+6. T2 模式在状态／审批标题中显示无人值守，并对每次覆盖单独审计 unattended_t2。CLI unattended 必须指定 --until；手机／原生签发逻辑提供常设两次确认，不把它写成 CLI 已支持 --standing。
+7. 远程 revoke_grant／revoke_all_grants 为 Quick，执行端回执才表示生效；本机 owner grant revoke 的控制路径仍走 owner 认证。立即锁定／收紧不能授权新操作，离线目标保留 revocation_pending。
 
-这一节的第 2 条是对既有「T2 永远弹窗」决策的放宽，需要用户拍板（§18）。
+不同操作批量授权、服务／组织 issuer、quorum 与 attestation 验证为 V2。验收通过只指相应对象与平台，不能由软件覆盖率或单次 FCM 唤起推导整个安全栏已通过。
 
 ---
 
@@ -701,38 +711,26 @@ keyvalet grant --to srv \
 
 ### 8.1 技术选型
 
-沿用总架构 §10.1：Rust（axum + tokio），单二进制 `kv-server`，feature `relay`。自托管用 SQLite（WAL），官方实例用 Postgres；presence 与队列用进程内 broadcast（单实例）或 Postgres LISTEN/NOTIFY（多实例）。TLS 由 **Cloudflare 橙色云代理 + 本机 nginx** 提供（§8.5），`kv-server` 只监听 `127.0.0.1`。
+Rust axum + tokio、单二进制 kv-server，relay feature 默认开启。当前自托管与官方实例均用 SQLite WAL、单实例进程内连接队列；Postgres／LISTEN-NOTIFY／多实例扩展为 V2。TLS 链路为 Cloudflare 橙色云 → nginx Origin CA → 127.0.0.1:8787；服务不监听公网。
 
 ### 8.2 API
 
-| 方法 | 路径 | 调用方 | 作用 |
-| --- | --- | --- | --- |
-| POST | `/v1/devices` | 任一设备 | 注册：`{DK_pub, AK_q: {pub, alg}?, AK_s: {pub, alg}?, key_kind, attestation?, os, caps, label}`；首个设备创建匿名账户并返回恢复码。relay 只存不验 `attestation`（§13.2） |
-| POST | `/v1/auth/challenge` → `/v1/auth/verify` | 设备 | 用 `DK` 签 32 字节挑战换会话令牌（24 h，可续） |
-| GET | `WS /v1/presence` | 设备 | 长连接；30 s 心跳；服务端推送 `approval_request / approval_decision / approval_cancel / grant / directive / directive_result / device_revoke / pair_*` |
-| POST | `/v1/pair/start` / `complete` / `finish` | 两端 | §4 |
-| POST | `/v1/approvals` | 请求方 | `{id, to[], exp, envelopes[]}`；每个 `to` 一个信封 |
-| POST | `/v1/approvals/{id}/reply` | 审批方 | 决策信封；首个有效回复后状态 `resolved`，其余设备收到 `approval_cancel` |
-| POST | `/v1/approvals/{id}/cancel` | 请求方 | 过期/取消 |
-| GET | `/v1/approvals?state=waiting` | 审批方 | 重连后拉取积压 |
-| POST | `/v1/messages` | 任一 | 非审批类信封（令牌、吊销），同样按 `to` 投递并持久化到送达 |
-| DELETE | `/v1/devices/{id}` | 同账户 Strong 设备 / 恢复码 / 管理员 | 吊销 |
-| GET | `/v1/health`, `/metrics` | 运维 | — |
+附录 B 按 http.rs 当前路由列出完整方法、认证、请求和响应，不把匿名设备会话当人类登录。
+
+- 桌面注册为 POST /v1/devices，返回匿名账户及一次性恢复码；手机使用 /v1/account/begin → finish，以 provider ID token 和 DK 身份签名绑定登录。已登录手机再经双方 SAS 加入执行端账户。
+- POST /v1/auth/challenge → verify：随机 32 字节、60 s、单次 challenge；身份验签使用 dk_sig（存在）或 dk_pub（缺失），换取 24 h Device 会话及 account_id。手机另带 x-keyvalet-user-session，退出／到期／吊销后 HTTP/WS 拒绝旧 Device token。
+- 配对 start／complete／finish 与恢复 /v1/recovery 的语义见 §3.4、§4；恢复不要求旧 Device 会话，不给手机免登录。
+- /v1/approvals 提交逐接收方信封，reply 首个有效外层回复使 relay resolved；relay 不知道 allow/deny，真正执行仍依赖 helper 的 AK／digest／nonce 验证。cancel 保留原签名信封。
+- /v1/messages 与 ack 传递非审批密文及 typed 回执；/v1/presence 是 kv-relay-v1 WS，不是人类在场证明。手机 push-token 更新／删除要求本人有效设备会话，手机还须活跃人类会话。
+- /v1/health 为公开诊断；/metrics 在当前 router 要求 Device 会话，未实现单独的 socket-loopback 检查。部署监听 loopback 不等于经 nginx 的访问也被限制到 loopback；该边界需落实，见 OPEN-QUESTIONS S03。
 
 ### 8.3 数据模型（SQLite）
 
-```sql
-accounts(id, created_at, recovery_hash, plan)
-devices(id, account_id, dk_pub, akq_pub, akq_alg, aks_pub, aks_alg, key_kind, attestation BLOB, os, caps, label, created_at, revoked_at, last_seen)
-sessions(token_hash, device_id, exp)
-pairings(token_hash, account_id, initiator_device, initiator_pubs, joiner_pubs, state, exp)
-messages(id, account_id, from_device, to_device, type, envelope BLOB, created_at, exp, delivered_at, acked_at)
-approvals(id, account_id, requester, state, exp, resolved_by, resolved_at)      -- 状态机：waiting → resolved | cancelled | expired
-```
+当前 server schema v3 的 14 张表及键／外键见附录 D。完整 DeviceRecord（含 dk_sig 与未知字段）在 devices.record 中保存，dk_pub 索引仍是 HPKE 公钥；不凭拆开的 SQL 列重建签名记录。accounts 只保存 recovery_hash，设备／人类会话各保存 token_hash；login_users 以 provider/subject 唯一，不按 email 合并。
 
-- `messages.envelope` 就是 §5 的整个 JSON（含密文）；relay 从不解析 `ct`。
-- 送达并 ack 后 7 天内删除（给审计对账留窗口）；`approvals` 过期后 7 天删除。
-- 容量限制：每设备每分钟 ≤ 60 条请求、≤ 600 条消息；每账户待处理 ≤ 500；单信封 ≤ 80 KiB。
+pairings 保存固定原始期限、双方确认状态和 SAS hash；used_pair_tokens 是 hash-only 重放墓碑。approvals 的 waiting/resolved/cancelled/expired 为路由状态；messages 以 `(account_id,id,to_device,type)` 标识完整原始信封，按 type ack 防止同 ID request/escalate/cancel 相互提前确认。完全相同重试幂等，不同密文冲突，ack 不重置。
+
+push_jobs 与 messages 外键及提交同事务，唤醒失败不撤销已接受信封。已 ack 消息七天后清理；审批相关记录到 exp 后七天清理；未 ack 的普通消息持久保留，过期后不投递。每设备每分钟 60 次 approvals／600 条 messages，账户待处理最多 500，单信封 80 KiB、HTTP/WS 输入 1 MiB。plan 当前默认 self_hosted，尚无计费／套餐配额执行。
 
 ### 8.4 relay 看得到 / 看不到
 
@@ -741,54 +739,34 @@ approvals(id, account_id, requester, state, exp, resolved_by, resolved_at)      
 | 账户内有哪些设备、公钥、在线状态、上次心跳 | 任何凭证值、UMK、CEK |
 | 谁向谁发了多少条、什么时候、多大、`type` | 请求里的凭证名、主机、路径、agent、purpose、决策内容（全部在 `ct` 内） |
 | 配对发生过、设备被吊销过 | 哪条 `approval_id` 批了还是拒了（`resolved` 不区分） |
+| 手机 push token、已签名的静默／横幅投递提示；托管登录的 provider/subject/email/name | 设备私钥与审批正文 |
+
+推送提示位于 Envelope 外层扩展 `push: {mode: silent|banner}`，纳入 AAD 与 DK 签名；helper 根据原始请求生成，relay 不解析 `ct`。旧请求缺提示时只做保守唤醒，手机仍依据解密并验签后的 delivery 决定呈现。升级必须 banner，取消和控制面更新 silent。relay 与 `kv-push` 仅用 loopback HTTP 和受限 bearer 传递 `{device_push_token, approval_id, to, delivery}`；不传信封、摘要或凭证信息。持久队列最多并发 8 个投递，初次加 3 次重试，限流遵循 Retry-After，任务 120 s 到期；失败不改变审批权限。失效 token 采用匹配旧值的删除，防止擦除新 token；退出、人类会话过期和吊销清除 token。
+
+HTTP 认证／登录／恢复参数依赖 TLS。Cloudflare 终止 TLS，能接触这些临时凭据；端到端保密承诺覆盖审批与授权信封，不把账户认证参数称为端到端密文。
 
 relay 被攻破的后果：丢消息、延迟、拒绝服务、观察元数据；不能伪造请求或批准（签名），不能重放（nonce + `exp`），不能解密。
 
 ### 8.5 部署
 
-**同机部署（第一版）**：在这台 Ubuntu 上，链路固定为 **Cloudflare 橙色云（代理 DNS）→ nginx（443，Cloudflare Origin CA 证书）→ `kv-server` 监听 `127.0.0.1:8787`**。不用 Tailscale，不用 Caddy。
+当前官方 relay 位于 simvito：**Cloudflare 橙色云 → nginx（Origin CA）→ kv-server 127.0.0.1:8787**；kv-push 是专用服务，127.0.0.1:8788，仅内部 bearer 调用。不用 Tailscale，不用 Caddy，不需要更改现有其他站点或 zone 全局 TLS 设置。
+
+自托管 relay **只服务桌面审批端／CLI**，仍可匿名注册及恢复。手机产品固定官方 relay.keyvalet.dev，不能连接自建地址；App 无地址展示、编辑入口或导出的地址修改 API。不是安装自建 push 或同邮箱登录就能绕过该限制。
 
 ```sh
-# 1. kv-server：二进制 + systemd，只听本地
-keyvalet relay install --listen 127.0.0.1:8787 --data /var/lib/keyvalet-relay --public-url https://relay.example.com
-# 2. nginx：安装器写出 /etc/nginx/conf.d/keyvalet-relay.conf（下方模板），证书放 /etc/ssl/keyvalet-relay/{origin.pem,origin.key}
-# 3. Cloudflare：A/AAAA 记录 relay.example.com 指向服务器公网 IP，开启橙色云；SSL/TLS 模式 Full (strict)；可选开启 Authenticated Origin Pulls
-# 4. 防火墙：443 只放行 Cloudflare 的 IP 段（https://www.cloudflare.com/ips/），8787 不对外
+# CLI renders deployment assets; administrator activation is a separate step.
+keyvalet relay install --listen 127.0.0.1:8787 --data /var/lib/keyvalet-relay-server --public-url https://relay.example.com
+keyvalet relay set-url https://relay.example.com
+keyvalet relay status --public-url https://relay.example.com
 ```
 
-```nginx
-# /etc/nginx/conf.d/keyvalet-relay.conf（安装器模板）
-server {
-    listen 443 ssl http2;
-    server_name relay.example.com;
-    ssl_certificate     /etc/ssl/keyvalet-relay/origin.pem;   # Cloudflare Origin CA，15 年有效，只被 Cloudflare 信任
-    ssl_certificate_key /etc/ssl/keyvalet-relay/origin.key;
-    # 可选：Authenticated Origin Pulls，拒绝不经 Cloudflare 的直连
-    # ssl_client_certificate /etc/ssl/keyvalet-relay/cloudflare-origin-pull-ca.pem;
-    # ssl_verify_client on;
-    client_max_body_size 1m;                     # 单信封 ≤ 80 KiB，留余量
-    location / {
-        proxy_pass http://127.0.0.1:8787;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;  # WebSocket /v1/presence
-        proxy_set_header Connection "upgrade";
-        proxy_set_header Host $host;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header CF-Connecting-IP $http_cf_connecting_ip;
-        proxy_read_timeout 90s;                  # 客户端 30 s 心跳；Cloudflare 自身 WS 空闲上限 100 s
-        proxy_send_timeout 90s;
-    }
-}
-```
+relay install 写出 unit／nginx 模板，不能代替创建专用用户、安装二进制、配置 Origin CA、启动 systemd 和 nginx。server 使用 keyvalet-relay-server.service 与 /var/lib/keyvalet-relay-server；执行端客户端使用 keyvalet-relay.service 与 /var/lib/keyvalet-relay，二者权限／目录不混用。参考实际 [nginx 模板](../deploy/relay/nginx.conf.template)、[push 私有入口](../deploy/relay/push-private.nginx.conf) 与 W9/R2-C 部署记录。
 
-Cloudflare 橙色云的几个事实与对策：
+nginx 的源站限制检查实际 TCP 来源的 Cloudflare IP allowlist，避免共享 real-ip 改写或伪造 CF 头绕过。kv-server 仅对 socket peer 恰为 127.0.0.1 的请求采纳单个合法 CF-Connecting-IP；其他来源／重复或无效头回退到 socket IP。应用心跳 30 s、nginx 超时 90 s、server 无入站活动 100 s 断开，是已测试的应用／部署值，不将 100 s 写成 Cloudflare 平台承诺。
 
-- WebSocket 在所有套餐都支持；空闲连接 100 s 无流量会被边缘断开，所以客户端心跳 30 s、nginx `proxy_read_timeout` 90 s。
-- TLS 在 Cloudflare 边缘终止：Cloudflare 能看到 HTTP 层——但信封内容本来就是端到端密文，Cloudflare 看到的与 relay 自己看到的一样只是元数据（§8.4）；威胁模型里把 Cloudflare 视为与 relay 运营者同级的中间人（§12）。
-- `kv-server` 从 `CF-Connecting-IP` 取客户端 IP 做限流，且只在请求来自 nginx（本地）时信任该头。
-- 免费套餐够用：请求体上限 100 MB、无 WS 连接数硬限；若日后官方 relay 走 Cloudflare 则另评估 Spectrum / Tunnel。
-- 同机的代价是可用性耦合：服务器重启时 relay 也不在，但那时也没有请求要批。安全上不扩大泄露面（vault 已在这台机器上）。
-- 官方 relay（后续）：同一二进制，Postgres，美国托管，Free 配额 3 台设备 / 每月 2,000 次远程审批 / 待审批保留 7 天（见总架构 §10.3 与 strategy 文档）；配额执行代码在第一版就留接口（`plan` 字段），不实现计费。
+已实测公网 health 200、普通认证 WSS／HPKE／typed ack，直连 origin 加伪造 CF 头 403、公网 push 404、内部未认证 push 401、认证 FCM 202。R2-A 2026-10-13 的现行 server SHA256 为 1eced902770d81e9933c204c8830ca7d2c7565e3fc0105e93aeeb44c45f9eab0，保留 account.env、systemd 与 nginx 配置；Google 已配置，Apple 未配置。Origin CA 私钥留在服务器，不读／不导出。单项传输通过不代表硬件审批延迟通过。
+
+托管计费、Free 3 台／每月 2,000 次等套餐额度仍是计划；当前官方实例没有这些配额执行。桌面同机自托管的可用性与执行端耦合，手机只走官方实例。
 
 ---
 
@@ -797,17 +775,17 @@ Cloudflare 橙色云的几个事实与对策：
 ### 9.1 `kv-relay-client`
 
 - 新 crate `rust/crates/kv-relay-client`，同一二进制在三平台运行。
-- Linux：systemd 单元 `keyvalet-relay.service`，`User=keyvalet-relay`，`ProtectSystem=strict`、`PrivateTmp`、`NoNewPrivileges`、`RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6`，无 `CAP_*`。配置文件 `/etc/keyvalet/relay-client.toml`（relay_url、device_id、account_id）。与 helper 通信走 `/var/run/keyvalet/relay.sock`，helper 用 `SO_PEERCRED` 只接受 uid=`keyvalet-relay`。
+- Linux：systemd 单元 `keyvalet-relay.service`，`User=keyvalet-relay`，`ProtectSystem=strict`、`PrivateTmp`、`NoNewPrivileges`、`RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6`，无 `CAP_*`。配置文件 `/etc/keyvalet/relay-client.toml`（relay_url、device_id、account_id）。与 helper 通信走 `/var/run/keyvalet/relay.sock`，helper 经 root peer broker 的 SO_PEERCRED／SO_PEERPIDFD 与执行文件证明只接受真实专用 relay UID／角色，不能仅凭 UID 或自报路径。
 - macOS：per-user LaunchAgent `dev.keyvalet.relay`，由 `dev.keyvalet.helper` 以 audit token + code requirement 校验（与 `dev.keyvalet.agent` 同机制），IPC 走 helper 的 socket 新增 `relay` 子协议。
-- Windows：服务 `KeyValetRelay`，以虚拟服务账户 `NT SERVICE\KeyValetRelay` 运行（不是 LocalSystem），经 `\\.\pipe\keyvalet-relay` 连 `KeyValetHelper`；管道 DACL 只给该 SID 与 SYSTEM，helper 用 `GetNamedPipeClientProcessId` → 进程令牌校验 SID 与 Authenticode 发布者；配置在 `C:\ProgramData\KeyValet\relay-client.toml`。
+- Windows：服务 `KeyValetRelay`，以虚拟服务账户 `NT SERVICE\KeyValetRelay` 运行（不是 LocalSystem），经 `\\.\pipe\keyvalet-relay` 连 `KeyValetHelper`；管道 DACL 只给该 SID 与 SYSTEM。helper 从 `GetNamedPipeClientProcessId` 获取真实 PID，核对进程令牌 SID、固定安装文件身份及受保护 owner／DACL；MCP 另核对服务创建的子进程与持有的进程句柄。Authenticode 是可选发行诊断，不能以模型提交的 PID／角色替代 OS 认证。配置在 `C:\ProgramData\KeyValet\relay-client.toml`；新无签名整包验收与历史收据分列于 [R3-B 续验](remote-approval-reports/R3-B-unsigned-acceptance.md)。
 - 行为：指数退避重连（1 s → 60 s）；本地磁盘队列（待发信封，密文），防 relay 短暂不可达时丢请求；收到信封立即转交 helper，由 helper 决定是否 ack（验签失败也 ack，避免毒消息反复投递，但审计）。
 - 不做任何策略判断，不存任何明文，不持任何私钥。
 
 ### 9.2 审批端 UI（macOS / Windows）
 
-- **V1 桌面弹窗**：macOS 复用现有 `kv-touchid` 原生对话框；Windows 复用 `kv-agent.exe` 的 TaskDialog。标题带来源：「srv 上的 claude-code 请求使用 GitHub (guang)」。正文按 §6.3 渲染：真实操作（summary）、主机/方法/路径、agent 自述 purpose（标注「agent 自述」）、风险档、执行端保护状态（`tpm2` / `software_key`，后者红色提示）、时钟偏差提示。按钮：允许（+ 范围下拉，选项来自 `scope_options`，§7.4 映射）/ 拒绝；Strong 时点允许触发 Touch ID / Hello；选到「一直允许」时按钮文案变为「一直允许（Touch ID）」。
+- **V1 桌面弹窗**：macOS 在 `kv-touchid` 内使用 SwiftUI/AppKit 专用审批窗口；Windows 由 `kv-agent.exe` 的短生命周期 UI 子进程使用 WinUI 3 原生控件。标题带来源：「srv 上的 claude-code 请求使用 GitHub (guang)」。正文按 §6.3 渲染：真实操作（summary）、主机/方法/路径、agent 自述 purpose（标注「agent 自述」）、风险档、执行端保护状态（`tpm2` / `software_key`，后者红色提示）、时钟偏差提示。按钮：允许（+ 范围下拉，选项来自 `scope_options`，§7.4 映射）/ 拒绝；Strong 时点允许触发 Touch ID / Hello；选到「一直允许」时按钮文案变为「一直允许（Touch ID）」。
 - **V1 设置（终端）**：`keyvalet remote <device>` 子命令组（§9.3）覆盖 §7.5 全部 Directive；没有图形设置页也能完成所有远程设置。
-- **V1 手机 App 是唯一的图形审批/控制面**（一套 Flutter 代码出 iOS 与 Android，见 §9.2.1；iOS 走 TestFlight、Android 走内部测试轨道，不等公开上架）：锁屏 Quick / 生物识别 Strong 审批、每台执行端一页设置（当前模式、常设 Grant 列表含剩余预算/到期/来源、无人值守红色状态与 `unattended_t2` 计数、`unlock_ttl`、batch 类、锁定、`revoke_all_grants` 大按钮）、扫码配对与吊销、最近活动摘要、推送（APNs 经 `kv-push`，Android 经 FCM data message）。桌面**不做**图形设置页——产品决策见产品文档 §6.2。
+- **V1 手机 App 是唯一的图形审批/控制面**（Flutter/Rust/native，见 §9.2.1；Android Debug 核心真机流程通过，iOS／TestFlight／Play 签名分发待验）：锁屏 Quick / 生物识别 Strong 审批、每台执行端一页设置（当前模式、常设 Grant 列表含剩余预算/到期/来源、无人值守红色状态与 `unattended_t2` 计数、`unlock_ttl`、batch 类、锁定、`revoke_all_grants` 大按钮）、扫码配对与吊销、最近活动摘要、推送（APNs 经 `kv-push`，Android 经 FCM data message）。桌面**不做**图形设置页——产品决策见产品文档 §6.2。
 - **V2**：瘦菜单栏/托盘项（状态点、待批数、打开待批、一键全部收回；仅当 dogfooding 证明桌前需要）；Linux 桌面审批端；手机上走 OAuth 添加凭证。
 - Web 控制台随 Team（总架构阶段 2），服务 Lead 角色；不做个人审批端（`webauthn` 位保留，§13.1）。
 - 本机优先与手机静默/升级的判定见 §6.10；审批端睡眠：醒来后由 relay-client 拉取积压，一次最多排队弹 5 个，其余在列表里。
@@ -821,43 +799,36 @@ Dart 侧**不碰任何私钥、不做任何验签、不解析任何信封**—�
 | 必须原生 | iOS | Android | 为什么 Flutter 插件不够 |
 | --- | --- | --- | --- |
 | 硬件密钥与生物绑定签名（`DK`、`AK_q`、`AK_s`） | `SecureEnclave.P256`；`AK_s` 带 `.biometryCurrentSet`，`AK_q` 带 `WhenUnlockedThisDeviceOnly`，`DK` 带 `AfterFirstUnlockThisDeviceOnly` | `KeyGenParameterSpec`：`setIsStrongBoxBacked(true)` 优先、回退 TEE 并上报；`AK_s` 用 `setUserAuthenticationRequired(true)` + `setUserAuthenticationParameters(0, AUTH_BIOMETRIC_STRONG)`，签名经 `BiometricPrompt.authenticate(CryptoObject(Signature))` | **生物识别必须门控密钥操作本身**。`local_auth` 一类插件只返回布尔值，被攻破的 App 进程可以跳过它直接签名；只有密钥级绑定才是 Strong |
-| 推送与后台解密 | Notification Service Extension（Swift，独立 target，不能跑 Flutter 引擎）链接同一个 Rust 静态库（UniFFI / C ABI），从 App Group 共享容器读设备密钥的加密表示与密文队列，解密后改通知正文、`interruptionLevel`、`threadIdentifier`；锁屏动作 `UNNotificationAction(options: .authenticationRequired)` → 主 App 后台唤起 → Rust 用 `AK_q` 签 Quick 决定 | `FirebaseMessagingService`（Kotlin）收 data message → Rust 解密 → 按 `delivery.mode` 选通知渠道；动作按钮 → 前台服务签 Quick | iOS NSE 与 Android 消息服务都在 Flutter 引擎之外运行；后台路径全走原生 + Rust，不依赖 Dart 后台 isolate |
-| 设备证明 | App Attest | Play Integrity | 平台 API |
+| 推送与后台解密 | Notification Service Extension（Swift，独立 target，不能跑 Flutter 引擎）链接同一个 Rust 静态库（手写 C JSON ABI），从 App Group 共享容器读设备密钥的加密表示与密文队列，解密后改通知正文、`interruptionLevel`、`threadIdentifier`；锁屏动作 `UNNotificationAction(options: .authenticationRequired)` → 主 App 后台唤起 → Rust 用 `AK_q` 签 Quick 决定 | `FirebaseMessagingService`（Kotlin）收 data message → Rust 解密 → 按 `delivery.mode` 选通知渠道；动作按钮 → 前台服务签 Quick | iOS NSE 与 Android 消息服务都在 Flutter 引擎之外运行；后台路径全走原生 + Rust，不依赖 Dart 后台 isolate |
+| 设备证明 | App Attest 原生适配器 | Play Integrity 原生适配器 | relay challenge／验证未接入，attestation 仍 unverified；K4/D09 为 V2 |
 | 扫码 | Flutter 插件（`mobile_scanner`）即可 | 同左 | 不涉及安全 |
 
-Rust 核心因此有两套绑定：Dart（`flutter_rust_bridge`，主 App）与 Swift（UniFFI 或手写 C ABI，NSE）。状态（待批队列、peers、设备记录、本机签发记录）放 Rust 侧 SQLite，iOS 在 App Group 容器、Android 在应用私有目录；NSE 与主 App 对同一个 SQLite 用 WAL + 文件锁。
+Rust 核心因此有两套绑定：Dart（`flutter_rust_bridge`，主 App）与 Swift／Kotlin（手写 C JSON ABI，NSE／后台）。状态（待批队列、peers、设备记录、本机签发记录）放 Rust 侧 SQLite，iOS 在 App Group 容器、Android 在应用私有目录；NSE 与主 App 对同一个 SQLite 用 WAL + 文件锁。
 
-已知代价与对策：双绑定的维护成本（用同一份 Rust 公开类型，CI 同时生成两套并编译）；iOS NSE 的 30 s / 内存上限（解密一条信封远低于此）；Flutter 在 iOS 的后台执行不可靠（所以后台一律原生）；Flutter 包体与启动时间（可接受）。V2 的瘦菜单栏/托盘不复用 Flutter desktop，用各平台原生轻量实现，避免为一个状态点引入第二个 Flutter 工程。
+已知代价与对策：双绑定的维护成本（用同一份 Rust 公开类型，CI 同时生成两套并编译）；iOS NSE 的时间／内存预算（仅编译，真实解密性能尚未测）；Flutter 在 iOS 的后台执行不可靠（所以后台一律原生）；Flutter 包体与启动时间（可接受）。V2 的瘦菜单栏/托盘不复用 Flutter desktop，用各平台原生轻量实现，避免为一个状态点引入第二个 Flutter 工程。
 
-**App 的页面清单（V1）**：① 待批（列表 + 详情，详情即 §6.3 的全部字段；详情页底部是范围选择与允许/拒绝）；② 设备（已配对执行端列表 → 每台一页：状态、模式、常设 Grant、无人值守开关、锁定、`revoke-all`、吊销、最近活动；加设备 = 扫码）；③ 活动（本机签发的批准/票/指令，按天分组，摘要级）；④ 设置（relay 地址、通知偏好、「我不在电脑前」、关于/诊断、导出诊断包不含任何密钥）。没有登录页、没有账号页。
+**App 的页面清单（V1）**：登录后四页：① 待批（列表 + 详情，详情即 §6.3 的全部字段；详情页底部是范围选择与允许/拒绝）；② 设备（已配对执行端列表 → 每台一页：状态、模式、常设 Grant、无人值守开关、锁定、`revoke-all`、吊销、最近活动；加设备 = 扫码）；③ 活动（本机签发的批准/票/指令，按天分组，摘要级）；④ 设置（已验证账户／退出、通知偏好、「我不在电脑前」、语言／显示、无密钥诊断；不展示 relay 地址）。手机首次进入为 Google／Apple 登录页，设置页包含退出；固定官方 relay，无地址编辑入口。该后续产品要求与匿名桌面账户分开，见 §3.3 和手机账户契约。
 
-**目录与构建**：`mobile/`（Flutter 工程，`pubspec.yaml`）、`mobile/ios/`（含 `KeyValetNSE` target）、`mobile/android/`、`rust/crates/kv-mobile-core/`（`crate-type = ["staticlib", "cdylib", "rlib"]`，`flutter_rust_bridge` 代码生成输出到 `mobile/lib/src/rust/`，UniFFI 输出到 `mobile/ios/KeyValetNSE/Generated/`）。CI：`cargo build -p kv-mobile-core --target aarch64-apple-ios` 与 `--target aarch64-linux-android`，`flutter analyze`，`flutter test`。
+**目录与构建**：`mobile/`（Flutter 工程，`pubspec.yaml`）、`mobile/ios/`（含 `KeyValetNSE` target）、`mobile/android/`、`rust/crates/kv-mobile-core/`（`crate-type = ["staticlib", "cdylib", "rlib"]`，`flutter_rust_bridge` 代码生成输出到 `mobile/lib/src/rust/`，同一生成器输出 C header 到 NSE／iOS 插件／Android JNI）。构建验收包含 aarch64-apple-ios、aarch64-apple-ios-sim、aarch64-linux-android；flutter analyze 与40项测试通过。它不等于已在普通macOS Rust CI执行NSE／真实硬件。
 
 ### 9.3 CLI
 
-| 命令 | 端 | 作用 |
-| --- | --- | --- |
-| `keyvalet relay install / status / set-url` | 两端 | 部署或指向 relay |
-| `keyvalet pair --new` / `keyvalet pair <kv-pair://…>` | 两端 | §4 |
-| `keyvalet devices list / revoke <id> / rename` | 两端 | 设备目录 |
-| `keyvalet approvals [--watch]` | 审批端 | 待处理与最近决策；`approve <id> [--scope …]` / `deny <id>` 供终端用户使用（Strong 仍走 Touch ID / Hello） |
-| `keyvalet grant … / list / revoke <jti> / revoke-all` | 审批端签发；两端查看 | §7.1、§7.4 |
-| `keyvalet remote <device> mode <per_use\|per_credential\|per_session\|remember:Nh>` | 审批端 | Directive `set_mode`；放宽 Strong、收紧 Quick |
-| `keyvalet remote <device> allow --credential X [--hosts …] [--until …\|--standing]` | 审批端 | 签发 §7.4 Grant（`--standing` 为常设，Strong） |
-| `keyvalet remote <device> unattended --include-sensitive --until 7d` | 审批端 | `max_tier = T2` Grant，Strong + 二次输入设备标签（§7.6） |
-| `keyvalet remote <device> lock / unlock-ttl <h> / class … / label …` | 审批端 | 其余 Directive |
-| `keyvalet remote <device> status / pending / grants / audit [--since …]` | 审批端 | `query_*` Directive，结果本地渲染 |
-| `keyvalet approve <pid>` | Linux 执行端 | 现有 SSH polkit 后备路径，不变 |
-| `keyvalet status --summary` | 两端 | 增加：relay 连接状态、已配对设备数、待处理数、有效 Grant 数、是否处于无人值守（红） |
+现有入口为 relay install/status/set-url/recover、pair --new/URI、devices list/revoke/rename、approvals/approve/deny、grant、remote、audit --remote 和 status --summary。完整实际 --help 语法见附录 E；不以规划中的 flag 补齐命令。
+
+CLI 提交 owner intent，不持私钥或指定 issuer/nonce/alg。目标优先精确 device_id，再匹配唯一 active label；* 对 Directive 展开当前 execute 设备，对 T1 全局 Grant 保留未来设备语义。unattended 必须 --until，有限 T2 逐设备两轮标签确认；常设 T2 是 helper／手机签发逻辑，并非现有 CLI flag。pair 会显示双方 SAS、恢复码和全局授权排除选择；JSON 也不是二次确认旁路。
+
+Linux 正整数 approve <pid> 仍保留本地 polkit 后备；远程 approval_id 用相应选项消歧。approvals --watch --on-approve 仅对本次观察到的明确 Allow 触发一次用户命令，参数不插进 shell 源码，历史重现不会重复执行。
 
 ### 9.4 MCP 与 agent 可见行为
 
-- `credential_http_request` 等使用类工具：新增可选参数 `approval_id`（§6.9.2 `approved_retry_required` 时使用）；新增结构化结果状态 `approval_pending`、`approval_denied`、`approval_expired`、`no_approver`（§6.9.1，正常结果而非协议错误），文案是写给模型看的，明确告诉它该等待还是该放弃。
+- `credential_http_request` 等使用类工具：新增可选参数 `approval_id`（§6.9.2 `approved_retry_required` 时使用）；新增结构化结果状态 `approval_pending`、`approval_denied`、`approval_cancelled`、`approval_expired`、`no_approver`（§6.9.1，正常结果而非协议错误），文案是写给模型看的，明确告诉它该等待还是该放弃。
 - 新工具 `credential_wait_approval(approval_id, max_wait_s?)`（§6.9.2 第三层）。工具描述里写清：批准后直接返回原请求结果；不要重复发起原请求。
-- `kv-mcp` 在 `initialize` 读取 `clientInfo.name` 选运行时预算（§6.9.3）；对带 `progressToken` 的请求按 `progress_interval_s` 发 `notifications/progress`；声明 `experimental["claude/channel"]` 能力并在批准时发 `notifications/claude/channel`（§6.9.2 第四层 a）。
+- kv-mcp 在 initialize 读取实际 clientInfo.name/version 选运行时预算（§6.9.3），它不是调用方认证或授权来源；对带 `progressToken` 的请求按 `progress_interval_s` 发 `notifications/progress`；声明 `experimental["claude/channel"]` 能力并在批准时发 `notifications/claude/channel`（§6.9.2 第四层 a）。
 - `credential_status`：增加 `remote_approval: { relay: connected|offline, approvers: [{label, online}], pending: [{approval_id, summary, expires_at}], grants: n, unattended: bool, runtime_budget_s: n }`。
 - hooks：`kv-hook` 新增 `stop` 模式及各运行时变体（§6.9.2 第四层 b）；安装器为 Claude Code / Devin / Codex / Cursor / Gemini 注册对应 Stop 类事件。现有 PreToolUse / UserPromptSubmit 模式不变。
-- 安装器为每个运行时写入 KeyValet 服务器自己的工具超时（§6.9.3「安装器写入」列），只改 KeyValet 这一项，不动用户其他服务器的配置。
+- 安装器只更新 KeyValet 自己的配置项。Codex 的 timeout=5/900 字段效果已实测，Claude/Gemini/Grok 尚未测；Devin 3000.3+ 的专用 mcp_config 路径及短超时同步 env 仍需维护者核对（OPEN-QUESTIONS T10），不能把配置写入当作生效证明。
+- 明确本地取消映射 approval_cancelled；兼容旧 IPC approval_expired + reason=cancelled。对话框 timeout 在请求 exp 前仍为 pending。所有 A.8 状态为 isError=false；channels 只通知、不领取结果，三个 live 场景待测。
+- HTTP 403/409/410 三终态均带 x-should-retry:false；429 才表示仍待批。同一活 gateway session 可按原绑定领取有限响应，缓存最多 16 tickets、每条响应 8 MiB，不能跨重启恢复或承诺外部 HTTP exactly-once（§6.9.2）。
 
 ### 9.5 配置（执行端 `/etc/keyvalet/helper.toml` 新段）
 
@@ -882,40 +853,23 @@ exp_s = 86400
 
 ## 10. 执行端与审批端的本地数据
 
-执行端（Ubuntu helper，SQLite 于 `/var/lib/keyvalet/state.db`，与 vault 分开；敏感字段无）：
+桌面两种角色共用 helper 的 remote SQLite，而非另建 peers 表；完整 DDL 见附录 D。devices.record_json 保存完整公钥目录，镜像进 vault AEAD 元数据；dk_sig 不需要单独 SQL 列，不能省略它后重建签名对象。pending 保留规范化与公开请求快照，完整请求 body／结果仅在 Zeroizing 内存、上限 1 MiB，取消／到期／领取后清理。批准后的执行绑定与凭证版本、进程身份再次核对。
 
-```sql
-devices(id, account_id, dk_pub, akq_pub, akq_alg, aks_pub, aks_alg, key_kind, attestation_json, caps, label, trust, added_at, revoked_at)
-                                                         -- 亦镜像到 vault AEAD 元数据；attestation 第一版只存不验（§13.2）
-pending_approvals(id, kind, digest, nonce, canonical_json, exp, state, created_at, resolved_at, approver, level, scope_json,
-                  agent_pid, agent_runtime, stop_hook_blocks, claimed_at)   -- 完整请求体只在 helper 内存（§6.9.2），不落盘
-nonces(nonce, digest, used_at, exp)                      -- 现有；Directive 的 nonce 也进这张表
-grants(jti, iss, iss_alg, aud, level, credential, hosts_json, methods_json, paths_json, agent, max_tier,
-       budget_json, budget_left_json, nbf, exp, origin, sig, revoked_at)   -- §7.4，统一了弹窗范围 / 能力令牌 / 常设允许
-directives(id, iss, op, args_json, applied_at, ok, error)                 -- §7.5 审计用副本
-settings(key, value_json, set_by, set_at)                                 -- mode / unlock_ttl / class 等，本地与远程写同一份
-revoked_jti(jti, revoked_at)
-```
+授权分 installed grants、issued 对象、逐执行端 usage 和 revocation targets；approval_history 提供持久 decision_seq，owner 可看最近 200 条，MCP 不可读取 owner 历史。remote_outbox 与摘要绑定 receipts 提供 spooled／accepted／inspect 交付恢复；remote_audit 为独立链表，vault 检查点另存（§11）。SQLite 目录／文件权限由真实 runner 检查，普通 CI 使用临时 fixture。
 
-审批端（macOS root-only / Windows SYSTEM+Administrators）：
-
-```sql
-peers(id, account_id, dk_pub, caps, key_kind, label, trust, added_at, revoked_at)
-issued_approvals(approval_id, peer, kind, digest, decision, level, scope_json, issued_at, summary_text)
-issued_grants(jti, peer, level, credential, max_tier, exp, origin, issued_at, revoked_at)
-issued_directives(id, peer, op, issued_at, result_ok, result_summary)
-peer_state_cache(peer, mode, unattended, grants_count, pending_count, last_seen, fetched_at)   -- query_* 结果缓存，供设置页秒开
-```
+手机使用硬件 DK ECDH 派生的 AEAD 存储键加密 SQLite 业务记录，WAL／文件锁保护主 App 与原生后台并发；iOS App Group、Android 私有目录。索引与时序元数据不加密，正文／人类 session 不进入 Dart，短 UI 历史轮转不能截断持久审计／发件箱。手机库内链头不等于库外反回滚锚点。
 
 ---
 
 ## 11. 审计
 
-- 执行端每条 `use` 审计新增：`approver_device`, `approval_level`, `approval_latency_ms`, `approval_path` (`local | remote | grant:<jti> | auto`), `unattended_t2`（被 T2 Grant 覆盖时为 true）, `relay_clock_skew_s`。
-- 执行端新增事件：`grant_installed / revoked / exhausted`, `directive_applied / rejected{op, iss, reason}`, `setting_changed{key, by: local|remote:<device>}`。
-- 审批端新增事件：`remote_approval_issued / denied / expired_unseen`, `grant_issued / revoked`, `directive_issued{op, aud, result}`, `unattended_enabled / disabled`, `device_paired / revoked`, `pair_sas_mismatch`。
-- 两端都进现有哈希链；`keyvalet audit --remote` 可按 `approval_id` 把两端记录对上。
-- relay 自己的日志只有元数据，默认 7 天。
+执行端记录审批来源、digest、级别、nonce 消费、Grant 使用／预算／unattended_t2、Directive 应用／拒绝和设置变更；审批端记录签发决定、票、指令、配对与吊销。日志不包含凭证值、完整 body、密文、私钥、恢复码、配对 token 或 session token。relay 只记录静态事件／数量，不能提供两端明文审批对账。
+
+`keyvalet audit --remote [--device <id或label>] [--since 24h或RFC3339] [--limit 1..200] [--json]` 读取 owner 本机链并用签名 QueryAudit 自动分页查询 peers。按 approval_id、Grant jti、Directive id 与两端设备关系比较完整签名对象 JCS 摘要、digest、级别及动作；缺失／差异／离线／吊销／历史不完整区分报告。首个页面冻结 through 序号／hash；每端上限 100,000 条，跨设备不承诺共同事务快照。全部完整且无差异才退出 0；缺口退出 3，不能把空集合视为实机 100% 验收。
+
+桌面提交顺序为：同步独立审计收据与 vault AEAD 准备检查点 → SQLite 提交 → 发布已提交检查点。启动／查询核对全链、链头和留存收据；中断可完成／丢弃准备状态，单独回滚 SQLite、删除已提交尾部或留存收据会拒绝。失败事务的独立收据不成为授权。
+
+边界：SQLite、加密 metadata 和日志一起回到一致旧备份仍可通过；最终检查点发布前的恢复窗口无法区分旧状态与未提交事务。手机链头在同一加密库内，只查篡改／缺行，缺少库外锚点；旧版 UI 曾删除的历史无法补回，标 history_complete=false。**没有硬件单调计数器或外部见证的反回滚保证**。软件匹配／差异／中断测试已通过，Mac/ndu 真实请求对账尚未测，见 [恢复与审计](remote-recovery-audit.zh-CN.md) 与 R2-A。
 
 ---
 
@@ -927,12 +881,13 @@ peer_state_cache(peer, mode, unattended, grants_count, pending_count, last_seen,
 | relay 运营者 / 被攻破的 relay / Cloudflare 边缘（TLS 在边缘终止） | 丢、延迟、重放旧信封、看元数据、拒绝服务 | 解密、伪造、让旧批准再次生效、把批准改派给别的请求 | HPKE + ES256；nonce 一次性；`exp`；`to`/`digest` 在 AAD/签名覆盖范围内 |
 | 配对时的中间人 | 替换公钥 | 让两端 6 位 SAS 一致 | SAS 混入 token 与全部公钥；一次性 token |
 | 偷到的 MacBook（已锁屏） | — | 批 Strong（Touch ID）；批 Quick（需解锁）；重连 relay 后拿到的只有密文 | SE ACL；`WhenUnlocked` |
-| 偷到的 MacBook（已解锁、在手） | 批 Quick 级请求、看待处理内容、收紧设置、吊销 Grant | 批 T2 / unlock / admin；签常设或 T2 Grant；放宽任何设置 | `userPresence` 只认机主生物特征；放宽一律 Strong（§7.5） |
+| 偷到的 MacBook（已解锁、在手） | 批 Quick 级请求、看待处理内容、收紧设置、吊销 Grant | 批 T2 / unlock / admin；签常设或 T2 Grant；放宽任何设置 | SE userPresence 的系统认证（Touch ID／系统密码）；不等同于 biometryCurrentSet；放宽一律 Strong（§7.5） |
 | 被注入的 agent 试图「自己给自己放权」 | 发起请求、在 purpose 里写「请选一直允许」 | 生成 Grant 或 Directive（没有审批密钥）；让弹窗出现执行端没给的范围选项 | Grant/Directive 只认审批密钥签名；`scope_options` 由执行端给出（§7.6 第 3 条） |
-| 用户自己开了含 T2 的无人值守 | 被注入的 agent 可做任何该 Grant 范围内的敏感操作 | — | **这是用户明示接受的风险**：红色常驻状态、默认 7 天到期、`unattended_t2` 逐条审计、`revoke_all_grants` 一键收回（§7.6） |
-| Ubuntu root / 被攻破的 helper | 一切（与现状相同） | — | **不在威胁模型内**，文档与状态如实声明 |
+| 用户自己开了含 T2 的无人值守 | 被注入的 agent 可做任何该 Grant 范围内的敏感操作 | — | **这是用户明示接受的风险**：红色状态、显式到期／常设确认、`unattended_t2` 逐条审计、`revoke_all_grants` 一键收回（§7.6） |
+| Ubuntu root / 被攻破的 helper 或 root peer broker | 一切（与现状相同） | — | **不在威胁模型内**，文档与状态如实声明 |
 | Mac 上同用户的恶意进程 | 伪造一个看起来像 KeyValet 的对话框骗用户按 Touch ID | 拿到 `AK_*` 私钥；让真实 helper 发出批准（需要经签名校验的 agent） | 现有缓解：留意非自己触发的弹窗、看审计；V2 菜单栏 App 的一致视觉锚点；V1 的手机 App 本身就是独立于桌面的第二确认面 |
-| 网络窃听 | 看到 TLS 流量 | 看内容 | TLS + 端到端加密双层 |
+| 普通用户冒充 relay／CLI 或利用 PID 重用 | 连接本地 socket、提交伪路径／PID | 取得其他角色或签名／批准权限 | root peer broker 校验已连接 FD、SO_PEERPIDFD、安装 inode、存活和 UID；broker 仅 AF_UNIX／CAP_SYS_PTRACE，无 vault 路径 |
+| 网络窃听 | 看到 TLS 流量 | 看审批内容 | TLS + 端到端加密双层；登录／恢复参数只由 TLS 保护 |
 
 明确不承诺：防服务器 root；防 Mac root；防物理访问 TPM 芯片；relay 的可用性；Quick 级批准在 Mac 已解锁且在手时的防护。
 
@@ -940,13 +895,13 @@ peer_state_cache(peer, mode, unattended, grants_count, pending_count, last_seen,
 
 ## 13. 扩展口子：云端密钥保护、隔离执行与更多审批者
 
-第一版全部跑在用户自己的机器上。但协议字段与 trait 一旦上线就难改，所以下面四条线在 V1 就把接口、枚举位和保留字段放好，**只放接口，不做实现**。原则：relay 永远不需要知道这些；执行端与审批端通过「设备记录里的声明」互相知道对方是什么。
+执行与审批在设备本地完成，官方 relay/push 已上线。协议字段与 trait 一旦上线就难改，所以下面四条线在 V1 就把接口、枚举位和保留字段放好，**只放接口，不做实现**。原则：relay 永远不需要知道这些；执行端与审批端通过「设备记录里的声明」互相知道对方是什么。
 
 ### 13.1 四个 trait
 
 | trait | 第一版实现 | 保留的实现位 | 对协议的影响 |
 | --- | --- | --- | --- |
-| `DeviceKeyProvider`（身份键与审批键） | `secure_enclave`、`tpm2`、`pcp_tpm`、`windows_hello`、`software` | `nitro_enclave_ephemeral`（启动时生成、公钥进证明文档）、`kms_asymmetric`（KMS Sign / ECDH，云执行端的身份）、`webcrypto`（Web 控制台的不可导出 P-256）、`yubikey_piv` | 设备记录的 `key.kind` 枚举；`alg` 已支持 ES256/RS256，云 KMS 的 ECC_NIST_P256 也是 ES256 |
+| `DeviceKeyProvider`（身份键与审批键） | `secure_enclave`、`tpm2`、`pcp_tpm`、`windows_hello`、`software` | `nitro_enclave_ephemeral`（启动时生成、公钥进证明文档）、`kms_asymmetric`（KMS Sign / ECDH，云执行端的身份）、`webcrypto`（Web 控制台的不可导出 P-256）、`yubikey_piv` | 设备记录的 key_kind 描述字段；`alg` 已支持 ES256/RS256，云 KMS 的 ECC_NIST_P256 也是 ES256 |
 | `MasterKeyProvider`（vault 主密钥，现有） | SE、TPM、Hello、软件 | `kms_envelope`（UMK 由 KMS 包裹，BYO-KMS 或托管）、`enclave_sealed` | `umk_wraps[*].alg` 枚举加 `kms-envelope`、`enclave-attested-hpke`；vault v2 格式本来就是「每设备一份包裹」 |
 | `Executor`（谁来注入与执行，总架构 §9.1） | 本机 helper（三平台） | `nitro_enclave`（SealedJob HPKE 到 enclave 临时键，KMS Recipient 解 CEK）、`remote_helper`（V2 的 Mac 代 Linux 执行）、`cloud_worker`（远程 MCP 端点背后的执行池） | ApprovalRequest 的 `requester.protection` 由字符串改为对象 `{kind, attestation?}`；`caps` 加 `execute_isolated` |
 | `Approver`（谁来批，总架构 §7.4） | `touchid`、`hello`、`polkit`、`remote-device`、`auto`、`capability` | `team`（N-of-M，路由到凭证所有者）、`policy_service`（组织策略服务自动批、带服务签名）、`webauthn`（浏览器 passkey 作审批键） | ApprovalDecision 加 `approver_kind: device \| service`，`quorum?: {m, n, sigs[]}`；执行端验签时按 `approver_kind` 选信任锚 |
@@ -954,14 +909,14 @@ peer_state_cache(peer, mode, unattended, grants_count, pending_count, last_seen,
 ### 13.2 协议里现在就放的保留字段
 
 ```
-device record:      { …, key: { kind, alg }, attestation?: { kind: app_attest | nitro_nsm | tpm_quote | none, doc }, caps[] }
+device record:      { …, key_kind, dk_pub, dk_sig?, ak_q, ak_s, attestation: null或对象, caps[] }
 ApprovalRequest:    { …, requester: { device_id, label, os, protection: { kind, attestation? } } }
 ApprovalDecision:   { …, approver_kind: "device", quorum?: … }
 Grant / Directive:  { …, iss_kind: "device" | "service" | "org" }      // 第一版只有 device
 Envelope:           { v: 1, … }                                         // v 升级规则：收到更高 v 的信封 ack 但不处理，审计 unsupported_version
 ```
 
-执行端对 `attestation` 的态度：第一版**只记录不验证**，`status` 里显示 `attestation: unverified`。验证逻辑随第一个云执行端一起来。
+执行端对 `attestation` 的态度：第一版**只记录不验证**，`status` 里显示 `attestation: unverified`。K4/D09 将证明 challenge／验证列为 V2；原生 App Attest／Play Integrity API 适配器不能代表已验证硬件。未知描述值可以保留，service/org issuer、非 null quorum 和未知授权枚举均失败关闭。
 
 ### 13.3 每条云端路线各自要补什么（现在不做）
 
@@ -969,7 +924,7 @@ Envelope:           { v: 1, … }                                         // v �
 | --- | --- | --- | --- |
 | BYO-KMS / 托管 KMS 包裹 UMK（总架构 §11.4） | vault v2 `umk_wraps`；`MasterKeyProvider` | `kms_envelope` 实现；KMS 策略治理文档；轮换流程 | 无（新 `alg` 值） |
 | Nitro Enclave 执行端（总架构 §11） | `Executor` trait；relay 对 caps 透明；§9 路由 | enclave 镜像、NSM 证明、KMS Recipient、`vsock-proxy`；审批端验证 PCR | 无（`protection.kind = nitro_enclave` + `attestation`） |
-| Web 控制台作审批设备 | 设备记录、HPKE、Grant/Directive 都是 JSON | WebCrypto 键、浏览器端 HPKE、Quick-only（无在场门） | 无（`key.kind = webcrypto`，`caps` 不含 `approve_strong`） |
+| Web 控制台作审批设备 | 设备记录、HPKE、Grant/Directive 都是 JSON | WebCrypto 键、浏览器端 HPKE、Quick-only（无在场门） | 无（`key_kind = webcrypto`，`caps` 不含 `approve_strong`） |
 | 团队 N-of-M | `Approver` trait；fan-out 已存在 | 组织目录、法定人数策略、合并签名 | ApprovalDecision 用上 `quorum` |
 | 远程 MCP 端点（总架构 §10.4） | 全部对象都是设备无关的签名 JSON | Hydra、资源服务器、`cloud_worker` 执行端 | 无 |
 
@@ -993,9 +948,9 @@ Envelope:           { v: 1, … }                                         // v �
 | helper 重启丢失内存中的完整请求 | `credential_wait_approval` 返回 `approved_retry_required`；模型带 `approval_id` 重发原调用，字段一致才执行一次 |
 | 时钟漂移 > 60 s | 处理但 UI/审计标注；> `exp` 窗口则一律视为过期（宁可误拒） |
 | TPM 故障 | 与现有一致：报错，不降级到软件；relay 会话无法续签 → `status` 报 `identity_key: unavailable` |
-| 审批设备全部丢失 | 服务器本地 polkit 仍可操作一切；用恢复码在 relay 吊销旧设备；重新配对 |
-| 同一请求收到两个批准 | 第二个在 nonce 表 `INSERT OR FAIL` 处失败，审计 `duplicate_decision` |
-| Mac 醒来时积压过多 | 过期的丢弃并汇总提示；未过期的按序弹，最多 5 个同时 |
+| 审批设备全部丢失 | 可用 owner 本地审批；relay recover 以恢复码与新 DK 恢复账户并原子撤销旧注册，不能恢复 vault 或擦掉旧离线 Grant（§3.4） |
+| 同一请求收到两个批准 | 第二个在 waiting 状态检查处拒绝；若仍 waiting 但 nonce 已消费则原子 INSERT 拒绝，不能跳过验证顺序 |
+| Mac 醒来时积压过多 | 过期的丢弃并汇总提示；未过期的按序弹，每个 wake batch 最多展示 5 个，完成一个不补位 |
 | 批准到了但 agent 已放弃 | pending 标 `approved_unused`，`exp` 后作废；审计可见 |
 
 ---
@@ -1004,21 +959,21 @@ Envelope:           { v: 1, … }                                         // v �
 
 | crate | 变更 |
 | --- | --- |
-| `kv-platform` | `DeviceKeyProvider` trait（§13.1）及实现：TPM（创建/签名/ECDH）、SE 身份与审批密钥（经 `kv-touchid` 桥，三种 ACL）、Windows PCP（`NCryptSecretAgreement`/`NCryptSignHash`，服务上下文持久化）、Hello RS256 审批键、软件键；`presence_kind()` 上报；`PresenceProbe` trait 与三平台实现（§6.10.1：会话 / 锁屏 / 空闲 / 显示器 / 审批通道五个信号） |
+| `kv-platform` | kv-ipc 的 DeviceKeyProvider／PresenceProbe trait 的平台实现：TPM（创建/签名/ECDH）、SE 身份与审批密钥（经 `kv-touchid` 桥，三种 ACL）、Windows PCP（`NCryptSecretAgreement`/`NCryptSignHash`，服务上下文持久化）、Hello RS256 审批键、软件键；`presence_kind()` 上报；`PresenceProbe` trait 与三平台实现（§6.10.1：会话 / 锁屏 / 空闲 / 显示器 / 审批通道五个信号） |
 | `kv-vault` | 元数据 v1.x：`identity_key_blob`、`devices`（含 `alg`、`key_kind`、`attestation`）；`umk_wraps[*].alg` 枚举预留 `kms-envelope` / `enclave-attested-hpke`（只读写，不实现） |
-| `kv-core` | 规范化与 digest 加 `kind/requester/agent`；`ApprovalRequest`/`ApprovalDecision`/`Grant`/`Directive` 类型与 JCS 编码；签名验证按 `alg` 分派 ES256/RS256；HPKE 信封（`hpke` crate 或自组合，需审查依赖发布时间 ≥ 7 天）；§13.2 保留字段的序列化（未知字段保留、未知 `v` 拒绝） |
+| `kv-core` | 规范化与 digest 加 `kind/requester/agent`；`ApprovalRequest`/`ApprovalDecision`/`Grant`/`Directive` 类型与 JCS 编码；签名验证按 `alg` 分派 ES256/RS256；HPKE 使用现有 P-256/HKDF/AES-GCM 组合，hpke 仅为独立 dev 向量参考；§13.2 保留字段的序列化（未知字段保留、未知 `v` 拒绝） |
 | `kv-helper` | `Approver` 实现 `RemoteDevice`（三平台）；pending/grants/directives/settings/nonce 表；§6.5 验证器；§6.8 选择器；fan-out；relay 子协议 IPC；内存中的完整请求保留与就地执行、`approval_id` 恢复、`agent_pid` 查询、Stop hook 计数（§6.9）；Grant 覆盖判定（§7.4）；Directive 执行器与档位规则（§7.5）；无人值守状态与 `unattended_t2` 审计（§7.6）；本地 `/keyvalet:mode` 与远程 `set_mode` 共用 `settings` |
-| `kv-ipc` | 新消息：`RelayInbound/Outbound`、`SignWithIdentity`、`PendingList`、`Decide`、`WaitApproval`、`PendingForAgent(pid)`、`IssueGrant`、`IssueDirective`、`DirectiveResult`、`PeerStateQuery` |
+| `kv-ipc` | 29 个实际 remote op 与五角色白名单（附录 C），owner intent、恢复意图和 typed control；默认 identity_sign_jwk |
 | `kv-relay-client`（新） | WS 客户端、重连、磁盘队列、systemd / LaunchAgent / Windows 服务集成；转发 `presence_hint` 与 `approval_escalate` |
-| `kv-mobile-core`（新，W8） | 手机 App 的 Rust 核心：信封、Grant/Directive、待批队列、SQLite 状态；两套绑定（`flutter_rust_bridge` 给 Dart、UniFFI/C ABI 给 iOS NSE）；`kv_native` 插件接口定义（§9.2.1） |
+| `kv-mobile-core`（新，W8） | 手机 App 的 Rust 核心：信封、Grant/Directive、待批队列、SQLite 状态；两套绑定（`flutter_rust_bridge` 给 Dart、手写 C JSON ABI 给 NSE／Android 原生后台）；`kv_native` 插件接口定义（§9.2.1） |
 | `kv-server`（新） | §8 全部，feature `relay` |
-| `kv-agent` / `kv-touchid` | macOS：远程审批对话框（范围下拉含常设选项）、SAS 确认、Strong 签名、Grant/Directive 签发流程、在场状态计算与去抖上报；Windows `kv-agent.exe`：同样的 TaskDialog 版本 + Hello RS256 签名 + 会话内 `GetLastInputInfo` / WTS 通知 |
+| `kv-agent` / `kv-touchid` | macOS：远程审批对话框（范围下拉含常设选项）、SAS 确认、Strong 签名、Grant/Directive 签发流程、在场状态计算与去抖上报；Windows `kv-agent.exe`：WinUI 3 原生窗口 + Hello RS256 签名 + 会话内 `GetLastInputInfo` / WTS 通知 |
 | `kv-cli` | `relay / pair / devices / approvals [--on-approve] / grant … revoke-all / remote <device> …`（§9.3） |
 | `kv-mcp` | `clientInfo` → 运行时预算表；`notifications/progress`；`credential_wait_approval`；`approval_id` 参数；四种结果状态；`claude/channel` 能力与通知；`credential_status` 字段；现有 60/180/200 s 常量改为由预算决定（§6.9） |
 | `kv-hook` | 新 `stop` 模式及 Claude / Devin / Codex / Cursor / Gemini 变体：`getppid()` 查 pending、按上限阻止、各运行时输出 schema（§6.9.2 第四层 b） |
 | `kv-proxy` | 网关与透明代理的挂连接等待、TCP keepalive、`429 + Retry-After` 与 `X-KeyValet-Approval` 头；`keyvalet run` 的 stderr 提示（§6.9.2 HTTP 路径） |
 | `kv-protocols` | 模板新增 `client_timeout_hint_s`（OpenAI / Anthropic 等 SDK 默认超时），供 `kv-proxy` 决定挂连接上限 |
-| `scripts/install.sh` / `install.ps1` | Linux：创建 `keyvalet-relay` 用户与单元；Mac：安装 `dev.keyvalet.relay`；Windows：注册 `KeyValetRelay` 服务与管道 DACL；三平台都为各运行时写入 KeyValet 自己的工具超时与 Stop 类 hook 注册（§6.9.3）。`install.sh` 遵守 AGENTS.md 的单引号与位置参数约束 |
+| `scripts/install.sh` / `install.ps1` | Linux：创建专用 helper／relay 用户，root peer broker 与三个单元；Mac：安装 `dev.keyvalet.relay`；Windows：注册 `KeyValetRelay` 服务与管道 DACL；三平台都为各运行时写入 KeyValet 自己的工具超时与 Stop 类 hook 注册（§6.9.3）。`install.sh` 遵守 AGENTS.md 的单引号与位置参数约束 |
 
 ---
 
@@ -1029,10 +984,10 @@ Envelope:           { v: 1, … }                                         // v �
 1. 配对：正常完成；SAS 不一致 → 双方丢弃；token 过期/复用 → 拒绝。
 2. 信封：头部任一字段篡改 → 解封失败；`sig` 用错设备 → 拒绝；`to` 不是自己 → 拒绝。
 3. 决策：重放同一决策 → nonce 冲突拒绝；digest 不一致 → 拒绝；`exp` 过 → 拒绝；T2 用 `AK_q` 签 → 拒绝；已吊销设备签 → 拒绝。
-4. 范围：`scope` 超出 `scope_options` → 拒绝；grant 覆盖判定与 T2 不覆盖。
+4. 范围：scope 超出 scope_options 拒绝；普通票不覆盖 T2，显式 T2 票另受 K4 安全栏及未关闭验证缺口约束。
 5. 排队：approver 离线 → 消息持久化 → 重连后送达；超时 → `approval_pending` → 带 `approval_id` 重试成功且只执行一次；参数变了 → 当新请求。
 6. 能力令牌：验签、`aud`、预算扣减到 0 回落到审批、吊销后拒绝。
-7. 合并：30 s 内同凭证 3 条 T1 → 1 个请求 → 临时 grant；T2 不合并。
+7. 相同完整绑定的重试可合并；不同操作各自审批，跨操作签名批承诺为 V2，不能把旧的不同操作合并目标记为通过。
 8. relay：限流、同账户校验、`resolved` 后其他设备收到 cancel、7 天清理。
 9. 明文零泄露：用含唯一标记的凭证名/主机跑完整流程，断言 relay 数据库与 relay 日志中 grep 不到标记。
 10. 等待与恢复（§6.9，用进程内假 MCP 客户端驱动 `kv-mcp`）：预算内批准 → 原调用直接返回结果且发过 progress；预算用尽 → `approval_pending` 为正常结果；`credential_wait_approval` 批准后返回原请求结果且 pending 关闭、第二次调用得到 `already_consumed`；拒绝 → `approval_denied`；`exp` 过 → `approval_expired`；helper 重启后 → `approved_retry_required` → 带 `approval_id` 重发只执行一次；不同 `clientInfo.name` 得到表中对应预算；未知客户端 50 s。
@@ -1041,30 +996,69 @@ Envelope:           { v: 1, … }                                         // v �
 13. Grant（§7.4）：弹窗各范围选项生成的 Grant 字段正确；常设 Grant 覆盖 T1、不覆盖 T2；`max_tier = T2` Grant 覆盖 T2 且审计 `unattended_t2`；多张 Grant 命中时 `max_tier` 不放大、预算各扣；`aud = *` 对新配对设备生效；吊销后立即不覆盖；RS256 签发的 Grant 在执行端用设备记录的 `alg` 验签通过、用错 `alg` 失败。
 14. Directive（§7.5）：收紧用 `AK_q` 通过、放宽用 `AK_q` 拒绝、放宽用 `AK_s` 通过；`nonce` 重放拒绝；`exp` 过拒绝；`query_*` 回包不含任何凭证值；本地 `/keyvalet:mode` 与远程 `set_mode` 写同一份 `settings` 且都审计；`revoke_all_grants` 后 `grants` 全部 `revoked_at` 非空。
 15. 安全栏（§7.6）：`scope_options` 外的范围被拒；T2 请求的 `scope_options` 只有 `per_use`；`unattended` 签发缺二次确认时 CLI 拒绝；无人值守状态在 `status` 与弹窗标题中可见。
-16. 保留字段（§13.2）：带未知 `attestation.kind`、未知 `key.kind` 的设备记录能存能读、状态显示 `unverified`；`v: 2` 信封被 ack 不处理并审计 `unsupported_version`；带未知顶层字段的 Grant/Directive 验签仍按 JCS 全字段通过（不丢字段）。
-17. 在场与投递（§6.10，用假 `PresenceProbe` 驱动）：五个信号任一缺失 → `away`；`present` → 本机为主、远程 `delivery.mode = silent`；`idle`/`away` → 远程 `banner`；静默 30 s 未决 → 发 `approval_escalate` 且同一 `approval_id`；桌面审批端 `presence_hint` 变化去抖 5 s、最多 60 s 一次；`notify always-phone` 覆盖判定；在场状态不改变任何档位（present 下 T2 仍 Strong）。
+16. 保留字段（§13.2）：带未知 `attestation.kind`、未知 key_kind 的设备记录能存能读、状态显示 `unverified`；`v: 2` 信封被 ack 不处理并审计 `unsupported_version`；带未知顶层字段的 Grant/Directive 验签仍按 JCS 全字段通过（不丢字段）。
+17. 在场与投递（§6.10，用假 `PresenceProbe` 驱动）：五个信号任一缺失 → `away`；`present` → 本机为主、远程 `delivery.mode = silent`；`idle`/`away` → 远程 `banner`；静默 30 s 未决 → 发 `approval_escalate` 且同一 `approval_id`；桌面 presence_hint 变化去抖 5 s 后立即发，未变化每 60 s 刷新；`notify always-phone` 覆盖判定；在场状态不改变任何档位（present 下 T2 仍 Strong）。
 
 **`#[ignore]`（实机）**：TPM 身份密钥往返；SE 三种 ACL 创建与 HPKE 解封；Touch ID Strong 签名；锁屏下 `AfterFirstUnlock` 身份签名可用而 `WhenUnlocked` 审批签名不可用；Windows PCP 在 LocalSystem 下的 P-256 ECDH/ECDSA 与原始共享点导出；Hello RS256 签名每次都弹在场；Windows 服务账户 `NT SERVICE\KeyValetRelay` 的管道 DACL 校验；三平台 `PresenceProbe` 的真实信号：锁屏 / 解锁 / 屏保 / 拔显示器 / RDP 断开 / 快速用户切换各一次，状态在 5 s 内变化。
 
 **运行时实测清单（W5，结果回填 §6.9.3）**：每个运行时各跑一次「阻塞 4 分钟的工具 + 每 15 s progress」与「阻塞 4 分钟、不发 progress」，记录是否被杀、何时被杀、`progressToken` 是否存在；Stop 类 hook 的输入字段与阻止后的行为；Claude Code channels 在 `--dangerously-load-development-channels server:keyvalet` 下能否唤醒空闲 session。对象：Claude Code CLI 与 Desktop、Codex TUI 与 `codex exec`、Gemini CLI、Cursor IDE 与 `cursor-agent`、Grok Build、Devin CLI。
 
-**实机验收（Ubuntu + MacBook）**，结果记入 review 文档：
+**R3-A 收尾实测（2026-10-14，未全部达标）**：Ubuntu×Mac 的已安装 Strong 配对完成 1 次（144.164769 s），真实 GET 批准/执行 27 次（401×1、403×26；HTTP 200=0）；20 次同质 Quick 样本 p50=3.0905 s、p95=6.0237 s。原生 MCP 与远程设置共用后端，有限 T2 两轮标签和真实 Strong 签发/撤回已完成。Mac 实际 GET/Deny 为 5.038746 s、执行 0，Esc 不签决定并按原 exp 自然到期；完整锁屏周期 39 次读取，锁屏→away=8.160197 s、解锁→present=6.782415 s。手机活跃数 0，手机静默/横幅未验。
 
-| 指标 | 目标 |
-| --- | --- |
-| 从 `pair --new` 到首次远程批准成功 | < 10 分钟 |
-| 审批端到端延迟（Mac 在线，经 Cloudflare + nginx）p50 / p95 | < 3 s / < 8 s |
-| 一周 dogfooding 中被预授权/grant 覆盖的调用占比 | > 80 % |
-| 一周内人工审批次数 | 可数、可解释（每一次都值得看） |
-| MacBook 合盖 2 小时后醒来：积压送达且无重复执行 | 通过 |
-| 吊销 Mac 后其旧批准与令牌 1 分钟内失效 | 通过 |
-| `keyvalet audit --remote` 两端记录按 `approval_id` 全部对上 | 100 % |
-| 从 MacBook 远程把 srv 切到 `per_use`、再签一张 1 小时 Grant、再 `revoke_all_grants`：三步各自在 5 s 内在 srv 生效且两端审计一致 | 通过 |
-| Windows 执行端（M4）：同一套 CI 测试 + 实机 Hello 审批端批 Linux 请求 | 通过 |
-| iPhone 与 Android（M3/M4）：锁屏 Quick、生物识别 Strong、静默→30 s 升级、设置页三步（切模式 / 签票 / 全部收回）各通过一次 | 通过 |
-| 被篡改的 UI 层跳过生物识别后用 `AK_s` 签名 → 失败（iOS 与 Android 各一次） | 通过 |
+05:14Z 新 agent 已签名安装，owner IPC 5/5；helper/CLI/relay 保留原组件哈希和 CI 来源。系统 Touch ID 取消现已在完整 installed path 返回 key_operation_cancelled / 10.485434 s，新 Grant=0；此前 8.531664 s 通用失败及其修前回归保留。Mac→ndu 真实吊销完成 1 次：命令 9.100511 s、从命令开始到待用批准及 Grant 失效读回 10.583576 s，执行 0。最新一小时 Strong Grant 签发 6.162329 s，超过 5 s。ndu 现已吊销，历史保留；纯执行端没有 AK_s，反向吊销及保留历史的重新加入未闭环。真实最终 biometric failure 仍未测，不能沿用软件分类用例充作硬件证据。
+
+最后完整双端 audit 为 53/54=98.148148%，历史缺接收记录 1 条保留；吊销后原生查询只有 ndu 单端快照、对端 unavailable=1，不能称新的完整对账通过。当前四项 CI 于 06:02Z 全绿：1416 passed / 0 failed / 10 ignored、69 组，526 份源码/构建输入未变；共享依赖由对应工作流对齐后，R3-A 在 locked/offline 保护下重验，未新增依赖或修改锁文件。本人取消两小时物理合盖测试；源码 review 的入站持久化缺口已有共享源码修复和 7 项 CI，当前 Mac helper 尚未部署该项，无两小时实机通过声明。[实机收尾](remote-approval-reports/assets/r3a-se-revocation-native-verified.json)、[当前 CI](remote-approval-reports/assets/r3a-se-child-closure-ci9-summary.json)、[最终源码核对](remote-approval-reports/assets/r3a-final-source-check-ci9-20261014.json)、[R3-A 报告](remote-approval-reports/R3-A-m2-closure.md)。
+
+| §16／R3-A 项目 | 当前结果 | 数字与证据 |
+| --- | --- | --- |
+| pair → 首次远程批准 <10 分钟 | 真批准已执行；耗时未达标，API 401 | pair=1 / 144.164769 s；首次 allow=7873.538466 s；GET=27；[实机 audit](remote-approval-reports/assets/r3a-first-run-ndu-audit.json) |
+| p50 <3 s／p95 <8 s，≥20 次 | 20 次已测；p50 超阈值、p95 达标 | n=20；p50=3.0905 s／p95=6.0237 s；20/20 各执行 1 次；[R3-A §3](remote-approval-reports/R3-A-m2-closure.md) |
+| 拒绝／续等／重放／改参数 | 通过；重放指同批准再次领取 | deny=3 / execution=0；wait=1、reclaim=1／0.005954 s、query-change=1；[原 Deny/续等](remote-approval-reports/R3-A-m2-closure.md#3-验收表)、[新 Mac Deny/Esc](remote-approval-reports/assets/r3a-delivery-escape-native-verified.json) |
+| 双向吊销 ≤60 s | 正向达标；反向缺 AK_s 被拒 | 正向完成=1，命令=9.100511 s、失效读回=10.583576 s；待用批准 cancelled／执行 0、Grant revoked；反向完成=0／key_unavailable／0.226363 s 含 SSH；[实机收尾](remote-approval-reports/assets/r3a-se-revocation-native-verified.json)、[反向预检](remote-approval-reports/assets/r3a-executor-revocation-ndu-preflight-native.json) |
+| 两端 audit 100%，差异 0 | 最后完整双端未达标；吊销后完整快照不可用 | 吊销前 53/54=98.148148%，findings=1、端点=2；吊销后端点=1／unavailable=1，单端 findings=53 不算新双端差异；[完整对账](remote-approval-reports/assets/r3a-audit-timeout-native-20261013T232726Z.json)、[吊销后尝试](remote-approval-reports/assets/r3a-post-revocation-native-audit.json) |
+| 合盖 2 小时，不重复、正确 expired | 本人取消实测，源码 review 已完成 | 计时 0 s／请求 0；原缺口 1 项、共享源码持久化回归 7/7，当前 Mac helper 未部署；[原 review](remote-approval-reports/assets/r3a-lid-code-review-20261014.json)、[复核](remote-approval-reports/assets/r3a-lid-review-followup-20261014.json) |
+| 切模式／1 小时票／全部收回各 <5 s | 最新一小时 Strong 签发超阈值；模式/收回达标 | per_session=4.760682 s；最新 allow=6.162329 s（此前 2.777137 s）；revoke-all=4.992178 s；lock=3.300604 s；T2 两轮=16.629137 s，已撤回；[最新签发](remote-approval-reports/assets/r3a-remaining-native-20261014T051814Z.json)、[其他控制面](remote-approval-reports/assets/r3a-controls-213127.json) |
+| 本机优先／锁屏 away | Mac 实际投递/锁屏转换已验；手机未验 | Mac GET/Deny=1／5.038746 s、执行 0；手机=0；完整周期 present=19／away=20，锁屏→away=8.160197 s、解锁→present=6.782415 s；[真实周期](remote-approval-reports/assets/r3a-presence-native-verified.json)、[实际投递](remote-approval-reports/assets/r3a-delivery-escape-native-verified.json) |
+| SE 取消／biometric failure producer | 系统取消实机通过；认证失败仅软件验证 | key_operation_cancelled=1／10.485434 s，新 Grant=0；真实 biometric failure=0；[实机收尾](remote-approval-reports/assets/r3a-se-revocation-native-verified.json) |
+| R3-A 最终四项 CI | 当前整合源码全绿 | 06:02Z 1416 passed／0 failed／10 ignored、69 组，526 份源码/构建输入未变；locked/offline 保护，未改依赖/锁文件；[当前四项](remote-approval-reports/assets/r3a-se-child-closure-ci9-summary.json)、[源码核对](remote-approval-reports/assets/r3a-final-source-check-ci9-20261014.json) |
+
+下表保留第二轮的历史快照；本轮的最新数字以上表及 R3-A 报告为准。
+
+**第二轮实机验收（2026-10-13）**：通过只限表中范围；未测与未通过都不计入 M5。各报告测试快照不同，计数不是同一源码的跨平台比较。
+
+| 项目 | 目标／范围 | 结果 | 数字与证据 |
+| --- | --- | --- | --- |
+| pair 到首次远程 use | <10 分钟，Ubuntu × Mac | 未通过 | 首轮 209.526 s 停止、use n=0；[R2-A §4](remote-approval-reports/R2-A-m2-acceptance.md)、[记录](remote-approval-reports/assets/r2a-pair-attempt-1.json) |
+| Mac 审批 p50／p95 | <3 s／<8 s、≥20 次 | 未测 | n=0；[R2-A §4](remote-approval-reports/R2-A-m2-acceptance.md) |
+| 拒绝／超时续等／单次消费／改参数 | 真实凭证请求各一次 | 未测 | 实际 use n=0；R2-A §4；[R2-A记录](remote-approval-reports/R2-A-m2-acceptance.md) |
+| 双向设备吊销 | 1 分钟内失效 | 未测 | 待真实配对及批准／Grant；R2-A §4；[R2-A记录](remote-approval-reports/R2-A-m2-acceptance.md) |
+| 双端 audit | approval_id 100% 对账 | 未测 | 审批数 0，不能以空集计通过；R2-A §4；[R2-A记录](remote-approval-reports/R2-A-m2-acceptance.md) |
+| Mac 合盖积压 | 实际 2 小时、不重复、正确 expired | 未测 | 尚未开始计时；R2-A §4；[R2-A记录](remote-approval-reports/R2-A-m2-acceptance.md) |
+| Mac 控制面 | 切模式／1 小时票／全部收回各 <5 s | 未测 | 各 n=0；R2-A §4；[R2-A记录](remote-approval-reports/R2-A-m2-acceptance.md) |
+| 本机优先与锁屏 away | 实际 GUI／锁屏转换 | 未测 | Mac/ndu 配对未完成；R2-A §4、R2-C 真机表；[R2-A记录](remote-approval-reports/R2-A-m2-acceptance.md) |
+| notify always-phone Directive | 指令落地 | 未测 | 桌面端 n=0；手机本地 away 是另一条路径；R2-A §4；[R2-A记录](remote-approval-reports/R2-A-m2-acceptance.md) |
+| ndu TPM 安装与原 vault | 三服务、权限、TPM 解锁与数据保留 | 通过 | helper/client 无 caps、broker 仅 SYS_PTRACE；原 vault hash 不变，凭证列表 0；[R2-A §3](remote-approval-reports/R2-A-m2-acceptance.md) |
+| Mac 签名 daemon 安装 | helper／agent／relay | 通过 | team PWCRJPY7YC，三服务 running；三把 SE 公钥不同，完整 Strong 配对未过；R2-A §3、§5；[R2-A记录](remote-approval-reports/R2-A-m2-acceptance.md) |
+| Windows PCP 双 DK | LocalSystem 创建／重开／签名／ECDH／清理 | 通过 | ES256 64 B、raw ECDH 32 B，错误 dk_pub 验 dk_sig 签名失败；[R2-B 原生结果](remote-approval-reports/R2-B-windows.md)、[SYSTEM](remote-approval-reports/assets/r2b-system-native.json) |
+| Windows Quick × 软件执行端 | HPKE 往返，按 AK alg 验签 | 通过 | 62.5863 ms，单次、不含 UI／公网；[证据](remote-approval-reports/assets/r2b-native-keys.json) |
+| Windows 安装／升级／卸载 | owner／跨账户／ACL／服务 | 通过 | 11 项；[证据](remote-approval-reports/assets/r2b-windows-service-test.json)；unsigned x64／模拟 TPM |
+| Windows Hello Strong | 创建／批准／取消／重复／跨端 RS256 | 真机分项通过；完整生产闭环待验 | IsSupported=true，RSA-2048/RS256；独立取消 UserCanceled(3)/2.2217 s，重复签名与软件执行端 HPKE/nonce通过；联合 fixture 的取消超时保留，VM 无 PIN。见 [R3-B](remote-approval-reports/R3-B-security-closure.md) |
+| Pixel 7 核心手机审批 | 软件 fixture 配对、锁屏 Quick、App 指纹 Strong | 通过 | 配对约 9 s；Quick 37 s、Strong 14 s（含用户操作），执行各 1、二次 Replay；[R2-C 真机表](remote-approval-reports/R2-C-mobile.md)、[事件](remote-approval-reports/assets/r2c-physical-events.json) |
+| Pixel 7 静默到同 ID 升级 | 30 s 定时／声音；端到端 ≤30 s 分开 | 定时与同 ID 通过；端到端未通过 | 静默到横幅 28.620 s，请求到横幅约 35 s；[采样](remote-approval-reports/assets/r2c-audio-upgrade-trace.json) |
+| Pixel 7 设置三步 | 切模式／1 小时票／全部收回 | 功能通过；各 <5 s 未通过 | 约 5 s／≤16 s／<1 s，含指纹／用户输入，单次样本；R2-C 真机表；[R2-C记录](remote-approval-reports/R2-C-mobile.md) |
+| 跳过生物识别签 AK_s | Android／iOS 分别拒绝 | Android 通过；iOS 未测 | Pixel 7 2/2、0 skipped、1.242 s；[XML](remote-approval-reports/assets/r2c-android-signing-gate.xml) |
+| 系统结束 Android 后台进程 | FCM → 原生/Rust 审批唤起 | 通过 | PID 16454→空→16720，约 7 s；[证据](remote-approval-reports/assets/r2c-approval-process-kill.json) |
+| Android 重启恢复与远端退出 | 新审批拉取／relay token 与会话删除 | 未通过 | boot 37→38、同 token／唤起通过，新请求持续 retry；本地退出约 1.1 s，远端 token/会话仍在；R2-C 真机表；[R2-C记录](remote-approval-reports/R2-C-mobile.md) |
+| 手机离线积压 | 实际 1 小时 | 未测 | 用户延后窗口；R2-C 真机表；[R2-C记录](remote-approval-reports/R2-C-mobile.md) |
+| iOS／发行渠道 | SE、APNs、Apple、TestFlight／Play 包 | 未测 | iOS/iOS-sim 编译通过；未生成 IPA／签名 AAB 或上传；R2-C Play 与 iOS；[R2-C记录](remote-approval-reports/R2-C-mobile.md) |
+| 运行时托管模型 | Claude + 另外两家，四分钟与续等 | 门槛未通过 | Codex exec 240.015/240.006 s、TUI 240.007/240.012 s；Devin 240.006/240.007 s。仅两家，Claude 未进工具；[R2-D §B](remote-approval-reports/R2-D-runtimes.md) |
+| Claude channels | idle／busy／无 flag | 未测 | 三项均待可用交互会话；R2-D §B；[R2-D记录](remote-approval-reports/R2-D-runtimes.md) |
+| HTTP SDK 与连接回收 | 两 SDK、h1/h2、wildcard、终态、低 fd | 通过（loopback／假 helper） | 26 SDK 记录；fd=256 两 bounded 测试 20/20 轮、40 结果；R2-D §A/§D/最终验证；[R2-D记录](remote-approval-reports/R2-D-runtimes.md) |
+| 一周／两周 dogfooding | 覆盖 >80%、人工审批可解释 | 未测 | 尚未开始，不由 CI 推算；R2-A §7；[R2-A记录](remote-approval-reports/R2-A-m2-acceptance.md) |
+| 工作区四条 CI | 各报告的冻结源码快照 | 通过 | R2-A Mac 1333/0/10；R2-B Mac 1323/0/10、Windows 1079/0/25；R2-C 四项 exit 0；R2-D Mac 1331/0/10。ignored 硬件项另列，不当通过；[四份R2汇总](remote-approval-reports/R2-E-docs.md) |
 
 ---
+
 
 ## 17. V1 实施计划：按工作流并行
 
@@ -1094,37 +1088,54 @@ Envelope:           { v: 1, … }                                         // v �
 
 ### 17.3 依赖与里程碑
 
-```
-M0  W0 交付契约 + 测试向量（其他工作流在此之前只读文档、搭骨架、写对契约的测试）
-M1  W2 relay harness 可用；W1 软件实现可用  ──▶ W3 / W4 / W5 / W6 / W7 / W8 开始对真实依赖联调
-M2  Linux 执行端（W4+W5+W3）× macOS 桌面审批端（W6+W7）端到端：Ubuntu + MacBook 上完成一次远程 use 审批
-M3  手机 App（W8）加入同一账户：iPhone 批 Ubuntu 的请求；静默/升级投递正确
-M4  Windows 执行端 + Windows 审批端（W1+W4+W6）接入；Android 接入
-M5  W9 集成：安装器、文档、全工作区 CI、§16 实机验收表全部通过  ──▶ 一周 dogfooding
-```
+| 里程碑 | 当前状态 | 依据与剩余条件 |
+| --- | --- | --- |
+| M0 契约／向量 | 完成，K1 扩展已交付 | W0 与 R2-B 新旧向量、schema；K4 接收验证、负向向量与旧票失效处理已完成，Mac／Windows CI 通过 |
+| M1 relay harness／模块集成 | 完成 | W2、W1–W5、owner integration、v1-completion；软件密钥／假 OS 不能代替硬件 |
+| M2 Ubuntu × MacBook 一次远程 use | 完整验收未完成 | R3-A Strong 配对=1、真实 GET=27 / HTTP 401×1、403×26；n=20 p50/p95 已测；双向吊销/合盖/在场待测，控制前三项通过，T2 标签待补 |
+| M3 iPhone 加入及审批／投递 | 未完成 | iOS 仅编译／模拟器；签名资源／APNs／Apple 登录／真机待验；Android 通过不能关闭 iPhone 里程碑 |
+| M4 Windows 双角色 + Android | 部分完成 | PCP 双键与安装、x64 Hello 分项和 x64／ARM64 无界面 CI 通过；正式 Windows 公网双角色、protected 客户端及物理 ARM64 待验；Android 重启恢复／远端退出未过 |
+| M5 所有 §16 项目与一周使用 | 未完成 | 多份四项 CI 通过；延迟、真实双端 audit／吊销、两小时合盖、channels 与发行矩阵仍缺 |
 
-每个工作流在报告里必须写明自己处在哪个里程碑、还缺谁的什么。
+第一轮 W0–W9 分工保留为历史，第二轮分工与 K1–K4 见 [R2 prompts](remote-approval-agent-prompts-r2-2026-10.zh-CN.md)。不同报告的通过只对应记录的源码与平台，不把较早二进制或覆盖率作为当前所有路径的验收。
 
 ### 17.4 V2 及以后（不在本轮）
 
-Linux 桌面审批端；瘦菜单栏/托盘；vault 密文同步与手机 OAuth 添加凭证；总架构 §9 的 Mac 代 Linux 执行；第一个云端实现（BYO-KMS 包裹 UMK 或 Nitro 执行端）接到 §13 的接口上；App Store / Play 公开上架；官方 relay 与配额执行。
+Linux 桌面审批端；瘦菜单栏/托盘；vault 密文同步与手机 OAuth 添加凭证；总架构 §9 的 Mac 代 Linux 执行；第一个云端实现（BYO-KMS 包裹 UMK 或 Nitro 执行端）接到 §13 的接口上；不同操作批承诺、产品多审批方／quorum、服务／组织信任根、attestation 验证；公开上架与托管计费／配额执行（计划中）。官方 relay 已上线。
 
 ---
 
-## 18. 需要用户决定的开放问题
+## 18. 已决事项与仍开放问题
 
-1. 这台 Ubuntu 有没有 TPM 2.0（`ls /dev/tpmrm0`；`keyvalet status --summary`）？没有就按 §3.1 软件模式走，审批弹窗会一直标「software_key」。
-2. relay 放这台 Ubuntu 上，还是单独一台小 VPS？用哪个域名接 Cloudflare 橙色云（§8.5 需要一个代理 DNS 记录与 Origin CA 证书）。
-3. 服务器上跑哪些 agent（Claude Code / Codex / OpenClaw / Hermes / 自己的脚本）？决定 M2 先验证哪条接入路径（MCP、网关、`keyvalet run`）。
-4. agent 是否已经以独立普通用户运行？若目前以 root 或 sudo 用户运行，第一步是先分用户。
-5. `unlock_ttl` 默认 12 h 是否合适；夜间批处理是否需要 `class: batch` 的 24 h 有效期。
-6. 调用内等待默认 60 s 还是 180 s？现设计默认 60 s、按运行时预算上调（§6.9.5）。
-7. Stop hook 兜底是否默认开启；上限 3 次是否合适。
-8. 是否在文档中推荐用户给 Claude Code 加 `--dangerously-load-development-channels server:keyvalet`。
-9. **「以后再也不需要管」是否包含敏感操作（T2）？** 现设计（§7.6）：允许，但单独开、Strong + 二次确认、红色常驻、默认 7 天到期。这是对既有「T2 永远弹窗」决策的放宽。
-10. 常设 Grant 的默认范围：「这个凭证一直允许」是否默认收窄到模板的 `allowed_hosts` 与 `GET/HEAD`？
-11. 手机 App 的 Apple 开发者账号 / Google Play 开发者账号是否已就绪（TestFlight 与内部测试轨道都需要）；APNs 密钥与 FCM 项目由谁持有。
-12. 并行工作流的 agent 数量：建议 W0 先单独跑完（它是所有人的依赖），之后 W1–W8 八个并行，W9 最后；若人手不够，合并顺序建议 W6+W7、W2+W3。
+已决与已实现的处置如下；“已决”不自动表示对应验收通过。
+
+| 项目 | 已决处置 | 实现／证据 |
+| --- | --- | --- |
+| K1 / D13 Windows | DK 分 PCP ECDH 与 ECDSA；可选 dk_sig，坏值拒绝 | R2-B／R3-B；原生双键、真机 Hello 分项通过；VM 无 PIN，生产链路待验 |
+| K2 / D11 账户 | 桌面匿名 + 恢复码，手机 Google／Apple + DK 证明；双方 SAS 后归属用户 | W8 账户补充、R2-C；Google Debug 实测通过，Apple 未测 |
+| K3 relay | 手机固定 relay.keyvalet.dev；自托管只服务桌面 | W8、R2-C、R2-A 线上部署 |
+| K4 / OPEN D01/D02 | owner intent、匿名初始化与 Strong 一次性准备令牌按实际 B/C 契约回写 | owner integration；源码／软件回归通过，Mac 真实配对仍未过 |
+| K4 / OPEN D03 | 短期设置 Grant 保持 Strong | R2-C 1 小时票实际 Strong；产品 Quick 文案已纠正 |
+| K4 / OPEN D04/D05 | 有限 T2 签名必须含标签；全局 T2 拒绝 | 发行与接收／使用前重验均已约束；负向向量、旧票失效处理和两平台 CI 通过，见 R3-B 无签名验收 |
+| K4 / OPEN D06/D07/D09 | 跨操作 batch、多审批方／quorum、attestation 验证为 V2 | 相同绑定重试与基础 fan-out、双 Strong 设备记录交换已有软件回归；不等于 V2 权威已支持 |
+| K4 / OPEN D08 | /v1/recovery 关闭旧恢复接口缺口 | v1-completion、恢复审计文档；真实全设备丢失恢复验收分开 |
+| K4 / OPEN D10 | Linux 6.5+ root peer broker；helper/client 无 capabilities | isolation 8 个原生 UID 用例、R2-A 已安装三服务 |
+| 运行时 T08 | typed 拒绝／取消／到期、活 gateway session 的有限响应恢复 | R2-D 软件与 SDK 通过；跨重启及外部 exactly-once 不承诺 |
+| 默认等待／Stop | 初始 60 s、续等 5–600 s、progress 15 s、最多三次 Stop | W5/R2-D；实际 runtime profile／override 仍封顶 |
+
+| 仍开放 | 当前状态／下一步 | 追踪 |
+| --- | --- | --- |
+| metrics 边界 | metrics 只有 Device 认证、无 socket-loopback 条件；运维访问边界及公网负向验收仍待落实。S01/S02 接收规则已修复，不再与此合并为未实现 | OPEN S03；R3-B 无签名验收 |
+| Ubuntu × Mac 真机链路 | Strong 配对=1、GET=27；n=20 p50/p95 已测，旧 audit 37/37；控制前三项通过，T2 标签／双向吊销／控制后 audit／两小时合盖待测 | R3-A、E03/E04/E08/T01/T02 |
+| Windows 生产／桌面范围 | 旧包的真机 Hello、PCP及protected MCP解锁／取消／Crash通过；当前签名可选，新WinUI／无签名发行包、绑定公网、锁屏崩溃修复复验／物理ARM64仍待验 | R3-B 无签名验收 §8–10、Windows发行策略、E02 |
+| Android 稳定性／预算 | 恢复 relay HTTPS 后复验重启与远端退出；横幅单次约 35 s、1 小时票 ≤16 s 未满足预算；一小时离线待窗口 | R2-C、E05/E08/T03 |
+| iOS／商店发行／Apple 登录 | profiles/App Group/APNs/ASC/Apple provider/Play keystore 与实际发行指纹、IPA/AAB 尚缺 | R2-C、E06/E09 |
+| 运行时与配置 | Claude 有效会话、第三家、channels 三项、IDE／未测 Stop／timeout；Devin 专用 MCP 配置与短 timeout env 核对 | R2-D、E07/T10 |
+| 硬件反回滚与历史 | 一致旧备份、手机库内锚点、旧历史缺口仍是边界 | T04 |
+| presence／原生覆盖率 | 初始屏保、Linux 精确 idle／polkit、OS 转换、native/Swift 覆盖率待验 | T05/T06 |
+| 账户生命周期 | 删除／解绑、跨 provider 显式链接、Apple code/refresh 生命周期未实现 | E09，计划中 |
+
+完整逐项处置与需要决定的冲突见 [OPEN-QUESTIONS](remote-approval-reports/OPEN-QUESTIONS.md)。旧架构 §18 的 TPM／域名选址已由真机与部署事实替代，不能再当未决前置条件。
 
 ---
 
@@ -1140,7 +1151,8 @@ Linux 桌面审批端；瘦菜单栏/托盘；vault 密文同步与手机 OAuth 
 ```
 
 - `type ∈ { approval_request, approval_escalate, approval_decision, approval_cancel, grant, directive, directive_result, presence_hint, device_revoke, pair_offer, pair_accept, pair_confirm }`。
-- AAD = JCS 编码的 `{v, type, id, account, from, to, created_at, exp}`；`sig` = ES256（发送方 `DK`，恒 P-256）覆盖 `AAD_bytes ‖ ct_bytes`。
+- AAD = JCS 编码的 `{v, type, id, account, from, to, created_at, exp}` 及全部未知头扩展（不含 `enc/ct/sig`）；`sig` = ES256（发送方 DK 身份签名公钥：合法 `dk_sig.pub` 或无此字段时的 `dk_pub`）覆盖 `AAD_bytes ‖ ct_bytes`。
+- 可选签名头 `push: {mode: "silent" | "banner"}` 只携带投递模式。helper 为手机接收方在 seal 前加入该字段，纳入 AAD 与外层签名；relay 仅验证提示和外层，不解析 `ct`。具体投递规则见 §8.4。
 - HPKE：`DHKEM(P-256, HKDF-SHA256)`、`HKDF-SHA256`、`AES-128-GCM`，mode base，`info = "keyvalet/envelope/v1"`。
 - 接收端：`v > 1` → ack 不处理，审计 `unsupported_version`；`exp < now` → 丢弃，审计 `expired_envelope`。
 
@@ -1169,15 +1181,15 @@ Linux 桌面审批端；瘦菜单栏/托盘；vault 密文同步与手机 OAuth 
   "approver": "dev_…", "approver_kind": "device", "quorum": null, "issued_at": 0, "reason": "…(deny 时可选)", "sig": "b64url" }
 ```
 
-`sig` 由 `level` 对应的审批键签，`alg` 取自设备记录。`scope.mode = standing` 时执行端生成 A.4 的常设 Grant（`exp = null`）。
+`sig` 由 `level` 对应的审批键签，`alg` 取自设备记录。scope.mode=standing 时执行端保存 exp=null 的内部授权及原决定证明；它不是可跨设备转发的独立 AK 签名 Grant。reason/quorum 的缺失与 null 保留，V1 非 null quorum 和非 device approver 拒绝。
 
 ### A.4 Grant（`type = grant`）
 
-见 §7.4 的 JSON；补充约束：`scope.level = global` 时 `aud` 必须为 `*`；`max_tier = T2` 时 `origin` 必须为 `settings` 且 `exp` 非空或带 `confirm: "<执行端 label>"` 字段；`budget.per ∈ {1h, 24h, 7d}`。
+见 §7.4。K4 规范：global 要求 aud=* 且 max_tier≤T1；所有 T2（有限／常设）必须 settings 来源、Strong AK 签名、confirm=当前执行端标签，不能使用全局 audience。budget.per 为 1h/24h/7d。共享 verify_grant 已对全部 T2 强制当前标签并拒绝 wildcard/global；Grant schema／样例／新负向向量同步，见 §7.6 和 R3-B 无签名验收。其他既有向量保持逐字节一致；原 finite 正例已加入签名标签。
 
 ### A.5 Directive / DirectiveResult（`type = directive | directive_result`）
 
-见 §7.5 的 JSON；`args` 按 `op`：`set_mode{mode}`、`revoke_grant{jti}`、`revoke_all_grants{}`、`lock{}`、`set_unlock_ttl{seconds}`、`set_class{name, match, exp_s}`、`set_device_label{label}`、`revoke_device{device_id}`、`notify{policy: prefer-local|always-phone|both}`、`query_status{}`、`query_pending{}`、`query_grants{}`、`query_audit{since, limit≤200}`、`cancel_approval{approval_id}`。
+见 §7.5 的 JSON；`args` 按 `op`：`set_mode{mode}`、`revoke_grant{jti}`、`revoke_all_grants{}`、`lock{}`、`set_unlock_ttl{seconds}`、`set_class{name, match, exp_s}`、`set_device_label{label}`、`revoke_device{device_id}`、`notify{policy: prefer-local|always-phone|both}`、`query_status{}`、`query_pending{}`、query_grants{after?,limit=50（1–100）}、query_audit{since,limit（1–200）,after?,through?}、`cancel_approval{approval_id}`。
 `DirectiveResult = { "id": "<directive id>", "ok": true, "error": null, "state": { … 按 op 的返回 … } }`，`query_audit` 返回条目只含 §11 的元数据字段，不含任何凭证值或请求体。
 
 ### A.6 PresenceHint（`type = presence_hint`）
@@ -1186,19 +1198,31 @@ Linux 桌面审批端；瘦菜单栏/托盘；vault 密文同步与手机 OAuth 
 { "device_id": "dev_…", "state": "present | idle | away", "since": 0, "sent_at": 0 }
 ```
 
-### A.7 Pairing（`type = pair_offer | pair_accept | pair_confirm`）
+### A.7 Pairing 与 DeviceRecord
 
-- `pair_offer`（发起方经 relay `/v1/pair/start` 后由 relay 转发给加入方）：`{ "token_hash": "hex", "initiator": <DeviceRecord> }`
-- `pair_accept`：`{ "token": "b64url", "joiner": <DeviceRecord>, "global_grants"?: 0 }`；授权数量只在加密正文中。
-- `pair_confirm`：`{ "sas": "6 位十进制", "device": <本端 DeviceRecord>, "exclude_global": false, "sig": "<AK_s 对整个对象 JCS 的签名（审批端）或空（纯执行端终端确认）>" }`；按附录 A 的通用签名规则移除 sig 后签名。两种确认均须有外层 DK 签名。
-- `DeviceRecord = { "device_id", "label", "os", "key_kind", "dk_pub": "jwk", "ak_q": {"pub": "jwk", "alg": "ES256|RS256"} | null, "ak_s": {…} | null, "caps": ["execute","approve_quick","approve_strong"], "attestation": null }`
-- `sas = 前 6 位十进制 of SHA-256("keyvalet-pair-v1" ‖ token ‖ sort(dk_pub_a, dk_pub_b) ‖ ak_q_pub ‖ ak_s_pub)`，公钥用 JWK 的 JCS 编码。
-- 优先使用加入方 AK；其没有 AK_s 时使用发起方 AK。双方都没有 Strong 键时拒绝配对。DeviceRecord 的 label 是可变显示字段，其余公钥、算法、能力、平台及扩展权威字段保持不变；配对最终标签采用经确认签名认证的记录。
+- PairOffer 为 `{token_hash, initiator: DeviceRecord, ...扩展}`；HTTP PairStart 另带 exp，外层身份认证和签名按 K1，不能信任 relay 裸 pair_accept 提示。
+- PairAccept 为 `{token, joiner: DeviceRecord, global_grants?: 数量, ...扩展}`；授权数量只在 E2E 密文中。
+- PairConfirm 基础为 `{sas, sig, ...扩展}`，最小签名载荷 JCS `{sas}`。现代确认携带 `{sas, device: 本端DeviceRecord, exclude_global, sig}`，签整个对象除顶层 sig；AK_s 按其 alg，纯执行端为空 AK 签名但仍有外层 DK 身份签名。双方真实确认前不得提交信任。
+
+```text
+DeviceRecord = {
+  device_id, label, os, key_kind,
+  dk_pub: JWK(P-256),
+  dk_sig?: {pub: JWK(P-256), alg: "ES256", ...扩展},
+  ak_q: {pub: JWK, alg: "ES256"或"RS256", ...扩展}或null,
+  ak_s: {pub: JWK, alg: "ES256"或"RS256", ...扩展}或null,
+  caps, attestation: null或对象, ...扩展
+}
+```
+
+dk_pub 是既有 wire 字段，承担 HPKE ECDH；不能改名为新对象 dk。dk_sig 缺失则保持原 dk_pub 的 ES256 身份验签与 ECDH。存在时全部设备身份签名仅用 dk_sig.pub 验，算法必须 ES256、公钥必须 P-256；null、RSA、其他曲线／算法、私钥字段、无效点均拒绝，不回退或跳过。dk_sig 本身及嵌套未知字段参与完整记录 JCS、签名、摘要和 authority 比较；缺失保持缺失。审批签名仍使用 AK 与其 alg。
+
+SAS 的完整旧域／split identity 新域、排序、token16、AK 角色选择与十进制转换见 §4；旧向量不改。label 可经已认证 SetDeviceLabel 更新，其余身份／审批公钥、算法、caps、平台和扩展权威字段不原地替换。现代确认绑定完整记录与 exclude_global，K1 不降低未知字段规则。
 
 ### A.8 agent 可见的工具结果（MCP）
 
 ```json
-{ "status": "ok | approval_pending | approval_denied | approval_expired | no_approver | approved_retry_required | still_pending | already_consumed",
+{ "status": "ok | approval_pending | approval_denied | approval_cancelled | approval_expired | no_approver | approved_retry_required | still_pending | already_consumed",
   "approval_id": "ULID", "expires_at": 0, "approver": { "label": "…", "online": true }, "wait_tool": "credential_wait_approval",
   "next_steps": "…", "result": { … 仅 status=ok 时 … } }
 ```
@@ -1213,27 +1237,45 @@ Linux 桌面审批端；瘦菜单栏/托盘；vault 密文同步与手机 OAuth 
 
 ## 附录 B. relay API 契约
 
-认证：除 `/v1/devices`、`/v1/auth/*`、`/v1/pair/complete`、`/v1/health` 外，所有请求带 `Authorization: Device <session_token>`。错误体统一 `{ "error": { "code": "…", "message": "…" } }`，`code ∈ { unauthorized, forbidden, not_found, rate_limited, payload_too_large, bad_envelope, expired, conflict }`。
+下表逐项对应 kv-server/src/http.rs 的 25 个方法／路径组合（含 metrics）。D 表示 Authorization: Device <session_token>；U 表示 Bearer 人类会话。手机 challenge/verify 另带 x-keyvalet-user-session，设备会话绑定活跃人类会话。公开入口仍有其自身证明／限流／配对限制，不能把“无 D”理解为跳过验证。
 
-| 方法 | 路径 | 请求体 | 响应 |
+| 方法 | 路径 | 认证／请求 | 响应 |
 | --- | --- | --- | --- |
-| POST | `/v1/devices` | `DeviceRecord` + `push_token?` | `{ account_id, device_id, recovery_code? }`（首台设备才有 recovery_code） |
-| POST | `/v1/auth/challenge` | `{ device_id }` | `{ challenge: b64url-32B, exp }` |
-| POST | `/v1/auth/verify` | `{ device_id, challenge, sig }` | `{ session_token, exp, account_id }`；account_id 供身份绑定核对 |
-| GET | `/v1/presence`（WebSocket） | 子协议 `kv-relay-v1`；客户端每 30 s 发 `{"t":"ping"}` | 服务端推 `{"t":"envelope","envelope":{…}}`、`{"t":"ack","id"}`、`{"t":"pong"}` |
-| POST | `/v1/pair/start` | `{ token_hash, initiator: DeviceRecord, exp }` | `{ pairing_id }` |
-| POST | `/v1/pair/complete` | `{ token, joiner: DeviceRecord }` | `{ pairing_id, initiator: DeviceRecord, account_id, expires_at }`；expires_at 为原始期限，同时向发起方推 `pair_accept` |
-| POST | `/v1/pair/finish` | `{ pairing_id, confirm: pair_confirm }` | `{ ok }`；双方都 finish 后删除 token；同一成员、同一 SAS 的有效确认在原期限内可重试，仍需验签 |
-| POST | `/v1/approvals` | `{ id, exp, envelopes: [Envelope] }`（每个 `to` 一个） | `{ accepted: n }` |
-| POST | `/v1/approvals/{id}/reply` | `{ envelope: Envelope }` | `{ ok }`；首个有效回复后状态 resolved，向其他设备推 `approval_cancel` |
-| POST | `/v1/approvals/{id}/cancel` | `{ envelope?: Envelope }` | `{ ok }`；带信封时传递 requester/helper 签名的 `approval_cancel`，保持密文与签名完整 |
-| GET | `/v1/approvals?state=waiting` | — | `{ envelopes: [Envelope] }`（只返回 `to` = 自己的） |
-| POST | `/v1/messages` | `{ envelopes: [Envelope] }` | `{ accepted: n }`；非审批类，持久化到 ack |
-| POST | `/v1/messages/ack` | `{ ids: [], type?: string }` | `{ ok }`；relay-client 总是带 type，仅确认 helper 刚处理的信封类型 |
-| DELETE | `/v1/devices/{id}` | `{ by: "device" \| "recovery", recovery_code? }` | `{ ok }` |
-| GET | `/v1/health` | — | `{ ok, version }` |
+| POST | `/v1/devices` | 桌面匿名；DeviceRecord 的字段平铺，另有 push_token? | {account_id,device_id,recovery_code?}；首个注册显示一次 |
+| POST | `/v1/devices/push-token` | D；手机须关联活跃人类会话；{push_token:{platform:apns或fcm,token}} | {ok:true}；仅本人且 OS 对应 |
+| DELETE | `/v1/devices/push-token` | D；手机须活跃人类会话，无体 | {ok:true}；清本人 token/job |
+| DELETE | `/v1/devices/{id}` | D、同账户；{by:device或recovery,recovery_code?}；device 分支须下述 Strong headers | {ok:true}；撤销注册／会话／WS |
+| POST | `/v1/auth/challenge` | {device_id}；手机另附人类会话 | {challenge:无填充b64url32B,exp}；60 s |
+| POST | `/v1/auth/verify` | {device_id,challenge,sig}；身份键签原始32B，不是 JCS | {session_token,exp,account_id}；24 h |
+| POST | `/v1/recovery` | 无旧 D；{account_id,recovery_code,new_recovery_code,device,nonce,sig} | {ok,account_id,device_id,recovery_code}；§3.4 |
+| GET | `/v1/account/providers` | 公开，无体 | {google,apple,google_web_client_id,google_ios_client_id,apple_app_id,apple_services_id,apple_callback_url} |
+| POST | `/v1/account/begin` | 公开限流；{provider:google或apple,device:DeviceRecord} | {attempt_id,nonce_hash,state,expires_at}；600 s 一次性 attempt |
+| POST | `/v1/account/finish` | {attempt_id,identity_token,state,signature,display_name?}；ID token + DK 证明 | {session_token,expires_at,account_id,user:{id,provider,email,display_name}}；30天 U |
+| GET | `/v1/account/session` | U，无体 | {user:{id,provider,email,display_name},expires_at} |
+| POST | `/v1/account/logout` | U，无体 | {ok:true}；清该会话与设备会话、token/job、WS |
+| POST | `/v1/account/apple/callback` | application/x-www-form-urlencoded；{state,id_token?,code?,user?,error?}，须有效 Apple state | 固定 Android intent redirect；无任意包名／URL 选择 |
+| GET | `/v1/presence` | D，WS 子协议 kv-relay-v1；30 s ping | t=envelope／ack／pong；裸 pair_accept／approval_cancel 仅提示 |
+| POST | `/v1/pair/start` | D；{token_hash,initiator:DeviceRecord,exp} | {pairing_id} |
+| POST | `/v1/pair/complete` | 新加入方无 D；已有单例须本人 D；{token,joiner:DeviceRecord} | {pairing_id,initiator,account_id,expires_at} |
+| POST | `/v1/pair/finish` | D；{pairing_id,confirm:PairConfirm} | {ok:true}；双方 finish 后完成，同确认可重试 |
+| POST | `/v1/approvals` | D；{id,exp,envelopes:[Envelope]} | {accepted:n}；每个 to 一份 |
+| GET | `/v1/approvals?state=waiting` | D | {envelopes:[Envelope]}；仅发给本人 |
+| POST | `/v1/approvals/{id}/reply` | D；{envelope}，仅原收件方 | {ok:true}；首个外层有效回复 resolved |
+| POST | `/v1/approvals/{id}/cancel` | D；原 requester，{envelope?:Envelope} | {ok:true}；原签名取消原样投递 |
+| POST | `/v1/messages` | D；{envelopes:[Envelope]} | {accepted:n}；持久化至 ack |
+| POST | `/v1/messages/ack` | D；{ids:[],type?:string} | {ok:true}；本人对应消息，客户端总带 type |
+| GET | `/v1/health` | 公开 | {ok:true,version} |
+| GET | `/metrics` | 当前 D，聚合数值；缺少原文所述独立 loopback 限制 | Prometheus 文本；S03 待处置 |
 
-限流默认：每设备每分钟 60 条 `approvals`、600 条 `messages`；每账户待处理 ≤ 500；单信封 ≤ 80 KiB。保留：送达并 ack 后 7 天删除。
+身份证明统一采用 verify_identity_signature(DeviceRecord,…)，dk_sig 合法存在时只用它，否则 dk_pub。登录 DK proof 为 JCS `{purpose:"keyvalet-account-login-v1",attempt_id,provider,device_id,identity_token_hash,state}`；identity_token_hash 为精确 ID token SHA256 hex。Apple 另核 nonce/state；provider+subject 唯一、邮箱不隐式合并。待 SAS 不抢占账户归属，另一用户不能加入已归属账户。
+
+恢复 DK proof 为 JCS `{action:"recover_account",account_id,device,nonce,new_recovery_code_hash}`，两码／nonce 都为32随机字节无填充 base64url，新码 hash 为字符串 SHA256 hex。新码先保存，失去旧会话也能恢复；响应不缓存，失败不修改旧权威。
+
+设备 DELETE 的 device 分支还要求 x-kv-challenge 与 x-kv-strong-signature：AK_s 对 JCS `{action:"revoke_device",account,by,device_id,challenge}` 签名，challenge 单次消费并与删除原子提交。恢复码分支仍需该路由的 D；无旧会话的全账户恢复使用 /v1/recovery。
+
+所有 JSON 错误使用 `{error:{code,message}}`，不回传数据库／provider 原始正文。普通路由映射：unauthorized 401、forbidden 403、not_found 404、rate_limited 429（Retry-After:60）、payload_too_large 413、bad_envelope 400、expired 410、conflict 409。账户流程额外有 provider_not_configured／provider_unavailable 503、invalid_identity 401、account_conflict 409、login_rejected（按原失败 400/401/403/429）；extractor／路由错误仍可返回普通错误。账户与 recovery 都 Cache-Control:no-store。完整 provider 配置见 [账户契约](../mobile/docs/account-login.md)。
+
+限额：设备每分钟 approvals 60／messages 600、账户待处理500、信封80 KiB、HTTP/WS输入1 MiB。恢复码／ID token／会话 token 不进入日志，表内 session_token 字段只说明形状，不是证据记录许可。
 
 传输重试必须幂等：相同账户、`id`、`to`、`type` 的同一完整签名信封重发成功，保留原 `acked_at`，不再重复推送；密文、签名或签名覆盖字段不同则返回 `conflict`。`/v1/approvals` 允许同一 requester 在原 `exp` 下向不同接收方分批提交，新增片段只在 `waiting` 时接收；已经存储的相同片段和相同回复在 `resolved` 后仍可重试。限额不重复计算已存储的片段。
 
@@ -1243,50 +1285,57 @@ relay 推送的裸 `approval_cancel`、`pair_accept` 控制帧只是无签名元
 
 ---
 
-## 附录 C. IPC 消息（`kv-ipc`）
+## 附录 C. IPC 消息（kv-ipc）
 
-在现有 IPC v4 上新增一个 `remote` 命名空间；所有消息都是 `{ "op": "remote.<name>", "params": {…} }` / `{ "ok": true, "result": {…} } | { "ok": false, "error": { "code", "message" } }`。
+IPC v4 remote 命名空间：请求 `{op:"remote.…",params:{…},...extra}`，响应 `{ok:true,result:{…}}` 或 `{ok:false,error:{code,message}}`。多请求连接使用关联 id；冷连接默认无推送，notifications=true 可订阅。底层 Op／五角色白名单来自 kv-ipc/src/remote.rs，core/ipc.rs 只提供 typed alias，不另定义权限。
 
-| op | 调用方 → 被调方 | params | result |
+| op | 允许调用方 → helper | params | result |
 | --- | --- | --- | --- |
-| `remote.relay.identity` | relay-client → helper | `{}` | `{ dk_pub, device_id, account_id }`（仅公钥；客户端核对配置绑定） |
-| `remote.relay.inbound` | relay-client → helper | `{ envelope }` | `{ ack: true }` |
-| `remote.relay.outbound.poll` | relay-client → helper（长轮询） | `{ max_wait_ms }` | `{ envelopes: [] }` |
-| `remote.relay.outbound.ack` | relay-client → helper | `{ envelopes: [], stage: "spooled" \| "accepted" \| "inspect" }` | `{ retired_count }` |
-| `remote.relay.control.poll` | relay-client → helper（冷启动亦可） | `{ max_wait_ms }` | `{ request: { id, relay_url, device_id: id或null, command: { op, params? } } 或 null }` |
-| `remote.relay.control.complete` | relay-client → helper | `{ id, result: { kind, value } }` | `{ ok: true }`；结果类型必须对应原请求 |
-| `remote.relay.control.sign` | relay-client → helper | `{ id, payload_b64 }` | `{ sig_b64 }`；仅该请求绑定的 DK challenge |
-| `remote.relay.status` | relay-client → helper | `{ connected, last_error, since }` | `{}` |
-| `remote.sign_identity` | relay-client → helper | `{ payload_b64 }` | `{ sig_b64 }` |
-| `remote.presence.update` | agent → helper | `PresenceHint` | `{}` |
-| `remote.pending.list` | cli / mcp → helper | `{ agent_pid? }` | `{ pending: [ApprovalRequest 摘要] }` |
-| `remote.pending.for_agent` | hook → helper | `{ agent_pid }` | `{ pending: [{approval_id, expires_at, stop_hook_blocks}] }` |
-| `remote.pending.stop_block` | hook → helper | `{ approval_id }` | `{ allowed: bool, blocks_left }` |
-| `remote.wait` | mcp → helper（长轮询） | `{ approval_id, max_wait_ms }` | A.8 结果 |
-| `remote.client_timeout_observed` | mcp → helper | `{}`（传输提示可忽略） | `{}`；仅审计，不拒绝、不取消、不消费审批 |
-| `remote.decide` | agent / cli（审批端）→ helper | `{ approval_id, decision, scope, level }` | `{ sent: true }` |
-| `remote.grant.issue` | cli / agent → helper | `Grant`（未签名） | `{ grant }`（已签名并已发送） |
-| `remote.grant.list` / `revoke` | cli → helper | `{ after?, limit? }` / `{ jti }` | `{ grants, next_cursor }` / `{}`；分页规则见 C.2 |
-| `remote.directive.issue` | cli / agent → helper | `Directive`（未签名） | `{ result: DirectiveResult }`（等待回包，超时 10 s） |
-| `remote.pair.start` / `complete` / `confirm` | cli / agent → helper | 见 A.7 | `{ sas }` / `{}` |
-| `remote.devices.list` / `revoke` / `rename` | cli → helper | … | … |
-| `remote.status` | cli / mcp → helper | `{}` | `{ relay, approvers[], pending_n, grants_n, unattended, runtime_budget_s, approval: { wait_in_call_s, wait_tool_max_s, progress_interval_s } }` |
+| `remote.relay.identity` | relay-client | {} | {dk_pub,device_id,account_id}；仅公开绑定 |
+| `remote.relay.inbound` | relay-client | {envelope} | {ack:true}；审计永久拒绝后也可 ack，暂时故障不 ack |
+| `remote.relay.outbound.poll` | relay-client | {max_wait_ms} | {envelopes:[]} |
+| `remote.relay.outbound.ack` | relay-client | {envelopes:[],stage:spooled或accepted或inspect} | {retired_count} |
+| `remote.relay.control.poll` | relay-client | {max_wait_ms} | {request:RelayControlJob或null}；冷启动可用 |
+| `remote.relay.control.complete` | relay-client | {id,result:{kind,value}} | {ok:true}；必须对应原命令 |
+| `remote.relay.control.sign` | relay-client | {id,payload_b64} | {sig_b64}；固定该请求首个32B challenge |
+| `remote.relay.status` | relay-client | {connected,last_error,since} | {}；不把任意 last_error 写审计 |
+| `remote.sign_identity` | relay-client | {payload_b64} | {sig_b64}；仅原始32B challenge |
+| `remote.presence.update` | agent | PresenceHint | {}；真实本端 device_id／时序核对 |
+| `remote.pending.list` | CLI owner、MCP | {agent_pid?} | {pending:[]}；owner 另有 recent/decision_seq，MCP 无 owner 历史 |
+| `remote.pending.for_agent` | hook | {agent_pid} | {pending:[{approval_id,expires_at,stop_hook_blocks}]} |
+| `remote.pending.stop_block` | hook | {approval_id} | {allowed,blocks_left}；原子最多三次 |
+| `remote.wait` | MCP | {approval_id,max_wait_ms,...预算提示} | A.8，调用方归属检查；只领取一次 |
+| `remote.client_timeout_observed` | MCP | {}，控制提示不作权威 | {}；审计，不拒绝／取消／消费 |
+| `remote.decide` | CLI owner、agent | DecideIntent（C.1） | {sent:true} |
+| `remote.grant.issue` | CLI owner、agent | GrantIntent（C.1）；兼容 Unsigned Grant | {grant}或GrantConfirmation |
+| `remote.grant.list` | CLI owner | {after?,limit?:50} | {grants,next_cursor}；1–100分页 |
+| `remote.grant.revoke` | CLI owner | {jti} | {}；逐目标回执，离线 revocation_pending |
+| `remote.directive.issue` | CLI owner、agent | DirectiveIntent（C.1）；兼容 Unsigned Directive | {result:DirectiveResult}；等待回执，超时10 s |
+| `remote.pair.start` | CLI owner、agent | owner {relay_url}；兼容 PairOffer | PairSasResult 及 C.1 扩展 |
+| `remote.pair.complete` | CLI owner、agent | PairJoinIntent {uri}；兼容 PairAccept | PairSasResult 及公开 binding |
+| `remote.pair.confirm` | CLI owner、agent | {sas,confirmed,exclude_global?:false}；兼容 PairConfirm | {}；最终状态读 status.pairing |
+| `remote.account.recover` | CLI owner | {account_id,recovery_code,relay_url,software?:false} | {binding:RelayBinding,recovery_code}；owner 一次性显示 |
+| `remote.devices.list` | CLI owner | {} | {devices:[DeviceRecord]} |
+| `remote.devices.revoke` | CLI owner | {device_id} | {}；Strong 删除证明／墓碑／持久重试 |
+| `remote.devices.rename` | CLI owner | {device_id,label} | {}；SetDeviceLabel 及已认证回执 |
+| `remote.status` | CLI owner、MCP | {} | {relay,approvers,pending_n,grants_n,unattended,runtime_budget_s,approval,...} |
+| `remote.audit.list` | CLI owner | QueryAuditArgs（A.5） | 本机固定链头审计页；不能授予权限 |
 
-helper 对每个 op 校验调用方身份：relay-client 仅允许明确列出的 `remote.relay.*` 与 `remote.sign_identity`；hook 仅允许 `remote.pending.for_agent` / `stop_block`；MCP 仅允许 `remote.wait` / `pending.list` / `status` / `client_timeout_observed`；其余只允许 CLI（owner）与审批端 agent。签名身份 challenge 必须是原始 32 字节，不开放任意 DK 签名 oracle。
+这是 R2 冻结快照的 29-op 列表：relay-client 9、hook 2、MCP 4、CLI owner 15、agent 7，重叠操作按该行明确授权。R3 的重新加入扩展需按现行 kv-ipc 单独核对，不能把本表当作新增操作的授权。owner／agent 不能冒充 relay/hook/MCP-only 的 op；MCP 不能签决定、Grant、Directive 或恢复账户。身份由真实 OS transport 决定：Linux peer broker、Mac audit token/code requirement、Windows pipe PID/token SID／固定文件身份／受保护 ACL；不使用模型提交的 PID／角色。
 
-控制请求与结果的类型定义在 `kv-core::remote::relay_control`。命令只包括身份认证、设备注册、配对 start/complete/finish、密文 messages/ack、challenge、临时 WS 收取和携带 helper Strong 证明的吊销，不接受任意 HTTP 路径。队列最多 8 条、期限 45 s、poll 最多等待 30 s；取消或完成后请求 ID 失效。`control.sign` 使用 helper 自己的身份提供器并验证返回签名；首次 32 字节 challenge 被固定，相同 challenge 可重试，换 challenge 被拒绝。HTTP 会话令牌始终由客户端维护，错误只返回固定代码。
+`remote.approval.resolved` 是 helper → 已认证 MCP 的非消费通知，`{op,params:{approval_id,status}}`，不是第三十个可调用 op；无请求正文／结果。Windows 保留 worker 进程句柄，在 ready 前把经 OS 验证 worker PID 绑定 launcher 实际父 PID。
 
-outbox 的交付以完整信封的规范 JSON 摘要绑定持久化回执。poll 响应丢失时继续返回原信封；客户端先持久化密文，再回 `spooled`，helper 记入数据库后停止 poll 重送，直到 `accepted` 才删除 helper outbox。relay 明确接受后，客户端先回 `accepted`，再删除自己的磁盘前缀。客户端每次发送前回 `inspect`：只有 helper 可以把已接受、已过期或对应审批已不再等待的连续前缀标为可删除，返回 `retired_count`；遇到首条仍有效的信封就停止。客户端只按该数量删除，不进行策略判断。`spooled` / `accepted` 返回数量恒为 0；相同回执幂等，迟到的落盘回执不会恢复已完成状态。
+RelayControlJob 为 `{id,relay_url,device_id:字符串或null,command:{op,params?}}`。命令仅 authenticate／register／recover_account／pair_start／pair_complete／pair_finish／messages／ack／challenge／pending／delete_device；pending 使用临时 WS，不接受任意 HTTP 路径。result kind 必须匹配，失败只返回固定代码；HTTP session token 始终在 relay-client。队列最多8、deadline45 s、poll≤30 s；完成／取消后的 ID 不能签名或回执。control.sign pin 首个32B challenge，同一值可重试、换值拒绝，签名结果按完整 DeviceRecord 的 K1 身份规则核对。
 
-入站信封在 helper 完成验证/处理后 ack；已持久审计的永久拒绝（过期、签名错误、未来版本、已处理重放等）也可 ack，避免重放队列被毒化。存储、审计或密钥提供器等暂时失败不 ack。`remote.presence.update` 由 helper 将粗粒度 hint 封装并签名，再经同一 outbox 发送；原始 presence signals 不跨进程传播。
+outbox 回执绑定完整信封规范 JSON 摘要。poll 丢响应仍返回原信封；客户端先落盘再回 spooled，helper 保存回执后停止 poll 重送；relay 明确接受后回 accepted，再删客户端磁盘前缀。inspect 只有 helper 判断已接受／过期／不再等待的连续队首可退休；遇第一条仍有效即停止。spooled／accepted 的 retired_count 恒为0，迟到回执不会恢复已完成状态。
 
-helper 可向已认证 MCP 连接发送 `remote.approval.resolved`，形状为 `{ op, params: { approval_id, status } }`；只通知结果可取，不包含请求正文或执行结果，不消费结果。单次冷连接默认只收响应；需要持久通知的冷连接显式带 `notifications: true`，已建立的凭证连接使用相同推送契约。Windows 由服务保留 worker 进程句柄，并在发送 worker ready 前，将其 PID 绑定到经 OS 验证的 launcher 父 PID；模型提交的 PID 不能覆盖该绑定。
+入站验证／处理与持久审计完成后才 ack；已审计永久拒绝可 ack 防毒队列，存储／审计／provider 暂时失败不能 ack。presence.update 只传粗粒度 hint；helper 签名／加密后经同一 outbox 发送，原始 signals 留本机。
 
 ---
 
 ### C.1 Owner intent 实现扩展（2026-10-12）
 
-第 2、3 项对接在现有 op 名称和调用方白名单内增加以下参数投影。类型定义共用 `kv-ipc`／`kv-core`，CLI 不提供签名、发行者、对象 ID 或 nonce；这些由 helper 填充。原有未签名对象的 T1 兼容路径保留；旧 T2 请求仅附标签会返回 `secondary_confirmation_required`。
+第 2、3 项对接在现有 op 名称和调用方白名单内增加以下参数投影。类型定义共用 `kv-ipc`／`kv-core`，CLI 不提供签名、发行者、对象 ID 或 nonce；这些由 helper 填充。原有 Unsigned 对象兼容路径保留；旧 T2 请求仅附标签会返回 `secondary_confirmation_required`。
 
 | op | 当前 owner 参数／结果扩展 |
 | --- | --- |
@@ -1297,81 +1346,313 @@ helper 可向已认证 MCP 连接发送 `remote.approval.resolved`，形状为 `
 | `remote.pending.list` | owner 结果额外包含最近 200 条 `recent`，每条有持久递增 `decision_seq`；MCP 的结果不包含 owner 历史。 |
 | `remote.grant.list` | 对象 Extra 承载 issued／installed 台账、使用快照和获取时间、各执行端使用量及 `revocation_pending`。审批决定衍生的内部 Grant 保留 `approval_decision` 权威来源，不伪造 Grant 签名。 |
 
-T2 准备令牌最长 120 秒，只保存哈希，绑定调用方 UID／PID／角色、完整意图和当前设备记录，失败的最终尝试也消费令牌。常设 T2 的 `confirmations_left` 从 2 开始，第一次精确标签确认交换新令牌和 1，第二次才签发；两轮共享原截止时间。有限 T2 返回 1。准备证明使用与 Grant 不同的签名域，不产生可执行 Grant。
+T2 准备令牌最长 120 秒，只保存哈希，绑定调用方 UID／PID／角色、完整意图和当前设备记录，失败的最终尝试也消费令牌。R3-A 桌面 helper 的有限与常设 T2 都令 `confirmations_left` 从 2 开始，第一次精确标签确认交换新令牌和 1，第二次才签发；两轮共享原截止时间。缺省 1 的旧回应仍可被类型解码，但新 CLI 不用于 T2 授权，须成套升级 helper/CLI；手机实现独立验收。准备证明使用与 Grant 不同的签名域，不产生可执行 Grant。
 
 首次注册先保存加密设备身份，再调用 relay，断网重试复用原密钥。已有身份加入仅允许尚无信任关系和授权／审批状态的单设备，并通过受认证迁移日志保持账户、目录和 SQLite 一致。公开绑定只包含 relay URL、设备 ID 和账户 ID；恢复码不保存到该配置。配对 API 的 `expires_at` 和认证结果的 `account_id` 已纳入附录 B 响应字段表。
 
 本地设置使用现有特权控制通道的 `remote_settings`，与远程 Directive 共用 helper 设置后端及 CAS，不扩大 MCP／relay-client 的 op 白名单。桌面确认经已有已认证私有 agent 通道进行；UI 同意不能替代实际 AK 签名。代码／schema、真实模块测试及实机验收边界详见 [第 2、3 项报告](remote-approval-reports/owner-integration-23.md)。
 
+恢复扩展：`remote.account.recover` 只允许 CLI owner，在冷启动时也可调用；不允许 relay-client、MCP、hook 或 agent 发起。结果包含公开 binding 和新的一次性恢复码；没有私钥或 HTTP session token。typed control 的 `recover_account` 仅传固定恢复对象、返回 `recovered`，不得接受任意 URL 路径。helper 将新码和目标绑定先存 vault AEAD 的准备状态，失败重试保留原 DK；已提交而响应丢失时先认证新 DK 并恢复同一新码。
+
 ### C.2 管理一致性与分页扩展（2026-10-12）
 
 - `remote.devices.revoke` 在配置 relay 时生成 Strong 删除证明、持久保存 peer 吊销信封并首先撤销本地权威，再投递密文及删除 relay 注册。网络或限流失败保留待重试状态，`remote.status.device_revocations_pending` 显示未完成 relay 删除的数量。离线 peer 由原有 outbox 继续投递；需要新 relay challenge 时由 owner 重试，不在后台绕过 Strong。
 - `remote.devices.rename` 针对已连接的远程执行端发送 SetDeviceLabel，并等待已认证回执。执行端设置、SQLite DeviceRecord 和加密目录同时更新，owner 缓存新标签；T2 标签确认使用该记录。只有 label 可变，密钥／能力变更必须重新建立权威。relay 的配对注册校验同样区分 label 与不可变身份。
-- SQLite 与加密目录通过加密 prepare 日志、SQLite `directory_commits` 标记和提交后发布保持同一提交决定。重开时提交标记存在则完成发布，否则丢弃准备日志。审计或 SQLite 回滚不会发布新目录；这不代替 T04 的硬件反回滚及完整审计锚定。
+- SQLite 与加密目录通过加密 prepare 日志、SQLite `directory_commits` 标记和提交后发布保持同一提交决定。重开时提交标记存在则完成发布，否则丢弃准备日志。审计或 SQLite 回滚不会发布新目录；这不提供 T04 的硬件反回滚；独立审计检查点的已实现范围和边界见 §11。
 - `remote.grant.list` 和 QueryGrants Directive 的 args 均为 `{ after?: jti, limit?: 50 }`。limit 为 1–100，after 最长 256 字节且无控制字符；按 jti 排序，返回 `{ grants: […], next_cursor: jti | null }`。单页元数据正文不超过 48 KiB；超大对象返回显式 `object_omitted: true` 的有限摘要，不附带伪造签名。列表是元数据，不能作为新的授权对象安装。
 - CLI 自动获取后续页再渲染完整列表，重复游标报协议错误。移动端用 Quick 签发有游标绑定的后续 QueryGrants，并合并各页；既有信封重放保护防止重复续页。分页期间授权变更可能影响快照，列表不承诺跨页事务快照。
 
-## 附录 D. 本地数据 DDL
+## 附录 D. 当前 SQLite DDL
+
+下面逐字收录两个 schema.sql（2026-10-14）；不把概念表当实际迁移。helper 的完整 record_json／object_json／authority_json 保留签名字段与扩展，dk_sig 无独立列也不会丢失。server v3 保存完整 record BLOB、人类身份／会话与持久 push_jobs；push 生命周期 trigger 由运行时初始化，见 R2-C。
+
+### D.1 helper（执行端／审批端共用）
 
 ```sql
--- 执行端与审批端共用的表（同一 state.db；审批端的 vault 可能为空）
-CREATE TABLE devices (
+-- Appendix D columns remain stable; lossless signed objects use explicit extension columns.
+PRAGMA foreign_keys = ON;
+PRAGMA journal_mode = WAL;
+PRAGMA synchronous = FULL;
+CREATE TABLE IF NOT EXISTS devices (
   id TEXT PRIMARY KEY, account_id TEXT NOT NULL, label TEXT NOT NULL, os TEXT NOT NULL, key_kind TEXT NOT NULL,
   dk_pub TEXT NOT NULL, akq_pub TEXT, akq_alg TEXT, aks_pub TEXT, aks_alg TEXT,
-  caps TEXT NOT NULL, attestation BLOB, trust TEXT NOT NULL, added_at INTEGER NOT NULL, revoked_at INTEGER);
-CREATE TABLE pending_approvals (
+  caps TEXT NOT NULL, attestation BLOB, trust TEXT NOT NULL, added_at INTEGER NOT NULL, revoked_at INTEGER,
+  record_json TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS directory_commits (id TEXT PRIMARY KEY);
+CREATE TABLE IF NOT EXISTS device_revocations (device_id TEXT PRIMARY KEY,body_json TEXT NOT NULL,relay_done INTEGER NOT NULL DEFAULT 0);
+CREATE TABLE IF NOT EXISTS device_revocation_targets (device_id TEXT NOT NULL,peer TEXT NOT NULL,envelope_json TEXT NOT NULL,
+  PRIMARY KEY(device_id,peer));
+CREATE TABLE IF NOT EXISTS pending_approvals (
   id TEXT PRIMARY KEY, kind TEXT NOT NULL, digest TEXT NOT NULL, nonce TEXT NOT NULL, canonical_json TEXT NOT NULL,
   exp INTEGER NOT NULL, state TEXT NOT NULL, created_at INTEGER NOT NULL, resolved_at INTEGER,
   approver TEXT, level TEXT, scope_json TEXT, agent_pid INTEGER, agent_runtime TEXT,
-  stop_hook_blocks INTEGER NOT NULL DEFAULT 0, claimed_at INTEGER, escalated_at INTEGER);
-CREATE TABLE nonces (nonce TEXT PRIMARY KEY, digest TEXT NOT NULL, used_at INTEGER NOT NULL, exp INTEGER NOT NULL);
-CREATE TABLE grants (
+  stop_hook_blocks INTEGER NOT NULL DEFAULT 0, claimed_at INTEGER, escalated_at INTEGER,
+  request_json TEXT NOT NULL, decision_json TEXT, session_id TEXT NOT NULL, epoch INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS nonces (nonce TEXT PRIMARY KEY, digest TEXT NOT NULL, used_at INTEGER NOT NULL, exp INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS grants (
   jti TEXT PRIMARY KEY, iss TEXT NOT NULL, iss_alg TEXT NOT NULL, aud TEXT NOT NULL, level TEXT NOT NULL, credential TEXT,
   hosts_json TEXT, methods_json TEXT, paths_json TEXT, agent TEXT, max_tier TEXT NOT NULL,
   budget_json TEXT, budget_left_json TEXT, nbf INTEGER, exp INTEGER, origin TEXT NOT NULL, sig TEXT NOT NULL,
-  installed_at INTEGER NOT NULL, revoked_at INTEGER);
-CREATE TABLE directives (id TEXT PRIMARY KEY, iss TEXT NOT NULL, op TEXT NOT NULL, args_json TEXT NOT NULL,
+  installed_at INTEGER NOT NULL, revoked_at INTEGER, object_json TEXT NOT NULL, authority_json TEXT NOT NULL,
+  session_id TEXT);
+CREATE TABLE IF NOT EXISTS directives (id TEXT PRIMARY KEY, iss TEXT NOT NULL, op TEXT NOT NULL, args_json TEXT NOT NULL,
   applied_at INTEGER NOT NULL, ok INTEGER NOT NULL, error TEXT);
-CREATE TABLE settings (key TEXT PRIMARY KEY, value_json TEXT NOT NULL, set_by TEXT NOT NULL, set_at INTEGER NOT NULL);
-CREATE TABLE revoked_jti (jti TEXT PRIMARY KEY, revoked_at INTEGER NOT NULL);
--- 审批端专用
-CREATE TABLE issued_approvals (approval_id TEXT PRIMARY KEY, peer TEXT NOT NULL, kind TEXT NOT NULL, digest TEXT NOT NULL,
+CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value_json TEXT NOT NULL, set_by TEXT NOT NULL, set_at INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS revoked_jti (jti TEXT PRIMARY KEY, revoked_at INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS issued_approvals (approval_id TEXT PRIMARY KEY, peer TEXT NOT NULL, kind TEXT NOT NULL, digest TEXT NOT NULL,
   decision TEXT NOT NULL, level TEXT NOT NULL, scope_json TEXT, issued_at INTEGER NOT NULL, summary_text TEXT NOT NULL);
-CREATE TABLE issued_grants (jti TEXT PRIMARY KEY, peer TEXT NOT NULL, level TEXT NOT NULL, credential TEXT, max_tier TEXT NOT NULL,
+CREATE TABLE IF NOT EXISTS approval_history (seq INTEGER PRIMARY KEY AUTOINCREMENT,
+  approval_id TEXT NOT NULL UNIQUE REFERENCES issued_approvals(approval_id));
+CREATE TABLE IF NOT EXISTS issued_grants (jti TEXT PRIMARY KEY, peer TEXT NOT NULL, level TEXT NOT NULL, credential TEXT, max_tier TEXT NOT NULL,
   exp INTEGER, origin TEXT NOT NULL, issued_at INTEGER NOT NULL, revoked_at INTEGER);
-CREATE TABLE issued_directives (id TEXT PRIMARY KEY, peer TEXT NOT NULL, op TEXT NOT NULL, issued_at INTEGER NOT NULL,
+CREATE TABLE IF NOT EXISTS issued_directives (id TEXT PRIMARY KEY, peer TEXT NOT NULL, op TEXT NOT NULL, issued_at INTEGER NOT NULL,
   result_ok INTEGER, result_summary TEXT);
-CREATE TABLE peer_state_cache (peer TEXT PRIMARY KEY, mode TEXT, unattended INTEGER, grants_count INTEGER, pending_count INTEGER,
+CREATE TABLE IF NOT EXISTS issued_grant_objects (jti TEXT PRIMARY KEY REFERENCES issued_grants(jti), object_json TEXT NOT NULL,
+  issued_at INTEGER NOT NULL, revoked_at INTEGER);
+CREATE TABLE IF NOT EXISTS issued_grant_usage (jti TEXT NOT NULL REFERENCES issued_grants(jti), peer TEXT NOT NULL,
+  usage_json TEXT NOT NULL, fetched_at INTEGER NOT NULL, PRIMARY KEY(jti,peer));
+CREATE TABLE IF NOT EXISTS issued_grant_revocations (jti TEXT PRIMARY KEY REFERENCES issued_grants(jti),
+  requested_at INTEGER NOT NULL, confirmed_at INTEGER);
+CREATE TABLE IF NOT EXISTS issued_grant_revocation_targets (jti TEXT NOT NULL REFERENCES issued_grant_revocations(jti),
+  peer TEXT NOT NULL, confirmed_at INTEGER, PRIMARY KEY(jti,peer));
+CREATE TABLE IF NOT EXISTS issued_directive_objects (id TEXT PRIMARY KEY REFERENCES issued_directives(id), object_json TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS grant_use_stats (jti TEXT PRIMARY KEY REFERENCES grants(jti), uses_n INTEGER NOT NULL, last_used_at INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS peer_state_cache (peer TEXT PRIMARY KEY, mode TEXT, unattended INTEGER, grants_count INTEGER, pending_count INTEGER,
   presence TEXT, last_seen INTEGER, fetched_at INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS remote_outbox (
+  seq INTEGER PRIMARY KEY AUTOINCREMENT, envelope_json TEXT NOT NULL, exp INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS remote_outbox_receipts (
+  envelope_hash TEXT PRIMARY KEY, stage TEXT NOT NULL, exp INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS remote_audit (
+  seq INTEGER PRIMARY KEY AUTOINCREMENT, entry_json TEXT NOT NULL, prev_hash TEXT NOT NULL, entry_hash TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS inbound_approvals (
+  id TEXT PRIMARY KEY, peer TEXT NOT NULL, object_json TEXT NOT NULL, state TEXT NOT NULL,
+  exp INTEGER NOT NULL, receipt_seq INTEGER NOT NULL REFERENCES remote_audit(seq));
+CREATE INDEX IF NOT EXISTS pending_agent ON pending_approvals(agent_pid, state, exp);
+CREATE INDEX IF NOT EXISTS grants_issuer ON grants(iss, revoked_at);
+CREATE INDEX IF NOT EXISTS inbound_exp ON inbound_approvals(state, exp);
 ```
 
-状态机：`pending_approvals.state ∈ { waiting, approved, approved_unused, executed, denied, expired, cancelled }`；`devices.trust ∈ { verified_sas, recovery, revoked }`。relay 侧 DDL 见 §8.3。
+pending_approvals 状态为 waiting／approved／approved_unused／executed／denied／expired／cancelled；devices 信任来源含 verified_sas／recovery／revoked。完整请求／执行结果只在内存，不写 request_json 的公开快照。实际授权同时受 vault 加密目录与审计检查点约束，不把 SQLite 私有权限当硬件反回滚。
+
+审批端的 `inbound_approvals` 状态为 waiting／issued／cancelled／expired；object_json 保留原签名信封和审批对象，receipt_seq 引用包含该对象哈希与状态的最新审计收据。入站签名、HPKE、角色验证和事务／vault 检查点提交成功后才 ACK；重启先验证检查点、目录与最新收据，再重验当前执行端的身份签名和权限，恢复尚未到期的 waiting。取消、签发和过期状态不恢复为 waiting；签发与 outbox／ledger 同事务提交。恢复过程不再次调用硬件 ECDH，不能恢复旧版本已 ACK 后完全丢失的对象，也不提供全备份硬件反回滚或外部 HTTP exactly-once。
+
+### D.2 relay-server（schema v3）
+
+```sql
+PRAGMA foreign_keys = ON;
+PRAGMA secure_delete = ON;
+
+CREATE TABLE IF NOT EXISTS accounts (
+    id TEXT PRIMARY KEY,
+    created_at INTEGER NOT NULL,
+    recovery_hash TEXT NOT NULL,
+    plan TEXT NOT NULL DEFAULT 'self_hosted'
+);
+CREATE TABLE IF NOT EXISTS devices (
+    id TEXT PRIMARY KEY,
+    account_id TEXT NOT NULL REFERENCES accounts(id),
+    dk_pub TEXT NOT NULL UNIQUE,
+    akq_pub TEXT, akq_alg TEXT, aks_pub TEXT, aks_alg TEXT,
+    key_kind TEXT NOT NULL, attestation BLOB, os TEXT NOT NULL,
+    caps TEXT NOT NULL, label TEXT NOT NULL,
+    created_at INTEGER NOT NULL, revoked_at INTEGER, last_seen INTEGER,
+    record BLOB NOT NULL, push_token BLOB
+);
+CREATE INDEX IF NOT EXISTS devices_account ON devices(account_id);
+CREATE TABLE IF NOT EXISTS sessions (
+    token_hash TEXT PRIMARY KEY,
+    device_id TEXT NOT NULL REFERENCES devices(id),
+    exp INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS sessions_device ON sessions(device_id);
+CREATE TABLE IF NOT EXISTS pairings (
+    pairing_id TEXT PRIMARY KEY, token_hash TEXT UNIQUE,
+    account_id TEXT NOT NULL REFERENCES accounts(id),
+    initiator_device TEXT NOT NULL REFERENCES devices(id),
+    initiator_pubs BLOB NOT NULL, joiner_pubs BLOB,
+    joiner_device TEXT REFERENCES devices(id),
+    state TEXT NOT NULL CHECK(state IN ('offered', 'accepted', 'finished', 'expired')),
+    exp INTEGER NOT NULL, initiator_finished INTEGER NOT NULL DEFAULT 0,
+    joiner_finished INTEGER NOT NULL DEFAULT 0, sas_hash TEXT
+);
+CREATE INDEX IF NOT EXISTS pairings_joiner ON pairings(joiner_device, state);
+CREATE TABLE IF NOT EXISTS used_pair_tokens (
+    token_hash TEXT PRIMARY KEY, exp INTEGER NOT NULL
+);
+CREATE TABLE IF NOT EXISTS approvals (
+    id TEXT NOT NULL, account_id TEXT NOT NULL REFERENCES accounts(id),
+    requester TEXT NOT NULL REFERENCES devices(id),
+    state TEXT NOT NULL CHECK(state IN ('waiting', 'resolved', 'cancelled', 'expired')),
+    exp INTEGER NOT NULL, resolved_by TEXT REFERENCES devices(id), resolved_at INTEGER,
+    PRIMARY KEY(account_id, id)
+);
+CREATE TABLE IF NOT EXISTS messages (
+    id TEXT NOT NULL, account_id TEXT NOT NULL REFERENCES accounts(id),
+    from_device TEXT NOT NULL REFERENCES devices(id),
+    to_device TEXT NOT NULL REFERENCES devices(id), type TEXT NOT NULL,
+    envelope BLOB NOT NULL, created_at INTEGER NOT NULL, exp INTEGER NOT NULL,
+    delivered_at INTEGER, acked_at INTEGER,
+    PRIMARY KEY(account_id, id, to_device, type)
+);
+CREATE INDEX IF NOT EXISTS messages_inbox ON messages(to_device, acked_at, exp);
+CREATE INDEX IF NOT EXISTS approvals_waiting ON approvals(account_id, state, exp);
+
+CREATE TABLE IF NOT EXISTS push_jobs (
+    account_id TEXT NOT NULL, id TEXT NOT NULL, to_device TEXT NOT NULL,
+    type TEXT NOT NULL, mode TEXT NOT NULL CHECK(mode IN ('silent','banner')),
+    attempts INTEGER NOT NULL DEFAULT 0, next_attempt INTEGER NOT NULL,
+    expires_at INTEGER NOT NULL,
+    PRIMARY KEY(account_id,id,to_device,type),
+    FOREIGN KEY(account_id,id,to_device,type)
+        REFERENCES messages(account_id,id,to_device,type) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS push_jobs_due ON push_jobs(next_attempt,expires_at);
+
+CREATE TABLE IF NOT EXISTS login_users (
+    id TEXT PRIMARY KEY, provider TEXT NOT NULL, subject TEXT NOT NULL,
+    email TEXT NOT NULL, display_name TEXT NOT NULL, created_at INTEGER NOT NULL,
+    UNIQUE(provider,subject)
+);
+CREATE TABLE IF NOT EXISTS device_users (
+    device_id TEXT PRIMARY KEY REFERENCES devices(id),
+    user_id TEXT NOT NULL REFERENCES login_users(id)
+);
+CREATE TABLE IF NOT EXISTS account_owners (
+    account_id TEXT PRIMARY KEY REFERENCES accounts(id) ON DELETE CASCADE,
+    user_id TEXT NOT NULL REFERENCES login_users(id)
+);
+CREATE TABLE IF NOT EXISTS login_attempts (
+    id TEXT PRIMARY KEY, provider TEXT NOT NULL, nonce_hash TEXT NOT NULL,
+    state TEXT NOT NULL UNIQUE, device BLOB NOT NULL, exp INTEGER NOT NULL
+);
+CREATE TABLE IF NOT EXISTS account_sessions (
+    token_hash TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES login_users(id),
+    device_id TEXT NOT NULL REFERENCES devices(id), exp INTEGER NOT NULL,
+    created_at INTEGER NOT NULL
+);
+CREATE TABLE IF NOT EXISTS device_session_users (
+    token_hash TEXT PRIMARY KEY REFERENCES sessions(token_hash) ON DELETE CASCADE,
+    account_session TEXT NOT NULL REFERENCES account_sessions(token_hash) ON DELETE CASCADE
+);
+
+PRAGMA user_version = 3;
+```
+
+server 启动另启用 WAL；账户／会话／token 清理与迁移按生产初始化代码执行。表结构与字段类型来自源码，未知 DeviceRecord 字段在 record／record_json 中保留，旧设备记录无需补 dk_sig 列。
 
 ---
 
-## 附录 E. CLI 与 MCP 面
+## 附录 E. 当前 CLI 与 MCP 面
 
-CLI 约定：所有子命令支持 `--json`；退出码 `0` 成功、`2` 参数错误、`3` 被执行端拒绝（验签/档位）、`4` 超时、`5` relay 不可达、`6` 需要 Strong 但用户取消。完整命令表见 §9.3；`keyvalet remote <device> …` 中 `<device>` 接受设备 id、标签或 `*`。
+以下为仓库构建的 kv-cli remote --help；另以 relay／pair／devices／approvals／grant／audit --remote／status --help 核对各 family。所有远程 family 接受 --json，pair/watch 输出 JSON Lines；恢复码只从隐藏输入或 stdin 读取，不能进 argv／证据。
 
-MCP 新工具 `credential_wait_approval`：
-
-```json
-{ "name": "credential_wait_approval",
-  "description": "等待一条待批准的 KeyValet 请求。批准后直接返回该请求的执行结果；不要重复发起原请求。",
-  "inputSchema": { "type": "object", "required": ["approval_id"],
-    "properties": { "approval_id": { "type": "string" }, "max_wait_s": { "type": "integer", "minimum": 5, "maximum": 600 } } } }
+```text
+relay install|status|set-url|recover
+pair --new | pair <kv-pair://...>
+devices list|revoke <id>|rename <id> <label>
+approvals [--watch] [--on-approve <cmd>] | approve <id> [--scope ...] | deny <id> [--reason ...]
+grant ...|list|revoke <jti>|revoke-all
+remote <device|label|*> mode <per_use|per_credential|per_session|remember:Nh>
+remote <device|label|*> allow <--credential type/name|--all> [--hosts ...] [--methods ...] [--paths ...] [--agent ...] [--until duration|RFC3339|--standing]
+remote <device|label|*> unattended --include-sensitive --until <duration|RFC3339>
+remote <device|label|*> lock
+remote <device|label|*> unlock-ttl <hours|duration>
+remote <device|label|*> class <name> [--credential pattern] [--host pattern] --exp <duration>
+remote <device|label|*> label <label>
+remote <device|label|*> notify <prefer-local|always-phone|both>
+remote <device|label|*> status|pending|grants
+remote <device|label|*> audit [--since duration|RFC3339] [--limit 1..200]
+remote <device|label|*> grant revoke <jti> | revoke-all
+status [--summary]
 ```
 
-现有使用类工具（`credential_http_request` 等）新增可选参数 `approval_id`（string）。`credential_status` 的 `remote_approval` 字段见 §9.4。所有新状态都通过 `content[0].text` 的 JSON（A.8）返回，`isError = false`。
+family 的补充语法：
+
+```text
+relay install [--listen 127.0.0.1:8787] [--data /var/lib/keyvalet-relay-server] --public-url https://relay.example.com [--root /staging]
+relay status [--public-url URL]
+relay recover <account-id> [--public-url URL] [--software] [--json]
+approve <id> [--scope per_use|per_credential|per_session|remember:1h|remember:8h|remember:24h|standing:credential|standing:device]
+deny <id> [--reason <text>]
+grant --to <device|label|*> --credential type/name [--hosts host,...] [--methods GET,POST] [--paths /path,...] [--budget calls/1h|24h|7d] --until <duration|RFC3339> [--agent identity]
+grant list | grant revoke <jti> | grant revoke-all
+audit --remote [--device <device|label>] [--since duration|RFC3339] [--limit 1..200] [--json]
+```
+
+remote audit 的 help／parser 与 QueryAudit/helper 均接受 limit 1..200；201 及以上在 CLI 拒绝，T12 已有边界回归。CLI unattended 无 --standing，也没有非交互 --yes 跳过标签；不把手机常设 T2 的实现写成 CLI flag。
+
+| 退出码 | 当前含义 |
+| --- | --- |
+| 0 | 成功，包括 watch 正常中断；audit 无差异且查询完整 |
+| 2 | 参数错误、未知／歧义标签 |
+| 3 | 验证／授权拒绝、协议响应错误或本地失败；audit 差异／缺口 |
+| 4 | 超时或过期，包括 pairing／Directive 回执等待 |
+| 5 | relay/helper/control transport 不可达／未就绪；status --summary 可仅展示本地公开状态与 remote_error |
+| 6 | Strong 或终端确认取消、缺少二次确认 |
+
+MCP 工具 credential_wait_approval：
+
+```json
+{"name":"credential_wait_approval","inputSchema":{"type":"object","required":["approval_id"],"properties":{"approval_id":{"type":"string"},"max_wait_s":{"type":"integer","minimum":5,"maximum":600}}}}
+```
+
+批准后返回原请求结果，不能重发原调用；approved_retry_required 才允许同参数／同 ID 恢复。使用类工具新增可选 approval_id，credential_status.remote_approval 见 §9.4，content[0].text 的 JSON 状态见 A.8，isError=false。模型文案说明 pending 继续等、denied 不绕路、expired 按需新建、cancelled 先确认新意图，不索要 key。SDK HTTP 与跨 session 边界见 §6.9.2。
 
 ---
 
 ## 附录 F. 代码布局、依赖与测试向量
 
-新 crate：`rust/crates/kv-server`（bin `kv-server`，features `relay`，默认开）、`rust/crates/kv-relay-client`（bin `kv-relay-client`）、`rust/crates/kv-mobile-core`（lib，`staticlib + cdylib + rlib`）、`rust/crates/kv-push`（bin）。全部加入 `rust/Cargo.toml` 的 workspace members（由 W0 一次性加入，带空骨架，避免并行改同一文件）。
+kv-server（bin、relay feature 默认开）、kv-relay-client（bin/library control transport）、kv-mobile-core（staticlib/cdylib/rlib）、kv-push（bin）已加入 workspace 并实现，不再是空骨架。底层 provider／presence trait 在 kv-ipc，core typed adapter 无平台循环；mobile 用关闭默认桌面依赖的 core remote feature。
 
-依赖选型（W0 决定并写入 `Cargo.lock`；其他工作流不新增依赖，需要则在报告里申请）：HTTP/WS 用 workspace 已有或 `axum` + `tokio-tungstenite`；SQLite 用 workspace 已有的 `rusqlite`；HPKE 优先 `hpke` crate，若其 P-256 支持或维护状态不满足则在 `kv-core` 内用现有 `p256` + `hkdf` + `aes-gcm` 自组合（RFC 9180 的 DHKEM 与 key schedule 都有测试向量）；JCS 用 `serde_jcs`；JWK 用 `p256::pkcs8` 导出。任何新依赖须已发布 ≥ 7 天，并记录在 W0 报告里。
+生产 HPKE 使用现有 p256/hkdf/aes-gcm 组合，让 ECDH 委托硬件 provider；hpke 0.12 为 dev-only 独立参考实现。JCS 为 serde_jcs，HTTP/WS 为 axum/tokio-tungstenite，SQLite 为 rusqlite。CLI QR 使用已批准 qrcode=0.14.1、关闭 image 默认 feature。依赖选择／发布时间与各工作流归属见 W0–W9、v1-completion，R2-B/C/D 没有新增运行依赖。
 
-测试向量（`rust/crates/kv-core/testdata/remote/`，W0 生成，所有工作流消费）：`envelope_roundtrip.json`（软件密钥对、明文、期望密文长度与 AAD）、`approval_request_digest.json`（canonical 与 digest）、`decision_valid.json` / `decision_wrong_key.json` / `decision_replayed.json`、`grant_standing_t1.json` / `grant_t2_requires_settings.json`、`directive_tighten_quick_ok.json` / `directive_loosen_quick_rejected.json`、`pair_sas.json`、`rs256_decision.json`（Windows Hello 形态）。每个向量文件自带 `expect` 字段，各 crate 的测试只断言 `expect`。
+向量在 rust/crates/kv-core/testdata/remote。当前 32 个 JSON 清单如下，全部带 expect；测试从 CARGO_MANIFEST_DIR 加载，不依赖本机安装、Python 或外网。generate.py 用独立 Python cryptography 生成自定义向量；RFC 9180 P-256 base suite16/1/1 与 hpke 参考同时验证。
 
-日志与 i18n：审批对话框与 MCP 结果文案通过现有 `kv-i18n`（zh-CN / en）；日志里永远不出现凭证值、请求体、`ct`、私钥材料；`RUST_LOG=kv_remote=debug` 打开远程审批调试。
+```text
+approval_request_digest.json
+decision_replayed.json
+decision_valid.json
+decision_validation_cases.json
+decision_wrong_key.json
+device_record_with_dk_sig_envelope.json
+device_record_with_dk_sig_legacy.json
+device_record_with_dk_sig_pair_sas.json
+device_record_with_dk_sig_tampered.json
+device_record_with_dk_sig_valid.json
+device_record_with_dk_sig_wrong_dk.json
+directive_loosen_quick_rejected.json
+directive_tighten_quick_ok.json
+envelope_rejections.json
+envelope_roundtrip.json
+envelope_tampering.json
+grant_standing_t1.json
+grant_t2_requires_settings.json
+grant_validation_cases.json
+ipc_contracts.json
+jcs.json
+jcs_numbers.json
+owner_intent_contracts.json
+pair_sas.json
+path_normalization.json
+provider_adapter.json
+relay_contract_extensions.json
+rfc9180_p256_base.json
+rs256_decision.json
+schema_rejections.json
+schema_samples.json
+test_keys.json
+```
+
+| K1 新向量 | expect 覆盖 |
+| --- | --- |
+| device_record_with_dk_sig_valid.json | 完整记录 JCS／SHA256／签名／未知字段 roundtrip |
+| device_record_with_dk_sig_wrong_dk.json | dk_sig 验成功，同签名用 dk_pub 必失败 |
+| device_record_with_dk_sig_tampered.json | 篡改 dk_sig 嵌套扩展使完整记录签名失败 |
+| device_record_with_dk_sig_legacy.json | 缺失字段仍缺失，旧 dk_pub 身份签名成功 |
+| device_record_with_dk_sig_envelope.json | split 签名与旧 HPKE 接收键互操作；错误 DK 拒绝 |
+| device_record_with_dk_sig_pair_sas.json | 新域 SAS，换 signing key／扩展改变 SAS；旧域不变 |
+
+R2-B 对其动手前24个旧向量逐字节核对保持；schema_samples 有意更新、ipc_contracts 有并行扩展，不能将所有32个文件称为原始未改。K4/D04/D05 的接收拒绝条件与负向向量已在 R3-B 无签名修复中完成；Grant 相关 schema／样例有意同步，其他向量逐字节保持。
+
+日志与审批／模型文案使用 kv-i18n 中英文本；调试日志也不允许凭证值、完整 body、ct、私钥、恢复码、配对／会话令牌。证据只保存脱敏事件、数字和公开结果。

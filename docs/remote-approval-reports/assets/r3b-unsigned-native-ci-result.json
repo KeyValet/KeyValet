@@ -1,0 +1,27 @@
+{
+  "failure": null,
+  "passed": true,
+  "finished_utc": "2026-10-14T02:04:40.5166191Z",
+  "commands": [
+    {
+      "exit_code": 0,
+      "command": "cargo fmt --all -- --check",
+      "seconds": 1.934758
+    },
+    {
+      "exit_code": 0,
+      "command": "cargo clippy --workspace --all-targets -- -D warnings",
+      "seconds": 21.3842659
+    },
+    {
+      "exit_code": 0,
+      "command": "cargo build --workspace --locked",
+      "seconds": 24.7038749
+    },
+    {
+      "exit_code": 0,
+      "command": "cargo test --workspace --locked",
+      "seconds": 366.5967974
+    }
+  ]
+}

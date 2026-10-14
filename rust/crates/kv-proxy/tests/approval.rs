@@ -184,14 +184,27 @@ async fn approved_http_results_and_terminal_errors_are_validated_without_replayi
     );
     for (state, status) in [
         ("approval_denied", 403),
+        ("approval_cancelled", 409),
         ("approval_expired", 410),
         ("no_approver", 503),
-        ("already_consumed", 502),
     ] {
-        let error = approval::http_response(&json!({"status": state})).unwrap_err();
-        assert_eq!(error.status.as_u16(), status);
-        assert!(!error.to_string().is_empty());
+        let response = approval::http_response(&json!({"status": state, "approval_id": ID}))
+            .unwrap()
+            .unwrap();
+        assert_eq!(response.status().as_u16(), status);
+        assert_eq!(response.headers()["x-should-retry"], "false");
+        let body: Value =
+            serde_json::from_slice(&response.into_body().collect().await.unwrap().to_bytes())
+                .unwrap();
+        assert_eq!(body["error"]["type"], format!("keyvalet_{state}"));
+        assert_eq!(body["error"]["approval_id"], ID);
     }
+    assert_eq!(
+        approval::http_response(&json!({"status":"already_consumed"}))
+            .unwrap_err()
+            .status,
+        502
+    );
     let response =
         approval::http_response(&json!({"status": "approval_pending", "approval_id": ID}))
             .unwrap()
@@ -291,10 +304,7 @@ async fn transparent_adapter_waits_silently_and_forwards_only_authorization_only
         .await
         .unwrap();
     let (stream, _) = listener.accept().await.unwrap();
-    for decision in [
-        Err("offline".into()),
-        Ok(json!({"status": "approval_denied"})),
-    ] {
+    for decision in [Err("offline".into())] {
         let layer = scripted_layer(
             decision,
             Err("unused".into()),
@@ -310,6 +320,87 @@ async fn transparent_adapter_waits_silently_and_forwards_only_authorization_only
         )
         .await
         .is_err());
+    }
+    for (state, status) in [
+        ("approval_denied", 403),
+        ("approval_cancelled", 409),
+        ("approval_expired", 410),
+    ] {
+        let layer = scripted_layer(
+            Ok(json!({"status":state,"approval_id":ID})),
+            Err("unused".into()),
+            Duration::ZERO,
+            Duration::ZERO,
+        );
+        let response = kv_proxy::transparent::forward_after_approval(
+            &stream,
+            &layer,
+            request(),
+            None,
+            || async { panic!("Must not forward a terminal outcome") },
+        )
+        .await
+        .unwrap();
+        assert_eq!(response.status(), status);
+        let body: Value =
+            serde_json::from_slice(&response.into_body().collect().await.unwrap().to_bytes())
+                .unwrap();
+        assert_eq!(body["error"]["type"], format!("keyvalet_{state}"));
+    }
+}
+
+#[tokio::test]
+async fn typed_local_outcomes_are_distinct_and_a_transport_timeout_remains_pending() {
+    let layer = scripted_layer(
+        Ok(json!({"status":"approval_expired","reason":"cancelled","approval_id":ID})),
+        Err("must not wait".into()),
+        Duration::ZERO,
+        Duration::ZERO,
+    );
+    assert_eq!(
+        layer.authorize(request(), None).await.unwrap()["status"],
+        "approval_cancelled"
+    );
+    for (code, state) in [
+        ("local_approval_denied", "approval_denied"),
+        ("local_approval_cancelled", "approval_cancelled"),
+        ("local_approval_expired", "approval_expired"),
+    ] {
+        let layer = scripted_layer(
+            Err(json!({"code":code,"approval_id":ID}).to_string()),
+            Err("must not wait".into()),
+            Duration::ZERO,
+            Duration::ZERO,
+        );
+        assert_eq!(
+            layer.authorize(request(), None).await.unwrap()["status"],
+            state
+        );
+    }
+    let layer = scripted_layer(
+        Ok(json!({"status":"approval_pending","approval_id":ID})),
+        Err("Local approval wait timed out".into()),
+        Duration::ZERO,
+        Duration::ZERO,
+    );
+    assert_eq!(
+        layer.authorize(request(), None).await.unwrap()["status"],
+        "approval_pending"
+    );
+    for (expiry, state) in [(0, "approval_expired"), (i64::MAX, "approval_pending")] {
+        let layer = scripted_layer(
+            Err(
+                json!({"code":"local_approval_timeout","approval_id":ID,"expires_at":expiry})
+                    .to_string(),
+            ),
+            Err("Transport wait timed out".into()),
+            Duration::ZERO,
+            Duration::ZERO,
+        );
+        assert_eq!(
+            layer.authorize(request(), None).await.unwrap()["status"],
+            state
+        );
     }
 }
 

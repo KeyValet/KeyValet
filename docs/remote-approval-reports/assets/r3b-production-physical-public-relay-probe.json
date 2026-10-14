@@ -1,0 +1,93 @@
+{
+    "url":  "https://relay.keyvalet.dev",
+    "unauthenticated_only":  true,
+    "certificate_validation_disabled":  false,
+    "device_registration_performed":  false,
+    "custom_ca_installed":  false,
+    "utc":  "2026-10-13T22:49:08.8680318Z",
+    "passed":  false,
+    "host":  "春有约花不误",
+    "default_tls_validation":  true,
+    "checks":  [
+                   {
+                       "expected":  200,
+                       "passed":  true,
+                       "method":  "GET",
+                       "milliseconds":  4084.6501000000003,
+                       "http":  200,
+                       "body":  "{\"ok\":true,\"version\":\"0.3.0\"}",
+                       "path":  "/v1/health",
+                       "curl_exit":  0
+                   },
+                   {
+                       "expected":  200,
+                       "passed":  true,
+                       "method":  "GET",
+                       "milliseconds":  1482.5094000000001,
+                       "http":  200,
+                       "body":  "{\"apple\":false,\"apple_app_id\":\"\",\"apple_callback_url\":\"https://relay.keyvalet.dev/v1/account/apple/callback\",\"apple_services_id\":\"\",\"google\":true,\"google_ios_client_id\":\"377993819556-a9jv022e3ikitqbb00k698ai4m30ncpu.apps.googleusercontent.com\",\"google_web_client_id\":\"377993819556-9mvtbodaont066ugeen78kphubspa98j.apps.googleusercontent.com\"}",
+                       "path":  "/v1/account/providers",
+                       "curl_exit":  0
+                   },
+                   {
+                       "expected":  401,
+                       "passed":  true,
+                       "method":  "GET",
+                       "milliseconds":  1121.3801,
+                       "http":  401,
+                       "body":  "{\"error\":{\"code\":\"unauthorized\",\"message\":\"A valid device session is required.\"}}",
+                       "path":  "/v1/approvals",
+                       "curl_exit":  0
+                   },
+                   {
+                       "expected":  401,
+                       "passed":  true,
+                       "method":  "GET",
+                       "milliseconds":  1433.7742,
+                       "http":  401,
+                       "body":  "{\"error\":{\"code\":\"login_rejected\",\"message\":\"Sign-in could not be completed.\"}}",
+                       "path":  "/v1/account/session",
+                       "curl_exit":  0
+                   },
+                   {
+                       "expected":  401,
+                       "passed":  true,
+                       "method":  "POST",
+                       "milliseconds":  1371.519,
+                       "http":  401,
+                       "body":  "{\"error\":{\"code\":\"unauthorized\",\"message\":\"A valid device session is required.\"}}",
+                       "path":  "/v1/pair/start",
+                       "curl_exit":  0
+                   },
+                   {
+                       "expected":  400,
+                       "passed":  true,
+                       "method":  "POST",
+                       "milliseconds":  1393.9901,
+                       "http":  400,
+                       "body":  "{\"error\":{\"code\":\"bad_envelope\",\"message\":\"Invalid request or envelope.\"}}",
+                       "path":  "/v1/auth/challenge",
+                       "curl_exit":  0
+                   },
+                   {
+                       "expected":  400,
+                       "passed":  true,
+                       "method":  "POST",
+                       "milliseconds":  1051.0091,
+                       "http":  400,
+                       "body":  "{\"error\":{\"code\":\"bad_envelope\",\"message\":\"Invalid request or envelope.\"}}",
+                       "path":  "/v1/auth/verify",
+                       "curl_exit":  0
+                   },
+                   {
+                       "expected":  404,
+                       "passed":  false,
+                       "method":  "GET",
+                       "milliseconds":  1096.9903000000002,
+                       "http":  401,
+                       "body":  "{\"error\":{\"code\":\"unauthorized\",\"message\":\"A valid device session is required.\"}}",
+                       "path":  "/metrics",
+                       "curl_exit":  0
+                   }
+               ]
+}

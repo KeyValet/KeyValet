@@ -1,0 +1,23 @@
+{
+  "observed_utc": "2026-10-13T21:53:40.415919+00:00",
+  "stop_reason": "disk_below_owner_required_15_gb",
+  "free_bytes": 14538043392,
+  "free_gb_decimal": 14.538,
+  "ci_source_matches_current_tree": false,
+  "changed_paths": [
+    "rust/crates/kv-agent/src/hello/remote_key.rs",
+    "rust/crates/kv-agent/src/remote/pcp_acceptance.rs",
+    "rust/crates/kv-cli/src/remote/live_helper_tests.rs"
+  ],
+  "current_ci": "r3a-return-ci-summary.json",
+  "current_ci_passed": 1390,
+  "current_ci_failed": 0,
+  "current_ci_ignored": 10,
+  "mac_install": "r3a-revocations-mac-install-212600.json",
+  "t2_success": "r3a-controls-213127.json",
+  "audit_findings": "r3a-native-audit-findings-213347.json",
+  "presence_failed": "r3a-presence-transitions-214746.json",
+  "running_r3a_drivers": [],
+  "rust_source_edits_this_return": 0,
+  "secret_values_in_evidence": false
+}

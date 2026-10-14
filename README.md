@@ -6,7 +6,7 @@ Let AI agents use any API, on any machine, without ever holding a secret. KeyVal
 
 [Install](#install) · [Website](https://keyvalet.dev/) · [Guide](https://keyvalet.dev/guide/) · [Security](SECURITY.md) · [简体中文](README.zh-CN.md)
 
-Works with Claude Code, Codex, Cursor, Gemini CLI, Grok, Devin — any MCP client or HTTP SDK — on macOS and Linux today, Windows 11 in preview.
+Works with Claude Code, Codex, Cursor, Gemini CLI, Grok, Devin — any MCP client or HTTP SDK — on macOS, Linux and Windows 11.
 
 ## Why KeyValet
 
@@ -50,7 +50,7 @@ Under the hood: ~50 service templates, OAuth 2.0 with automatic refresh, Google 
 | --- | --- | --- |
 | **macOS** | Apple Silicon, macOS 14+. Signed and notarized. | [Guide](https://keyvalet.dev/guide/#install) |
 | **Linux** | systemd, polkit, sudo; `tpm2-tools` for TPM 2.0, or explicit `--software` without a TPM. x64 and ARM64. | [Linux](docs/linux.md) |
-| **Windows 11** | Development preview: Hello, service and installer implemented; signed packages pending. | [Windows](docs/windows.md) · [WSL](docs/wsl.md) |
+| **Windows 11** | 24H2+, Windows Hello. Unsigned x64/ARM64 release packages; signing is optional for local and remote features. | [Windows](docs/windows.md) · [WSL](docs/wsl.md) |
 
 The one-line installer above picks the right package, asks for your password once, and configures the agents it finds (Claude Code, Codex, Cursor, Grok, Devin CLI). Uninstall: `curl -fsSL https://keyvalet.dev/install.sh | sh -s -- --uninstall`. Key protection, recovery and platform limits: [protection matrix](docs/key-protection.md).
 

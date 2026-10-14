@@ -1,0 +1,8 @@
+{
+  "authorized_utc": "2026-10-14T01:11:47.400123+00:00",
+  "user_reply": "全部允许啊，以后不要再问我了",
+  "scope": "R3-A 必要的跨文件修复可直接推进，保留原认证强度和机器操作限制；本次 agent.rs 子进程结果保真明确允许",
+  "proposal": "r3a-se-child-hop-scope-request.md",
+  "patch": "r3a-se-child-hop-proposed.patch",
+  "secret_values_in_evidence": false
+}

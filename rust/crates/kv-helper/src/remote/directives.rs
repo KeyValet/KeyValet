@@ -231,12 +231,7 @@ impl RemoteHelper {
             }
             DirectiveOp::QueryAudit => {
                 let args: QueryAuditArgs = directive.args_as()?;
-                serde_json::to_value(state.store.audit_page(
-                    &args,
-                    &self.account,
-                    &self.local.device_id,
-                    self.services.audit.as_ref(),
-                )?)?
+                serde_json::to_value(super::rejoin::audit_page(self, state, &args)?)?
             }
             DirectiveOp::CancelApproval => {
                 let args: CancelApprovalArgs = directive.args_as()?;
@@ -358,6 +353,9 @@ impl RemoteHelper {
         state
             .inbound_requests
             .retain(|_, request| request.requester.device_id != id);
+        state
+            .inbound_escalated
+            .retain(|pending| state.inbound_requests.contains_key(pending));
         for pending_id in cancelled {
             state.full.remove(&pending_id);
             if let Some(mut value) = state.results.remove(&pending_id) {
@@ -391,6 +389,31 @@ impl RemoteHelper {
             params![now, id],
         )?;
         state.store.db.execute("UPDATE pending_approvals SET state='cancelled', resolved_at=?1 WHERE approver=?2 AND state IN ('approved','approved_unused')", params![now, id])?;
+        if id == self.local.device_id {
+            // Removing this execution identity invalidates all authority addressed to it,
+            // even when the issuer remains paired or the grant has a wildcard audience.
+            self.revoke_all_locked(state, by)?;
+            let epoch = state
+                .store
+                .setting::<u64>("epoch")?
+                .unwrap_or(0)
+                .checked_add(1)
+                .ok_or(Error("state_unavailable"))?;
+            state.store.set_setting("epoch", &epoch, by, now)?;
+            state
+                .store
+                .db
+                .execute("DELETE FROM settings WHERE key LIKE 'unlock:%'", [])?;
+            self.services.runner.lock_sessions()?;
+            for pending_id in state.store.pending_ids()? {
+                if matches!(
+                    state.store.pending(&pending_id)?.state,
+                    PendingState::Waiting | PendingState::Approved | PendingState::ApprovedUnused
+                ) {
+                    self.cancel_in_transaction(state, &pending_id, PendingState::Cancelled)?;
+                }
+            }
+        }
         self.audit(state, "device_revoked", json!({"device_id": id, "by": by}))?;
         let mut cancelled = Vec::new();
         for pending_id in state.store.pending_ids()? {
@@ -426,7 +449,9 @@ impl RemoteHelper {
         let now = self.services.clock.now();
         let peers = state.store.devices(&self.account)?;
         let approvers = peers.iter().filter(|peer| super::engine::is_approver(peer)).map(|peer| json!({"device_id": peer.device_id,
-            "label": peer.label, "online": state.relay_connected && state.hints.get(&peer.device_id).is_some_and(|hint| now.saturating_sub(hint.received_at) <= 120), "attestation": "unverified"})).collect::<Vec<_>>();
+            "label": peer.label, "online": state.relay_connected && state.hints.get(&peer.device_id).is_some_and(|hint| now.saturating_sub(hint.received_at) <= 120),
+            "presence": state.hints.get(&peer.device_id).filter(|hint| now.saturating_sub(hint.received_at) <= 120).map_or(Presence::Away, |hint| hint.hint.state),
+            "attestation": "unverified"})).collect::<Vec<_>>();
         let grants: u64 = state.store.db.query_row("SELECT COUNT(*) FROM grants WHERE revoked_at IS NULL AND nbf<=?1 AND (exp IS NULL OR exp>=?1)", [now], |r| r.get(0))?;
         let unattended: bool = state.store.db.query_row("SELECT EXISTS(SELECT 1 FROM grants WHERE max_tier='T2' AND revoked_at IS NULL AND nbf<=?1 AND (exp IS NULL OR exp>=?1))", [now], |r| r.get(0))?;
         let issued_grants: u64 = state.store.db.query_row("SELECT COUNT(*) FROM issued_grants i WHERE revoked_at IS NULL AND (exp IS NULL OR exp>=?1)

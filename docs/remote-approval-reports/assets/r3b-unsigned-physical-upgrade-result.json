@@ -1,0 +1,57 @@
+{
+  "backup": "C:\\ProgramData\\KeyValet-Backups\\pre-r3b-unsigned-20261014T052910Z",
+  "agent_task": "Ready",
+  "owner_unchanged": true,
+  "data_dacl_unchanged": true,
+  "binaries": [
+    {
+      "sha256": "5a6810bb749d469684c254bc21eb8b7a50dd227d92444fbcbed5918f3ed9a299",
+      "name": "kv-agent.exe",
+      "version": "0.3.0",
+      "signature": "NotSigned"
+    },
+    {
+      "sha256": "2a1d5dead34cb1206089d04a3cd93f63c515e8180577802f01516ace7cffb820",
+      "name": "kv-cli.exe",
+      "version": "0.3.0",
+      "signature": "NotSigned"
+    },
+    {
+      "sha256": "ad1b6417334f4b43045f2932d2c1fca30a770d42a157f4dff8d073f45f72bd9c",
+      "name": "kv-helper.exe",
+      "version": "0.3.0",
+      "signature": "NotSigned"
+    },
+    {
+      "sha256": "f15d6fcbebe9bc391d846dd675150ff88a93ba270a581bb7b7ca6dea0a43dc62",
+      "name": "kv-hook.exe",
+      "version": "0.3.0",
+      "signature": "NotSigned"
+    },
+    {
+      "sha256": "4f82b0b121c5d77273b698f50af14b3ca1b2c503574d55b581d2ce6df751cde4",
+      "name": "kv-mcp.exe",
+      "version": "0.3.0",
+      "signature": "NotSigned"
+    },
+    {
+      "sha256": "0c93a3ece9f5a352d62e3c63b322e9261fd66b71f5a15038e1252c6f45122dbf",
+      "name": "kv-relay-client.exe",
+      "version": "0.3.0",
+      "signature": "NotSigned"
+    },
+    {
+      "sha256": "04e3967d7d4c5b26415341c306a322bc6af2689c4dac1d7fc18b567f0ad1e877",
+      "name": "kv-server.exe",
+      "version": "0.3.0",
+      "signature": "NotSigned"
+    }
+  ],
+  "relay": "Stopped",
+  "vault_hash_unchanged": true,
+  "package_sha256": "e2aab64b16b3ce1407e0e1c3c2fcec319168fbc080bcd9d4e9f8e6eac41336f0",
+  "helper": "Running",
+  "utc": "2026-10-14T05:30:33.7936350Z",
+  "installed": true,
+  "ssh_exit": 0
+}

@@ -1,0 +1,36 @@
+{
+  "process_64bit": true,
+  "services": [
+    {
+      "status": "Running",
+      "name": "KeyValetHelper",
+      "start_type": "Automatic"
+    },
+    {
+      "status": "Stopped",
+      "name": "KeyValetRelay",
+      "start_type": "Manual"
+    }
+  ],
+  "free_bytes": 375983362048,
+  "battery": [
+    {
+      "charge": 15,
+      "status": 1
+    }
+  ],
+  "processes": [
+    {
+      "pid": 24076,
+      "name": "explorer",
+      "session": 13
+    },
+    {
+      "pid": 35216,
+      "name": "kv-agent",
+      "session": 13
+    }
+  ],
+  "os": "Microsoft Windows NT 10.0.26200.0",
+  "ssh_exit": 0
+}

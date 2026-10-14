@@ -1,0 +1,47 @@
+{
+  "services": {
+    "keyvalet.service": {
+      "MainPID": "2969468",
+      "CapabilityBoundingSet": "",
+      "AmbientCapabilities": "",
+      "User": "keyvalet",
+      "ActiveState": "active"
+    },
+    "keyvalet-peer.service": {
+      "MainPID": "2969156",
+      "CapabilityBoundingSet": "cap_sys_ptrace",
+      "AmbientCapabilities": "cap_sys_ptrace",
+      "User": "root",
+      "ActiveState": "active"
+    },
+    "keyvalet-relay.service": {
+      "MainPID": "2969577",
+      "CapabilityBoundingSet": "",
+      "AmbientCapabilities": "",
+      "User": "keyvalet-relay",
+      "ActiveState": "active"
+    }
+  },
+  "paths": {
+    "/var/backups": {
+      "exists": true,
+      "symlink": false
+    },
+    "/var/lib/keyvalet": {
+      "exists": true,
+      "symlink": false
+    },
+    "/var/lib/keyvalet-relay": {
+      "exists": true,
+      "symlink": false
+    },
+    "/etc/keyvalet": {
+      "exists": true,
+      "symlink": false
+    },
+    "/usr/local/lib/keyvalet/bin/kv-helper": {
+      "exists": true,
+      "symlink": false
+    }
+  }
+}

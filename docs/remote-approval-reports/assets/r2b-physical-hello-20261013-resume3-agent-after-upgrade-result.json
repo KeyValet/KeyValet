@@ -1,0 +1,32 @@
+{
+    "agents":  [
+                   {
+                       "ProcessId":  7316,
+                       "ParentProcessId":  11836,
+                       "SessionId":  13,
+                       "ExecutablePath":  "C:\\Program Files\\KeyValet\\bin\\kv-agent.exe",
+                       "CommandLine":  "\"C:\\Program Files\\KeyValet\\bin\\kv-agent.exe\" --serve"
+                   }
+               ],
+    "utc":  "2026-10-13T09:37:14.5421366Z",
+    "observed_seconds":  18,
+    "services":  [
+                     {
+                         "Name":  "KeyValetHelper",
+                         "State":  "Running",
+                         "StartMode":  "Auto",
+                         "StartName":  "LocalSystem",
+                         "ProcessId":  11836
+                     },
+                     {
+                         "Name":  "KeyValetRelay",
+                         "State":  "Stopped",
+                         "StartMode":  "Manual",
+                         "StartName":  "NT SERVICE\\KeyValetRelay",
+                         "ProcessId":  0
+                     }
+                 ],
+    "exit_events":  [
+
+                    ]
+}

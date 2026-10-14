@@ -1,0 +1,127 @@
+--- rust/crates/kv-agent/src/hello.rs
++++ rust/crates/kv-agent/src/hello.rs
+@@ -24,17 +24,25 @@
+ 
+ /// Every step shares one request budget shorter than the helper's timeout. Expired WinRT
+ /// prompts are cancelled; a sequence of prompts cannot keep a retired agent busy indefinitely.
++#[track_caller]
+ fn wait<T: windows::core::RuntimeType>(
+     operation: windows_future::IAsyncOperation<T>,
+     budget: &Budget,
+ ) -> windows::core::Result<T> {
+     wait_for(operation, budget, Duration::from_secs(90))
+ }
++#[track_caller]
+ fn wait_for<T: windows::core::RuntimeType>(
+     operation: windows_future::IAsyncOperation<T>,
+     budget: &Budget,
+     cap: Duration,
+ ) -> windows::core::Result<T> {
++    #[cfg(test)]
++    let started = std::time::Instant::now();
++    #[cfg(test)]
++    let caller = std::panic::Location::caller();
++    #[cfg(test)]
++    eprintln!("HELLO_WAIT begin site={}:{} cap_ms={}", caller.file(), caller.line(), cap.as_millis());
+     let timeout = match budget.remaining(cap) {
+         Ok(timeout) => timeout,
+         Err(e) => {
+@@ -47,8 +55,12 @@
+             ));
+         }
+     };
+-    wait_completion(&operation, timeout)?;
+-    operation.GetResults()
++    let result = wait_completion(&operation, timeout).and_then(|()| operation.GetResults());
++    #[cfg(test)]
++    eprintln!("HELLO_WAIT end site={}:{} elapsed_ms={} success={} hresult={:?}",
++        caller.file(), caller.line(), started.elapsed().as_millis(), result.is_ok(),
++        result.as_ref().err().map(|error| error.code()));
++    result
+ }
+ fn wait_completion(operation: &impl Interface, timeout: Duration) -> windows::core::Result<()> {
+     let info = operation.cast::<windows_future::IAsyncInfo>()?;
+@@ -110,7 +122,11 @@
+ ) -> Result<Zeroizing<[u8; 256]>> {
+     let input = CryptographicBuffer::CreateFromByteArray(challenge).map_err(error)?;
+     let operation = key.RequestSignAsync(&input).map_err(error)?;
++    #[cfg(test)]
++    eprintln!("HELLO_VAULT stage=request_sign");
+     let result = wait(operation, budget).map_err(error)?;
++    #[cfg(test)]
++    eprintln!("HELLO_VAULT sign_status={:?}", result.Status());
+     if result.Status().map_err(error)? != KeyCredentialStatus::Success {
+         return Err(error("signing denied, cancelled or unavailable"));
+     }
+@@ -147,6 +163,8 @@
+         "keyvalet.vault.{}",
+         id.iter().map(|b| format!("{b:02x}")).collect::<String>()
+     );
++    #[cfg(test)]
++    eprintln!("HELLO_VAULT stage=request_create");
+     let result = KeyCredentialManager::RequestCreateAsync(
+         &HSTRING::from(&name),
+         KeyCredentialCreationOption::FailIfExists,
+@@ -160,6 +178,8 @@
+         let _ = delete(&name);
+     });
+     let key = result.Credential().map_err(error)?;
++    #[cfg(test)]
++    eprintln!("HELLO_VAULT stage=attestation");
+     let tpm_backed = key
+         .GetAttestationAsync()
+         .ok()
+@@ -167,6 +187,8 @@
+         .and_then(|attestation| attestation.Status().ok())
+         .and_then(|status| (status == KeyCredentialAttestationStatus::Success).then_some(true));
+     // Unavailable attestation is unknown, not evidence of an absent TPM.
++    #[cfg(test)]
++    eprintln!("HELLO_VAULT stage=public_key_and_metadata");
+     let metadata = EnclaveMetadata::windows_hello(
+         &HelloMetadata {
+             key_name: name.clone(),
+@@ -176,6 +198,8 @@
+         &challenge,
+     )
+     .map_err(error)?;
++    #[cfg(test)]
++    eprintln!("HELLO_VAULT stage=derive_first_signature");
+     let output = EnclaveKey {
+         key: derive(&key, &challenge, budget)?,
+         metadata,
+--- rust/crates/kv-agent/src/hello/remote_key.rs
++++ rust/crates/kv-agent/src/hello/remote_key.rs
+@@ -29,6 +29,8 @@
+     )
+     .and_then(|op| wait(op, budget))
+     .map_err(|_| DeviceKeyError::Unavailable)?;
++    #[cfg(test)]
++    eprintln!("HELLO_REMOTE result_status={:?}", result.Status());
+     if result
+         .Status()
+         .map_err(|_| DeviceKeyError::OperationFailed)?
+@@ -59,6 +61,8 @@
+     ))
+     .and_then(|op| wait(op, budget))
+     .map_err(|_| DeviceKeyError::Unavailable)?;
++    #[cfg(test)]
++    eprintln!("HELLO_REMOTE result_status={:?}", result.Status());
+     if result
+         .Status()
+         .map_err(|_| DeviceKeyError::OperationFailed)?
+@@ -79,6 +83,8 @@
+         .RequestSignAsync(&input)
+         .and_then(|op| wait(op, budget))
+         .map_err(|_| DeviceKeyError::OperationFailed)?;
++    #[cfg(test)]
++    eprintln!("HELLO_REMOTE result_status={:?}", result.Status());
+     if result
+         .Status()
+         .map_err(|_| DeviceKeyError::OperationFailed)?
+@@ -196,3 +202,6 @@
+         );
+     }
+ }
++
++#[cfg(test)]
++mod physical_acceptance;

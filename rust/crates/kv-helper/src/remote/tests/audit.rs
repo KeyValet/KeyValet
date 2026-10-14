@@ -2,6 +2,224 @@ use super::*;
 use crate::remote::bootstrap::{Backend, Environment, Options};
 use kv_core::remote::audit::AuditHead;
 
+#[tokio::test]
+async fn r3a_directive_wait_timeout_is_bound_and_keeps_late_verified_results() {
+    use super::boundaries::signing_harness;
+    use super::workflow::signed_directive;
+
+    let h = signing_harness();
+    let mut directive = signed_directive(
+        &h,
+        DirectiveOp::QueryGrants,
+        json!({"test_context":"synthetic-context-must-not-export"}),
+        ApprovalLevel::Quick,
+    );
+    directive.iss = h.helper.local.device_id.clone();
+    directive.aud = h.peer.device_id.clone();
+    let id = directive.id.clone();
+    let response = h
+        .exchange(
+            Caller::CliOwner,
+            Op::DirectiveIssue,
+            json!(kv_core::remote::ipc::Unsigned(directive)),
+        )
+        .await;
+    assert_eq!(response["error"]["code"], "directive_result_timeout");
+
+    let object: String = h
+        .helper
+        .lock()
+        .unwrap()
+        .store
+        .db
+        .query_row(
+            "SELECT object_json FROM issued_directive_objects WHERE id=?1",
+            [&id],
+            |row| row.get(0),
+        )
+        .unwrap();
+    let original: Directive = serde_json::from_str(&object).unwrap();
+    let entries = h.helper.audit_entries().unwrap();
+    let timeouts: Vec<_> = entries
+        .iter()
+        .filter(|entry| entry["op"] == "directive_wait_timeout")
+        .collect();
+    assert_eq!(timeouts.len(), 1, "missing command-bound wait outcome");
+    let entry = timeouts[0];
+    assert_eq!(entry["id"], id);
+    assert_eq!(entry["peer"], h.peer.device_id);
+    assert_eq!(entry["directive_op"], "query_grants");
+    assert_eq!(
+        entry["directive_hash"],
+        sha256_hex(&jcs(&original).unwrap())
+    );
+    assert_eq!(entry["reason"], "directive_result_timeout");
+    assert_eq!(entry["state"], "unconfirmed");
+    assert!(
+        entry.get("ok").is_none(),
+        "a wait timeout is not an executor rejection"
+    );
+    let exported = kv_core::remote::audit::metadata(entry).to_string();
+    assert_eq!(serde_json::from_str::<Value>(&exported).unwrap()["id"], id);
+    for secret in [
+        "synthetic-context-must-not-export",
+        &original.nonce,
+        &original.sig,
+    ] {
+        assert!(!exported.contains(secret));
+    }
+    let outcome: Option<bool> = h
+        .helper
+        .lock()
+        .unwrap()
+        .store
+        .db
+        .query_row(
+            "SELECT result_ok FROM issued_directives WHERE id=?1",
+            [&id],
+            |row| row.get(0),
+        )
+        .unwrap();
+    assert_eq!(outcome, None);
+    assert!(h
+        .helper
+        .outbound_poll(0)
+        .await
+        .unwrap()
+        .iter()
+        .any(|envelope| envelope.id == id));
+
+    // The timeout ends this caller's wait; it must not consume a future real result.
+    let result = DirectiveResult {
+        id: id.clone(),
+        ok: true,
+        error: None,
+        state: json!({"grants":[]}).as_object().unwrap().clone(),
+        extra: Extra::new(),
+    };
+    h.helper
+        .inbound(h.envelope(EnvelopeType::DirectiveResult, &id, &result))
+        .await
+        .unwrap();
+    let outcome: Option<bool> = h
+        .helper
+        .lock()
+        .unwrap()
+        .store
+        .db
+        .query_row(
+            "SELECT result_ok FROM issued_directives WHERE id=?1",
+            [&id],
+            |row| row.get(0),
+        )
+        .unwrap();
+    assert_eq!(outcome, Some(true));
+    assert_eq!(
+        h.helper
+            .inbound(h.envelope(EnvelopeType::DirectiveResult, &id, &result))
+            .await
+            .unwrap_err()
+            .code(),
+        "already_consumed"
+    );
+    let comparison = kv_core::remote::audit::compare(&[
+        (
+            h.helper.local.device_id.clone(),
+            h.helper.audit_entries().unwrap(),
+        ),
+        (h.peer.device_id.clone(), vec![]),
+    ]);
+    assert_eq!(comparison.matched, 0);
+    assert_eq!(comparison.findings.len(), 1);
+    assert_eq!(comparison.findings[0].problem, "missing_receiver_record");
+}
+
+#[tokio::test]
+async fn r3a_directive_timeout_audit_failure_preserves_pending_and_late_failure_result() {
+    use super::boundaries::signing_harness;
+    use super::workflow::signed_directive;
+
+    let h = signing_harness();
+    let mut directive = signed_directive(
+        &h,
+        DirectiveOp::QueryGrants,
+        json!({}),
+        ApprovalLevel::Quick,
+    );
+    directive.iss = h.helper.local.device_id.clone();
+    directive.aud = h.peer.device_id.clone();
+    let id = directive.id.clone();
+    let helper = h.helper.clone();
+    let job = tokio::spawn(async move {
+        helper
+            .handle(
+                CallerContext::authenticated(Caller::CliOwner, 501, 4242, 50),
+                Request {
+                    op: Op::DirectiveIssue,
+                    params: json!(kv_core::remote::ipc::Unsigned(directive)),
+                    extra: Extra::new(),
+                },
+            )
+            .await
+    });
+    let queued = h.helper.outbound_poll(500).await.unwrap();
+    assert!(queued.iter().any(|envelope| envelope.id == id));
+    h.audit.fail.store(true, Ordering::SeqCst);
+    let reply = serde_json::to_value(job.await.unwrap()).unwrap();
+    assert_eq!(reply["error"]["code"], "audit_unavailable");
+    h.audit.fail.store(false, Ordering::SeqCst);
+    assert!(!h
+        .helper
+        .audit_entries()
+        .unwrap()
+        .iter()
+        .any(|entry| entry["op"] == "directive_wait_timeout"));
+    let pending: Option<bool> = h
+        .helper
+        .lock()
+        .unwrap()
+        .store
+        .db
+        .query_row(
+            "SELECT result_ok FROM issued_directives WHERE id=?1",
+            [&id],
+            |row| row.get(0),
+        )
+        .unwrap();
+    assert_eq!(pending, None);
+    assert!(h
+        .helper
+        .outbound_poll(0)
+        .await
+        .unwrap()
+        .iter()
+        .any(|envelope| envelope.id == id));
+    let result = DirectiveResult {
+        id: id.clone(),
+        ok: false,
+        error: Some("expired".into()),
+        state: Extra::new(),
+        extra: Extra::new(),
+    };
+    h.helper
+        .inbound(h.envelope(EnvelopeType::DirectiveResult, &id, &result))
+        .await
+        .unwrap();
+    let recorded: Option<bool> = h
+        .helper
+        .lock()
+        .unwrap()
+        .store
+        .db
+        .query_row(
+            "SELECT result_ok FROM issued_directives WHERE id=?1",
+            [&id],
+            |row| row.get(0),
+        )
+        .unwrap();
+    assert_eq!(recorded, Some(false));
+}
+
 fn backend(path: &std::path::Path) -> Backend {
     let h = Harness::new();
     let keys = crate::remote::platform_keys::SoftwareKeys;
@@ -26,6 +244,34 @@ fn backend(path: &std::path::Path) -> Backend {
         },
     )
     .unwrap()
+}
+
+#[test]
+fn r3a_local_settings_commit_keeps_the_authenticated_audit_checkpoint_current() {
+    let directory = tempfile::tempdir().unwrap();
+    let b = backend(&directory.path().join("remote"));
+    let _settings = crate::remote::settings::install(&b.helper, &b.metadata.dir).unwrap();
+    b.helper
+        .set_mode_local("per_session", ApprovalLevel::Strong)
+        .unwrap();
+    let expected = b.helper.local_settings().unwrap();
+    let mut next = expected.clone();
+    next.grant_mode = kv_core::settings::GrantMode::PerUse;
+    kv_core::compare_and_write_settings(&b.metadata.dir, &expected, &next).unwrap();
+    assert_eq!(b.helper.local_settings().unwrap(), next);
+    let state = b.helper.lock().unwrap();
+    let head = state.store.audit_head().unwrap();
+    b.metadata.verify_checkpoint(&head).unwrap();
+    b.metadata
+        .verify_records(&state.store.audit_records().unwrap())
+        .unwrap();
+    // The next authenticated transaction, such as a delivered Grant, must still commit.
+    b.helper
+        .audit(&state, "after_local_settings", json!({}))
+        .unwrap();
+    b.metadata
+        .verify_checkpoint(&state.store.audit_head().unwrap())
+        .unwrap();
 }
 
 #[test]

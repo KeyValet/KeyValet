@@ -1,0 +1,34 @@
+{
+  "toolchain": "1.99.0",
+  "target_dir": "/Users/guang/dev/keyvalet/rust/target-r2a",
+  "checks": [
+    {
+      "command": "cargo +1.99.0 fmt --all -- --check",
+      "started_utc": "2026-10-12T23:48:21.952339+00:00",
+      "log": "r2a-ci-fmt.log",
+      "exit": 0,
+      "elapsed_s": 1.135
+    },
+    {
+      "command": "cargo +1.99.0 clippy --workspace --all-targets -- -D warnings",
+      "started_utc": "2026-10-12T23:48:23.088292+00:00",
+      "log": "r2a-ci-clippy.log",
+      "exit": 0,
+      "elapsed_s": 66.679
+    },
+    {
+      "command": "cargo +1.99.0 build --workspace --locked",
+      "started_utc": "2026-10-12T23:49:29.768692+00:00",
+      "log": "r2a-ci-build.log",
+      "exit": 0,
+      "elapsed_s": 38.906
+    },
+    {
+      "command": "cargo +1.99.0 test --workspace --locked",
+      "started_utc": "2026-10-12T23:50:08.678195+00:00",
+      "log": "r2a-ci-test.log",
+      "exit": 0,
+      "elapsed_s": 338.655
+    }
+  ]
+}

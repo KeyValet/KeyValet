@@ -1,0 +1,10 @@
+{
+    "system_phase_only":  true,
+    "passed":  true,
+    "setup_skipped":  true,
+    "backup":  "C:\\ProgramData\\KeyValet-Backups\\pre-upgrade-20261013T0935Z",
+    "archive_sha256":  "e2db970c1678b5f120377ee83b3f026cc98dbfcee2416563bca07cc43d2d94b9",
+    "started_utc":  "2026-10-13T09:34:59.3729469Z",
+    "owner_sid":  "S-1-5-21-3389053113-2113560702-4064643913-1001",
+    "finished_utc":  "2026-10-13T09:35:10.0328246Z"
+}

@@ -1,0 +1,128 @@
+--- a/rust/crates/kv-ipc/src/remote.rs
++++ b/rust/crates/kv-ipc/src/remote.rs
+@@ -27,6 +27,8 @@
+     Unavailable,
+     UnsupportedAlgorithm,
+     OperationFailed,
++    OperationCancelled,
++    AuthenticationFailed,
+ }
+ 
+ impl std::fmt::Display for DeviceKeyError {
+@@ -36,6 +38,8 @@
+             Self::Unavailable => "key_unavailable",
+             Self::UnsupportedAlgorithm => "unsupported_algorithm",
+             Self::OperationFailed => "key_operation_failed",
++            Self::OperationCancelled => "key_operation_cancelled",
++            Self::AuthenticationFailed => "key_authentication_failed",
+         })
+     }
+ }
+--- a/rust/crates/kv-core/src/remote/error.rs
++++ b/rust/crates/kv-core/src/remote/error.rs
+@@ -7,6 +7,8 @@
+     InvalidKey,
+     KeyUnavailable,
+     KeyOperationFailed,
++    KeyOperationCancelled,
++    KeyAuthenticationFailed,
+     UnsupportedAlgorithm,
+     InvalidSignature,
+     DecryptionFailed,
+@@ -36,6 +38,8 @@
+             Self::InvalidKey => "invalid_key",
+             Self::KeyUnavailable => "key_unavailable",
+             Self::KeyOperationFailed => "key_operation_failed",
++            Self::KeyOperationCancelled => "key_operation_cancelled",
++            Self::KeyAuthenticationFailed => "key_authentication_failed",
+             Self::UnsupportedAlgorithm => "unsupported_algorithm",
+             Self::InvalidSignature => "invalid_signature",
+             Self::DecryptionFailed => "decryption_failed",
+--- a/rust/crates/kv-core/src/remote/keys.rs
++++ b/rust/crates/kv-core/src/remote/keys.rs
+@@ -79,6 +79,8 @@
+         kv_ipc::remote::DeviceKeyError::Unavailable => RemoteError::KeyUnavailable,
+         kv_ipc::remote::DeviceKeyError::UnsupportedAlgorithm => RemoteError::UnsupportedAlgorithm,
+         kv_ipc::remote::DeviceKeyError::OperationFailed => RemoteError::KeyOperationFailed,
++        kv_ipc::remote::DeviceKeyError::OperationCancelled => RemoteError::KeyOperationCancelled,
++        kv_ipc::remote::DeviceKeyError::AuthenticationFailed => RemoteError::KeyAuthenticationFailed,
+     }
+ }
+ 
+@@ -182,6 +184,8 @@
+         RemoteError::InvalidKey | RemoteError::InvalidEncoding => DeviceKeyError::InvalidKey,
+         RemoteError::UnsupportedAlgorithm => DeviceKeyError::UnsupportedAlgorithm,
+         RemoteError::KeyUnavailable => DeviceKeyError::Unavailable,
++        RemoteError::KeyOperationCancelled => DeviceKeyError::OperationCancelled,
++        RemoteError::KeyAuthenticationFailed => DeviceKeyError::AuthenticationFailed,
+         _ => DeviceKeyError::OperationFailed,
+     }
+ }
+--- a/rust/crates/kv-platform/src/device_key/agent.rs
++++ b/rust/crates/kv-platform/src/device_key/agent.rs
+@@ -75,7 +75,11 @@
+                     .await
+                     .map_err(|_| DeviceKeyError::Unavailable)?;
+                 if header["ok"] != true {
+-                    return Err(DeviceKeyError::OperationFailed);
++                    return Err(match header["error"].as_str() {
++                        Some("key_operation_cancelled") => DeviceKeyError::OperationCancelled,
++                        Some("key_authentication_failed") => DeviceKeyError::AuthenticationFailed,
++                        _ => DeviceKeyError::OperationFailed,
++                    });
+                 }
+                 let (bytes, len) = payload.ok_or(DeviceKeyError::OperationFailed)?;
+                 Ok(Zeroizing::new(bytes[..len].to_vec()))
+--- a/rust/crates/kv-touchid/src/device_key.rs
++++ b/rust/crates/kv-touchid/src/device_key.rs
+@@ -90,7 +90,11 @@
+             )
+         };
+         if status != 0 {
+-            return Err(DeviceKeyError::OperationFailed);
++            return Err(match status {
++                -100001 => DeviceKeyError::OperationCancelled,
++                -100002 => DeviceKeyError::AuthenticationFailed,
++                _ => DeviceKeyError::OperationFailed,
++            });
+         }
+         Ok(output)
+     }
+--- a/rust/crates/kv-touchid/src/enclave.swift
++++ b/rust/crates/kv-touchid/src/enclave.swift
+@@ -228,6 +228,26 @@
+     return 0
+ }
+ 
++// Fixed failure tags preserve typed facts without returning localized system error text.
++private func remoteKeyFailureStatus(_ error: Error) -> Int32 {
++    var current = error as NSError
++    for _ in 0..<8 {
++        if current.domain == LAError.errorDomain {
++            switch current.code {
++            case -2, -3, -4, -9: return -100001
++            case -1, -8: return -100002
++            default: break
++            }
++        } else if current.domain == NSOSStatusErrorDomain {
++            if current.code == -128 { return -100001 } // errSecUserCanceled
++            if current.code == -25293 { return -100002 } // errSecAuthFailed
++        }
++        guard let underlying = current.userInfo[NSUnderlyingErrorKey] as? NSError else { break }
++        current = underlying
++    }
++    return -100003
++}
++
+ // Remote identity and approval keys use separate objects and ACLs from the vault key.
+ @_cdecl("kv_device_key")
+ public func deviceKey(
+@@ -290,7 +310,6 @@
+         }
+         return 0
+     } catch {
+-        let code = (error as NSError).code
+-        return code == 0 ? -1 : Int32(clamping: code)
++        return remoteKeyFailureStatus(error)
+     }
+ }

@@ -1,0 +1,31 @@
+{
+  "started_utc": "2026-10-13T17:19:22.560630+00:00",
+  "ci_receipt": "r3a-executor-revocation-ci-final-summary.json",
+  "installed": false,
+  "binaries": {
+    "kv-helper": {
+      "sha256": "82864c8ed673e1d3510b7ce62eb9da84a95f40a5eec2751ba97befd6c02f909e",
+      "strict_requirement": true,
+      "rebuilt": true
+    },
+    "kv-cli": {
+      "sha256": "53e9fe0f41f04958f4c93c1ce11b4b7ef7d6f259e1bc5218bda63688d0e546e0",
+      "strict_requirement": true,
+      "rebuilt": false
+    },
+    "kv-touchid": {
+      "sha256": "559de7dd8419beecd98c0123b6dfe4a16b719755307374558e1f7a759c419e39",
+      "strict_requirement": true,
+      "rebuilt": false
+    },
+    "kv-relay-client": {
+      "sha256": "accc5f6a0cff09b049a0697f4c048eeebd13f495749e6703b68926f18c4ab91c",
+      "strict_requirement": true,
+      "rebuilt": false
+    }
+  },
+  "team": "PWCRJPY7YC",
+  "sign_exit": 0,
+  "package_verified": true,
+  "finished_utc": "2026-10-13T17:19:23.999266+00:00"
+}

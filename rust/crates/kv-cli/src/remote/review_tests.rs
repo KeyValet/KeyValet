@@ -2,8 +2,216 @@ use super::super::*;
 use super::{parse, run, Fake, NOW, URI};
 use std::io::{Cursor, Read, Write};
 
+#[cfg(unix)]
+#[test]
+fn r3a_pair_owner_ipc_eof_identifies_the_op_and_read_stage() {
+    use std::io::{BufRead, BufReader};
+    let (mut client, peer) = std::os::unix::net::UnixStream::pair().unwrap();
+    let request = kv_core::remote::ipc::Request {
+        op: kv_core::remote::ipc::Op::PairComplete,
+        params: serde_json::json!({"uri":"kv-pair://example.test/PRIVATE_TEST_TOKEN"}),
+        extra: Default::default(),
+    };
+    let server = std::thread::spawn(move || {
+        let mut reader = BufReader::new(peer);
+        let mut line = String::new();
+        reader.read_line(&mut line).unwrap();
+        assert_eq!(
+            serde_json::from_str::<serde_json::Value>(&line).unwrap()["op"],
+            "remote.pair.complete"
+        );
+        // An owner connection rejected before dispatch closes without an agent request.
+    });
+    let error = transport::exchange_stream(&mut client, &request).unwrap_err();
+    server.join().unwrap();
+    assert_eq!(error.code, "ipc_unavailable");
+    assert!(error.message.contains("remote.pair.complete"));
+    assert!(error.message.contains("UnexpectedEof"));
+    assert!(!error.message.contains("PRIVATE_TEST_TOKEN"));
+}
+
 fn argv(values: &[&str]) -> Vec<String> {
     values.iter().map(|v| (*v).into()).collect()
+}
+
+#[cfg(target_os = "macos")]
+#[test]
+fn source_installer_relay_requirement_accepts_its_identifier_and_rejects_another() {
+    let script = std::fs::read_to_string(
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../scripts/install.sh"),
+    )
+    .unwrap();
+    let requirement = script
+        .lines()
+        .find(|line| line.contains("/usr/bin/codesign -v -R"))
+        .and_then(|line| line.split_once("-R '"))
+        .and_then(|(_, rest)| rest.split_once('\''))
+        .map(|(requirement, _)| requirement)
+        .unwrap();
+    let directory = tempfile::tempdir().unwrap();
+    let fixture = directory.path().join("kv-relay-client");
+    std::fs::copy(std::env::current_exe().unwrap(), &fixture).unwrap();
+    let signed = std::process::Command::new("/usr/bin/codesign")
+        .args([
+            "--force",
+            "--sign",
+            "-",
+            "--identifier",
+            "dev.keyvalet.relay-client",
+        ])
+        .arg(&fixture)
+        .output()
+        .unwrap();
+    assert!(signed.status.success());
+    let verify = |requirement: &str| {
+        std::process::Command::new("/usr/bin/codesign")
+            .args(["-v", "-R", requirement])
+            .arg(&fixture)
+            .output()
+            .unwrap()
+    };
+    let accepted = verify(requirement);
+    assert!(
+        accepted.status.success(),
+        "installer rejected its signed fixture: {}",
+        String::from_utf8_lossy(&accepted.stderr)
+    );
+    assert!(
+        !verify(&requirement.replace("dev.keyvalet.relay-client", "dev.keyvalet.other"))
+            .status
+            .success()
+    );
+}
+
+#[test]
+fn pairing_renders_a_quiet_zone_qr_and_keeps_json_free_of_terminal_art() {
+    let pair = Success::Pair {
+        uri: Some(URI.into()),
+        sas: None,
+        paired: false,
+    };
+    let human = output::render(&pair, false, false);
+    assert!(human.starts_with(URI));
+    let top = human.lines().nth(1).unwrap();
+    assert!(top.chars().count() >= 29);
+    assert!(top.chars().all(|c| c == '█'));
+    assert!(human.contains('▀') || human.contains('▄'));
+    let encoded = serde_json::to_string(&output::JsonSuccess {
+        ok: true,
+        output: pair.clone(),
+    })
+    .unwrap();
+    assert!(!encoded.contains('█'));
+    assert_eq!(
+        serde_json::from_str::<output::JsonSuccess>(&encoded)
+            .unwrap()
+            .output,
+        pair
+    );
+    let oversized = Success::Pair {
+        uri: Some(format!("kv-pair://{}", "x".repeat(8000))),
+        sas: None,
+        paired: false,
+    };
+    let fallback = output::render(&oversized, false, false);
+    assert!(fallback.contains(&kv_i18n::t(
+        "无法生成二维码；请使用上面的配对地址。",
+        "Unable to render the QR code; use the pairing URI above.",
+    )));
+}
+
+#[test]
+fn recovery_and_audit_inputs_validate_account_bounds_and_time_before_ipc() {
+    let numeric = argv(&["approve", "42"]);
+    assert_eq!(
+        args::linux_pid_approval(&numeric),
+        cfg!(target_os = "linux")
+    );
+    for account in [
+        "".to_owned(),
+        "x".repeat(257),
+        "has space".into(),
+        "bad\u{1b}".into(),
+    ] {
+        assert!(Invocation::parse(&["relay".into(), "recover".into(), account]).is_err());
+    }
+    assert!(Invocation::parse(&argv(&[
+        "relay",
+        "recover",
+        "acct_valid",
+        "--public-url",
+        "http://remote.example.com"
+    ]))
+    .is_err());
+    let past = "2000-01-01T00:00:00Z";
+    assert_eq!(args::since(past, NOW).unwrap(), 946684800);
+    assert!(args::since("2099-01-01T00:00:00Z", NOW).is_err());
+    assert!(args::since("badTvalue", NOW).is_err());
+    assert!(args::since("1h", i64::MIN).is_err());
+    let directory = tempfile::tempdir().unwrap();
+    let mut fake = Fake::new(directory.path());
+    assert!(super::super::run(
+        &mut fake,
+        &argv(&["audit", "--remote", "--since", "2099-01-01T00:00:00Z"])
+    )
+    .is_err());
+    assert!(fake.requests.is_empty());
+    let recovery = Success::PairRecovery {
+        recovery_code: "offline-code".into(),
+        account_id: None,
+    };
+    assert!(output::render(&recovery, false, false).contains("offline-code"));
+    assert!(!args::help("audit").is_empty());
+    let mut fake = Fake::new(directory.path());
+    let code = kv_core::remote::keys::encode_b64(&[7; 32]);
+    fake.answers.push_back(Some(code));
+    fake.replies.push_back((
+        Op::AccountRecover,
+        Response::err("forbidden", "provider details"),
+    ));
+    let before = std::fs::read(&fake.config).unwrap();
+    let error =
+        super::super::run(&mut fake, &argv(&["relay", "recover", "acct_valid"])).unwrap_err();
+    assert_eq!(error.code, "forbidden");
+    assert_eq!(fake.ops(), [Op::AccountRecover]);
+    assert!(fake.emitted.is_empty());
+    assert_eq!(std::fs::read(&fake.config).unwrap(), before);
+}
+
+#[test]
+fn recovery_input_and_binding_io_failures_never_publish_partial_config() {
+    for fault in ["confirmation", "config_path", "set_binding"] {
+        let directory = tempfile::tempdir().unwrap();
+        let mut fake = Fake::new(directory.path());
+        let original = fake.config.clone();
+        let before = std::fs::read(&original).unwrap();
+        fake.fail = (fault != "set_binding").then_some(fault);
+        fake.answers
+            .push_back(Some(kv_core::remote::keys::encode_b64(&[7; 32])));
+        if fault == "set_binding" {
+            let blocked = directory.path().join("blocked");
+            std::fs::write(&blocked, b"parent is a file").unwrap();
+            fake.config = blocked.join("relay-client.toml");
+            fake.replies.push_back((Op::AccountRecover, Response::ok(json!({
+                "binding":{"account_id":"acct_valid","device_id":"dev_new","relay_url":"https://relay.example.com"},
+                "recovery_code":kv_core::remote::keys::encode_b64(&[8;32])
+            }))));
+        }
+        let args = if fault == "set_binding" {
+            argv(&[
+                "relay",
+                "recover",
+                "acct_valid",
+                "--public-url",
+                "https://relay.example.com",
+            ])
+        } else {
+            argv(&["relay", "recover", "acct_valid"])
+        };
+        assert!(super::super::run(&mut fake, &args).is_err());
+        assert_eq!(std::fs::read(&original).unwrap(), before);
+        assert!(fake.emitted.is_empty());
+    }
 }
 
 #[test]
@@ -159,7 +367,14 @@ fn pairing_rejects_missing_uri_poll_errors_and_elapsed_confirmation() {
 
 fn prepared(id: &str, label: &str, expires: i64) -> Response {
     Response::ok(
-        json!({"confirmation_token":"one-use-helper-token","expires_at":expires,"device_id":id,"label":label}),
+        json!({"confirmation_token":"one-use-helper-token","expires_at":expires,"device_id":id,"label":label,"confirmations_left":2}),
+    )
+}
+
+fn prepared_second(id: &str, label: &str, expires: i64) -> Response {
+    Response::ok(
+        json!({"confirmation_token":"one-use-helper-second-token","expires_at":expires,
+        "device_id":id,"label":label,"confirmations_left":1}),
     )
 }
 
@@ -190,9 +405,13 @@ fn confirmation_lifetime_is_bounded_and_all_drafts_remain_live() {
     assert_eq!(run(&mut fake, &args).unwrap_err().exit_code(), 4);
     assert_eq!(fake.ops(), [Op::DevicesList, Op::GrantIssue]);
     let mut fake = Fake::new(temp.path());
-    fake.answers
-        .extend([Some("srv".into()), Some("other".into())]);
-    fake.confirmation_advances.extend([119, 1]);
+    fake.answers.extend([
+        Some("srv".into()),
+        Some("srv".into()),
+        Some("other".into()),
+        Some("other".into()),
+    ]);
+    fake.confirmation_advances.extend([119, 0, 0, 1]);
     assert_eq!(
         run(
             &mut fake,
@@ -211,7 +430,13 @@ fn confirmation_lifetime_is_bounded_and_all_drafts_remain_live() {
     );
     assert_eq!(
         fake.ops(),
-        [Op::DevicesList, Op::GrantIssue, Op::GrantIssue]
+        [
+            Op::DevicesList,
+            Op::GrantIssue,
+            Op::GrantIssue,
+            Op::GrantIssue,
+            Op::GrantIssue
+        ]
     );
     let mut fake = Fake::new(temp.path());
     fake.answers.push_back(Some("srv".into()));
@@ -260,8 +485,12 @@ fn partial_rejections_and_malformed_internal_intents_fail_explicitly() {
     assert_eq!(error.code, "executor_rejected");
     assert_eq!(error.completed_devices, ["dev_srv"]);
     let mut fake = Fake::new(temp.path());
-    fake.answers
-        .extend([Some("srv".into()), Some("other".into())]);
+    fake.answers.extend([
+        Some("srv".into()),
+        Some("srv".into()),
+        Some("other".into()),
+        Some("other".into()),
+    ]);
     let mut first = Fake::new(temp.path());
     let Success::GrantsIssued { grants } =
         run(&mut first, &["remote", "srv", "allow", "--all"]).unwrap()
@@ -274,7 +503,12 @@ fn partial_rejections_and_malformed_internal_intents_fail_explicitly() {
             Response::ok(json!({"devices":fake.directory})),
         ),
         (Op::GrantIssue, prepared("dev_srv", "srv", NOW + 120)),
+        (Op::GrantIssue, prepared_second("dev_srv", "srv", NOW + 120)),
         (Op::GrantIssue, prepared("dev_other", "other", NOW + 120)),
+        (
+            Op::GrantIssue,
+            prepared_second("dev_other", "other", NOW + 120),
+        ),
         (Op::GrantIssue, Response::ok(json!({"grant":grants[0]}))),
         (Op::GrantIssue, Response::err("forbidden", "untrusted")),
     ]);

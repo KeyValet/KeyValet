@@ -54,5 +54,9 @@ CREATE TABLE IF NOT EXISTS remote_outbox_receipts (
   envelope_hash TEXT PRIMARY KEY, stage TEXT NOT NULL, exp INTEGER NOT NULL);
 CREATE TABLE IF NOT EXISTS remote_audit (
   seq INTEGER PRIMARY KEY AUTOINCREMENT, entry_json TEXT NOT NULL, prev_hash TEXT NOT NULL, entry_hash TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS inbound_approvals (
+  id TEXT PRIMARY KEY, peer TEXT NOT NULL, object_json TEXT NOT NULL, state TEXT NOT NULL,
+  exp INTEGER NOT NULL, receipt_seq INTEGER NOT NULL REFERENCES remote_audit(seq));
 CREATE INDEX IF NOT EXISTS pending_agent ON pending_approvals(agent_pid, state, exp);
 CREATE INDEX IF NOT EXISTS grants_issuer ON grants(iss, revoked_at);
+CREATE INDEX IF NOT EXISTS inbound_exp ON inbound_approvals(state, exp);

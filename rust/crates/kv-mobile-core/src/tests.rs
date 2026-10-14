@@ -5,6 +5,8 @@ mod accounts;
 mod audit;
 #[path = "tests/helper_pairing.rs"]
 mod helper_pairing;
+#[path = "tests/push.rs"]
+mod push;
 use super::*;
 use crate::{api::directive_args, engine::Candidate, view::*};
 use kv_core::remote::{
@@ -672,6 +674,8 @@ async fn w2_pairing_silent_thirty_seconds_escalation_quick_strong_grant_revoke_a
         json!({"pairing_id":pair.pairing_id,"confirm":confirm}),
     )
     .await;
+    // A confirmation cannot extend the pairing expiry after the wall clock advances.
+    tokio::time::sleep(std::time::Duration::from_millis(1100)).await;
     let executor_confirmation = remote::envelope::seal(
         EnvelopeHeader {
             v: 1,
@@ -681,7 +685,7 @@ async fn w2_pairing_silent_thirty_seconds_escalation_quick_strong_grant_revoke_a
             from: f.peer.device_id.clone(),
             to: f.core.own.device_id.clone(),
             created_at: now(),
-            exp: now() + 300,
+            exp: pair.expires_at,
             extra: Extra::new(),
         },
         &jcs(&confirm).unwrap(),
@@ -698,7 +702,13 @@ async fn w2_pairing_silent_thirty_seconds_escalation_quick_strong_grant_revoke_a
     )
     .await;
     f.authorize();
-    relay.confirm_pair(&pair.sas, false).await.unwrap();
+    tokio::time::timeout(
+        std::time::Duration::from_secs(10),
+        relay.confirm_pair(&pair.sas, false),
+    )
+    .await
+    .expect("the in-process peer confirmation must arrive")
+    .unwrap();
     assert_eq!(owner_count(), 1);
     let stranger = Fixture::new();
     stranger

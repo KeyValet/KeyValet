@@ -1,0 +1,25 @@
+{
+  "observed_utc": "2026-10-13T03:35:19.728207+00:00",
+  "state": "locked",
+  "remote_keys": [
+    "approvers",
+    "grants",
+    "pending",
+    "relay",
+    "runtime_budget_s",
+    "unattended"
+  ],
+  "remote": {
+    "relay": "connected",
+    "unattended": false,
+    "approvers": [
+      {
+        "attestation": "unverified",
+        "device_id": "01M4SM5QTRQKNQE1TD6FBJTG79",
+        "label": "keyvalet",
+        "online": false
+      }
+    ]
+  },
+  "authentication_calls": 0
+}

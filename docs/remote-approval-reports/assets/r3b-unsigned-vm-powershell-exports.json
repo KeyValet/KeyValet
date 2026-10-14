@@ -1,0 +1,22 @@
+{
+  "real_credentials_read": false,
+  "binary_sha256": "d4bba9fc92996ae3c3c142c9c0170fc2e7e5ac1b24e05a7e1101af92e2e5fe5e",
+  "tests": [
+    {
+      "exit_code": 0,
+      "engine": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+      "output_logged": false,
+      "seconds": 0.23629499999999998,
+      "test": "windows_script::tests::powershell_executes_export_fixture"
+    },
+    {
+      "exit_code": 0,
+      "engine": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+      "output_logged": false,
+      "seconds": 0.4468626,
+      "test": "windows_script::tests::powershell_executes_export_fixture"
+    }
+  ],
+  "passed": true,
+  "ssh_exit": 0
+}

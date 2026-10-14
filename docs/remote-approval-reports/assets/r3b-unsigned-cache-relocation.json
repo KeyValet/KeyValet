@@ -1,0 +1,647 @@
+{
+  "files": [
+    {
+      "name": "kv_agent-bbc1a51095a797f0",
+      "sha256": "50a3227037c16db3baca5197b1ae16e2a4ba76dfa4c55287b328bffa5d3ecf14",
+      "bytes": 443016,
+      "mtime": 1791872656.627807
+    },
+    {
+      "name": "remote_agent_cli-718d776d6af7c091",
+      "sha256": "12f330db29d45febf375d42c5fb8957a0780e6fd05961cef2b97ed9fedc432f9",
+      "bytes": 1113520,
+      "mtime": 1791872663.427748
+    },
+    {
+      "name": "remote_contracts-9be9c3700b3d1f00",
+      "sha256": "40c9ebc3e4d316a425968d3310f8666c8997f0cce0b527d3162cebf2f1818b66",
+      "bytes": 4252640,
+      "mtime": 1791872664.3183715
+    },
+    {
+      "name": "kv_agent-12f430b430bb2d16",
+      "sha256": "01d06d5bfd785ed7e5a8ea3fb5bc51342430994489ef34e75cee4282f5c611b3",
+      "bytes": 4411464,
+      "mtime": 1791872664.5242033
+    },
+    {
+      "name": "kv_agent-f2c7ce4eb174bfbc",
+      "sha256": "e9f1e4e42ba7cff860affb041806bd6cb3aa841a6d1aece8bf91b5ab5a2139dd",
+      "bytes": 5193896,
+      "mtime": 1791872664.8322346
+    },
+    {
+      "name": "kv_hook-591ff5f218fc4ba1",
+      "sha256": "0e1c8d4fe85b9469ca73ec4932cb122f41030a0c9d27261c4bb23cb767302a4d",
+      "bytes": 6025472,
+      "mtime": 1791873107.6717227
+    },
+    {
+      "name": "stop-2e7c73e1fdb1c625",
+      "sha256": "1df43446669a134992e21f297bc28997293785a9e93c1513e76d308f7d98b79a",
+      "bytes": 1830432,
+      "mtime": 1791873119.6042974
+    },
+    {
+      "name": "linux_metadata-cbcdfb5037145df1",
+      "sha256": "b208468ceaf005524028279e41996a7e4e39cc73e79ca7175fa80ba6d5e7976e",
+      "bytes": 8229808,
+      "mtime": 1791873119.8582723
+    },
+    {
+      "name": "kv_hook-2f2ebe29b93f2204",
+      "sha256": "b1a55fe2a67222fc33202d32c979fad9189bb44898ce27b801d887b6750ba2a0",
+      "bytes": 946832,
+      "mtime": 1791873119.9098055
+    },
+    {
+      "name": "vault-913520d7377c7515",
+      "sha256": "70175186aaaff44448bd3b6094cdac7cd448442c883799b3444c8c498a3725c3",
+      "bytes": 8011440,
+      "mtime": 1791873120.0035987
+    },
+    {
+      "name": "enclave-76831fba7dcd25dc",
+      "sha256": "d157cf17cfa982c1054c282c5a53f6b9c66d4bb406c018c6f7075aaacb96fe5d",
+      "bytes": 8491824,
+      "mtime": 1791873120.063579
+    },
+    {
+      "name": "hello-4d10c1e1a8bb94c3",
+      "sha256": "d9d5e43bd085934ffe2b8893a2b37605015009de6d604b24072533f0b8b7674a",
+      "bytes": 8391664,
+      "mtime": 1791873120.091052
+    },
+    {
+      "name": "kv_hook-3233f120cd646b4f",
+      "sha256": "25f01b2b92dd273a42aebded875f43961e2d8e48694d77a271185fc0227c5943",
+      "bytes": 6596112,
+      "mtime": 1791873120.7825048
+    },
+    {
+      "name": "kv_vault-af6828ddff4d589d",
+      "sha256": "dd618e9587d96f4c88897395e26bda592c0d3de7f2b0a973cc126c3fdfed8bfa",
+      "bytes": 8010288,
+      "mtime": 1791873121.7740068
+    },
+    {
+      "name": "source_installers-8930035a22c068f5",
+      "sha256": "d1aaab06fa2b66805e3a63a2dc115f259c7e0e1cea86b5d2ad8ed1ed8e37b1cc",
+      "bytes": 1200320,
+      "mtime": 1791882909.383103
+    },
+    {
+      "name": "protection_installers-5f59fc156af4eb6e",
+      "sha256": "8167892c75cf266c9670b2edee727497aaf9cb00634964e0f57074df1e6fb386",
+      "bytes": 1200368,
+      "mtime": 1791882909.4046137
+    },
+    {
+      "name": "linux_presence_logic-3ea895705d77e5f7",
+      "sha256": "4b3bb5631e8d444f17e719236ef338e5314ac740f165387e0afb74fac302f6a1",
+      "bytes": 1993904,
+      "mtime": 1791882909.5113163
+    },
+    {
+      "name": "kv_platform-058be0fecc33232d",
+      "sha256": "1587244484f3a06209e68c9d141907b8c70253064e75a3d4d3577622c76968f0",
+      "bytes": 19307520,
+      "mtime": 1791882910.9506574
+    },
+    {
+      "name": "kv_cli-1cc2db8d162239d6",
+      "sha256": "50923a5afe95a95449b1dac36e79a20b4a96dd67f40bbc4c55ecf6655a3d1332",
+      "bytes": 29944528,
+      "mtime": 1791882915.2970247
+    },
+    {
+      "name": "remote_cli-f8745e65dfa9f2ea",
+      "sha256": "a2b0b101a13c9c1261e900618aeb58672da2688370dc29016f25d15bc999e7e5",
+      "bytes": 1493376,
+      "mtime": 1791882915.7074919
+    },
+    {
+      "name": "kv_cli-052546cc18722cf3",
+      "sha256": "c7f74e2a04dd44dc17e0e357251c55efd36189b3c0a1fd0e63349e631f7d15dc",
+      "bytes": 35772256,
+      "mtime": 1791882917.6449099
+    },
+    {
+      "name": "remote-2e55a65d35e77102",
+      "sha256": "808d05dbab7b8d393a0cabb73d4840461f9580e1e1ef3e72a15569079985a4f8",
+      "bytes": 1888016,
+      "mtime": 1791896551.1267502
+    },
+    {
+      "name": "kv_ipc-7af7806636785267",
+      "sha256": "a3821e33e82c344a588b61970bbfe767f9c13de7cd451652f14040b3a5e641e0",
+      "bytes": 2617776,
+      "mtime": 1791896551.1300874
+    },
+    {
+      "name": "kv_relay_client-198cb5e0386543b5",
+      "sha256": "8a9d593b3ab920e0c2b71fc82c5ca549c7fae17606f3ba952efbea8fc61c10c8",
+      "bytes": 946912,
+      "mtime": 1791896557.0881367
+    },
+    {
+      "name": "kv_helper-884439fe836ee346",
+      "sha256": "2d6586592e309958782bb2e97d10e78d2e6c0b4f4339689d5fda6b04b980d9b5",
+      "bytes": 58479296,
+      "mtime": 1791896559.6417804
+    },
+    {
+      "name": "kv_relay_client-fd08afcc699095b8",
+      "sha256": "8274b781805b682650faf2300e8b1285496c0fef41a8d5492d749b6748f39260",
+      "bytes": 63020976,
+      "mtime": 1791896560.4942732
+    },
+    {
+      "name": "kv_helper-3d15fc9b6a9e3a13",
+      "sha256": "1bb9d5369d8d054a577ffa2dc93fc2abd27a36df9bcaa50a3b9a932c2b866ad4",
+      "bytes": 64655024,
+      "mtime": 1791896563.097236
+    },
+    {
+      "name": "remote-63858ac0aa021fa0",
+      "sha256": "bfaa742c3a3252e260890c424b8c1b276fdd572033783e5fabe8dab19d756a00",
+      "bytes": 1888144,
+      "mtime": 1791896751.3581254
+    },
+    {
+      "name": "kv_ipc-f98a637cbd7889bc",
+      "sha256": "373de1a1c508a81229da77aea3646a99eb045fa71265e176ab095b003f92be96",
+      "bytes": 2619136,
+      "mtime": 1791896751.3605776
+    },
+    {
+      "name": "kv_core-c3fcb914a2faca8f",
+      "sha256": "1487eb50860e51e9ae00ff42c943174cac5bb813db4ddca143572ba9ae927be0",
+      "bytes": 16626528,
+      "mtime": 1791896767.1821482
+    },
+    {
+      "name": "remote-d7e301e8b803221c",
+      "sha256": "215160cadc77215577c8c3de7da73d69b1c46a2ff787fbf520623bc9c5d9fc9f",
+      "bytes": 17942592,
+      "mtime": 1791896767.1913707
+    },
+    {
+      "name": "dispatch-422ce24f548316c4",
+      "sha256": "97687bde9957835c01f95b72da43af88d674f535392da6791692ee235725fd6e",
+      "bytes": 33567312,
+      "mtime": 1791896767.7650497
+    },
+    {
+      "name": "kv_relay_client-4228298d93568464",
+      "sha256": "89b622a656df76b3c2c9cd1578cf6ba2fdf959497bb9d2c7336fef5cb3a0cef3",
+      "bytes": 947568,
+      "mtime": 1791896769.07188
+    },
+    {
+      "name": "kv_helper-f44d895975318e42",
+      "sha256": "849d5c3c9a2fe22eaa35974fe35c3ee2ce42991663b7341e13d9507cba260af0",
+      "bytes": 58521552,
+      "mtime": 1791896771.5619226
+    },
+    {
+      "name": "kv_relay_client-8f83e7eecb958bfb",
+      "sha256": "a3ab1b2d8ef5422db9e184202c5833fa7edd04e3cdc17463a246162a6d82b7ef",
+      "bytes": 62973024,
+      "mtime": 1791896772.434236
+    },
+    {
+      "name": "kv_helper-d5a57b59977c34d4",
+      "sha256": "c6c9dcf32dc2f2f0754a74e96b740d71ea9a57fe178b74d0b15db723e0ac5550",
+      "bytes": 64681440,
+      "mtime": 1791896774.665437
+    },
+    {
+      "name": "kv_push-7f1823856da41b76",
+      "sha256": "b7980d365ab38ece04372c6e9ec881533a3cc97e9a6ea05dfa87c3e545f76399",
+      "bytes": 21397472,
+      "mtime": 1791897147.581015
+    },
+    {
+      "name": "kv_push-b1eebdf1b95ad5df",
+      "sha256": "c89c074c4958114cb277aac7c4de295fb8336d5aaf39aed2e429480eaa51d8c3",
+      "bytes": 946832,
+      "mtime": 1791897164.194322
+    },
+    {
+      "name": "kv_push-4468495a4164381f",
+      "sha256": "797ebe845fba952a655bf9ab7f79b2c6c222566cb3622959ee73992f50fcf5a3",
+      "bytes": 22405344,
+      "mtime": 1791897166.4004462
+    },
+    {
+      "name": "source_installers-84525afc42a2c974",
+      "sha256": "4285ded995cd4ed381c0b33dba2f321088df3f447dbe08ef261c570f3579d759",
+      "bytes": 1200320,
+      "mtime": 1791899899.3507261
+    },
+    {
+      "name": "protection_installers-bc8be9b30199b175",
+      "sha256": "6f8ffc550a2277a1d3c857ae57259adaa60a2bc6d131cc2a2295bec745ae867c",
+      "bytes": 1200384,
+      "mtime": 1791899899.3575456
+    },
+    {
+      "name": "linux_presence_logic-8206c7e1b42c91b4",
+      "sha256": "bd0bc88210e600ee7969692aadeae60125de68aba7abd0e3cd9a59c6a034aeaf",
+      "bytes": 1808688,
+      "mtime": 1791899899.4421315
+    },
+    {
+      "name": "kv_platform-783a40ffece43eb1",
+      "sha256": "832da501c5c9c3ba687f4a7dbbf37c5d320200c324c02ce36b3c5f64c524a4e8",
+      "bytes": 19177616,
+      "mtime": 1791899969.2636623
+    },
+    {
+      "name": "kv_touchid-0c63a974696f32a7",
+      "sha256": "3130dea5d133845b91a54e728cbaaf807d55278bad201a21a7fce7b0ffdb9e2c",
+      "bytes": 3375952,
+      "mtime": 1791902622.3354867
+    },
+    {
+      "name": "kv_server-bdf422126d3c5bdd",
+      "sha256": "9d128ccfdbeb8d033d0f5578824f8c84ff1da4890a13add3320d605630e8d8c4",
+      "bytes": 30183696,
+      "mtime": 1791902627.875533
+    },
+    {
+      "name": "source_installers-f8dcb563c85b8789",
+      "sha256": "213d836d06e3de4ecc75bd9cbbf756753dab773231de84b68e3f31309b78e90f",
+      "bytes": 1200320,
+      "mtime": 1791902630.8773644
+    },
+    {
+      "name": "linux_presence_logic-3517c97ffb508b78",
+      "sha256": "5c602826e57f465596520740a04489a84e63a19d9b51ca4047cf35651e645dd5",
+      "bytes": 1994608,
+      "mtime": 1791902631.1539042
+    },
+    {
+      "name": "remote_dialog-c030021523fd572b",
+      "sha256": "70b2083e1b5e2b89ddf3fd67b51832fcd7d8b6e31cbbc70d63409071547bee8e",
+      "bytes": 1962192,
+      "mtime": 1791902631.7743988
+    },
+    {
+      "name": "github_google_flow-5ca41ef27bded668",
+      "sha256": "ef180d735b7bb5464d13f2c689a13d4e59a72217f76726c1bc381ed2b4ac5909",
+      "bytes": 27884016,
+      "mtime": 1791902632.4949224
+    },
+    {
+      "name": "device_key_cli-9cf333994b18e3db",
+      "sha256": "3e52af71ec26ec2704dde6b38e759084ad2e2c91a26a34e4cbf01859e1e4024d",
+      "bytes": 1024112,
+      "mtime": 1791902632.8012896
+    },
+    {
+      "name": "kv_touchid-bb1dec463dd2c400",
+      "sha256": "a939fcddd08608ee30e2b76e40d4d6304dd923041ede49600e1b54ea147116fc",
+      "bytes": 3766096,
+      "mtime": 1791902633.016761
+    },
+    {
+      "name": "kv_touchid-200f1d032b72332f",
+      "sha256": "0e6bb84f76bf74146d5f40840e582565983b1302cb681840f14251f91427585f",
+      "bytes": 3379056,
+      "mtime": 1791902633.0590587
+    },
+    {
+      "name": "protection_installers-3470ce81ba48eaf6",
+      "sha256": "bd7fa071e4db57dd39ed4f16e82b2bded1ebcf486c79355d92be29151af7dbe8",
+      "bytes": 1200368,
+      "mtime": 1791902633.2068245
+    },
+    {
+      "name": "run_notice-d1d9531122a2a885",
+      "sha256": "c2ed1f6be23d3b64cff3e8d80e74be73538c509c45f73d04d00b6edacd43f401",
+      "bytes": 3666368,
+      "mtime": 1791902634.0540693
+    },
+    {
+      "name": "manage-0caaf4202f4d80dd",
+      "sha256": "fe72479f17da5cc5c7ba401c79ab75d75a97235fa31802dd2aaed701ea9e28b8",
+      "bytes": 10738688,
+      "mtime": 1791902634.1371026
+    },
+    {
+      "name": "kv_protocols-d16e78faa7672075",
+      "sha256": "8187a7f890d3af4f4cca2079e29a0a833e710ad0d69e10dd1b9d0ead264c36eb",
+      "bytes": 12671344,
+      "mtime": 1791902634.3480146
+    },
+    {
+      "name": "windows_gateway-488f1476ea80d013",
+      "sha256": "0ae6f88aa64648bc3ff334f22ad6feb2628c4c3ba2d195938e08635708542251",
+      "bytes": 946912,
+      "mtime": 1791902635.7637484
+    },
+    {
+      "name": "recovery-1eaba001a61c273e",
+      "sha256": "e9edacaff62a1aabb090153057b5bf5d38ca5c85b83b857a197daf7bea53ddaa",
+      "bytes": 31186752,
+      "mtime": 1791902636.4218616
+    },
+    {
+      "name": "proxy_flow-7fbfa48161748e26",
+      "sha256": "52614747854cf41c08089c5d2234e1b7ba138255ade4433d5999d78730549021",
+      "bytes": 29108016,
+      "mtime": 1791902636.5504503
+    },
+    {
+      "name": "gateway_shutdown-d6f21b3194197a15",
+      "sha256": "8fd9ae790f55ec465de52736de62d9d8287813c849989def3af5416bb2cf1546",
+      "bytes": 31024112,
+      "mtime": 1791902636.8869152
+    },
+    {
+      "name": "approval-fe4080dd4783ac33",
+      "sha256": "bb15fec20d067c3e0979591e3a5315935562f059bcb9fe236beb0384dc4e1555",
+      "bytes": 5558912,
+      "mtime": 1791902637.1580772
+    },
+    {
+      "name": "kv_platform-8275bd623c20453b",
+      "sha256": "452c9715e40a7ca7bb673094e55c5f9eb3d09f92a1b8642d131546d0a605c098",
+      "bytes": 19379760,
+      "mtime": 1791902637.2865126
+    },
+    {
+      "name": "gateway_flow-0badb8aee35bf6ca",
+      "sha256": "ae8720929b9796870f188a18fe85509cf5e38f905c5ca5cb81e0e57c2560bebf",
+      "bytes": 32399120,
+      "mtime": 1791902637.476104
+    },
+    {
+      "name": "kv_proxy-c6aab852b201f3b1",
+      "sha256": "554b43253eba664b6d5dd56c28660c95db41e6fce95d90f984ab261a61c3c53e",
+      "bytes": 33720800,
+      "mtime": 1791902637.6306813
+    },
+    {
+      "name": "https-255bf2b6817c890c",
+      "sha256": "7b6ca4f5b21c993523871ef3add3172a120ab14e6194acd73063ea26cd47cedb",
+      "bytes": 25420208,
+      "mtime": 1791902638.1415136
+    },
+    {
+      "name": "kv_core-63e03167f7046448",
+      "sha256": "e6590bb47bf07e86cc2c5cbbd10610118173e669f5c4b42b822de06ffacc5028",
+      "bytes": 16604512,
+      "mtime": 1791902640.645069
+    },
+    {
+      "name": "dispatch-1b77622cfc8230cf",
+      "sha256": "76ad45562fc6ffb5120e07d905936731838d4f0f5643900fa19eece49f06e502",
+      "bytes": 34010128,
+      "mtime": 1791902642.0821228
+    },
+    {
+      "name": "remote-eed0d366fc5eb12f",
+      "sha256": "c025f4e00c5b2b9a3789620a31cfef8e0093adfbc296348cb3a6ce3b7f278fcf",
+      "bytes": 17954192,
+      "mtime": 1791902642.6024723
+    },
+    {
+      "name": "cli-5db5f8ae2b5300b6",
+      "sha256": "25c7844348b6c0e556e55156baffdbd67cafa1900b46931a8ec568156b1c53bd",
+      "bytes": 17030816,
+      "mtime": 1791902644.5967686
+    },
+    {
+      "name": "kv_server-24bfadfb143eaa88",
+      "sha256": "7911ded3720db1941d6101358d14d241119266923b4a24391aa917de4dcf54cc",
+      "bytes": 30395904,
+      "mtime": 1791902644.7602327
+    },
+    {
+      "name": "kv_server-b94fb4cf791e8361",
+      "sha256": "a9186a51b09f6b4a1cfd29e18fdd40fe7cc58b03b53968eb37eff20a8e9efd6d",
+      "bytes": 3269680,
+      "mtime": 1791902645.0969548
+    },
+    {
+      "name": "kv_server-0c627da3674521a6",
+      "sha256": "90b3c270bc031a14b8300110345a536627edeb02a287a3b4986eb089b54284e7",
+      "bytes": 43697104,
+      "mtime": 1791902649.003045
+    },
+    {
+      "name": "kv_relay_client-b253ca6f68922e53",
+      "sha256": "a6ff95ef5e345b6e3e0e1b9c5ec330648d14d91f318881651d698c18a2e4a18d",
+      "bytes": 946912,
+      "mtime": 1791903770.350253
+    },
+    {
+      "name": "kv_relay_client-2fd7edde7b8f994d",
+      "sha256": "d6d8a473bc761e69540fd40dcf6c9191a59b381952398bfc93b29b72f737d8f3",
+      "bytes": 62977952,
+      "mtime": 1791903772.1796682
+    },
+    {
+      "name": "kv_relay_client-31c924beea1242e6",
+      "sha256": "43aea0365ef4d709c7a2a222cc4ad5b4f5436a5672bebe65b65796c34d2c069a",
+      "bytes": 23687536,
+      "mtime": 1791903854.9294906
+    },
+    {
+      "name": "kv_helper-003a5c7b9a81c858",
+      "sha256": "5f9fcc1bd239aa0e902d6f781b73d3c91753d9db35de26907f5eeb1f0d38c9ec",
+      "bytes": 54562640,
+      "mtime": 1791903856.754391
+    },
+    {
+      "name": "kv_helper-7f446ac9671612ab",
+      "sha256": "f2dce5ecf3c0e9d366f6bf2a7bff264b11b6ef5db802d6f892c9902ff51fee26",
+      "bytes": 58934240,
+      "mtime": 1791903862.2770572
+    },
+    {
+      "name": "kv_helper-641b915866cd057a",
+      "sha256": "5e635e4cdef8a1c0111d475fd5a2af9343600d93657d68a2a49763b4b0b79a79",
+      "bytes": 65260960,
+      "mtime": 1791903863.8412297
+    },
+    {
+      "name": "kv_cli-62fa6b7dbcac9a9d",
+      "sha256": "47bebb68349e36dd1b432cb895668506ffbf1700e4e64609ce1f9db8cbc34cb1",
+      "bytes": 31408176,
+      "mtime": 1791904322.7165668
+    },
+    {
+      "name": "kv_mcp-1257aa26d09aa577",
+      "sha256": "d88f714987d237c56505f6ff472cfafc447dab07e9607b1f5f8612593160d37b",
+      "bytes": 40883312,
+      "mtime": 1791904324.471907
+    },
+    {
+      "name": "kv_cli-8158ead03bf52c9c",
+      "sha256": "220223ce352bddaf529648b6c0000c19ff7097d00f211ce07a3ce1b5d823f605",
+      "bytes": 31445616,
+      "mtime": 1791904327.031673
+    },
+    {
+      "name": "kv_mcp-79b6feb9f397e6ac",
+      "sha256": "5aa80804a409332040b0eb6fa714c70b8da886b094c3cc11ba182a576a3d84b2",
+      "bytes": 946816,
+      "mtime": 1791904328.7713883
+    },
+    {
+      "name": "kv_mcp-dd20ef0b43855350",
+      "sha256": "22e6dd81221e57a49933b66a7046a41976826eb6fd5ef714a440fb606beb186b",
+      "bytes": 47341904,
+      "mtime": 1791904330.91766
+    },
+    {
+      "name": "device_key_cli-8316f359f93ab086",
+      "sha256": "e887500632a7abce905d852f18acbc4e8affd414e4dfbe7dd63c1d22adeeedbf",
+      "bytes": 1024112,
+      "mtime": 1791907261.9609303
+    },
+    {
+      "name": "kv_touchid-ef2fed64a69e3e21",
+      "sha256": "26db21d911920ece402ba1712466a139e9894a404c1550a89ff203192f26b946",
+      "bytes": 3312176,
+      "mtime": 1791907262.1408613
+    },
+    {
+      "name": "remote_dialog-2c5973d726514de3",
+      "sha256": "5a7fbe5e16fc0d56faf882b8d65294caf362dd02b68207f52cf3fe1f0e3c14a6",
+      "bytes": 1881904,
+      "mtime": 1791907262.1671154
+    },
+    {
+      "name": "kv_touchid-2dfafc5885c8bf8e",
+      "sha256": "6bc6e97d5df55b0f15b47ba5e2fdf36c754a1cabcf0f841bec9f4ac5eef9242d",
+      "bytes": 3348288,
+      "mtime": 1791907262.2665381
+    },
+    {
+      "name": "kv_touchid-4668240f2fe057d7",
+      "sha256": "58ba9be3c36cc932812ec4a2f8bc5e7492cd4f6323e9a6b5912ec8a44061c3dc",
+      "bytes": 3753728,
+      "mtime": 1791907262.4568224
+    },
+    {
+      "name": "kv_touchid-682b28d2f0239d1b",
+      "sha256": "653fa0d63cb19191a19bbb413dc5dc5a7fd9ec72b46c02297e16d5665be2810f",
+      "bytes": 3337552,
+      "mtime": 1791907540.225975
+    },
+    {
+      "name": "kv_mobile_core-c8c3f2e9f345b542",
+      "sha256": "4b901d029815c4726673002eb5f0a249a613ce33b1e330ade89ade2afdf0bcf5",
+      "bytes": 54682256,
+      "mtime": 1791908604.6658459
+    },
+    {
+      "name": "kv_mobile_core-520030bad76cf400",
+      "sha256": "7cefafcc26d24fd1cd238a7ab5454df221a1f9ea142cac6e1ec765094b2dc31e",
+      "bytes": 56170640,
+      "mtime": 1791908801.9275272
+    },
+    {
+      "name": "kv_agent-541073212fb9d07a",
+      "sha256": "e93c310cb96a944fa3aead4fd0cef230dde4a9704cd12997f6fa03f3084e91af",
+      "bytes": 433744,
+      "mtime": 1791927152.8928635
+    },
+    {
+      "name": "remote_agent_cli-9f17f4bf51f3ac34",
+      "sha256": "b792bd8e2a46275b75ceac307232470a6b817da6dded1f0f78aeddf4bf771b6b",
+      "bytes": 1027888,
+      "mtime": 1791927152.8957398
+    },
+    {
+      "name": "kv_agent-9baa5fa3053023e3",
+      "sha256": "36f6d21140ff52c2f3357b1aae66ecbda56f33deba7951fa21efcb5c68181f5d",
+      "bytes": 4547120,
+      "mtime": 1791927152.909069
+    },
+    {
+      "name": "remote_contracts-f7755f441b7707db",
+      "sha256": "3f8485b9b1c64b42ed3022ee167043dc34edfa39ab28b0b2783cde76b01e6f66",
+      "bytes": 3733952,
+      "mtime": 1791927153.096308
+    },
+    {
+      "name": "kv_agent-ada2309e97177bb2",
+      "sha256": "791dac4c6a918ff4ceb78d62f622d4cd916af534e62506d00da939dbb4c802cb",
+      "bytes": 3942352,
+      "mtime": 1791927342.7858934
+    },
+    {
+      "name": "kv_agent-0726457de9547c26",
+      "sha256": "06cc81bdc6c91fd9a784f17a09dee699e97282a1184d0616cbbb86c3ffda55bc",
+      "bytes": 433744,
+      "mtime": 1791927467.6981184
+    },
+    {
+      "name": "kv_agent-2e78d4ee9c20631f",
+      "sha256": "3935ca7bc66d3a4058617982806149c3bab16fd698b93983874a52c58849d3f1",
+      "bytes": 433744,
+      "mtime": 1791927470.9494567
+    },
+    {
+      "name": "remote_agent_cli-40772ab9a7b98685",
+      "sha256": "0553537b86944287ddb4c632cc50f45c566f0a19c2322c03553794dcd064e7a4",
+      "bytes": 1028112,
+      "mtime": 1791927471.0429952
+    },
+    {
+      "name": "remote_cli-aab6f940794a27b8",
+      "sha256": "a27a1b981933dc8ea81c060a58d5093d224465027517b513d4674d6fc4f3644a",
+      "bytes": 1579888,
+      "mtime": 1791927471.0962648
+    },
+    {
+      "name": "kv_relay_client-34d8770a615fed8b",
+      "sha256": "ec2cbf107a77f8a860bc4b9c0d39524ea8c2c3d8964165c2e12d2d616bd66848",
+      "bytes": 946912,
+      "mtime": 1791927471.4049597
+    },
+    {
+      "name": "remote_contracts-abcf3155c70af910",
+      "sha256": "fd3210fbf07e1ad6ab43ae6fec30232c5b30ec99f773f1e5ec2442453a5f51ac",
+      "bytes": 4476896,
+      "mtime": 1791927471.461835
+    },
+    {
+      "name": "kv_agent-f4699c0d6af13b1a",
+      "sha256": "4f6b49f88e45efefb5f00de0a3a677508a820f30b2b1f09cfcc8881567ee491e",
+      "bytes": 4592736,
+      "mtime": 1791927471.7530637
+    },
+    {
+      "name": "kv_agent-6f80ecdfd25a16d4",
+      "sha256": "a5bd0b0451890f2abf3476e3c5d18d84badc5c48759e6cc5934e380032a6db1f",
+      "bytes": 4017760,
+      "mtime": 1791927471.797058
+    },
+    {
+      "name": "kv_relay_client-c32f5852d47292b7",
+      "sha256": "d9bd3a79d162259b8fd8a87111dc37e636026cae102acbd3114cef6a457c2c54",
+      "bytes": 63544928,
+      "mtime": 1791927475.76917
+    },
+    {
+      "name": "kv_cli-3320dbf269f95133",
+      "sha256": "e30c988559d95f5baf99e109c9e4da0fa20815b70ffb2f5416e8eac23c3b1a23",
+      "bytes": 36988160,
+      "mtime": 1791928457.4418097
+    }
+  ],
+  "bytes_relocated": 1834761032,
+  "archive_sha256": "0eb0c1b6f1de43896dcac0755644c4de8bf1e9be8574e4428282840bb4b8249d",
+  "vm_archive": "C:\\kv-r3b-unsigned-20261014\\preserved-old-mac-test-binaries.tar.gz",
+  "vm_directory": "C:\\kv-r3b-unsigned-20261014\\preserved-old-mac-test-binaries",
+  "free_bytes_after": 16584769536,
+  "logs_json_keys_and_data_backups_preserved": true,
+  "local_upload_staging_copy_removed_after_vm_verification": true
+}

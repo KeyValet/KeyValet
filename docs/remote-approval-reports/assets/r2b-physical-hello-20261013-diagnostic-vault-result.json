@@ -1,0 +1,15 @@
+{
+  "exit_code": null,
+  "finished_utc": "2026-10-13T05:52:58.8606552Z",
+  "seconds": 25.0179039,
+  "session_id": 13,
+  "elevated": false,
+  "test_binary_sha256": "0cd0b54b45d933e40a1569b7bf8b0b9c34360bcd4499e5148b9fecfcaf601012",
+  "test": "existing::hello::tests::hardware_roundtrip",
+  "account": "春有约花不误\\11516",
+  "started_utc": "2026-10-13T05:52:33.5100623Z",
+  "stderr": "HELLO_VAULT stage=request_create\nHELLO_WAIT begin site=crates\\kv-agent\\src\\hello.rs:172 cap_ms=90000\nHELLO_WAIT end site=crates\\kv-agent\\src\\hello.rs:172 elapsed_ms=10781 success=true hresult=None\nHELLO_VAULT stage=attestation\nHELLO_WAIT begin site=crates\\kv-agent\\src\\hello.rs:186 cap_ms=10000\nHELLO_WAIT end site=crates\\kv-agent\\src\\hello.rs:186 elapsed_ms=2353 success=true hresult=None\nHELLO_VAULT stage=public_key_and_metadata\nHELLO_VAULT stage=derive_first_signature\nHELLO_VAULT stage=request_sign\nHELLO_WAIT begin site=crates\\kv-agent\\src\\hello.rs:127 cap_ms=90000\nHELLO_WAIT end site=crates\\kv-agent\\src\\hello.rs:127 elapsed_ms=108 success=true hresult=None\nHELLO_VAULT sign_status=Ok(KeyCredentialStatus(0))\nHELLO_WAIT begin site=crates\\kv-agent\\src\\hello.rs:107 cap_ms=90000\nHELLO_WAIT end site=crates\\kv-agent\\src\\hello.rs:107 elapsed_ms=5 success=true hresult=None\nHELLO_VAULT stage=request_sign\nHELLO_WAIT begin site=crates\\kv-agent\\src\\hello.rs:127 cap_ms=90000\nHELLO_WAIT end site=crates\\kv-agent\\src\\hello.rs:127 elapsed_ms=10194 success=true hresult=None\nHELLO_VAULT sign_status=Ok(KeyCredentialStatus(0))\n",
+  "phase": "vault",
+  "passed": false,
+  "uses_installed_worker": false
+}

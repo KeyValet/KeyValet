@@ -238,6 +238,7 @@ pub(crate) async fn push_token(
         }
         let value = serde_json::to_vec(&json!({"platform":push.platform,"token":push.token}))
             .map_err(|_| ApiError::bad())?;
+        crate::push::install_lifecycle_triggers(&data.db)?;
         data.db.execute(
             "UPDATE devices SET push_token=?1 WHERE id=?2 AND revoked_at IS NULL",
             params![value, principal.device.device_id],
@@ -254,6 +255,10 @@ pub(crate) async fn remove_push_token(
         data.check(&principal, now, true)?;
         data.db.execute(
             "UPDATE devices SET push_token=NULL WHERE id=?1",
+            [&principal.device.device_id],
+        )?;
+        data.db.execute(
+            "DELETE FROM push_jobs WHERE to_device=?1",
             [&principal.device.device_id],
         )?;
         Ok(())

@@ -1,0 +1,140 @@
+{
+  "started_utc": "2026-10-13T09:01:34.870543+00:00",
+  "runtime": "installed native MCP, persistent owner session",
+  "method": "GET",
+  "url": "https://graph.microsoft.com/v1.0/me",
+  "credential": "api_key/r3a-graph-readonly",
+  "upstream_403_accepted_for_approval_measurement": true,
+  "secret_values_in_evidence": false,
+  "samples": [
+    {
+      "status": 403,
+      "call_elapsed_s": 7.815426,
+      "index": 1
+    },
+    {
+      "status": 403,
+      "call_elapsed_s": 5.775543,
+      "index": 2
+    },
+    {
+      "status": 403,
+      "call_elapsed_s": 6.2109,
+      "index": 3
+    },
+    {
+      "status": 403,
+      "call_elapsed_s": 7.830552,
+      "index": 4
+    },
+    {
+      "status": 403,
+      "call_elapsed_s": 4.410365,
+      "index": 5
+    },
+    {
+      "status": 403,
+      "call_elapsed_s": 7.787033,
+      "index": 6
+    },
+    {
+      "status": 403,
+      "call_elapsed_s": 7.688671,
+      "index": 7
+    },
+    {
+      "status": 403,
+      "call_elapsed_s": 4.194494,
+      "index": 8
+    },
+    {
+      "status": 403,
+      "call_elapsed_s": 4.271498,
+      "index": 9
+    },
+    {
+      "status": 403,
+      "call_elapsed_s": 4.884276,
+      "index": 10
+    },
+    {
+      "status": 403,
+      "call_elapsed_s": 4.212106,
+      "index": 11
+    },
+    {
+      "status": 403,
+      "call_elapsed_s": 4.550449,
+      "index": 12
+    },
+    {
+      "status": 403,
+      "call_elapsed_s": 3.771298,
+      "index": 13
+    },
+    {
+      "status": 403,
+      "call_elapsed_s": 4.411102,
+      "index": 14
+    },
+    {
+      "status": 403,
+      "call_elapsed_s": 4.117797,
+      "index": 15
+    },
+    {
+      "status": 403,
+      "call_elapsed_s": 4.573007,
+      "index": 16
+    },
+    {
+      "status": 403,
+      "call_elapsed_s": 4.63356,
+      "index": 17
+    },
+    {
+      "status": 403,
+      "call_elapsed_s": 4.189275,
+      "index": 18
+    },
+    {
+      "status": 403,
+      "call_elapsed_s": 4.092658,
+      "index": 19
+    },
+    {
+      "status": 403,
+      "call_elapsed_s": 4.553525,
+      "index": 20
+    }
+  ],
+  "negative_cases": [
+    {
+      "case": "deny",
+      "result": {
+        "status": 403
+      }
+    }
+  ],
+  "set_per_use_cli_elapsed_s": 5.332671,
+  "set_per_use_cli_exit": 0,
+  "process_identity": {
+    "pid": 1370456,
+    "start_time": 53963324,
+    "uid": 1000,
+    "parent_pid": 1370451
+  },
+  "fixed_error": "sample_denial_not_observed",
+  "audit_receipt": "r3a-samples-audit-090330.json",
+  "helper_latency": {
+    "n": 20,
+    "cohort_calls": 20,
+    "all_quick_per_use_once": true,
+    "quantile_method": "linear interpolation at (n-1)*p",
+    "p50_s": 3.0905,
+    "p95_s": 6.0237,
+    "touch_id_user_time_s": 0
+  },
+  "elapsed_s": 116.040059,
+  "finished_utc": "2026-10-13T09:03:30.910388+00:00"
+}

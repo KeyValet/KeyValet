@@ -1,0 +1,12 @@
+﻿{
+    "commands":  [
+                     {
+                         "command":  "cargo fmt --all -- --check",
+                         "seconds":  1.2490955,
+                         "exit_code":  0
+                     }
+                 ],
+    "finished_utc":  "2026-10-14T08:16:54.2803613Z",
+    "failure":  "    Finished `dev` profile [unoptimized] target(s) in 0.43s",
+    "passed":  false
+}

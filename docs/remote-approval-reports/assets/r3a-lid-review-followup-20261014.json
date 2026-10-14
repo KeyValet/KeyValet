@@ -1,0 +1,41 @@
+{
+  "reviewed_utc": "2026-10-14T05:33:58.523404+00:00",
+  "previous_review": "r3a-lid-code-review-20261014.json",
+  "verification_kind": "source_review_and_existing_ci",
+  "physical_lid_test_seconds": 0,
+  "physical_lid_test_requests": 0,
+  "physical_acceptance_claimed": false,
+  "finding": "approver_restart_after_relay_ack",
+  "current_source_result": "durable_inbound_receipt_and_recovery_implemented_in_shared_tree",
+  "current_source_sha256": {
+    "rust/crates/kv-helper/src/remote/inbound.rs": "2f44bd7e35e05abce51630e24e6bb9839c55d944402226b29ec686de2f44c07f",
+    "rust/crates/kv-helper/src/remote/engine.rs": "317481163d424e1ba3972fd95cadb932a3e40ebc98235e295366511ae7dd0efc",
+    "rust/crates/kv-helper/src/remote/owner.rs": "9c03a42a44fefbd706c4cb8b5684345ccd5afd6ea77e1577e486fa42d64f3c3a",
+    "rust/crates/kv-helper/src/remote/tests/inbound_recovery.rs": "4e37517ca2e6292d71ddac0df993009322ac01be8536af6176b23bcd5969c52c"
+  },
+  "checks_summary": "r3a-se-child-closure-ci5-summary.json",
+  "test_log": "r3a-se-child-closure-ci5-test.log",
+  "inbound_recovery_passed_n": 7,
+  "inbound_recovery_passed": [
+    "remote::tests::inbound_recovery::r3b_cancelled_inbound_does_not_resurrect_after_restart_or_redelivery",
+    "remote::tests::inbound_recovery::r3b_inbound_escalation_survives_restart_without_changing_the_request",
+    "remote::tests::inbound_recovery::r3b_inbound_expiry_boundary_and_revoked_sender_remain_closed",
+    "remote::tests::inbound_recovery::r3b_inbound_storage_or_audit_failure_never_acknowledges_the_request",
+    "remote::tests::inbound_recovery::r3b_received_approval_survives_reopen_without_relay_redelivery",
+    "remote::tests::inbound_recovery::r3b_issued_inbound_recovers_only_the_outbound_decision",
+    "remote::tests::inbound_recovery::r3b_inbound_tampering_and_old_waiting_snapshot_fail_recovery"
+  ],
+  "source_matches_final_ci": true,
+  "installed_helper_sha256": "abfcb9a65eba7e71fa1f5a2d8a1e2b7a599c7846e3f7d07389ec86e6df73486d",
+  "new_inbound_fix_installed_on_mac": false,
+  "installed_package_note": "The final native package replaced only the agent; helper/CLI/relay retained their prior installed component hashes and CI provenance.",
+  "review_facts": [
+    "Acceptance persists the decrypted request, verified envelope and audit/vault receipt before ACK in a transaction.",
+    "Startup recovery checks the audit/vault checkpoint, receipt hash, original envelope signature, current device Execute authority and original expiry.",
+    "Cancelled, expired and already-issued requests are not reopened as waiting; escalation is preserved.",
+    "Storage or audit failure does not acknowledge the incoming request."
+  ],
+  "secret_values_in_evidence": false,
+  "keyvalet_calls": 0,
+  "touch_id_requests": 0
+}

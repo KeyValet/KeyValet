@@ -1,0 +1,44 @@
+name: Windows signing input
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        include:
+          - architecture: x64
+            runner: windows-latest
+          - architecture: arm64
+            runner: windows-11-arm
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rust
+      - name: Build native executables
+        shell: pwsh
+        run: |
+          Push-Location rust
+          try {
+            cargo build --release --locked -p kv-helper -p kv-agent -p kv-cli -p kv-mcp -p kv-hook -p kv-server -p kv-relay-client
+            if ($LASTEXITCODE -ne 0) { throw 'Native build failed.' }
+          } finally { Pop-Location }
+      - name: Validate signing input
+        shell: pwsh
+        run: |
+          ./scripts/prepare-windows-signing.ps1 -BinaryDirectory rust/target/release -OutputDirectory signing-input -Architecture '${{ matrix.architecture }}'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-signing-input-${{ matrix.architecture }}
+          path: signing-input/
+          if-no-files-found: error
+
+# Foundation declined the application. This optional workflow only prepares signing inputs;
+# the release workflow distributes unsigned Windows packages without a signing prerequisite.

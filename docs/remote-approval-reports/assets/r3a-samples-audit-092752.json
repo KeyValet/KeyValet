@@ -1,0 +1,97 @@
+{
+  "agent_pid": 1438556,
+  "approvals": [
+    {
+      "id": "01M4T9CQC0GHCBTQ4RH08Q2ND7",
+      "kind": "use",
+      "state": "executed",
+      "agent_pid": 1438556,
+      "level": "quick",
+      "scope_mode": "per_use",
+      "tier": "T1",
+      "digest": "579783004d2372789171c25939ea695fe5e4e16d58735119db82a5e990804a0f",
+      "delivery_mode": "banner",
+      "helper_request_to_decision_s": 21.119,
+      "execution_started_count": 1,
+      "execution_completed_count": 1,
+      "touch_id_user_time_s": 0
+    },
+    {
+      "id": "01M4T9DGRG5AWXHHE7VKZRE2NR",
+      "kind": "use",
+      "state": "executed",
+      "agent_pid": 1438556,
+      "level": "quick",
+      "scope_mode": "per_use",
+      "tier": "T1",
+      "digest": "75dfce545500746c80d71063f3a7c1f8ff5a75004546d7a9c832ab319de5f7eb",
+      "delivery_mode": "banner",
+      "helper_request_to_decision_s": 13.16,
+      "execution_started_count": 1,
+      "execution_completed_count": 1,
+      "touch_id_user_time_s": 0
+    }
+  ],
+  "events": [
+    {
+      "agent_pid": 1438556,
+      "approval_id": "01M4T9CQC0GHCBTQ4RH08Q2ND7",
+      "digest": "579783004d2372789171c25939ea695fe5e4e16d58735119db82a5e990804a0f",
+      "op": "approval_requested",
+      "ts": "2026-10-13T09:27:12.580Z"
+    },
+    {
+      "approval_id": "01M4T9CQC0GHCBTQ4RH08Q2ND7",
+      "approval_level": "quick",
+      "approver_device": "01M4SM5QTRQKNQE1TD6FBJTG79",
+      "decision": "allow",
+      "decision_hash": "2a3ff494f891c720d3241da977b0b67d1a515600de47c2249a251a818f3b93f1",
+      "digest": "579783004d2372789171c25939ea695fe5e4e16d58735119db82a5e990804a0f",
+      "op": "remote_approval_accepted",
+      "state": "approved",
+      "ts": "2026-10-13T09:27:33.699Z"
+    },
+    {
+      "approval_id": "01M4T9CQC0GHCBTQ4RH08Q2ND7",
+      "digest": "579783004d2372789171c25939ea695fe5e4e16d58735119db82a5e990804a0f",
+      "op": "approval_execution_started",
+      "ts": "2026-10-13T09:27:34.094Z"
+    },
+    {
+      "approval_id": "01M4T9CQC0GHCBTQ4RH08Q2ND7",
+      "op": "approval_execution_completed",
+      "ts": "2026-10-13T09:27:34.591Z"
+    },
+    {
+      "agent_pid": 1438556,
+      "approval_id": "01M4T9DGRG5AWXHHE7VKZRE2NR",
+      "digest": "75dfce545500746c80d71063f3a7c1f8ff5a75004546d7a9c832ab319de5f7eb",
+      "op": "approval_requested",
+      "ts": "2026-10-13T09:27:38.492Z"
+    },
+    {
+      "approval_id": "01M4T9DGRG5AWXHHE7VKZRE2NR",
+      "approval_level": "quick",
+      "approver_device": "01M4SM5QTRQKNQE1TD6FBJTG79",
+      "decision": "allow",
+      "decision_hash": "b7f600e06cdf9a63e6064c5c5623081084fd1fbb04d90a8d4c5807447504b5ec",
+      "digest": "75dfce545500746c80d71063f3a7c1f8ff5a75004546d7a9c832ab319de5f7eb",
+      "op": "remote_approval_accepted",
+      "state": "approved",
+      "ts": "2026-10-13T09:27:51.652Z"
+    },
+    {
+      "approval_id": "01M4T9DGRG5AWXHHE7VKZRE2NR",
+      "digest": "75dfce545500746c80d71063f3a7c1f8ff5a75004546d7a9c832ab319de5f7eb",
+      "op": "approval_execution_started",
+      "ts": "2026-10-13T09:27:52.053Z"
+    },
+    {
+      "approval_id": "01M4T9DGRG5AWXHHE7VKZRE2NR",
+      "op": "approval_execution_completed",
+      "ts": "2026-10-13T09:27:52.664Z"
+    }
+  ],
+  "measurement": "same helper millisecond audit ts: approval_requested to accepted/denied",
+  "observed_utc": "2026-10-13T09:27:52.904608+00:00"
+}

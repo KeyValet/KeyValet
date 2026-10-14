@@ -1,0 +1,22 @@
+{
+    "results":  [
+                    {
+                        "result":  "deleted_without_ui",
+                        "alias":  "keyvalet.remote.strong.7a845fb472b366906eb122a60e855a40"
+                    },
+                    {
+                        "result":  "deleted_without_ui",
+                        "alias":  "keyvalet.remote.strong.0ce9ad63e6c98a51336141c53161801a"
+                    }
+                ],
+    "private_keys_exported":  false,
+    "remote_identity_was_unenrolled":  true,
+    "utc":  "2026-10-13T16:28:24.8764403Z",
+    "formal_agent_preserved":  true,
+    "vault_hash_unchanged":  true,
+    "vault_dacl_unchanged":  true,
+    "remaining_remote_strong_aliases":  [
+
+                                        ],
+    "silent_flag":  64
+}

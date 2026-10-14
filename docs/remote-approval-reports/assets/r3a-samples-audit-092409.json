@@ -1,0 +1,86 @@
+{
+  "agent_pid": 1428709,
+  "approvals": [
+    {
+      "id": "01M4T96G50MCCJ4N13F0F4H4TR",
+      "kind": "use",
+      "state": "denied",
+      "agent_pid": 1428709,
+      "level": "quick",
+      "scope_mode": "per_use",
+      "tier": "T1",
+      "digest": "624157fb29a89fcd641beb22f00b99c53b21a13588e7bf3504627fa2b5003f8a",
+      "delivery_mode": "banner",
+      "helper_request_to_decision_s": 9.983,
+      "execution_started_count": 0,
+      "execution_completed_count": 0,
+      "touch_id_user_time_s": 0
+    },
+    {
+      "id": "01M4T96XTGCAZRS35XXG7Y0GRH",
+      "kind": "use",
+      "state": "executed",
+      "agent_pid": 1428709,
+      "level": "quick",
+      "scope_mode": "per_use",
+      "tier": "T1",
+      "digest": "90d1de24a86528764649d05b98afd0397b3d47070c96c82d9b5b644c353587f3",
+      "delivery_mode": "banner",
+      "helper_request_to_decision_s": 6.589,
+      "execution_started_count": 1,
+      "execution_completed_count": 1,
+      "touch_id_user_time_s": 0
+    }
+  ],
+  "events": [
+    {
+      "agent_pid": 1428709,
+      "approval_id": "01M4T96G50MCCJ4N13F0F4H4TR",
+      "digest": "624157fb29a89fcd641beb22f00b99c53b21a13588e7bf3504627fa2b5003f8a",
+      "op": "approval_requested",
+      "ts": "2026-10-13T09:23:48.430Z"
+    },
+    {
+      "approval_id": "01M4T96G50MCCJ4N13F0F4H4TR",
+      "approval_level": "quick",
+      "approver_device": "01M4SM5QTRQKNQE1TD6FBJTG79",
+      "decision": "deny",
+      "decision_hash": "81ba2d967de67c1eff3563989e28399e5bbe82ea94ac91855b1f0cacf1370b23",
+      "digest": "624157fb29a89fcd641beb22f00b99c53b21a13588e7bf3504627fa2b5003f8a",
+      "op": "remote_approval_denied",
+      "state": "denied",
+      "ts": "2026-10-13T09:23:58.413Z"
+    },
+    {
+      "agent_pid": 1428709,
+      "approval_id": "01M4T96XTGCAZRS35XXG7Y0GRH",
+      "digest": "90d1de24a86528764649d05b98afd0397b3d47070c96c82d9b5b644c353587f3",
+      "op": "approval_requested",
+      "ts": "2026-10-13T09:24:02.753Z"
+    },
+    {
+      "approval_id": "01M4T96XTGCAZRS35XXG7Y0GRH",
+      "approval_level": "quick",
+      "approver_device": "01M4SM5QTRQKNQE1TD6FBJTG79",
+      "decision": "allow",
+      "decision_hash": "b7870876130efbad8e622b538caaca1cab7c1c0ea78c723145402177bf958b13",
+      "digest": "90d1de24a86528764649d05b98afd0397b3d47070c96c82d9b5b644c353587f3",
+      "op": "remote_approval_accepted",
+      "state": "approved",
+      "ts": "2026-10-13T09:24:09.342Z"
+    },
+    {
+      "approval_id": "01M4T96XTGCAZRS35XXG7Y0GRH",
+      "digest": "90d1de24a86528764649d05b98afd0397b3d47070c96c82d9b5b644c353587f3",
+      "op": "approval_execution_started",
+      "ts": "2026-10-13T09:24:09.735Z"
+    },
+    {
+      "approval_id": "01M4T96XTGCAZRS35XXG7Y0GRH",
+      "op": "approval_execution_completed",
+      "ts": "2026-10-13T09:24:10.188Z"
+    }
+  ],
+  "measurement": "same helper millisecond audit ts: approval_requested to accepted/denied",
+  "observed_utc": "2026-10-13T09:24:10.426310+00:00"
+}

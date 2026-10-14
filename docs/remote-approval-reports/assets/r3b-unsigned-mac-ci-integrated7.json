@@ -1,0 +1,30 @@
+{
+  "passed": false,
+  "commands": [
+    {
+      "command": "cargo +1.99.0 fmt --all -- --check",
+      "exit_code": 0,
+      "seconds": 1.2541545839922037,
+      "log": "r3b-unsigned-mac-ci-integrated7-1.log"
+    },
+    {
+      "command": "cargo +1.99.0 clippy --workspace --all-targets -- -D warnings",
+      "exit_code": 0,
+      "seconds": 35.76754749999964,
+      "log": "r3b-unsigned-mac-ci-integrated7-2.log"
+    },
+    {
+      "command": "cargo +1.99.0 build --workspace --locked",
+      "exit_code": 0,
+      "seconds": 28.720465666003292,
+      "log": "r3b-unsigned-mac-ci-integrated7-3.log"
+    },
+    {
+      "command": "cargo +1.99.0 test --workspace --locked",
+      "exit_code": 101,
+      "seconds": 80.35934879098204,
+      "log": "r3b-unsigned-mac-ci-integrated7-4.log"
+    }
+  ],
+  "utc": "2026-10-14T08:48:52.290730+00:00"
+}

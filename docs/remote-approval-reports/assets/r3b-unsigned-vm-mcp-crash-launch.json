@@ -1,0 +1,7 @@
+{
+  "launched": true,
+  "runlevel": "Limited",
+  "mode": "PreflightCrash",
+  "hello": false,
+  "ssh_exit": 0
+}

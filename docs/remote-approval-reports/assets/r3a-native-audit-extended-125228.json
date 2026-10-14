@@ -1,0 +1,37 @@
+{
+  "observed_utc": "2026-10-13T12:51:49.736415+00:00",
+  "read_only": true,
+  "touch_id_requests": 0,
+  "secret_values_in_evidence": false,
+  "collection_timeout_s": 120,
+  "cli_exit": 0,
+  "native_report": {
+    "matched": 37,
+    "consistent": true,
+    "findings_count": 0,
+    "unavailable_count": 0,
+    "endpoints": [
+      {
+        "device_id": "01M4SM5QTRQKNQE1TD6FBJTG79",
+        "checkpoint": "vault_authenticated_metadata",
+        "head": {
+          "seq": 3143,
+          "hash": "bf0017fb6cd999a3f2d4b79b1d85a4ee6988129690021c1142b5c7afa61e1425"
+        },
+        "entries": 2453
+      },
+      {
+        "device_id": "01M4S8KJ48BSMNK1S4BEGT07FC",
+        "checkpoint": "vault_authenticated_metadata",
+        "head": {
+          "seq": 1902,
+          "hash": "65489af4c3c0f473738b544fc2f73eb4eaf76bddefd8139c7416f32ea74a9269"
+        },
+        "entries": 1219
+      }
+    ],
+    "two_endpoint_snapshots": true
+  },
+  "elapsed_s": 38.366326,
+  "finished_utc": "2026-10-13T12:52:28.103439+00:00"
+}

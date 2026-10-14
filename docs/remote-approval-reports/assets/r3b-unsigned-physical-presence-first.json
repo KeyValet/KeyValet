@@ -1,0 +1,27 @@
+{
+  "complete": false,
+  "samples": [
+    {
+      "elapsed_ms": 17,
+      "observation": {
+        "signals": {
+          "approval_channel_available": true,
+          "console_session": 13,
+          "display_awake": null,
+          "display_connected": true,
+          "graphical_session": true,
+          "idle_seconds": 0,
+          "last_input_tick": 2446584843,
+          "remote_session_active": false,
+          "screen_locked": null,
+          "screensaver_active": false,
+          "session_active": true,
+          "wts_protocol": 0,
+          "wts_session_state": 0
+        },
+        "since": 1791959121,
+        "state": "away"
+      }
+    }
+  ]
+}

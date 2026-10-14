@@ -1,0 +1,9 @@
+{
+  "task": 4,
+  "ci-final2-progress.json": {
+    "command": 2,
+    "phase": "ci",
+    "utc": "2026-10-14T06:24:38.7220904Z"
+  },
+  "ssh_exit": 0
+}

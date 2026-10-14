@@ -1,0 +1,14 @@
+{
+  "utc": "2026-10-13T23:27:13.692856+00:00",
+  "documents": [
+    "docs/windows.md",
+    "docs/windows-native-acceptance-2026-10-12.zh-CN.md",
+    "docs/remote-approval-reports/R3-B-security-closure.md"
+  ],
+  "table_count": 16,
+  "local_link_count": 92,
+  "evidence_utf8_files": 189,
+  "secret_scan": "private PEM, pair URI, nonempty token/recovery/private-key/raw-secret/master-key fields",
+  "errors": [],
+  "passed": true
+}

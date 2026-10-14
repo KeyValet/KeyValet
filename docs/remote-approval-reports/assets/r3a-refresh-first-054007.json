@@ -1,0 +1,26 @@
+{
+  "started_utc": "2026-10-13T05:39:47.329262+00:00",
+  "source_credential": "oauth2/outlook-hhstuhacker-graph",
+  "test_credential": "api_key/r3a-graph-readonly",
+  "method": "GET",
+  "url": "https://graph.microsoft.com/v1.0/me",
+  "force_refresh": true,
+  "refresh_token_transferred": false,
+  "secret_values_in_evidence": false,
+  "first_two_decision_audit": {
+    "expected": 2,
+    "matched": 0,
+    "differences": 2,
+    "scope": "first two real decisions"
+  },
+  "source_expires_at": "2026-10-13T06:40:05.179Z",
+  "source_refresh_elapsed_s": 11.747488,
+  "refresh_process": {
+    "pid": 849516,
+    "start_time": 52753863,
+    "uid": 1000
+  },
+  "fixed_error": "mcp_tool_rejected",
+  "elapsed_s": 19.947114,
+  "finished_utc": "2026-10-13T05:40:07.276233+00:00"
+}

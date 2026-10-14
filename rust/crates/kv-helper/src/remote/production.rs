@@ -20,6 +20,22 @@ pub trait OwnerUi: Send + Sync {
     fn request(&self, op: &'static str, fields: Value) -> Task<'_, Value>;
 }
 
+/// Only the authenticated private agent may supply these fixed presentation facts.
+/// A missing/unknown reply is unavailable, never evidence of a user's cancellation.
+pub(super) fn private_ui_error(reply: &Value) -> Error {
+    Error(match reply["error"].as_str() {
+        Some("remote_action_cancelled") => "user_cancelled",
+        Some("remote_request_expired") => "remote_request_expired",
+        Some("invalid_remote_request") => "invalid_remote_request",
+        Some("invalid_remote_scope") => "invalid_remote_scope",
+        Some("invalid_remote_response") => "invalid_remote_response",
+        Some("approval_key_unavailable") => "approval_key_unavailable",
+        Some("remote_helper_unavailable") => "remote_helper_unavailable",
+        Some("remote_setting_unavailable") => "remote_setting_unavailable",
+        _ => "remote_ui_unavailable",
+    })
+}
+
 fn owner_operation_text(reason: &str) -> String {
     let (zh, en) = match reason {
         "prepare_grant" => (
@@ -29,7 +45,9 @@ fn owner_operation_text(reason: &str) -> String {
         "issue_grant" => ("确认签发远程授权", "Confirm issuing remote authorization"),
         "pair_start" => ("确认添加远程设备", "Confirm adding a remote device"),
         "revoke_grant" => ("确认撤销远程授权", "Confirm revoking remote authorization"),
-        "revoke_device" => ("确认移除远程设备", "Confirm removing a remote device"),
+        "revoke_device" | "revoke_device_proof" => {
+            ("确认移除远程设备", "Confirm removing a remote device")
+        }
         "remote_settings" => (
             "确认更改 KeyValet 授权设置",
             "Confirm changing KeyValet authorization settings",
@@ -40,6 +58,105 @@ fn owner_operation_text(reason: &str) -> String {
         ),
     };
     kv_i18n::t(zh, en)
+}
+
+// These owner operations always sign an object (or the T2 preparation proof) after
+// confirmation. The signature's AK_s userPresence gate supplies Strong; a second,
+// unbound LocalAuthentication evaluation neither strengthens nor replaces it.
+fn signed_owner_confirmation(reason: &str, binding: &Value) -> Result<(ApprovalLevel, Value)> {
+    let (target, mut message, level) = if reason == "issue_directive" {
+        let directive = &binding["directive"];
+        let level = match binding["minimum_level"].as_str() {
+            Some("quick") => ApprovalLevel::Quick,
+            Some("strong") => ApprovalLevel::Strong,
+            _ => return Err(Error("insufficient_level")),
+        };
+        let (zh, en) = match directive["op"].as_str() {
+            Some("query_status") => ("查看远程状态", "View remote status"),
+            Some("query_pending") => ("查看远程待批请求", "View remote pending requests"),
+            Some("query_grants") => ("查看远程授权", "View remote grants"),
+            Some("query_audit") => ("查看远程审计", "View remote audit"),
+            Some("lock") => ("锁定远程凭证库", "Lock the remote vault"),
+            Some("revoke_grant") => ("撤销远程授权", "Revoke a remote grant"),
+            Some("revoke_all_grants") => ("收回全部远程授权", "Revoke all remote grants"),
+            Some("cancel_approval") => ("取消远程待批请求", "Cancel a remote pending request"),
+            Some("notify") => ("提醒远程审批者", "Notify the remote approver"),
+            Some("set_mode") => ("更改远程审批模式", "Change the remote approval mode"),
+            Some("set_unlock_ttl") => ("更改远程解锁期限", "Change the remote unlock duration"),
+            Some("set_class") => ("更改远程审批类别", "Change the remote approval class"),
+            Some("set_device_label") => ("更改远程设备名称", "Rename the remote device"),
+            Some("revoke_device") => ("移除远程设备", "Remove a remote device"),
+            _ => return Err(Error("invalid_directive")),
+        };
+        (directive["aud"].as_str(), kv_i18n::t(zh, en), level)
+    } else if reason == "revoke_device_proof" {
+        let mut message = owner_operation_text(reason);
+        if let Some(label) = binding["label"].as_str() {
+            if label.len() > 4096 || label.chars().any(char::is_control) {
+                return Err(Error("invalid_device_label"));
+            }
+            message.push_str(&kv_i18n::t(
+                &format!("\n设备名称：{label}"),
+                &format!("\nDevice label: {label}"),
+            ));
+        }
+        (
+            binding["device_id"].as_str(),
+            message,
+            ApprovalLevel::Strong,
+        )
+    } else {
+        let intent = &binding["intent"];
+        let mut message = owner_operation_text(reason);
+        if intent["scope"]["max_tier"] == "T2" {
+            message.push_str(&kv_i18n::t(
+                "\n含敏感操作（T2）",
+                "\nIncludes sensitive operations (T2)",
+            ));
+        }
+        if let Some(credential) = intent["scope"]["credential"].as_str() {
+            if credential.len() > 4096 || credential.chars().any(char::is_control) {
+                return Err(Error("invalid_grant"));
+            }
+            message.push_str(&kv_i18n::t(
+                &format!("\n凭证：{credential}"),
+                &format!("\nCredential: {credential}"),
+            ));
+        }
+        if let (Some(start), Some(end)) = (intent["nbf"].as_i64(), intent["exp"].as_i64()) {
+            let seconds = end
+                .checked_sub(start)
+                .filter(|s| *s > 0)
+                .ok_or(Error("invalid_grant"))?;
+            message.push_str(&kv_i18n::t(
+                &format!("\n授权期限：{seconds} 秒"),
+                &format!("\nGrant duration: {seconds} seconds"),
+            ));
+        } else if intent["exp"].is_null() {
+            message.push_str(&kv_i18n::t(
+                "\n授权期限：直到撤销",
+                "\nGrant duration: until revoked",
+            ));
+        } else {
+            return Err(Error("invalid_grant"));
+        }
+        (intent["aud"].as_str(), message, ApprovalLevel::Strong)
+    };
+    let target = target
+        .filter(|s| !s.is_empty() && s.len() <= 256 && !s.chars().any(char::is_control))
+        .ok_or(Error("wrong_recipient"))?;
+    message.push_str(&if reason == "revoke_device_proof" {
+        kv_i18n::t(&format!("\n设备：{target}"), &format!("\nDevice: {target}"))
+    } else {
+        kv_i18n::t(
+            &format!("\n执行端：{target}"),
+            &format!("\nExecutor: {target}"),
+        )
+    });
+    Ok((
+        level,
+        json!({"message":message,"ok_label":kv_i18n::t("确认","Confirm")}),
+    ))
 }
 
 #[derive(Clone, PartialEq, Eq)]
@@ -96,26 +213,34 @@ impl Processes for SystemProcesses {
 #[cfg(target_os = "linux")]
 impl Processes for SystemProcesses {
     fn inspect(&self, pid: u32) -> Result<ProcessIdentity> {
-        use std::os::unix::fs::MetadataExt;
-        if pid == 0 {
-            return Err(Error("agent_unavailable"));
-        }
-        let directory = std::path::PathBuf::from(format!("/proc/{pid}"));
-        let uid = std::fs::metadata(&directory)
-            .map_err(|_| Error("agent_unavailable"))?
-            .uid();
-        let start_time =
-            kv_platform::peer::process_start_time(pid).map_err(|_| Error("agent_unavailable"))?;
-        let path =
-            std::fs::read_link(directory.join("exe")).map_err(|_| Error("agent_unavailable"))?;
-        let bytes = bounded_executable(&path)?;
-        Ok(ProcessIdentity {
-            uid,
+        super::process_observer::observe(
             pid,
-            start_time,
-            exe_sha256: bytes,
-        })
+            inspect_local_linux_process,
+            super::process::inspect_linux_agent,
+        )
     }
+}
+
+#[cfg(target_os = "linux")]
+fn inspect_local_linux_process(pid: u32) -> Result<ProcessIdentity> {
+    use std::os::unix::fs::MetadataExt;
+    if pid == 0 {
+        return Err(Error("agent_unavailable"));
+    }
+    let directory = std::path::PathBuf::from(format!("/proc/{pid}"));
+    let uid = std::fs::metadata(&directory)
+        .map_err(|_| Error("agent_unavailable"))?
+        .uid();
+    let start_time =
+        kv_platform::peer::process_start_time(pid).map_err(|_| Error("agent_unavailable"))?;
+    let path = std::fs::read_link(directory.join("exe")).map_err(|_| Error("agent_unavailable"))?;
+    let bytes = bounded_executable(&path)?;
+    Ok(ProcessIdentity {
+        uid,
+        pid,
+        start_time,
+        exe_sha256: bytes,
+    })
 }
 
 #[cfg(windows)]
@@ -225,6 +350,21 @@ impl<G: AuthorizeGate + Send + Sync, C: Confirmer + Send + Sync> SessionExecutor
                 .authorize(&reason)
                 .await
                 .map_err(|error| {
+                    // The authenticated agent supplies typed facts. Do not infer a denial
+                    // or cancellation from localized prose or a failed biometric operation.
+                    if let Ok(value) = serde_json::from_str::<Value>(&error) {
+                        match value["code"].as_str() {
+                            Some("local_approval_denied") => return Error("local_approval_denied"),
+                            Some("local_approval_cancelled") => {
+                                return Error("local_approval_cancelled")
+                            }
+                            Some("local_approval_failed") => return Error("local_approval_failed"),
+                            Some("local_approval_timeout") => {
+                                return Error("local_approval_timeout")
+                            }
+                            _ => {}
+                        }
+                    }
                     let lower = error.to_ascii_lowercase();
                     if lower.contains("timeout")
                         || lower.contains("timed out")
@@ -673,9 +813,12 @@ impl RequestRunner for ProductionRunner {
             if self.has_private_ui() && binding.get("session_id").is_none() {
                 if reason == "remote_decide" {
                     let mut request = binding["request"].clone();
-                    request["requested_scope"] = binding["scope"].clone();
                     if let Some(option) = binding["scope_option"].as_str() {
+                        request["requested_scope"] = json!(option);
                         request["scope_options"] = json!([option]);
+                    }
+                    if binding["minimum_level"] == "strong" {
+                        request["min_level"] = json!("strong");
                     }
                     let reply = self
                         .private_ui(
@@ -685,13 +828,15 @@ impl RequestRunner for ProductionRunner {
                         )
                         .await?;
                     let params = &reply["params"];
-                    if reply["ok"] != true
-                        || params["approval_id"] != binding["request"]["approval_id"]
+                    if reply["ok"] != true {
+                        return Err(private_ui_error(&reply));
+                    }
+                    if params["approval_id"] != binding["request"]["approval_id"]
                         || params["decision"] != binding["decision"]
                         || params["scope"]["mode"] != binding["scope"]["mode"]
                         || params["scope"]["level"] != binding["scope"]["level"]
                     {
-                        return Err(Error("user_cancelled"));
+                        return Err(Error("invalid_remote_response"));
                     }
                     return Ok(
                         if binding["minimum_level"] == "strong"
@@ -707,9 +852,42 @@ impl RequestRunner for ProductionRunner {
                 }
                 if binding["intent"]["aud"] == "*" {
                     let reply = self.private_ui("remote_confirm_global", json!({})).await?;
-                    if reply["ok"] != true || reply["confirmed"] != true {
-                        return Err(Error("user_cancelled"));
+                    if reply["ok"] != true {
+                        return Err(private_ui_error(&reply));
                     }
+                    if reply["confirmed"] != true {
+                        return Err(if reply["confirmed"] == false {
+                            Error("user_cancelled")
+                        } else {
+                            Error("invalid_remote_response")
+                        });
+                    }
+                }
+                if matches!(
+                    reason,
+                    "issue_grant" | "prepare_grant" | "revoke_device_proof"
+                ) || (reason == "issue_directive" && binding.get("directive").is_some())
+                {
+                    let (minimum, fields) = signed_owner_confirmation(reason, &binding)?;
+                    // The authenticated owner's explicit query is the UI action. A
+                    // paginated metadata read must not reopen a dialog for every page.
+                    // publish_directive still requires the original unlocked AK_q,
+                    // verifies its signature and applies the normal role/nonce/exp rules.
+                    if reason == "issue_directive"
+                        && minimum == ApprovalLevel::Quick
+                        && matches!(
+                            binding["directive"]["op"].as_str(),
+                            Some("query_status" | "query_pending" | "query_grants" | "query_audit")
+                        )
+                    {
+                        return Ok(ApprovalLevel::Quick);
+                    }
+                    let reply = self.private_ui("confirm", fields).await?;
+                    return match reply["confirmed"].as_bool() {
+                        Some(true) => Ok(minimum),
+                        Some(false) => Err(Error("user_cancelled")),
+                        None => Err(Error("invalid_remote_response")),
+                    };
                 }
                 let reply = self
                     .private_ui(
@@ -721,7 +899,12 @@ impl RequestRunner for ProductionRunner {
                     )
                     .await?;
                 if reply["outcome"] != "approved" {
-                    return Err(Error("authentication_cancelled"));
+                    return Err(match reply["outcome"].as_str() {
+                        Some("failed") => Error("authentication_failed"),
+                        Some("timeout") => Error("authentication_timeout"),
+                        Some("cancelled") => Error("authentication_cancelled"),
+                        _ => Error("authentication_unavailable"),
+                    });
                 }
                 // Hardware-bound AK_s/AK_q signing follows this UI step in the helper.
                 return Ok(ApprovalLevel::Strong);

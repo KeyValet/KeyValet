@@ -1,0 +1,11 @@
+{
+  "source_rust_sha256": "34ea185d637f22c6c4564673e109106336b46f0d2445a01b25c87495ae160a1c",
+  "merged_rust_sha256": "34ea185d637f22c6c4564673e109106336b46f0d2445a01b25c87495ae160a1c",
+  "stripped_rust_sha256": "ba9c70292f917c2eed5a69698c55d34c5e68df250679efa46be4f9d646e993f0",
+  "packaged_rust_sha256": "ba9c70292f917c2eed5a69698c55d34c5e68df250679efa46be4f9d646e993f0",
+  "source_matches_merged": true,
+  "stripped_matches_packaged": true,
+  "current_rust_packaged": true,
+  "apk_sha256": "4b3ffb3b76d4f00790017eb317cb0e4382d253224465e417bbfa0c9f4bb07834",
+  "note": "AGP strips symbols; compare each packaging stage rather than raw ELF to stripped APK bytes."
+}

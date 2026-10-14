@@ -8,10 +8,14 @@ use std::time::Duration;
 
 pub const WAIT_TOOL: &str = "credential_wait_approval";
 pub const UNKNOWN_BUDGET_S: u64 = 50;
+pub const DEFAULT_PROGRESS_INTERVAL_S: u64 = 15;
+/// R2-D measured both 240 s calls with the hosted model on exactly this client version.
+/// Other versions keep the conservative table budget until separately verified.
+pub const VERIFIED_CODEX_CLIENT: (&str, &str, u64) = ("codex-mcp-client", "0.162.1", 180);
 pub const RUNTIME_BUDGETS: &[(&[&str], u64)] = &[
     (&["claude-code", "claude code", "claude-code-cli"], 180),
     (&["claude-desktop", "claude-ai", "claude code desktop"], 50),
-    (&["codex", "codex-mcp-client", "codex-cli"], 60),
+    (&["codex", "codex-mcp-client", "codex-cli"], 50),
     (&["gemini-cli", "gemini"], 180),
     (&["cursor-ide", "cursor-vscode"], 120),
     // Cursor CLI also reports "Cursor"; an ambiguous name must use the hard-timeout budget.
@@ -51,7 +55,7 @@ impl Default for ApprovalConfig {
         Self {
             wait_in_call: Duration::from_secs(60),
             wait_tool_max: Duration::from_secs(600),
-            progress_interval: Duration::from_secs(15),
+            progress_interval: Duration::from_secs(DEFAULT_PROGRESS_INTERVAL_S),
             runtime_overrides: HashMap::new(),
             server_timeout_s: None,
         }
@@ -79,7 +83,10 @@ impl ApprovalConfig {
         let mut config = Self {
             wait_in_call: Duration::from_secs(seconds("KEYVALET_WAIT_IN_CALL_S", 60)?),
             wait_tool_max: Duration::from_secs(seconds("KEYVALET_WAIT_TOOL_MAX_S", 600)?.min(600)),
-            progress_interval: Duration::from_secs(seconds("KEYVALET_PROGRESS_INTERVAL_S", 15)?),
+            progress_interval: Duration::from_secs(seconds(
+                "KEYVALET_PROGRESS_INTERVAL_S",
+                DEFAULT_PROGRESS_INTERVAL_S,
+            )?),
             ..Self::default()
         };
         if !matches!(
@@ -119,6 +126,22 @@ impl ApprovalConfig {
                 .unwrap_or(budget),
         )
     }
+
+    pub fn client_budget(&self, name: &str, version: &str) -> Duration {
+        let normalized = name.trim().to_ascii_lowercase();
+        if normalized == VERIFIED_CODEX_CLIENT.0
+            && version == VERIFIED_CODEX_CLIENT.1
+            && !self.runtime_overrides.contains_key(&normalized)
+        {
+            let seconds = self
+                .server_timeout_s
+                .map(|s| VERIFIED_CODEX_CLIENT.2.min(s.saturating_sub(10).max(1)))
+                .unwrap_or(VERIFIED_CODEX_CLIENT.2);
+            Duration::from_secs(seconds)
+        } else {
+            self.budget(name)
+        }
+    }
 }
 
 pub fn is_approval_result(value: &Value) -> bool {
@@ -127,6 +150,7 @@ pub fn is_approval_result(value: &Value) -> bool {
         Some(
             "ok" | "approval_pending"
                 | "approval_denied"
+                | "approval_cancelled"
                 | "approval_expired"
                 | "no_approver"
                 | "approved_retry_required"
@@ -151,16 +175,20 @@ pub fn next_steps(status: &str) -> (&'static str, &'static str) {
             "The request executed and its result is returned. Do not repeat the same request.",
         ),
         "approval_pending" | "still_pending" => (
-            "用户还未决定，这不是拒绝。你可以先做不需要这条凭证的事。需要结果时调用 credential_wait_approval(approval_id)，批准后它直接返回本次请求的结果。不要重复发起同一请求，不要向用户索要密钥。",
-            "The user has not decided; this is not a denial. Continue work that does not need this credential. Call credential_wait_approval(approval_id) when you need the result; after approval it returns this request's result directly. Do not repeat the original request or ask the user for a key.",
+            "用户还未决定，这不是拒绝。你可以先做不需要这条凭证的事。需要结果时调用 credential_wait_approval(approval_id)，批准后它直接返回本次请求的结果。没有其他独立工作时，请在结束本轮前调用续等工具。不要重复发起同一请求，不要向用户索要密钥。",
+            "The user has not decided; this is not a denial. Continue work that does not need this credential. Call credential_wait_approval(approval_id) when you need the result; after approval it returns this request's result directly. If no independent work remains, call the wait tool before finishing this turn. Do not repeat the original request or ask the user for a key.",
         ),
         "approval_denied" => (
             "用户拒绝了这次请求。不要重试或绕过审批，不要让用户粘贴密钥。将拒绝原因告诉用户。",
             "The user denied this request. Do not retry or bypass approval, and do not ask the user to paste a key. Tell the user the reason for the denial.",
         ),
         "approval_expired" => (
-            "这次请求已过期，没有收到决定。重新发起会产生新的审批提示；除非确有必要，不要自动重发。",
-            "This request expired without a decision. A new request creates a new approval prompt; do not resend automatically unless necessary.",
+            "这次请求已过期，没有收到决定。仍需结果时可重新发起，会产生新的审批提示；除非确有必要，不要自动重发。",
+            "This request expired without a decision. You may start a new request if the result is still needed; this creates a new approval prompt. Do not resend automatically unless necessary.",
+        ),
+        "approval_cancelled" => (
+            "本地审批已取消，未授予权限；这不表示用户拒绝。此请求已结束，若仍需结果，请先确认用户希望重新发起审批，不要索要密钥。",
+            "Local approval was cancelled and no permission was granted; this is not a denial. This request ended. If the result is still needed, confirm that the user wants a new approval request. Do not ask for a key.",
         ),
         "no_approver" => (
             "没有可用的审批通道。请告诉用户配置审批设备，或通过 SSH 在执行端本地审批；不要索要密钥。",
@@ -176,6 +204,46 @@ pub fn next_steps(status: &str) -> (&'static str, &'static str) {
         ),
         _ => ("", ""),
     }
+}
+
+/// Only typed helper outcomes describe an explicit local decision. A local timeout
+/// requires the retained ID/expiry: it is pending until exp, and never denial.
+pub(crate) fn local_outcome(error: &Value) -> Option<Value> {
+    if let Some(encoded) = error.as_str() {
+        let decoded: Value = serde_json::from_str(encoded).ok()?;
+        return decoded
+            .is_object()
+            .then(|| local_outcome(&decoded))
+            .flatten();
+    }
+    let status = match error["code"].as_str()? {
+        "local_approval_denied" => "approval_denied",
+        "local_approval_cancelled" => "approval_cancelled",
+        "local_approval_expired" => "approval_expired",
+        "local_approval_timeout" => {
+            error["approval_id"].as_str().filter(|id| !id.is_empty())?;
+            if error["expires_at"].as_i64()? <= unix_time() {
+                "approval_expired"
+            } else {
+                "approval_pending"
+            }
+        }
+        _ => return None,
+    };
+    let mut result = json!({"status":status});
+    for name in ["approval_id", "expires_at", "reason"] {
+        if let Some(value) = error.get(name) {
+            result[name] = value.clone();
+        }
+    }
+    Some(result)
+}
+
+pub(crate) fn normalize_helper_result(mut value: Value) -> Value {
+    if value["status"] == "approval_expired" && value["reason"] == "cancelled" {
+        value["status"] = json!("approval_cancelled");
+    }
+    value
 }
 
 pub fn tool_result(mut value: Value) -> CallToolResult {

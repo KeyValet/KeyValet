@@ -4,6 +4,14 @@
 
 CLI 首次显示恢复码时也显示对应账户 ID，提醒一并离线保存；JSON 的 `pair_recovery` 结果包含 `account_id`。
 
+```sh
+keyvalet relay recover <account-id> --public-url https://relay.keyvalet.dev
+# Only for an explicitly selected software identity on unsupported hardware:
+keyvalet relay recover <account-id> --software --json
+```
+
+终端从隐藏输入读取旧恢复码，非交互用标准输入；没有 `--recovery-code` 参数，避免进入进程列表和 shell 历史。helper 先把新恢复码与目标账户、relay 和设备 ID 写入 vault AEAD 准备状态，再让 relay-client 发送请求。注册失败不重建身份密钥；相同设备重试保留相同新码。服务端已提交但响应丢失时，新 DK 认证成功且账户匹配后恢复同一新码并完成公开 binding 更新。输出成功才提醒离线保存新码。另一已有账户的身份拒绝直接覆写；硬件失败不隐式改用软件。正常成功退出 0，输入错误 2，网络不可达 5，用户取消 6；JSON 成功类型为 `relay_recovered`。
+
 请求为 `{ account_id, recovery_code, new_recovery_code, device, nonce, sig }`。两项恢复码及 nonce 都是 32 随机字节的无填充 base64url；DK 用 ES256 签署 JCS `{ action: "recover_account", account_id, device, nonce, new_recovery_code_hash }`，最后一项为新码字符串的 SHA-256 hex。新码由调用端提前生成和保存，避免成功响应丢失时一起丢掉恢复凭据。
 
 ```rust,ignore

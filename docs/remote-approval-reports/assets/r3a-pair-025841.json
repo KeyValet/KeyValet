@@ -1,0 +1,15 @@
+{
+  "started_utc": "2026-10-13T02:58:29.522904+00:00",
+  "commands": [
+    "ndu: keyvalet pair --new --json",
+    "Mac: keyvalet pair <redacted URI> --json"
+  ],
+  "safety_code_equal": true,
+  "owner_confirmed": false,
+  "driver_error": "owner_cancelled",
+  "paired_cli_sides": [],
+  "finished_utc": "2026-10-13T02:58:37.701261+00:00",
+  "total_elapsed_s": 8.178304,
+  "ndu_cli_exit": 255,
+  "mac_cli_exit": -15
+}

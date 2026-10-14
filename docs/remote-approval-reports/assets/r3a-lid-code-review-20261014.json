@@ -1,0 +1,63 @@
+{
+  "reviewed_utc": "2026-10-13T22:26:35.395695+00:00",
+  "owner_instruction": "两小时合盖子，就不测试了，你自己review一遍得了。",
+  "verification_kind": "source_review",
+  "physical_lid_test_seconds": 0,
+  "physical_lid_test_requests": 0,
+  "acceptance_claimed": false,
+  "keyvalet_approval_requests": 0,
+  "keyvalet_touch_id_requests": 0,
+  "secret_values_in_evidence": false,
+  "source_sha256": {
+    "rust/crates/kv-relay-client/src/client.rs": "93e672802aedb144d9a06d0fcd42e019447b02209533063ca338bbfe360b24bd",
+    "rust/crates/kv-relay-client/src/queue.rs": "2aafac074120ca7abe2e089c69f7031c3d9a55954ccce5160a9fd8387cc2383c",
+    "rust/crates/kv-helper/src/remote/engine.rs": "014ea53c84460d4b7488e565a2a11436bfc902a73bafc08f37e85fe105fce2d6",
+    "rust/crates/kv-helper/src/remote/ipc.rs": "8dd4afa988069784bf103872c208813afdee809f0e76f463c10b02f2301f49ff",
+    "rust/crates/kv-helper/src/remote/store.rs": "de8277f76ea9b0df9d43874fd2bf0b973106777d386102bc7b9a2555d7864f1b"
+  },
+  "observations": [
+    {
+      "topic": "offline_spool_and_reconnect",
+      "result": "reviewed",
+      "source": "rust/crates/kv-relay-client/src/client.rs:108",
+      "detail": "Outbound polling commits ciphertext to the local queue before the helper spool receipt. Connection retries reauthenticate, with 1 to 60 second backoff. Each session pulls relay waiting messages before draining the local outbound queue."
+    },
+    {
+      "topic": "durable_queue",
+      "result": "reviewed",
+      "source": "rust/crates/kv-relay-client/src/queue.rs",
+      "detail": "An exclusive queue lock, temporary-file fsync, atomic rename and directory fsync protect committed ciphertext batches. Deduplication compares complete ciphertext, not caller-selected identifiers. Only durable helper acceptance or retirement removes a committed prefix."
+    },
+    {
+      "topic": "expiry_and_sensitive_requests",
+      "result": "reviewed",
+      "source": "rust/crates/kv-helper/src/remote/engine.rs:785",
+      "detail": "Wall-clock expiry retires waiting/approved/approved_unused requests, scrubs retained payload/results and emits a cancellation with a fresh delivery window. Execution rechecks the original decision signature, required level, nonce/expiry and live device authority; sleep does not permit T2 to become Quick."
+    },
+    {
+      "topic": "duplicate_execution",
+      "result": "at_most_once_with_crash_limit",
+      "source": "rust/crates/kv-helper/src/remote/engine.rs:1289",
+      "detail": "Execution is claimed under the state lock before calling the runner. Duplicate decisions cannot blindly execute again. A crash after the claim can produce no execution or lose a result; this is not proof of end-to-end exactly-once delivery."
+    },
+    {
+      "topic": "approver_restart_after_relay_ack",
+      "result": "open_finding",
+      "source": "rust/crates/kv-helper/src/remote/engine.rs:1050",
+      "detail": "An incoming undecided ApprovalRequest is stored only in State.inbound_requests, which is empty on helper startup. RelayInbound can return ack=true and retire relay delivery after this in-memory acceptance. A later helper restart can lose the undecided approver request. Ordinary sleep retaining process memory does not exercise this failure boundary.",
+      "regression_added": false,
+      "fix_applied": false
+    }
+  ],
+  "existing_regression_sources_reviewed_not_newly_run": [
+    "rust/crates/kv-helper/src/remote/tests/acceptance.rs::lost_poll_is_replayed_and_durable_spool_and_accept_receipts_survive_helper_restart",
+    "rust/crates/kv-helper/src/remote/tests/acceptance.rs::cancellation_has_a_live_delivery_window_even_after_the_approval_expires",
+    "rust/crates/kv-relay-client/src/tests/client.rs::websocket_controls_do_not_dequeue_ciphertext_and_close_reconnects",
+    "rust/crates/kv-relay-client/src/tests/client.rs::session_renewal_reauthenticates_and_preserves_waiting_before_queue_order",
+    "rust/crates/kv-relay-client/src/tests/client.rs::only_helper_retirement_or_durable_acceptance_can_remove_a_queued_prefix",
+    "rust/crates/kv-relay-client/src/tests/queue.rs::committed_prefix_wins_over_an_interrupted_rewrite",
+    "rust/crates/kv-helper/src/remote/tests/boundaries.rs::runner_failure_is_audited_and_result_claimed_once",
+    "rust/crates/kv-helper/src/remote/tests/boundaries.rs::original_body_is_retained_on_timeout_and_retry_waiting_or_expired_does_not_execute",
+    "rust/crates/kv-helper/src/remote/tests/review.rs::time_jump_between_tick_and_operation_expires_decision_retry_and_stop_block"
+  ]
+}

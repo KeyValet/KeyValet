@@ -1,0 +1,9 @@
+{
+  "dispatched_utc": "2026-10-14T01:03:00.372474+00:00",
+  "window_id": 27206,
+  "tty": "/dev/ttys000",
+  "command": "/usr/bin/python3 /Users/guang/dev/keyvalet/docs/remote-approval-reports/assets/r3a-resume-se-remaining.py",
+  "user_authorized_start": "开始续测",
+  "installation_requests": 0,
+  "secret_values_in_evidence": false
+}

@@ -2,7 +2,7 @@
 # Ordinary unit tests do not invoke this script. It refuses an existing installation/vault.
 [CmdletBinding()]
 param([switch]$AllowSystemChanges, [switch]$DeferProfileCleanup, [string]$BinaryDirectory, [string]$ResultPath,
-      [string]$WslDistribution, [string]$WslUser = 'kvwsltest')
+      [string]$WslDistribution, [string]$WslUser = 'kvwsltest', [switch]$TestRemoteKeys)
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 [Console]::OutputEncoding = [Text.UTF8Encoding]::new($false)
@@ -38,6 +38,48 @@ function Assert-Throws([scriptblock]$Action, [string]$Message) {
 function Wait-Service([string]$State) {
     $controller = Get-Service KeyValetHelper
     try { $controller.WaitForStatus($State, [TimeSpan]::FromSeconds(20)) } finally { $controller.Dispose() }
+}
+function Test-UnboundRelay {
+    $descriptor = (Get-Acl -LiteralPath $vault).Sddl
+    Start-Sleep -Seconds 2
+    $relay = Get-CimInstance Win32_Service -Filter "Name='KeyValetRelay'"
+    Assert ($relay.State -eq 'Running' -and $relay.StartMode -eq 'Auto') 'The unbound relay must remain Running/Automatic.'
+    Assert (!(Test-Path -LiteralPath "$vault/relay-client.toml")) 'This probe requires absent binding metadata.'
+    $events = @(Get-WinEvent -FilterHashtable @{LogName='Application';Id=1001} -MaxEvents 100 -ErrorAction SilentlyContinue |
+        Where-Object {$_.ProviderName -eq 'KeyValetRelay' -and @($_.Properties.Value) -contains 'waiting_for_relay_binding'})
+    Assert ($events.Count -gt 0) 'Relay must log waiting_for_relay_binding.'
+    Assert ((Get-Acl -LiteralPath $vault).Sddl -ceq $descriptor) 'Waiting must not widen the protected vault directory DACL.'
+}
+function Test-UnreadableRelayConfig {
+    $config = "$vault/relay-client.toml"
+    Assert (!(Test-Path -LiteralPath $config)) 'Do not replace an existing binding.'
+    $descriptor = (Get-Acl -LiteralPath $vault).Sddl
+    $service = Get-Service KeyValetRelay
+    try {
+        # Only this disposable fixture file is private; do not change directory/service ACLs.
+        [IO.File]::WriteAllText($config, "relay_url='https://relay.example.com'", [Text.UTF8Encoding]::new($false))
+        $acl = [Security.AccessControl.FileSecurity]::new()
+        $acl.SetOwner([Security.Principal.SecurityIdentifier]::new('S-1-5-32-544'))
+        $acl.SetAccessRuleProtection($true,$false)
+        foreach ($sid in 'S-1-5-18','S-1-5-32-544') { $acl.AddAccessRule([Security.AccessControl.FileSystemAccessRule]::new([Security.Principal.SecurityIdentifier]::new($sid), 'FullControl','Allow')) }
+        Set-Acl -LiteralPath $config -AclObject $acl
+        Stop-Service KeyValetRelay
+        $service.WaitForStatus('Stopped',[TimeSpan]::FromSeconds(20))
+        & sc.exe failureflag KeyValetRelay 0 | Out-Null
+        Assert ($LASTEXITCODE -eq 0) 'Cannot disable automatic restart for this negative probe.'
+        Start-Service KeyValetRelay -ErrorAction SilentlyContinue
+        $service.WaitForStatus('Stopped',[TimeSpan]::FromSeconds(20))
+        $relay = Get-CimInstance Win32_Service -Filter "Name='KeyValetRelay'"
+        Assert ($relay.ExitCode -ne 0) 'Existing unreadable binding must stop with a nonzero exit code.'
+    } finally {
+        if (Test-Path -LiteralPath $config) { Remove-Item -LiteralPath $config }
+        & sc.exe failureflag KeyValetRelay 1 | Out-Null
+        Start-Service KeyValetRelay
+        $service.WaitForStatus('Running',[TimeSpan]::FromSeconds(20))
+        $service.Dispose()
+    }
+    Assert ((Get-Acl -LiteralPath $vault).Sddl -ceq $descriptor) 'The negative probe changed the protected directory DACL.'
+    Test-UnboundRelay
 }
 Add-Type @'
 using System;
@@ -227,9 +269,9 @@ try {
     $users = Get-LocalGroup -SID 'S-1-5-32-545'
     Add-LocalGroupMember -Group $users.Name -Member $testUser
     $owner = $testUser.SID.Value
-    & "$repo/scripts/package-windows.ps1" -Tag "v$version" -Architecture $architecture -AllowUnsigned -BinaryDirectory $BinaryDirectory
+    & "$repo/scripts/package-windows.ps1" -Tag "v$version" -Architecture $architecture -BinaryDirectory $BinaryDirectory
     $options = @{ InstallSystem = $true; OwnerSid = $owner; OwnerProfile = "C:\Users\$testName";
-        PackagePath = "$repo/dist/keyvalet-v$version-windows-$architecture.zip"; AllowUnsignedAgent = $true }
+        PackagePath = "$repo/dist/keyvalet-v$version-windows-$architecture.zip" }
     & "$repo/scripts/install.ps1" @options
     Wait-Service 'Running'
     Test-ServicePipe
@@ -240,8 +282,13 @@ try {
     $relay = Get-CimInstance Win32_Service -Filter "Name='KeyValetRelay'"
     Assert ($null -ne $relay -and $relay.StartName -ieq 'NT SERVICE\KeyValetRelay') 'Relay must use its dedicated virtual service account.'
     Assert ($relay.PathName -ieq ('"' + "$install\bin\kv-relay-client.exe" + '" --service')) 'Relay service executable differs from the package.'
-    Assert ($relay.State -eq 'Stopped' -and $relay.StartMode -eq 'Manual') 'An unpaired relay must remain stopped with manual startup.'
-    $checks.Add('complete remote binaries and unpaired relay virtual service account')
+    Assert ($relay.State -eq 'Running' -and $relay.StartMode -eq 'Auto') 'An unsigned unpaired relay must run its authenticated control worker.'
+    Assert (!(Test-Path -LiteralPath "$install/allow-unsigned-agent")) 'Unsigned releases must not need a development trust marker.'
+    Assert (!(Test-Path -LiteralPath "$repo/dist/keyvalet-v$version-windows-$architecture/UNSIGNED-DEVELOPMENT-BUILD.txt")) 'Release packages must not be labeled development builds.'
+    Test-UnboundRelay
+    Test-UnreadableRelayConfig
+    $checks.Add('unsigned release installs without opt-in; authenticated relay runs automatically without a development marker')
+    $checks.Add('absent binding waits and existing unreadable binding fails nonzero; unchanged vault DACL')
     foreach ($file in 'bridge.sh', 'install.sh', 'uninstall.sh', 'configure.py', 'verify.py') {
         Assert ((Get-FileHash "$repo/scripts/wsl/$file").Hash -eq (Get-FileHash "$install/wsl/$file").Hash) 'Installed WSL bridge differs from package input.'
     }
@@ -284,16 +331,33 @@ try {
     Assert ((Get-CimInstance Win32_Service -Filter "Name='KeyValetHelper'").ProcessId -eq $pidBefore) 'Wrong-owner rejection stopped the service.'
     Assert ((Get-Content "$vault/owner.sid" -Raw).Trim() -eq $owner) 'Wrong-owner upgrade changed owner.sid.'
     $checks.Add('wrong-owner upgrade rejection')
+    # An older unsigned installation can leave either protected development marker.
+    # The new default policy must upgrade it without a flag and retire both markers.
+    [IO.File]::WriteAllText("$install/allow-unsigned-agent", 'Legacy unsigned installation.')
+    Set-Acl -LiteralPath "$install/allow-unsigned-agent" -AclObject (Get-Acl -LiteralPath "$install/bin/kv-helper.exe")
+    [IO.File]::WriteAllText("$vault/allow-unsigned-agent", 'Legacy unsigned installation.')
+    Set-Acl -LiteralPath "$vault/allow-unsigned-agent" -AclObject (Get-Acl -LiteralPath "$vault/owner.sid")
     & "$repo/scripts/install.ps1" @options
     Wait-Service 'Running'
     Test-ServicePipe
     Assert-NoKeys
+    Assert (!(Test-Path -LiteralPath "$install/allow-unsigned-agent") -and !(Test-Path -LiteralPath "$vault/allow-unsigned-agent")) 'Upgrade must remove both protected legacy markers.'
     $checks.Add('same-owner upgrade')
-    Stop-Service KeyValetHelper
+    $checks.Add('legacy unsigned markers removed without opt-in during upgrade')
+    Test-UnboundRelay
+    if ($TestRemoteKeys) {
+        & "$repo/scripts/test-windows-remote-keys.ps1" -AllowSystemChanges -TargetDirectory (Split-Path $BinaryDirectory -Parent) -ResultDirectory (Join-Path (Split-Path $ResultPath -Parent) 'pcp') -InstalledCli "$install/bin/kv-cli.exe"
+        $checks.Add('LocalSystem PCP double DK, identity/HPKE Quick roundtrip and installed pcp_ecdh/pcp_ecdsa status')
+    }
+    # Relay now runs for unsigned installs and depends on the helper. Stop its dependency
+    # tree, then restart both services to exercise the actual release lifecycle.
+    Stop-Service KeyValetHelper -Force
     Wait-Service 'Stopped'
     Start-Service KeyValetHelper
     Wait-Service 'Running'
+    Start-Service KeyValetRelay
     Test-ServicePipe
+    Test-UnboundRelay
     $checks.Add('SCM stop and restart')
 
     & "$repo/scripts/uninstall.ps1"
@@ -333,7 +397,7 @@ try {
     }
     if ($testPassword) { $testPassword.Dispose() }
     $report = @{ windows_build = [Environment]::OSVersion.Version.ToString(); architecture = $architecture;
-        hello_tested = $false; signing = 'unsigned development'; checks = @($checks.ToArray());
+        hello_tested = $false; signing = 'unsigned release'; checks = @($checks.ToArray());
         wsl_interop_tested = ($checks -contains 'live WSL native CLI/hooks/WSLENV/TTL and per-user client installation; no Hello or desktop MCP');
         profile_cleanup_pending_reboot = @($pendingProfiles.ToArray());
         passed = !$failure; error = $failure; timestamp_utc = [DateTime]::UtcNow.ToString('o') }

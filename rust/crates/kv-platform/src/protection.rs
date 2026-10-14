@@ -121,7 +121,17 @@ pub fn validate_report(report: &Value) -> std::io::Result<()> {
         })
         && tpm
             .get("resource_manager_present")
-            .is_none_or(|value| value.is_boolean() || value.is_null());
+            .is_none_or(|value| value.is_boolean() || value.is_null())
+        && report.get("remote_identity").is_none_or(|keys| {
+            keys.is_object()
+                && ["pcp_ecdh", "pcp_ecdsa"].iter().all(|field| {
+                    keys.get(field)
+                        .is_some_and(|value| value.is_boolean() || value.is_null())
+                })
+                && keys["ready"].as_bool()
+                    == Some(keys["pcp_ecdh"] == true && keys["pcp_ecdsa"] == true)
+                && text_field(keys.get("evidence"))
+        });
     if valid {
         Ok(())
     } else {
@@ -369,6 +379,22 @@ pub fn summary(report: &Value) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn pcp_status_distinguishes_missing_halves_and_unknown_without_claiming_ready() {
+        for (ecdh, ecdsa, ready) in [
+            (json!(true), json!(true), true),
+            (json!(true), json!(false), false),
+            (json!(false), json!(true), false),
+            (Value::Null, Value::Null, false),
+        ] {
+            let mut value = report("windows_hello", None);
+            value["remote_identity"] = json!({"pcp_ecdh":ecdh,"pcp_ecdsa":ecdsa,"ready":ready,"evidence":"pcp_machine_key_inventory"});
+            validate_report(&value).unwrap();
+            value["remote_identity"]["ready"] = json!(!ready);
+            assert!(validate_report(&value).is_err());
+        }
+    }
 
     #[tokio::test]
     async fn status_response_requires_a_complete_bounded_frame_and_matching_protocol() {

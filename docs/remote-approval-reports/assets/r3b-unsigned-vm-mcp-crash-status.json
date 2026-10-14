@@ -1,0 +1,25 @@
+{
+  "last_result": 0,
+  "result": {
+    "mode": "PreflightCrash",
+    "checks": [
+      "initialize_tools_jsonrpc_no_handshake_leak",
+      "fresh_session_locked_status_without_authentication",
+      "helper_owned_protected_worker_observed",
+      "client_crash_exits",
+      "protected_worker_exits_after_client"
+    ],
+    "session": 1,
+    "failure": null,
+    "owner_sid": "S-1-5-21-3283475767-415700631-2745889461-1002",
+    "hello_tested": false,
+    "passed": true,
+    "seconds": 0.5077224,
+    "protected_workers_observed": 1,
+    "credential_values_logged": false,
+    "valid_mcp_frames": 3,
+    "mcp_sha256": "4f82b0b121c5d77273b698f50af14b3ca1b2c503574d55b581d2ce6df751cde4"
+  },
+  "task": "Ready",
+  "ssh_exit": 0
+}

@@ -163,24 +163,38 @@ impl Startup {
         let runner = ProductionRunner::new(Arc::new(SystemProcesses));
         runner.set_owner_ui(self.keys.owner_ui())?;
         let master = super::metadata_master::IdentityMaster { keys: &keys };
-        let backend = bootstrap::open(
-            bootstrap::Options {
-                path: &self.directory,
-                initialize: initialize.map(|(account, label, password, _)| {
-                    (account, label, password, self.os.clone())
-                }),
-                config,
-            },
-            bootstrap::Environment {
-                master: &master,
-                factory: &keys,
-                runner: runner.clone(),
-                presence: Arc::new(UnknownPresence),
-                clock: Arc::new(SystemClock),
-            },
-        )?;
+        let anchor = if initialize.is_none() {
+            Some(self.anchor(&master)?)
+        } else {
+            None
+        };
+        let path = anchor
+            .as_ref()
+            .map(|vault| super::rejoin::active_path(&self.directory, vault))
+            .transpose()?
+            .unwrap_or_else(|| self.directory.clone());
+        let options = bootstrap::Options {
+            path: &path,
+            initialize: initialize
+                .map(|(account, label, password, _)| (account, label, password, self.os.clone())),
+            config,
+        };
+        let environment = bootstrap::Environment {
+            master: &master,
+            factory: &keys,
+            runner: runner.clone(),
+            presence: Arc::new(UnknownPresence),
+            clock: Arc::new(SystemClock),
+        };
+        let backend = if initialize.is_none() {
+            bootstrap::open_for_management(options, environment)
+        } else {
+            bootstrap::open(options, environment)
+        }?;
+        let anchor = anchor.unwrap_or_else(|| backend.metadata.clone());
+        super::rejoin::attach(&self.directory, anchor.clone(), &backend.helper, &master)?;
         let authority = Arc::new(
-            kv_proxy::certificates::CertificateAuthority::open(&backend.metadata)
+            kv_proxy::certificates::CertificateAuthority::open(&anchor)
                 .map_err(|_| Error("proxy_certificate_unavailable"))?,
         );
         super::server::install_production_runtime(backend.helper, runner, authority)?;
@@ -189,6 +203,54 @@ impl Startup {
             .lock()
             .map_err(|_| Error("state_unavailable"))? = Some(backend.metadata);
         Ok(())
+    }
+    fn anchor(&self, master: &dyn kv_vault::MasterKeyProvider) -> Result<Arc<kv_vault::Vault>> {
+        let vault = Arc::new(kv_vault::Vault::new(&self.directory));
+        vault
+            .init_with_provider(master, "Load remote history catalog")
+            .map_err(|_| Error("remote_metadata_unavailable"))?;
+        Ok(vault)
+    }
+    fn rejoin(
+        &self,
+        current: &Arc<super::RemoteHelper>,
+        relay: &super::pairing_relay::RelayApi,
+    ) -> Result<Arc<super::RemoteHelper>> {
+        let _serial = self.serial.lock().map_err(|_| Error("state_unavailable"))?;
+        let old_relay = current
+            .lock()?
+            .store
+            .setting::<String>("relay_url")?
+            .ok_or(Error("invalid_relay_url"))?;
+        if super::pairing_relay::RelayApi::new(&old_relay)?.url != relay.url {
+            return Err(Error("relay_mismatch"));
+        }
+        let keys = SelectedKeys {
+            native: &*self.keys,
+            software: current.local.key_kind == kv_core::remote::KeyKind::Software,
+        };
+        let master = super::metadata_master::IdentityMaster { keys: &keys };
+        let anchor = self.anchor(&master)?;
+        current.services.runner.lock_sessions()?;
+        let backend = super::rejoin::create(
+            &self.directory,
+            &anchor,
+            current,
+            bootstrap::Environment {
+                master: &master,
+                factory: &keys,
+                runner: current.services.runner.clone(),
+                presence: current.services.presence.clone(),
+                clock: current.services.clock.clone(),
+            },
+        )?;
+        super::rejoin::attach(&self.directory, anchor, &backend.helper, &master)?;
+        super::server::replace_helper(current, backend.helper.clone())?;
+        *self
+            .metadata
+            .lock()
+            .map_err(|_| Error("state_unavailable"))? = Some(backend.metadata);
+        Ok(backend.helper)
     }
     pub async fn load_existing(self: &Arc<Self>) -> Result<()> {
         if !self.directory.join("vault.enc").exists() || super::server::runtime().is_some() {
@@ -227,10 +289,10 @@ pub(crate) async fn pair_existing(
     if !super::server::runtime().is_some_and(|current| Arc::ptr_eq(&current, &helper)) {
         return Err(Error("remote_identity_changed"));
     }
-    let (relay, token) = if op == kv_ipc::remote::Op::PairComplete {
+    let (relay, token, rejoin) = if op == kv_ipc::remote::Op::PairComplete {
         let intent: kv_ipc::remote::PairJoinIntent = serde_json::from_value(value)?;
         let (relay, token) = super::pairing_relay::parse_uri(&intent.uri)?;
-        (relay, Some(token))
+        (relay, Some(token), intent.rejoin)
     } else {
         (
             super::pairing_relay::RelayApi::new(
@@ -239,8 +301,26 @@ pub(crate) async fn pair_existing(
                     .ok_or(Error("invalid_relay_url"))?,
             )?,
             None,
+            false,
         )
     };
+    let helper = if rejoin {
+        let opening = startup.clone();
+        let original = helper.clone();
+        let target = relay.clone();
+        tokio::task::spawn_blocking(move || opening.rejoin(&original, &target))
+            .await
+            .map_err(|_| Error("remote_metadata_unavailable"))??
+    } else {
+        helper
+    };
+    let keys = SelectedKeys {
+        native: &*startup.keys,
+        software: false,
+    };
+    let master = super::metadata_master::IdentityMaster { keys: &keys };
+    let anchor = startup.anchor(&master)?;
+    let original_account = super::rejoin::account(&startup.directory, &anchor)?;
     let mut frozen = false;
     if token.is_some() {
         bootstrap::freeze_unpaired(&helper)?;
@@ -308,6 +388,12 @@ pub(crate) async fn pair_existing(
             return Err(error);
         }
     };
+    if original_account.is_some_and(|original| original != account) {
+        if frozen {
+            bootstrap::resume_unpaired(&helper);
+        }
+        return Err(Error("account_mismatch"));
+    }
     let next = if frozen || account != helper.account {
         if !frozen {
             bootstrap::freeze_unpaired(&helper)?;
@@ -319,7 +405,7 @@ pub(crate) async fn pair_existing(
             .clone()
             .ok_or(Error("remote_metadata_unavailable"))?;
         let original = helper.clone();
-        let path = startup.directory.clone();
+        let path = super::rejoin::active_path(&startup.directory, &anchor)?;
         let next = tokio::task::spawn_blocking(move || {
             bootstrap::rebind_backend(&original, vault, &path, &account)
         })
@@ -330,6 +416,7 @@ pub(crate) async fn pair_existing(
     } else {
         helper
     };
+    super::rejoin::attach(&startup.directory, anchor, &next, &master)?;
     next.lock()?.store.set_setting(
         "relay_url",
         &relay.url.as_str().trim_end_matches('/'),
@@ -374,6 +461,9 @@ pub async fn initialize_pair(
     }
     let (relay, join_token) = if op == kv_ipc::remote::Op::PairComplete {
         let intent: kv_ipc::remote::PairJoinIntent = serde_json::from_value(value)?;
+        if intent.rejoin {
+            return Err(Error("rejoin_requires_revoked_device"));
+        }
         let (relay, token) = super::pairing_relay::parse_uri(&intent.uri)?;
         (relay, Some(token))
     } else {

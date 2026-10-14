@@ -1,0 +1,9 @@
+{
+  "native_schema_checks": {
+    "credential_http_request": true,
+    "credential_wait_approval": true
+  },
+  "credential_requests": 0,
+  "authentication_requests": 0,
+  "touch_id_requests": 0
+}

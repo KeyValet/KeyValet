@@ -1,0 +1,16 @@
+[
+  {
+    "at_unix_ms": 1791850405448,
+    "push_token_present": true,
+    "active_user_sessions": 1,
+    "push_jobs": 0
+  },
+  {
+    "binary": "kv-server",
+    "sha256": "1eced902770d81e9933c204c8830ca7d2c7565e3fc0105e93aeeb44c45f9eab0"
+  },
+  {
+    "binary": "kv-push",
+    "sha256": "73ccc644701871f4026cac735129d7b8d698a827c2b1983cdcb0225d9f67d87d"
+  }
+]

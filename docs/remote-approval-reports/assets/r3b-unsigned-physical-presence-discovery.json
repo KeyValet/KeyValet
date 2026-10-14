@@ -1,0 +1,14 @@
+{
+  "presence_tests": [
+    "existing::presence::tests::failed_heartbeat_and_state_changes_retry_and_clock_regression_refreshes: test",
+    "existing::presence::tests::missing_receiver_retries_and_reports_only_coarse_changes: test",
+    "existing::presence::windows::tests::windows_presence_native_transitions: test",
+    "remote::tests::agent_connection_retries_with_bounded_backoff_and_registered_presence_only: test",
+    "remote::tests::presence_uses_the_w1_probe_and_sends_only_coarse_state: test"
+  ],
+  "cursor_files": [
+    "agent.cmd",
+    "cursor-agent.cmd"
+  ],
+  "ssh_exit": 0
+}

@@ -1,0 +1,49 @@
+{
+  "started_utc": "2026-10-13T09:23:39.084964+00:00",
+  "runtime": "installed native MCP, persistent owner session",
+  "method": "GET",
+  "url": "https://graph.microsoft.com/v1.0/me",
+  "credential": "api_key/r3a-graph-readonly",
+  "upstream_403_accepted_for_approval_measurement": true,
+  "secret_values_in_evidence": false,
+  "samples": [],
+  "negative_cases": [
+    {
+      "case": "deny",
+      "result": {
+        "status": "approval_denied",
+        "approval_id": "01M4T96G50MCCJ4N13F0F4H4TR",
+        "expires_at": 1791884028
+      },
+      "call_elapsed_s": 13.732512
+    },
+    {
+      "case": "initial_timeout",
+      "result": {
+        "status": 403
+      },
+      "call_elapsed_s": 7.900791
+    }
+  ],
+  "negative_only": true,
+  "existing_mode_verified": "per_use",
+  "process_identity": {
+    "pid": 1428712,
+    "start_time": 54095238,
+    "uid": 1000,
+    "parent_pid": 1428709
+  },
+  "fixed_error": "sample_initial_wait_did_not_time_out",
+  "audit_receipt": "r3a-samples-audit-092409.json",
+  "helper_latency": {
+    "n": 0,
+    "cohort_calls": 0,
+    "all_quick_per_use_once": false,
+    "quantile_method": "linear interpolation at (n-1)*p",
+    "p50_s": null,
+    "p95_s": null,
+    "touch_id_user_time_s": 0
+  },
+  "elapsed_s": 30.897629,
+  "finished_utc": "2026-10-13T09:24:09.982449+00:00"
+}

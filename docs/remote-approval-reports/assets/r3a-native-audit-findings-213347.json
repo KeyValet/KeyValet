@@ -1,0 +1,47 @@
+{
+  "observed_utc": "2026-10-13T21:33:15.889122+00:00",
+  "read_only": true,
+  "touch_id_requests": 0,
+  "secret_values_in_evidence": false,
+  "collection_timeout_s": 120,
+  "cli_exit": 3,
+  "native_report": {
+    "matched": 52,
+    "consistent": false,
+    "findings_count": 1,
+    "unavailable_count": 0,
+    "endpoints": [
+      {
+        "device_id": "01M4SM5QTRQKNQE1TD6FBJTG79",
+        "checkpoint": "vault_authenticated_metadata",
+        "head": {
+          "seq": 5958,
+          "hash": "e25d50dab3ae1ea83373789dcee4f7bc88a143cd5ce4a3949ca34e90e4f78f5a"
+        },
+        "entries": 5268
+      },
+      {
+        "device_id": "01M4S8KJ48BSMNK1S4BEGT07FC",
+        "checkpoint": "vault_authenticated_metadata",
+        "head": {
+          "seq": 3022,
+          "hash": "72917ae77308c74f50346920be99106d7f8b2708a49e8f65fc206319c270328f"
+        },
+        "entries": 2339
+      }
+    ],
+    "two_endpoint_snapshots": true
+  },
+  "findings": [
+    {
+      "kind": "directive",
+      "problem": "missing_receiver_record",
+      "fields": [],
+      "id": "01M4TNJG10T64E6D72NQ0VMM7A",
+      "issuer": "01M4SM5QTRQKNQE1TD6FBJTG79",
+      "receiver": "01M4S8KJ48BSMNK1S4BEGT07FC"
+    }
+  ],
+  "elapsed_s": 31.559525,
+  "finished_utc": "2026-10-13T21:33:47.450103+00:00"
+}

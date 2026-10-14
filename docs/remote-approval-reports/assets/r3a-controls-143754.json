@@ -1,0 +1,424 @@
+{
+  "started_utc": "2026-10-13T14:36:21.413876+00:00",
+  "commands": [
+    {
+      "case": "cleanup_previous_test_grants",
+      "elapsed_s": 4.206764,
+      "exit": 0,
+      "public_result": {
+        "ok": true,
+        "command": "remote",
+        "results": [
+          {
+            "device_id": "01M4S8KJ48BSMNK1S4BEGT07FC",
+            "id": "01M4TV41NGFVWD3THVHY9SSAZM",
+            "ok": true,
+            "state": {
+              "grants_n": 0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "case": "set_per_session",
+      "elapsed_s": 4.760682,
+      "exit": 0,
+      "public_result": {
+        "ok": true,
+        "command": "remote",
+        "results": [
+          {
+            "device_id": "01M4S8KJ48BSMNK1S4BEGT07FC",
+            "id": "01M4TV45JG7E10HT61QHKXXD4D",
+            "ok": true,
+            "state": {
+              "mode": "per_session"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "case": "allow_1h",
+      "elapsed_s": 2.777137,
+      "exit": 0,
+      "public_result": {
+        "ok": true,
+        "command": "grants_issued",
+        "grants": [
+          {
+            "jti": "01M4TV4S3G3V4JQJKS47GWPP8Y",
+            "aud": "01M4S8KJ48BSMNK1S4BEGT07FC",
+            "exp": 1791905846,
+            "nbf": 1791902246,
+            "origin": "settings",
+            "scope": {
+              "level": "credential",
+              "credential": "api_key/r3a-graph-readonly",
+              "max_tier": "T1"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "case": "grant_list",
+      "elapsed_s": 0.052712,
+      "exit": 0,
+      "public_result": {
+        "ok": true,
+        "command": "grants",
+        "grants": [
+          {
+            "jti": "01M4TNJD387H1KZXETKHSYVGRK",
+            "aud": "01M4S8KJ48BSMNK1S4BEGT07FC",
+            "exp": 1791900001,
+            "nbf": 1791896401,
+            "revoked_at": 1791902226,
+            "origin": "settings",
+            "scope": {
+              "level": "credential",
+              "credential": "api_key/r3a-graph-readonly",
+              "max_tier": "T1"
+            }
+          },
+          {
+            "jti": "01M4TV4S3G3V4JQJKS47GWPP8Y",
+            "aud": "01M4S8KJ48BSMNK1S4BEGT07FC",
+            "exp": 1791905846,
+            "nbf": 1791902246,
+            "revoked_at": null,
+            "origin": "settings",
+            "scope": {
+              "level": "credential",
+              "credential": "api_key/r3a-graph-readonly",
+              "max_tier": "T1"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "case": "remote_grants_before_revoke",
+      "elapsed_s": 2.781611,
+      "exit": 0,
+      "public_result": {
+        "ok": true,
+        "command": "remote",
+        "results": [
+          {
+            "device_id": "01M4S8KJ48BSMNK1S4BEGT07FC",
+            "id": "01M4TV4W18ZFJG5KJP8KYSSJFA",
+            "ok": true,
+            "state": {
+              "grants": [
+                {
+                  "jti": "01M4TNJD387H1KZXETKHSYVGRK",
+                  "aud": "01M4S8KJ48BSMNK1S4BEGT07FC",
+                  "exp": 1791900001,
+                  "nbf": 1791896401,
+                  "revoked_at": 1791902225,
+                  "origin": "settings",
+                  "scope": {
+                    "level": "credential",
+                    "credential": "api_key/r3a-graph-readonly",
+                    "max_tier": "T1"
+                  }
+                },
+                {
+                  "jti": "01M4TV4S3G3V4JQJKS47GWPP8Y",
+                  "aud": "01M4S8KJ48BSMNK1S4BEGT07FC",
+                  "exp": 1791905846,
+                  "nbf": 1791902246,
+                  "revoked_at": null,
+                  "origin": "settings",
+                  "scope": {
+                    "level": "credential",
+                    "credential": "api_key/r3a-graph-readonly",
+                    "max_tier": "T1"
+                  }
+                },
+                {
+                  "jti": "approval:01M4SVNXC88217RE2V2HSTCXGS",
+                  "aud": "01M4S8KJ48BSMNK1S4BEGT07FC",
+                  "exp": 1791912459,
+                  "nbf": 1791869259,
+                  "revoked_at": 1791902225,
+                  "origin": "approval:01M4SVNXC88217RE2V2HSTCXGS",
+                  "scope": {
+                    "level": "credential",
+                    "credential": "api_key/r3a-graph-readonly",
+                    "hosts": [
+                      "graph.microsoft.com"
+                    ],
+                    "methods": [
+                      "GET"
+                    ],
+                    "max_tier": "T1"
+                  }
+                },
+                {
+                  "jti": "approval:01M4SXBYW00A03JAPMA6ND3B5N",
+                  "aud": "01M4S8KJ48BSMNK1S4BEGT07FC",
+                  "exp": 1791914229,
+                  "nbf": 1791871029,
+                  "revoked_at": 1791902225,
+                  "origin": "approval:01M4SXBYW00A03JAPMA6ND3B5N",
+                  "scope": {
+                    "level": "credential",
+                    "credential": "api_key/r3a-graph-readonly",
+                    "hosts": [
+                      "graph.microsoft.com"
+                    ],
+                    "methods": [
+                      "GET"
+                    ],
+                    "max_tier": "T1"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "case": "revoke_all",
+      "elapsed_s": 2.817435,
+      "exit": 0,
+      "public_result": {
+        "ok": true,
+        "command": "remote",
+        "results": [
+          {
+            "device_id": "01M4S8KJ48BSMNK1S4BEGT07FC",
+            "id": "01M4TV4YZ0D78591FXVR0GR1ZN",
+            "ok": true,
+            "state": {
+              "grants_n": 0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "case": "lock",
+      "elapsed_s": 3.300604,
+      "exit": 0,
+      "public_result": {
+        "ok": true,
+        "command": "remote",
+        "results": [
+          {
+            "device_id": "01M4S8KJ48BSMNK1S4BEGT07FC",
+            "id": "01M4TV51WRF69HYBAPPS0WDWY2",
+            "ok": true,
+            "state": {
+              "locked": true
+            }
+          }
+        ]
+      }
+    },
+    {
+      "case": "remote_status",
+      "elapsed_s": 2.958694,
+      "exit": 0,
+      "public_result": {
+        "ok": true,
+        "command": "remote",
+        "results": [
+          {
+            "device_id": "01M4S8KJ48BSMNK1S4BEGT07FC",
+            "id": "01M4TV55SRTE0MMDNX2DFJAX2F",
+            "ok": true,
+            "state": {
+              "mode": "per_use",
+              "pending_n": 0,
+              "grants_n": 0,
+              "unattended": false,
+              "label": "keyvalet",
+              "unlock_ttl_s": 43200,
+              "device_revocations_pending": 0,
+              "approvers": [
+                {
+                  "device_id": "01M4SM5QTRQKNQE1TD6FBJTG79",
+                  "label": "keyvalet",
+                  "online": true,
+                  "presence": "away"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "case": "remote_pending",
+      "elapsed_s": 2.733293,
+      "exit": 0,
+      "public_result": {
+        "ok": true,
+        "command": "remote",
+        "results": [
+          {
+            "device_id": "01M4S8KJ48BSMNK1S4BEGT07FC",
+            "id": "01M4TV58QGM9QT7QWEF436MGHZ",
+            "ok": true,
+            "state": {
+              "pending_count": 0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "case": "remote_grants",
+      "elapsed_s": 2.801576,
+      "exit": 0,
+      "public_result": {
+        "ok": true,
+        "command": "remote",
+        "results": [
+          {
+            "device_id": "01M4S8KJ48BSMNK1S4BEGT07FC",
+            "id": "01M4TV5BN877BZ7FT7K8YRRXNJ",
+            "ok": true,
+            "state": {
+              "grants": [
+                {
+                  "jti": "01M4TNJD387H1KZXETKHSYVGRK",
+                  "aud": "01M4S8KJ48BSMNK1S4BEGT07FC",
+                  "exp": 1791900001,
+                  "nbf": 1791896401,
+                  "revoked_at": 1791902225,
+                  "origin": "settings",
+                  "scope": {
+                    "level": "credential",
+                    "credential": "api_key/r3a-graph-readonly",
+                    "max_tier": "T1"
+                  }
+                },
+                {
+                  "jti": "01M4TV4S3G3V4JQJKS47GWPP8Y",
+                  "aud": "01M4S8KJ48BSMNK1S4BEGT07FC",
+                  "exp": 1791905846,
+                  "nbf": 1791902246,
+                  "revoked_at": 1791902254,
+                  "origin": "settings",
+                  "scope": {
+                    "level": "credential",
+                    "credential": "api_key/r3a-graph-readonly",
+                    "max_tier": "T1"
+                  }
+                },
+                {
+                  "jti": "approval:01M4SVNXC88217RE2V2HSTCXGS",
+                  "aud": "01M4S8KJ48BSMNK1S4BEGT07FC",
+                  "exp": 1791912459,
+                  "nbf": 1791869259,
+                  "revoked_at": 1791902225,
+                  "origin": "approval:01M4SVNXC88217RE2V2HSTCXGS",
+                  "scope": {
+                    "level": "credential",
+                    "credential": "api_key/r3a-graph-readonly",
+                    "hosts": [
+                      "graph.microsoft.com"
+                    ],
+                    "methods": [
+                      "GET"
+                    ],
+                    "max_tier": "T1"
+                  }
+                },
+                {
+                  "jti": "approval:01M4SXBYW00A03JAPMA6ND3B5N",
+                  "aud": "01M4S8KJ48BSMNK1S4BEGT07FC",
+                  "exp": 1791914229,
+                  "nbf": 1791871029,
+                  "revoked_at": 1791902225,
+                  "origin": "approval:01M4SXBYW00A03JAPMA6ND3B5N",
+                  "scope": {
+                    "level": "credential",
+                    "credential": "api_key/r3a-graph-readonly",
+                    "hosts": [
+                      "graph.microsoft.com"
+                    ],
+                    "methods": [
+                      "GET"
+                    ],
+                    "max_tier": "T1"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "case": "remote_audit",
+      "elapsed_s": 3.890948,
+      "exit": 0,
+      "public_result": {
+        "ok": true,
+        "command": "remote",
+        "results": [
+          {
+            "device_id": "01M4S8KJ48BSMNK1S4BEGT07FC",
+            "id": "01M4TV5DKRSZ84EE3WSXA6T3HB",
+            "ok": true,
+            "state": {
+              "audit_entry_count": 130
+            }
+          }
+        ]
+      }
+    },
+    {
+      "case": "unattended_1h_two_labels",
+      "elapsed_s": 3.135483,
+      "exit": 5,
+      "public_result": {
+        "ok": false,
+        "command": null,
+        "error_code": "ipc_unavailable"
+      }
+    }
+  ],
+  "secret_values_in_evidence": false,
+  "resume_after_verified_mode": false,
+  "audit_before_controls": {
+    "cli_exit": 3,
+    "fixed_error": "native_audit_unavailable"
+  },
+  "native_local_mode_after_remote": "per_session",
+  "settings_mcp_process": {
+    "pid": 2227794,
+    "start_time": 55976486,
+    "uid": 1000,
+    "parent_pid": 2227791
+  },
+  "read_settings_diagnostic": {
+    "elapsed_s": 12.915432,
+    "is_error": false
+  },
+  "native_mcp_settings_after_remote": {
+    "grant_mode": "per_session",
+    "remember_hours": 8.0
+  },
+  "tighten_settings_diagnostic": {
+    "elapsed_s": 0.016881,
+    "is_error": false
+  },
+  "native_mcp_settings_after_local_change": {
+    "grant_mode": "per_use",
+    "remember_hours": 8.0
+  },
+  "native_local_mode_after_local_change": "per_use",
+  "remote_mode_after_local_change": "per_use",
+  "shared_settings_both_directions": true,
+  "fixed_error": "control_command_not_applied",
+  "finished_utc": "2026-10-13T14:37:54.897750+00:00"
+}

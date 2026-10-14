@@ -36,9 +36,9 @@ daemon trusts the agent only after checking its audit-token code signature (`AGE
 ## Releases
 
 Push a `vX.Y.Z` tag matching `rust/crates/kv-cli/Cargo.toml`; `.github/workflows/release.yml`
-builds `keyvalet-<tag>-macos-arm64.tar.gz`, native Linux x64/ARM64 archives and their individual
-checksums, then verifies all three packages and assembles a combined `SHA256SUMS` into a draft
-release, with notes from
+builds `keyvalet-<tag>-macos-arm64.tar.gz`, native Linux x64/ARM64 archives, unsigned Windows
+x64/ARM64 ZIPs and their individual checksums, then verifies all five packages and assembles
+a combined `SHA256SUMS` into a draft release, with notes from
 `.github/release-notes/<tag>.md` (`marketing/` is gitignored). A maintainer publishes the draft.
 
 The macOS job runs in the protected `release` environment (a reviewer approves each run; its secrets
@@ -50,6 +50,8 @@ notarization). Every binary in the macOS workflow package is signed with the Sim
 does not accept them (added after v0.2.0; the v0.2.0 binaries were notarized after publication).
 `REQUIRE_SIGNED=1` makes signing mandatory; `SIGN_IDENTITY=<sha1> scripts/package-release.sh <tag>`
 signs a local macOS package. `.github/workflows/linux-package.yml` is also reusable from the
-release workflow. Windows remains a separate manual artifact workflow pending production signing.
+release workflow. `.github/workflows/windows-package.yml` builds unsigned Windows release packages;
+installed process authentication checks service/owner SID, fixed file identity and protected ACLs.
+Windows Authenticode signing is optional and is not required for local or remote features.
 Dry run without a tag: **Actions → release → Run workflow** (`workflow_dispatch`) builds and
 signs the package and uploads it as an artifact — no release is created.

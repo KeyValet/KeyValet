@@ -1,0 +1,29 @@
+{
+    "system_phase_only":  true,
+    "seconds":  16.8411874,
+    "passed":  true,
+    "unsigned_development":  true,
+    "setup_skipped":  true,
+    "master_key_present":  false,
+    "services":  [
+                     {
+                         "Name":  "KeyValetHelper",
+                         "State":  "Running",
+                         "StartMode":  "Auto",
+                         "StartName":  "LocalSystem"
+                     },
+                     {
+                         "Name":  "KeyValetRelay",
+                         "State":  "Stopped",
+                         "StartMode":  "Manual",
+                         "StartName":  "NT SERVICE\\KeyValetRelay"
+                     }
+                 ],
+    "backup":  "C:\\ProgramData\\KeyValet-Backups\\pre-r3b-initialized-20261013T144240Z",
+    "vault_sha256":  "9f163953f99bf1f31aa49e7a9744cf9e20a3b16e14ea8f3e4dc2b13286eeab7c",
+    "vault_directory_dacl_preserved":  true,
+    "archive_sha256":  "5d02bf3b726a6396bdc474ca64f35cb5fed773b0ac8124df979ff9aa24145e63",
+    "vault_preserved":  true,
+    "started_utc":  "2026-10-13T15:42:23.3896332Z",
+    "finished_utc":  "2026-10-13T15:42:40.2484468Z"
+}

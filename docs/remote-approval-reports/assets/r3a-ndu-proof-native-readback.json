@@ -1,0 +1,63 @@
+{
+  "observed_utc": "2026-10-13T04:54:16.418387+00:00",
+  "touch_id_requests": 0,
+  "polkit_requests": 0,
+  "samples": [
+    {
+      "state": "locked",
+      "elapsed_s": 0.00602
+    },
+    {
+      "state": "locked",
+      "elapsed_s": 0.005213
+    },
+    {
+      "state": "locked",
+      "elapsed_s": 0.004558
+    },
+    {
+      "state": "locked",
+      "elapsed_s": 0.004491
+    },
+    {
+      "state": "locked",
+      "elapsed_s": 0.004582
+    },
+    {
+      "state": "locked",
+      "elapsed_s": 0.004342
+    },
+    {
+      "state": "locked",
+      "elapsed_s": 0.004502
+    },
+    {
+      "state": "locked",
+      "elapsed_s": 0.005283
+    },
+    {
+      "state": "locked",
+      "elapsed_s": 0.006685
+    },
+    {
+      "state": "locked",
+      "elapsed_s": 0.008183
+    }
+  ],
+  "before": {
+    "helper_pid": 728450,
+    "fds": 17,
+    "sockets": 9
+  },
+  "same_mcp_alive_after_probes": true,
+  "with_mcp_alive": {
+    "helper_pid": 728450,
+    "fds": 17,
+    "sockets": 9
+  },
+  "after": {
+    "helper_pid": 728450,
+    "fds": 17,
+    "sockets": 9
+  }
+}

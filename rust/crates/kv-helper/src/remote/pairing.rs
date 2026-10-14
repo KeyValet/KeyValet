@@ -624,8 +624,15 @@ impl RemoteHelper {
                         .runner
                         .private_ui("remote_pair", json!({"peer":snapshot.3,"sas":confirm.sas}))
                         .await?;
-                    if reply["ok"] != true || reply["confirmed"] != true {
-                        return Err(Error("user_cancelled"));
+                    if reply["ok"] != true {
+                        return Err(super::production::private_ui_error(&reply));
+                    }
+                    if reply["confirmed"] != true {
+                        return Err(if reply["confirmed"] == false {
+                            Error("user_cancelled")
+                        } else {
+                            Error("invalid_remote_response")
+                        });
                     }
                 } else {
                     self.authorize_strong(

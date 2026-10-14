@@ -1,0 +1,16 @@
+{
+  "observed_utc": "2026-10-14T00:14:35.717497+00:00",
+  "authorization": "User explicitly requested autonomous rebuildable cache cleanup",
+  "removed": {
+    "rust/target-r2a/debug/deps": 2662182912,
+    "rust/target-r2a/debug/build": 96436224,
+    "rust/target-r2a/debug/examples": 191094784,
+    "rust/target-r2a/debug/.fingerprint": 15093760,
+    "rust/target-r2a/debug/incremental": 0
+  },
+  "free_before_bytes": 13310525440,
+  "free_after_bytes": 15853502464,
+  "free_increase_bytes": 2542977024,
+  "kept_installed_programs_signed_packages_backups_evidence": true,
+  "secret_values_in_evidence": false
+}

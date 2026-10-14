@@ -1,0 +1,11 @@
+{
+  "observed_utc": "2026-10-14T06:04:13.841695+00:00",
+  "local_links_checked": 517,
+  "missing_local_links": [],
+  "ci_summary": "r3a-se-child-closure-ci9-summary.json",
+  "source_check": "r3a-final-source-check-ci9-20261014.json",
+  "native_receipt": "r3a-remaining-native-20261014T051814Z.json",
+  "r3a_lockfile_edited": false,
+  "lockfile_unchanged_during_final_ci": true,
+  "secret_values_in_evidence": false
+}

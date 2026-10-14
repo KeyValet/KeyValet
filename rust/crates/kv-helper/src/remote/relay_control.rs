@@ -1,6 +1,10 @@
 //! Bounded, leased control requests. The networking process gets no key provider: a DK
 //! challenge signature is scoped to one helper-created authentication job and used once.
-use super::{bootstrap::DeviceKey, engine::random_nonce, Error, Result};
+use super::{
+    bootstrap::DeviceKey,
+    engine::{blocking_lock, random_nonce},
+    Error, Result,
+};
 use kv_core::remote::{
     keys::{decode_b64, encode_b64},
     relay_control::*,
@@ -55,7 +59,7 @@ impl ControlHub {
         let id = random_nonce()?;
         let (sender, receiver) = oneshot::channel();
         {
-            let mut state = self.state.lock().map_err(|_| Error("state_unavailable"))?;
+            let mut state = blocking_lock(&self.state).map_err(|_| Error("state_unavailable"))?;
             Self::prune(&mut state);
             if state.entries.len() >= CAPACITY {
                 return Err(Error("relay_busy"));
@@ -84,8 +88,7 @@ impl ControlHub {
         }
         self.changed.notify_waiters();
         let result = tokio::time::timeout(DEADLINE, receiver).await;
-        self.state
-            .lock()
+        blocking_lock(&self.state)
             .map_err(|_| Error("state_unavailable"))?
             .entries
             .remove(&id);
@@ -109,7 +112,8 @@ impl ControlHub {
                 tokio::pin!(changed);
                 changed.as_mut().enable();
                 {
-                    let mut state = self.state.lock().map_err(|_| Error("state_unavailable"))?;
+                    let mut state =
+                        blocking_lock(&self.state).map_err(|_| Error("state_unavailable"))?;
                     Self::prune(&mut state);
                     while let Some(id) = state.queue.pop_front() {
                         if let Some(entry) = state.entries.get_mut(&id) {
@@ -129,7 +133,7 @@ impl ControlHub {
         }
     }
     pub fn complete(&self, params: RelayControlCompleteParams) -> Result<()> {
-        let mut state = self.state.lock().map_err(|_| Error("state_unavailable"))?;
+        let mut state = blocking_lock(&self.state).map_err(|_| Error("state_unavailable"))?;
         Self::prune(&mut state);
         let entry = state
             .entries
@@ -152,7 +156,7 @@ impl ControlHub {
         if bytes.len() != 32 {
             return Err(Error("invalid_identity_challenge"));
         }
-        let mut state = self.state.lock().map_err(|_| Error("state_unavailable"))?;
+        let mut state = blocking_lock(&self.state).map_err(|_| Error("state_unavailable"))?;
         Self::prune(&mut state);
         let entry = state
             .entries
@@ -172,11 +176,7 @@ impl ControlHub {
         let RelayControlCommand::Authenticate(local) = &entry.job.command else {
             return Err(Error("forbidden"));
         };
-        kv_core::remote::verify_identity_signature(
-            local,
-            &bytes,
-            &raw,
-        )?;
+        kv_core::remote::verify_identity_signature(local, &bytes, &raw)?;
         let sig = encode_b64(&raw);
         entry.signature = Some((params.payload_b64, sig.clone()));
         Ok(serde_json::json!({"sig_b64":sig}))

@@ -21,6 +21,76 @@ use crate::{
     platform,
 };
 
+/// Static public service state only; no configuration contents or device/account identifiers.
+pub(crate) fn report_binding(bound: bool) {
+    report_event(
+        if bound { 1002 } else { 1001 },
+        if bound {
+            "relay_binding_ready"
+        } else {
+            "waiting_for_relay_binding"
+        },
+    );
+}
+
+pub(crate) fn report_helper_error(error: &std::io::Error) {
+    let message = error.to_string();
+    // Only local verifier-generated stage names are eligible, never arbitrary OS/peer text.
+    let stage = if message.starts_with("helper_") || message.starts_with("service_binding:") {
+        message.as_str()
+    } else {
+        "native_connection_failed"
+    };
+    report_event(
+        1004,
+        &format!(
+            "{stage};kind={:?};os={:?}",
+            error.kind(),
+            error.raw_os_error()
+        ),
+    );
+}
+
+fn report_event(event_id: u32, message: &str) {
+    use std::ffi::c_void;
+    #[link(name = "advapi32")]
+    unsafe extern "system" {
+        fn RegisterEventSourceW(server: *const u16, source: *const u16) -> *mut c_void;
+        fn ReportEventW(
+            source: *mut c_void,
+            kind: u16,
+            category: u16,
+            id: u32,
+            sid: *const c_void,
+            count: u16,
+            size: u32,
+            strings: *const *const u16,
+            data: *const c_void,
+        ) -> i32;
+        fn DeregisterEventSource(source: *mut c_void) -> i32;
+    }
+    let source: Vec<u16> = "KeyValetRelay".encode_utf16().chain(Some(0)).collect();
+    let message: Vec<u16> = message.encode_utf16().chain(Some(0)).collect();
+    unsafe {
+        let handle = RegisterEventSourceW(std::ptr::null(), source.as_ptr());
+        if !handle.is_null() {
+            let strings = [message.as_ptr()];
+            let _ = ReportEventW(
+                handle,
+                4,
+                0,
+                event_id,
+                std::ptr::null(),
+                1,
+                0,
+                strings.as_ptr(),
+                std::ptr::null(),
+            );
+            let _ = DeregisterEventSource(handle);
+        }
+    }
+}
+
 pub fn dispatch() -> Result<()> {
     service_dispatcher::start(platform::service_name(), ffi_service_main).map_err(|_| Error::Config)
 }
@@ -87,6 +157,10 @@ fn service_main(_arguments: Vec<OsString>) {
             _ = &mut stop_status => daemon.await,
         }
     });
+    if let Err(error) = &result {
+        // Error::Display contains only fixed transport categories, never peer/config bodies.
+        report_event(1003, &error.to_string());
+    }
     let _ = handle.set_service_status(status(ServiceState::Stopped, u32::from(result.is_err())));
 }
 

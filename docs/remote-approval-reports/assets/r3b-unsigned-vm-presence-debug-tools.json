@@ -1,0 +1,11 @@
+{
+  "pdbs": [
+    {
+      "bytes": 7589888,
+      "name": "kv_agent-d6155e4a924ef552.pdb"
+    }
+  ],
+  "llvm_symbolizer": [],
+  "debuggers": [],
+  "ssh_exit": 0
+}

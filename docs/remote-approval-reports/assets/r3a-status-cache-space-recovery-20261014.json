@@ -1,0 +1,21 @@
+{
+  "observed_utc": "2026-10-14T06:58:23.034677+00:00",
+  "free_before": 6353838080,
+  "free_after": 14462087168,
+  "removed": [
+    {
+      "path": "rust/target-status/debug/incremental",
+      "bytes": 10600240412,
+      "kind": "rebuildable_incremental"
+    },
+    {
+      "path": "rust/target-status/debug/deps",
+      "files": 3126,
+      "bytes": 2667421594,
+      "kind": "older_hash_variants_only"
+    }
+  ],
+  "installed_and_signed_stages_preserved": true,
+  "source_backups_evidence_preserved": true,
+  "no_compiler_active": true
+}

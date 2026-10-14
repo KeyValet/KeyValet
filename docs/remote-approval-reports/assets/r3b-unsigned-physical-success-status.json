@@ -1,0 +1,34 @@
+{
+  "progress.json": {
+    "phase": "complete",
+    "utc": "2026-10-14T05:38:05.7504704Z",
+    "session": 13,
+    "mode": "Success",
+    "owner_sid": "S-1-5-21-3389053113-2113560702-4064643913-1001"
+  },
+  "task": "Ready",
+  "result.json": {
+    "mode": "Success",
+    "checks": [
+      "initialize_tools_jsonrpc_no_handshake_leak",
+      "fresh_session_locked_status_without_authentication",
+      "helper_owned_protected_worker_observed",
+      "installed_protected_worker_hello_unlock",
+      "existing_vault_metadata_query",
+      "explicit_lock_revokes_session",
+      "client_eof_exits",
+      "protected_worker_exits_after_client"
+    ],
+    "session": 13,
+    "failure": null,
+    "owner_sid": "S-1-5-21-3389053113-2113560702-4064643913-1001",
+    "hello_tested": true,
+    "passed": true,
+    "seconds": 16.9188753,
+    "protected_workers_observed": 1,
+    "credential_values_logged": false,
+    "valid_mcp_frames": 8,
+    "mcp_sha256": "4f82b0b121c5d77273b698f50af14b3ca1b2c503574d55b581d2ce6df751cde4"
+  },
+  "ssh_exit": 0
+}

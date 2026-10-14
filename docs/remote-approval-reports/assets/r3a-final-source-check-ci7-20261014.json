@@ -1,0 +1,18 @@
+{
+  "observed_utc": "2026-10-14T05:49:46.935745+00:00",
+  "source_snapshot": "r3a-se-child-closure-ci7-source.json",
+  "checks_summary": "r3a-se-child-closure-ci7-summary.json",
+  "source_files": 525,
+  "source_unchanged": false,
+  "changed_source_files": [
+    "rust/crates/kv-agent/Cargo.toml",
+    "rust/crates/kv-agent/build.rs",
+    "rust/crates/kv-agent/src/remote_main.rs"
+  ],
+  "free_bytes": 15606538240,
+  "minimum_free_bytes": 15000000000,
+  "r3a_rust_edits_after_native_segment": "One whitespace-only rustfmt change in kv-agent/src/remote/view.rs; shared UI/Swift changes were retained.",
+  "installed_component_ci_provenance_unchanged": true,
+  "native_install_receipt": "r3a-se-child-mac-install-20261014T051422Z.json",
+  "secret_values_in_evidence": false
+}

@@ -1,0 +1,30 @@
+{
+  "receipt": "/home/guang/.keyvalet/remote-runtime-state.json",
+  "changed_files": [
+    {
+      "path": "/home/guang/.claude.json",
+      "created": false,
+      "backup_exists": true,
+      "backup_path": "/home/guang/.claude.json.bak-keyvalet-remote"
+    },
+    {
+      "path": "/home/guang/.claude/settings.json",
+      "created": false,
+      "backup_exists": true,
+      "backup_path": "/home/guang/.claude/settings.json.bak-keyvalet-remote"
+    },
+    {
+      "path": "/home/guang/.codex/config.toml",
+      "created": false,
+      "backup_exists": true,
+      "backup_path": "/home/guang/.codex/config.toml.bak-keyvalet-remote"
+    },
+    {
+      "path": "/home/guang/.codex/hooks.json",
+      "created": false,
+      "backup_exists": true,
+      "backup_path": "/home/guang/.codex/hooks.json.bak-keyvalet-remote"
+    }
+  ],
+  "backup_contents_copied_to_report": false
+}

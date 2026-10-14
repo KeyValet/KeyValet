@@ -1,0 +1,24 @@
+{
+  "observed_utc": "2026-10-14T05:54:47.164263+00:00",
+  "checked_docs": [
+    "docs/remote-approval-reports/R3-A-m2-closure.md",
+    "docs/review-2026-10.zh-CN.md",
+    "docs/remote-approval-architecture-2026-10.zh-CN.md",
+    "docs/linux.md"
+  ],
+  "local_links_checked": 516,
+  "missing_local_links": [],
+  "last_complete_ci": "r3a-se-child-closure-ci7-summary.json",
+  "subsequent_guarded_ci": "r3a-se-child-closure-ci8-summary.json",
+  "current_source_differences_from_last_complete_ci": [
+    "rust/Cargo.lock",
+    "rust/crates/kv-agent/Cargo.toml",
+    "rust/crates/kv-agent/build.rs",
+    "rust/crates/kv-agent/src/hello/remote_key.rs",
+    "rust/crates/kv-agent/src/remote/windows.rs",
+    "rust/crates/kv-agent/src/remote_main.rs"
+  ],
+  "secret_values_in_evidence": false,
+  "lockfile_unchanged_between_r3a_ci_snapshots": true,
+  "lockfile_changed_after_guarded_ci": true
+}

@@ -1,0 +1,11 @@
+{
+  "observed_utc": "2026-10-13T13:29:36.016468+00:00",
+  "exit": 1,
+  "maintenance_sha256": "5f6e3aa9a084500f01e4c97644dfb16fdaf148f82bc033344de848b6526d1075",
+  "result": {
+    "fixed_error": "remote_metadata_unavailable",
+    "ok": false
+  },
+  "product_state_changed": false,
+  "secret_values_in_evidence": false
+}

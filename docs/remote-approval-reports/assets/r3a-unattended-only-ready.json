@@ -1,0 +1,18 @@
+{
+  "observed_utc": "2026-10-13T15:16:20.835186+00:00",
+  "signed_binaries_verified": 4,
+  "source_changed_after_ci": [],
+  "installer_and_driver_parse": true,
+  "owner_regressions_passed": 5,
+  "foreground_tty_regressions_passed": 3,
+  "audit_projection_and_collector_regressions_passed": 8,
+  "workspace_checks": {
+    "fmt": 0,
+    "clippy": 0,
+    "build": 0,
+    "test": 101
+  },
+  "installed_new_owner_ui": false,
+  "touch_id_requests": 0,
+  "secret_values_in_evidence": false
+}

@@ -1,0 +1,21 @@
+{
+  "codex": {
+    "expected_sha256": "a97c427a033b08d58902af3e52e8586ad2013267212112d306100223e2b12ec7",
+    "source": "https://github.com/openai/codex/releases/download/rust-v0.162.1/codex-x86_64-pc-windows-msvc.exe.tar.gz",
+    "download_exit": 56,
+    "login_attempted": false,
+    "error_type": "RuntimeException",
+    "credentials_read": false,
+    "installed": false
+  },
+  "cursor_keyvalet_config": {
+    "arg_count": 0,
+    "field_names": [
+      "args",
+      "command"
+    ],
+    "command_matches_install": true,
+    "command_exists": true
+  },
+  "ssh_exit": 0
+}

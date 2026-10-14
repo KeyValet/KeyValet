@@ -1,0 +1,45 @@
+{
+    "binaries":  [
+                     {
+                         "sha256":  "836d6a6c0b7c9076bff2ee688600f787b73f4f19b83ceb22e7183d6013d3f55f",
+                         "name":  "kv-agent.exe",
+                         "bytes":  2925056
+                     },
+                     {
+                         "sha256":  "d022b951b4d82deb1a106eee0d89e3523ea93e529aa2e5ccc5a37787b88c7f3a",
+                         "name":  "kv-cli.exe",
+                         "bytes":  18948096
+                     },
+                     {
+                         "sha256":  "a58901cd036353d0782d9928b67f98d1457a93e1721b80d433537f3c8725b77d",
+                         "name":  "kv-helper.exe",
+                         "bytes":  28745728
+                     },
+                     {
+                         "sha256":  "947ccdca4e8fbf9e85743c86c08544e7ded1403dd28613cc1a6762520890acf5",
+                         "name":  "kv-hook.exe",
+                         "bytes":  4508160
+                     },
+                     {
+                         "sha256":  "f21b284a5512851744a80a2e0fb337dc207780b5d555cde0b2f5574554aa02b1",
+                         "name":  "kv-mcp.exe",
+                         "bytes":  21710848
+                     },
+                     {
+                         "sha256":  "4b2ee0925c0db688cec4f9080ab647de4da19c3fea5371dafdb0c02bcdd8176a",
+                         "name":  "kv-relay-client.exe",
+                         "bytes":  14504960
+                     },
+                     {
+                         "sha256":  "69b90d81a1121c1cab3486ca6c7b0cecf815dbdfb8f7c9aece9dea30fda74e6f",
+                         "name":  "kv-server.exe",
+                         "bytes":  16778752
+                     }
+                 ],
+    "unsigned_development":  true,
+    "archive":  "C:\\kv-r3b-windows-20261013\\repo\\dist\\keyvalet-v0.3.0-windows-x64.zip",
+    "sha256":  "5d02bf3b726a6396bdc474ca64f35cb5fed773b0ac8124df979ff9aa24145e63",
+    "profile":  "debug with debug info/incremental disabled",
+    "source_fingerprint":  "11d76b93748a10dcabc2923caf3de7b82a68e489ea7b61d6d295ed398bb7ba8d",
+    "utc":  "2026-10-13T15:15:12.8201610Z"
+}

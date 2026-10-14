@@ -1,0 +1,7 @@
+{
+  "started_utc": "2026-10-13 09:00:54 UTC",
+  "user_start_confirmed": true,
+  "checklist_literal": "接下来约 10–15 分钟你要做的事：\n1. 回复「开始」后，我打开 Mac Terminal；如提示管理员密码，在该 Terminal 输入，看到双端审计结果。\n2. Mac 出现所选 Outlook 凭证的解锁或 token 更新提示时，点击 Allow 并按 Touch ID。\n3. Terminal 提示更新 ndu 的 Graph 代理凭证时，输入 ndu 用户 guang 的 polkit 密码，并确认覆盖。\n4. Mac 提示把 ndu 设为 per_use 时，确认并按 Touch ID。\n5. Terminal 再提示 ndu 解锁时，输入 ndu 用户 guang 的密码。\n6. Mac 连续出现 20 次 GET /v1.0/me 时，每次选择“This request／仅本次”并点击 Allow；这些 Quick 请求无需 Touch ID，上游 403 单列。\n7. 仅当 Terminal 显示“拒绝用例”后，在下一条 Mac GET 框点击 Deny。\n8. Terminal 显示“续等用例”后先不操作，等“已进入 credential_wait_approval”出现再点击 Allow。\n9. 同一批准再次领取无需操作，看到 already_consumed 算重放被拒。\n10. Mac 出现 GET /v1.0/me?$select=id 时，核对新参数并选择仅本次批准，看到 Terminal 显示测量段完成算结束。\n密码只在 Terminal 输入，不发到聊天。是否现在开始？",
+  "driver": "r3a-refresh-and-first-use.py --follow-up samples",
+  "secret_values_in_evidence": false
+}

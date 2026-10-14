@@ -1,0 +1,104 @@
+{
+  "observed_utc": "2026-10-14T01:11:18.453821+00:00",
+  "source_receipt": "r3a-remaining-native-20261014T010532Z.json",
+  "executor_snapshot": {
+    "observed_utc": "2026-10-14T01:11:18.543669+00:00",
+    "device": {
+      "id": "01M4S8KJ48BSMNK1S4BEGT07FC",
+      "os": "linux",
+      "revoked_at": null
+    },
+    "grants": [
+      {
+        "jti": "approval:01M4SVNXC88217RE2V2HSTCXGS",
+        "iss": "01M4SM5QTRQKNQE1TD6FBJTG79",
+        "aud": "01M4S8KJ48BSMNK1S4BEGT07FC",
+        "exp": 1791912459,
+        "revoked_at": 1791902225
+      },
+      {
+        "jti": "approval:01M4SXBYW00A03JAPMA6ND3B5N",
+        "iss": "01M4SM5QTRQKNQE1TD6FBJTG79",
+        "aud": "01M4S8KJ48BSMNK1S4BEGT07FC",
+        "exp": 1791914229,
+        "revoked_at": 1791902225
+      },
+      {
+        "jti": "01M4TNJD387H1KZXETKHSYVGRK",
+        "iss": "01M4SM5QTRQKNQE1TD6FBJTG79",
+        "aud": "01M4S8KJ48BSMNK1S4BEGT07FC",
+        "exp": 1791900001,
+        "revoked_at": 1791902225
+      },
+      {
+        "jti": "01M4TV4S3G3V4JQJKS47GWPP8Y",
+        "iss": "01M4SM5QTRQKNQE1TD6FBJTG79",
+        "aud": "01M4S8KJ48BSMNK1S4BEGT07FC",
+        "exp": 1791905846,
+        "revoked_at": 1791902254
+      },
+      {
+        "jti": "01M4VJS388MBYCZG5PN1THWWX9",
+        "iss": "01M4SM5QTRQKNQE1TD6FBJTG79",
+        "aud": "01M4S8KJ48BSMNK1S4BEGT07FC",
+        "exp": 1791930629,
+        "revoked_at": 1791927054
+      }
+    ],
+    "approvals": [
+      {
+        "id": "01M4VZ136GB0YSA3WD9CGQM5B4",
+        "state": "denied",
+        "agent_pid": 3845051,
+        "exp": 1791940474,
+        "min_level": "quick",
+        "tier": "T1",
+        "delivery_mode": "banner",
+        "execution_started_n": 0,
+        "execution_completed_n": 0
+      },
+      {
+        "id": "01M4VZ1PQGTTQZK6M6K5AWTJHY",
+        "state": "waiting",
+        "agent_pid": 3845051,
+        "exp": 1791940494,
+        "min_level": "quick",
+        "tier": "T1",
+        "delivery_mode": "banner",
+        "execution_started_n": 0,
+        "execution_completed_n": 0
+      }
+    ],
+    "events": [
+      {
+        "op": "approval_requested",
+        "approval_id": "01M4VZ136GB0YSA3WD9CGQM5B4",
+        "digest": "2ab778701221b68f90fb3c89272b3ba57faf5df2bf62849956a32e5f9bad6eda"
+      },
+      {
+        "op": "remote_approval_denied",
+        "approval_id": "01M4VZ136GB0YSA3WD9CGQM5B4",
+        "state": "denied",
+        "decision": "deny",
+        "approval_level": "quick",
+        "digest": "2ab778701221b68f90fb3c89272b3ba57faf5df2bf62849956a32e5f9bad6eda"
+      },
+      {
+        "op": "approval_requested",
+        "approval_id": "01M4VZ1PQGTTQZK6M6K5AWTJHY",
+        "digest": "c7162abb8114740f73ddecdcdbb8f046dd576c28670659f666190e5f1879a82b"
+      }
+    ],
+    "active_phone_n": 0
+  },
+  "native_desktop_present_before_request": true,
+  "native_deny_elapsed_s": 5.038746,
+  "escape_producer_reason": "user_cancelled",
+  "active_phone_n": 0,
+  "phone_silent_or_banner_verified": false,
+  "native_se_cancel_typed": false,
+  "native_se_cancel_error_code": "key_operation_failed",
+  "native_se_cancel_elapsed_s": 8.531664,
+  "revocation_started": false,
+  "secret_values_in_evidence": false
+}

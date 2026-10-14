@@ -1,0 +1,15 @@
+{
+  "launched": true,
+  "files": [
+    {
+      "sha256": "9a357acd27f214fff1b307bd2bbaf49de1b9a70a5b64a39a716693e9228cf0a9",
+      "name": "kv_platform-bbc1303a78ef43f1.exe"
+    },
+    {
+      "sha256": "a68b6071b188e0f325539f73e62960686659ad69a446f52e6577cf91c31c2f7e",
+      "name": "kv_agent-d6155e4a924ef552.exe"
+    }
+  ],
+  "context": "LocalSystem",
+  "ssh_exit": 0
+}

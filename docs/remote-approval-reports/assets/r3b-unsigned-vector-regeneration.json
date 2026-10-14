@@ -1,0 +1,11 @@
+{
+  "changed": [
+    "testdata/remote/grant_validation_cases.json",
+    "testdata/remote/schema_samples.json",
+    "schemas/remote/unsigned_grant.schema.json",
+    "schemas/remote/grant_list_result.schema.json",
+    "schemas/remote/grant.schema.json",
+    "schemas/remote/grant_issue_result.schema.json"
+  ],
+  "unrelated_fixtures_unchanged": true
+}

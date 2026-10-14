@@ -479,6 +479,82 @@ fn appendix_f_decision_vectors() {
 }
 
 #[test]
+fn r3b_finite_t2_requires_the_signed_executor_label() {
+    let vector = load("grant_standing_t1.json");
+    let now = vector["now"].as_i64().unwrap();
+    let device: DeviceRecord = decode(&vector["device"]);
+    let signer = key(&vector["keys"], "strong");
+    for confirm in [
+        Optional::Missing,
+        Optional::Null,
+        Optional::Value(String::new()),
+        Optional::Value("another executor".into()),
+        Optional::Value("srv".into()),
+    ] {
+        let mut grant: Grant = decode(&vector["grant"]);
+        grant.scope.max_tier = Tier::T2;
+        grant.exp = Some(now + 3600);
+        grant.confirm = confirm;
+        grant.sig = sign_object(&grant, SignatureAlgorithm::ES256, &signer).unwrap();
+        let observed = validation::verify_grant(
+            &grant,
+            "dev_srv",
+            "srv",
+            &device,
+            ApprovalLevel::Strong,
+            now,
+        );
+        if grant.confirm.as_value().map(String::as_str) == Some("srv") {
+            assert!(observed.is_ok());
+            grant.confirm = Optional::Value("changed after signing".into());
+            assert_eq!(
+                validation::verify_grant(
+                    &grant,
+                    "dev_srv",
+                    "srv",
+                    &device,
+                    ApprovalLevel::Strong,
+                    now,
+                ),
+                Err(RemoteError::InvalidSignature)
+            );
+        } else {
+            assert_eq!(observed, Err(RemoteError::InvalidGrant));
+        }
+    }
+}
+
+#[test]
+fn r3b_t2_rejects_global_scope_and_wildcard_audience() {
+    let vector = load("grant_standing_t1.json");
+    let now = vector["now"].as_i64().unwrap();
+    let device: DeviceRecord = decode(&vector["device"]);
+    let signer = key(&vector["keys"], "strong");
+    for scope in [GrantScopeLevel::Credential, GrantScopeLevel::Global] {
+        for exp in [Some(now + 3600), None] {
+            let mut grant: Grant = decode(&vector["grant"]);
+            grant.scope.level = scope;
+            grant.scope.max_tier = Tier::T2;
+            grant.aud = "*".into();
+            grant.exp = exp;
+            grant.confirm = Optional::Value("srv".into());
+            grant.sig = sign_object(&grant, SignatureAlgorithm::ES256, &signer).unwrap();
+            assert_eq!(
+                validation::verify_grant(
+                    &grant,
+                    "dev_srv",
+                    "srv",
+                    &device,
+                    ApprovalLevel::Strong,
+                    now,
+                ),
+                Err(RemoteError::InvalidGrant)
+            );
+        }
+    }
+}
+
+#[test]
 fn appendix_f_grant_vectors() {
     for name in ["grant_standing_t1.json", "grant_t2_requires_settings.json"] {
         let vector = load(name);

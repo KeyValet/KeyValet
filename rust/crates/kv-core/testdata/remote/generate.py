@@ -193,6 +193,8 @@ write("envelope_roundtrip.json", {"keys": KEY_DATA, "header": HEADER, "sender": 
 # K1: dedicated identity ECDSA key; all original keys/vectors above remain byte-identical.
 SPLIT_DEVICE = copy.deepcopy(APPROVER)
 SPLIT_DEVICE.update(os="windows", label="Windows fixture", dk_sig={"pub": pub(KEYS["wrong"]), "alg": "ES256", "future_key": {"binding": "signed"}})
+WINDOWS_DEVICE = copy.deepcopy(SPLIT_DEVICE)
+WINDOWS_DEVICE["ak_s"] = {"pub": pub(RSA_KEY), "alg": "RS256"}
 SPLIT_PROOF = {"action": "device_record", "device": SPLIT_DEVICE, "future_proof": {"v": 1}}
 split_payload = canonical(SPLIT_PROOF)
 split_signature = b64(sign_bytes(KEYS["wrong"], split_payload))
@@ -215,6 +217,12 @@ split_sender = copy.deepcopy(SERVER)
 split_sender["dk_sig"] = copy.deepcopy(SPLIT_DEVICE["dk_sig"])
 write("device_record_with_dk_sig_envelope.json", {"sender": split_sender, "recipient": APPROVER, "envelope": split_envelope, "now": NOW,
     "expect": {"open_ok": True, "plaintext": plaintext.decode(), "dk_error": "invalid_signature"}})
+split_sas_input = b"keyvalet-pair-v1-split-identity" + token + b"".join(sorted([
+    canonical({"dk_pub": record["dk_pub"], "dk_sig": record.get("dk_sig")})
+    for record in [split_sender, APPROVER]])) + canonical(APPROVER["ak_q"]["pub"]) + canonical(APPROVER["ak_s"]["pub"])
+write("device_record_with_dk_sig_pair_sas.json", {"token": b64(token), "initiator": split_sender, "joiner": APPROVER,
+    "expect": {"sas": str(int.from_bytes(hashlib.sha256(split_sas_input).digest(), "big")).zfill(6)[:6],
+               "legacy_sas": SAS, "tampered_key_changes_sas": True, "tampered_extension_changes_sas": True}})
 
 official_url = "https://raw.githubusercontent.com/cfrg/draft-irtf-cfrg-hpke/5f503c564da00b0687b3de75f1dfbdfc4079ad31/test-vectors.json"
 official_path = HERE / "rfc9180_p256_base.json"
@@ -266,7 +274,7 @@ obj("PublicJwk", {"kty": STRING, **{k: STRING for k in ["crv", "x", "y", "n", "e
 obj("ApprovalKey", {"pub": ref("PublicJwk"), "alg": enum("ES256", "RS256")}, APPROVER["ak_q"])
 obj("Attestation", {"kind": STRING, "doc": {}}, {"kind": "future-attestation", "doc": {"opaque": "test"}, "future": 1})
 identity_sign_schema = {"type": "object", "properties": {"pub": {"allOf": [ref("PublicJwk"), {"properties": {"kty": {"const": "EC"}, "crv": {"const": "P-256"}}}]}, "alg": {"const": "ES256"}}, "required": ["pub", "alg"], "additionalProperties": True}
-obj("DeviceRecord", {"device_id": STRING, "label": STRING, "os": STRING, "key_kind": STRING, "dk_pub": ref("PublicJwk"), "dk_sig": identity_sign_schema, "ak_q": nullable(ref("ApprovalKey")), "ak_s": nullable(ref("ApprovalKey")), "caps": array(STRING), "attestation": nullable(ref("Attestation"))}, APPROVER, ["dk_sig"])
+obj("DeviceRecord", {"device_id": STRING, "label": STRING, "os": STRING, "key_kind": STRING, "dk_pub": ref("PublicJwk"), "dk_sig": identity_sign_schema, "ak_q": nullable(ref("ApprovalKey")), "ak_s": nullable(ref("ApprovalKey")), "caps": array(STRING), "attestation": nullable(ref("Attestation"))}, WINDOWS_DEVICE, ["dk_sig"])
 obj("Protection", {"kind": STRING, "attestation": nullable(ref("Attestation"))}, REQUEST["requester"]["protection"], ["attestation"])
 obj("Requester", {"device_id": STRING, "label": STRING, "os": STRING, "protection": ref("Protection")}, REQUEST["requester"])
 obj("Agent", {"runtime": STRING, "cwd": STRING, "user": STRING, "pid": U32}, REQUEST["agent"])
@@ -295,7 +303,7 @@ grant_props = {"kind": {"const": "grant"}, "jti": ULID, "iss": STRING, "iss_alg"
                "budget": nullable(ref("Budget")), "nbf": INT, "exp": nullable(INT), "origin": STRING, "confirm": nullable(STRING), "sig": B64}
 grant_rules = {"allOf": [
     {"if": {"properties": {"scope": {"properties": {"level": {"const": "global"}}}}}, "then": {"properties": {"aud": {"const": "*"}}}},
-    {"if": {"properties": {"scope": {"properties": {"max_tier": {"const": "T2"}}}}}, "then": {"properties": {"origin": {"const": "settings"}}, "anyOf": [{"properties": {"exp": INT}}, {"required": ["confirm"], "properties": {"confirm": STRING}}]}}]}
+    {"if": {"properties": {"scope": {"properties": {"max_tier": {"const": "T2"}}}}}, "then": {"required": ["confirm"], "properties": {"origin": {"const": "settings"}, "confirm": STRING, "aud": {"not": {"const": "*"}}, "scope": {"properties": {"level": enum("credential", "device")}}}}}]}
 obj("Grant", grant_props, signed(GRANT, KEYS["strong"]), ["budget", "confirm"], rules=grant_rules)
 obj("UnsignedGrant", {k: v for k, v in grant_props.items() if k != "sig"}, GRANT, ["budget", "confirm"], "ipc::Unsigned<Grant>", {**grant_rules, "not": {"required": ["sig"]}})
 obj("EmptyArgs", {}, {})
@@ -338,7 +346,7 @@ obj("PresenceSignals", {k: nullable(UINT if k == "idle_seconds" else BOOL) for k
 obj("PresenceState", {"state": enum("present", "idle", "away"), "since": INT, "signals": ref("PresenceSignals")}, {"state": "present", "since": NOW, "signals": signals}, rust="traits::PresenceState")
 
 # Appendix B objects.
-obj("RegisterDeviceRequest", {**DEFS["DeviceRecord"]["properties"], "push_token": {}}, {**APPROVER, "push_token": {"provider": "apns", "token": "test-token"}}, ["push_token", "dk_sig"], "relay::RegisterDeviceRequest")
+obj("RegisterDeviceRequest", {**DEFS["DeviceRecord"]["properties"], "push_token": {}}, {**WINDOWS_DEVICE, "push_token": {"provider": "apns", "token": "test-token"}}, ["push_token", "dk_sig"], "relay::RegisterDeviceRequest")
 obj("RegisterDeviceResponse", {"account_id": STRING, "device_id": STRING, "recovery_code": nullable(STRING)}, {"account_id": "acct_test", "device_id": "dev_mac"}, ["recovery_code"], "relay::RegisterDeviceResponse")
 relay_objects = {
     "ChallengeRequest": ({"device_id": STRING}, {"device_id": "dev_srv"}),
@@ -428,7 +436,7 @@ DEFS["GrantSource"], SAMPLES["GrantSource"], RUST_TYPES["GrantSource"] = enum("p
 write("owner_intent_contracts.json", {"cases": owner_cases, "expect": owner_expect})
 obj("RecoverAccountRequest", {"account_id": STRING, "recovery_code": {"type":"string","minLength":43,"maxLength":43}, "new_recovery_code": {"type":"string","minLength":43,"maxLength":43}, "device": ref("DeviceRecord"), "nonce": {"type":"string","minLength":43,"maxLength":43}, "sig": {"type":"string","minLength":86,"maxLength":86}}, {"account_id":"acct_test","recovery_code":"A"*43,"new_recovery_code":"B"*43,"device":SERVER,"nonce":"A"*43,"sig":"A"*86}, rules={"additionalProperties":False}, rust="relay::RecoverAccountRequest")
 obj("RecoverAccountResponse", {"ok":{"const":True},"account_id":STRING,"device_id":STRING,"recovery_code":{"type":"string","minLength":43,"maxLength":43}}, {"ok":True,"account_id":"acct_test","device_id":"dev_srv","recovery_code":"A"*43}, rules={"additionalProperties":False}, rust="relay::RecoverAccountResponse")
-OPS = ["remote.relay.inbound", "remote.relay.outbound.poll", "remote.relay.status", "remote.sign_identity", "remote.presence.update", "remote.pending.list", "remote.pending.for_agent", "remote.pending.stop_block", "remote.wait", "remote.decide", "remote.grant.issue", "remote.grant.list", "remote.grant.revoke", "remote.directive.issue", "remote.pair.start", "remote.pair.complete", "remote.pair.confirm", "remote.account.recover", "remote.devices.list", "remote.devices.revoke", "remote.devices.rename", "remote.status", "remote.audit.list", "remote.relay.identity", "remote.relay.outbound.ack", "remote.relay.control.poll", "remote.relay.control.complete", "remote.relay.control.sign", "remote.client_timeout_observed"]
+OPS = ["remote.relay.inbound", "remote.relay.outbound.poll", "remote.relay.status", "remote.sign_identity", "remote.presence.update", "remote.pending.list", "remote.pending.for_agent", "remote.pending.stop_block", "remote.wait", "remote.decide", "remote.grant.issue", "remote.grant.list", "remote.grant.revoke", "remote.directive.issue", "remote.pair.start", "remote.pair.complete", "remote.pair.confirm", "remote.account.recover", "remote.devices.list", "remote.devices.revoke", "remote.devices.rename", "remote.status", "remote.audit.list", "remote.relay.identity", "remote.relay.config_presence", "remote.relay.outbound.ack", "remote.relay.control.poll", "remote.relay.control.complete", "remote.relay.control.sign", "remote.client_timeout_observed"]
 obj("IpcRequest", {"op": enum(*OPS), "params": OBJECT}, {"op": "remote.relay.inbound", "params": SAMPLES["RelayInboundParams"]}, rust="kv_ipc::remote::Request")
 DEFS["IpcResponse"] = {"oneOf": [{"type": "object", "properties": {"ok": {"const": True}, "result": {}}, "required": ["ok", "result"], "additionalProperties": True},
                                  {"type": "object", "properties": {"ok": {"const": False}, "error": ref("IpcError")}, "required": ["ok", "error"], "additionalProperties": True}]}
@@ -531,7 +539,14 @@ def gc(name, updates, error=None, level="strong", key="strong", record=APPROVER)
     grant_cases.append({"name": name, "grant": signed(value, KEYS[key]), "device": record, "level": level, "expect": {"error": error} if error else {"ok": True}})
 
 
-gc("finite_t2_settings", {"scope": {**GRANT["scope"], "max_tier": "T2"}, "exp": NOW + 604800})
+gc("finite_t2_settings", {"scope": {**GRANT["scope"], "max_tier": "T2"}, "exp": NOW + 604800, "confirm": "srv"})
+gc("finite_t2_missing_confirm", {"scope": {**GRANT["scope"], "max_tier": "T2"}, "exp": NOW + 604800}, "invalid_grant")
+gc("finite_t2_null_confirm", {"scope": {**GRANT["scope"], "max_tier": "T2"}, "exp": NOW + 604800, "confirm": None}, "invalid_grant")
+gc("finite_t2_wrong_confirm", {"scope": {**GRANT["scope"], "max_tier": "T2"}, "exp": NOW + 604800, "confirm": "another"}, "invalid_grant")
+gc("finite_t2_empty_confirm", {"scope": {**GRANT["scope"], "max_tier": "T2"}, "exp": NOW + 604800, "confirm": ""}, "invalid_grant")
+for exp in [NOW + 604800, None]:
+    for scope in ["global", "credential"]:
+        gc(f"{'standing' if exp is None else 'finite'}_t2_{scope}_star", {"scope": {**GRANT["scope"], "level": scope, "max_tier": "T2"}, "aud": "*", "exp": exp, "confirm": "srv"}, "invalid_grant")
 gc("standing_t2_confirm", {"scope": {**GRANT["scope"], "max_tier": "T2"}, "confirm": "srv"})
 gc("standing_t2_missing_confirm", {"scope": {**GRANT["scope"], "max_tier": "T2"}}, "invalid_grant")
 gc("standing_t2_wrong_confirm", {"scope": {**GRANT["scope"], "max_tier": "T2"}, "confirm": "another"}, "invalid_grant")
@@ -564,7 +579,7 @@ for name, sample, updates in [("ApprovalRequest", REQUEST, {"tier": "T3"}), ("Ap
 missing = copy.deepcopy(REQUEST); missing.pop("agent"); negative_schema.append({"type": "ApprovalRequest", "schema": "approval_request.schema.json", "value": missing})
 write("schema_rejections.json", {"samples": negative_schema, "expect": [False] * len(negative_schema)})
 
-caller_ops = {"relay_client": OPS[:4] + ["remote.relay.identity", "remote.relay.outbound.ack", "remote.relay.control.poll", "remote.relay.control.complete", "remote.relay.control.sign"], "hook": ["remote.pending.for_agent", "remote.pending.stop_block"], "mcp": ["remote.wait", "remote.pending.list", "remote.status", "remote.client_timeout_observed"],
+caller_ops = {"relay_client": OPS[:4] + ["remote.relay.identity", "remote.relay.config_presence", "remote.relay.outbound.ack", "remote.relay.control.poll", "remote.relay.control.complete", "remote.relay.control.sign"], "hook": ["remote.pending.for_agent", "remote.pending.stop_block"], "mcp": ["remote.wait", "remote.pending.list", "remote.status", "remote.client_timeout_observed"],
               "cli_owner": ["remote.account.recover", "remote.audit.list", "remote.pending.list", "remote.decide", "remote.grant.issue", "remote.grant.list", "remote.grant.revoke", "remote.directive.issue", "remote.pair.start", "remote.pair.complete", "remote.pair.confirm", "remote.devices.list", "remote.devices.revoke", "remote.devices.rename", "remote.status"],
               "approval_agent": ["remote.presence.update", "remote.decide", "remote.grant.issue", "remote.directive.issue", "remote.pair.start", "remote.pair.complete", "remote.pair.confirm"]}
 write("ipc_contracts.json", {"ops": OPS, "request": {"op": "remote.status", "params": {}, "future": {"flag": True}}, "response": {"ok": False, "error": {"code": "forbidden", "message": "Access denied", "future": None}, "future": True},

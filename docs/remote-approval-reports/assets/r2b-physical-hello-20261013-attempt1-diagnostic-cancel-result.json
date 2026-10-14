@@ -1,0 +1,17 @@
+{
+  "exit_code": 101,
+  "finished_utc": "2026-10-13T05:56:17.6956820Z",
+  "seconds": 33.4306706,
+  "session_id": 13,
+  "elevated": false,
+  "deletion_verified": false,
+  "test_binary_sha256": "0cd0b54b45d933e40a1569b7bf8b0b9c34360bcd4499e5148b9fecfcaf601012",
+  "test": "existing::hello::remote_key::physical_acceptance::remote_hello_sign_cancellation",
+  "account": "春有约花不误\\11516",
+  "started_utc": "2026-10-13T05:55:43.9788151Z",
+  "hello_returned_user_canceled": true,
+  "stderr": "PHYSICAL_ACCEPTANCE stage=create_approve\nHELLO_WAIT begin site=crates\\kv-agent\\src\\hello\\remote_key.rs:30 cap_ms=90000\nHELLO_WAIT end site=crates\\kv-agent\\src\\hello\\remote_key.rs:30 elapsed_ms=32546 success=true hresult=None\nHELLO_REMOTE result_status=Ok(KeyCredentialStatus(3))\n\nthread 'existing::hello::remote_key::physical_acceptance::remote_hello_sign_cancellation' (34080) panicked at crates\\kv-agent\\src\\hello\\remote_key\\physical_acceptance.rs:55:43:\ncalled `Result::unwrap()` on an `Err` value: OperationFailed\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n",
+  "phase": "cancel",
+  "passed": false,
+  "uses_installed_worker": false
+}

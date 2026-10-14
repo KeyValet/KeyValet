@@ -1,0 +1,52 @@
+{
+  "probe": {
+    "commands": [
+      {
+        "exit": 0,
+        "keyvalet_disabled": false,
+        "expected_tools_present": false,
+        "version": "2026.10.14-0f9edde",
+        "client": "cursor",
+        "tool_names": [],
+        "diagnostic_markers": [],
+        "timed_out": false,
+        "command": "--version",
+        "auth_required": false
+      },
+      {
+        "exit": 0,
+        "keyvalet_disabled": false,
+        "expected_tools_present": false,
+        "version": "",
+        "client": "cursor",
+        "tool_names": [],
+        "diagnostic_markers": [
+          "approval"
+        ],
+        "timed_out": false,
+        "command": "mcp --help",
+        "auth_required": false
+      },
+      {
+        "exit": 1,
+        "keyvalet_disabled": false,
+        "expected_tools_present": false,
+        "version": "",
+        "client": "cursor",
+        "tool_names": [],
+        "diagnostic_markers": [
+          "MCP error"
+        ],
+        "timed_out": false,
+        "command": "mcp list-tools keyvalet",
+        "auth_required": false
+      }
+    ],
+    "login_attempted": false,
+    "owner_sid": "S-1-5-21-3389053113-2113560702-4064643913-1001",
+    "protected_workers_remaining": 0,
+    "credential_values_logged": false,
+    "session": 13
+  },
+  "ssh_exit": 0
+}

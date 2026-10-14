@@ -1,0 +1,52 @@
+{
+  "tasks": [
+    {
+      "TaskName": "KeyValetR3BUnsignedAuditArchiveAfter-20261014",
+      "State": 3
+    },
+    {
+      "TaskName": "KeyValetR3BUnsignedCodexExtract-20261014",
+      "State": 3
+    }
+  ],
+  "audit": {
+    "exit": 0
+  },
+  "codex": {
+    "verified": true,
+    "tar_exit": 0,
+    "binaries": [
+      {
+        "bytes": 74685744,
+        "sha256": "9f865a748c984492ca9b69aac75680e4954f31311c43ec33ddbdae0ed77bd4bd",
+        "path": "C:\\kv-r3b-unsigned-20261014\\codex-npm\\extracted\\package\\vendor\\x86_64-pc-windows-msvc\\bin\\codex-code-mode-host.exe",
+        "name": "codex-code-mode-host.exe"
+      },
+      {
+        "bytes": 333479728,
+        "sha256": "dd13bdb162a184fa04039488b234a8258ef9b76f84e926c505d5742b19249a6a",
+        "path": "C:\\kv-r3b-unsigned-20261014\\codex-npm\\extracted\\package\\vendor\\x86_64-pc-windows-msvc\\bin\\codex.exe",
+        "name": "codex.exe"
+      },
+      {
+        "bytes": 8209704,
+        "sha256": "4b1f3369cf4f9a1fd6ecebb8c7caef0d6a33a4a3af77650c277525d3b4e34c76",
+        "path": "C:\\kv-r3b-unsigned-20261014\\codex-npm\\extracted\\package\\vendor\\x86_64-pc-windows-msvc\\codex-resources\\codex-command-runner.exe",
+        "name": "codex-command-runner.exe"
+      },
+      {
+        "bytes": 17723696,
+        "sha256": "b30ec190ac0b43c6e4a7c26fbc533f5321674b57fe85bb7306872641bc0bd40b",
+        "path": "C:\\kv-r3b-unsigned-20261014\\codex-npm\\extracted\\package\\vendor\\x86_64-pc-windows-msvc\\codex-resources\\codex-windows-sandbox-setup.exe",
+        "name": "codex-windows-sandbox-setup.exe"
+      },
+      {
+        "bytes": 8684336,
+        "sha256": "94fecc491c7fcb9eabdaaabecd79aa0ddbc275d98f13dc387c326e59f41edf74",
+        "path": "C:\\kv-r3b-unsigned-20261014\\codex-npm\\extracted\\package\\vendor\\x86_64-pc-windows-msvc\\codex-resources\\voice\\bin\\codex-voice-host.exe",
+        "name": "codex-voice-host.exe"
+      }
+    ]
+  },
+  "ssh_exit": 0
+}

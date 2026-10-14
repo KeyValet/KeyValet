@@ -1,0 +1,8 @@
+{
+  "hello_requested": false,
+  "launched": true,
+  "agent_sessions": [
+    13
+  ],
+  "ssh_exit": 0
+}

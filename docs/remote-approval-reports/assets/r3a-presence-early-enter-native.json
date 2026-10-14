@@ -1,0 +1,25 @@
+{
+  "observed_utc": "2026-10-13T23:44:09.442361+00:00",
+  "source_receipt": "r3a-presence-transitions-20261013T234012Z.json",
+  "sample_counts": {
+    "present": 32
+  },
+  "os_events": [
+    {
+      "event": "locked",
+      "observed_utc": "2026-10-13T23:40:11.415107+00:00",
+      "elapsed_s": 41.790947,
+      "callback_on_main_thread": true
+    }
+  ],
+  "early_unlock_phase": {
+    "phase": "after_measured_unlock",
+    "observed_utc": "2026-10-13T23:40:12.704499+00:00",
+    "elapsed_s": 43.08033,
+    "mac_presence": "present"
+  },
+  "full_measured_lock_pair_complete": false,
+  "original_fixed_error": "authenticated_presence_transition_pair_not_observed",
+  "keyvalet_touch_id_requests": 0,
+  "secret_values_in_evidence": false
+}

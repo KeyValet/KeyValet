@@ -1,0 +1,20 @@
+KeyValet 0.3.0 - Windows x64 unsigned preview
+
+This is an experimental unsigned release build, not a signed production release.
+Windows SmartScreen or organizational policy may prevent installation or execution.
+
+Local vault: Windows Hello PIN/biometrics and the intended interactive owner are required.
+Same-source development builds have native Hello setup and vault-unlock evidence.
+Live AI-client use and the full protected cancellation lifecycle remain unaccepted.
+
+Remote approvals on Windows: unavailable in this unsigned build. KeyValetRelay remains
+Manual/Stopped because its privileged IPC role requires a valid Simvito Limited publisher.
+Do not start the service manually or disable its publisher verification.
+
+From the intended owner's unelevated PowerShell in this extracted directory:
+  powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 `
+    -PackagePath <absolute-path-to-this-preview-zip> -AllowUnsignedAgent
+UAC is used only for system installation. Enable Hello first. Keep the recovery passphrase private.
+
+The explicit development switch reports agent_trust=unsigned and does not bypass the relay check.
+For usage and uninstall instructions, read docs\windows.md and scripts\uninstall.ps1.

@@ -1,0 +1,12 @@
+{
+  "dispatched_utc": "2026-10-13T23:26:27.485965+00:00",
+  "window_id": 25785,
+  "tab_index": 1,
+  "parent_terminal": "/dev/ttys000",
+  "shell_foreground_ready": true,
+  "command_dispatched": true,
+  "user_start": "开始",
+  "checklist": "签名包和四项 CI 已准备好，接下来约 5–7 分钟你要做的事：\n1. 回复「开始」后，我打开 Mac Terminal；若提示管理员密码，只在那里输入，看到 Signed R3-A binaries installed 和 Owner IPC: True 算安装成功。\n2. 保持 Mac 开着，等待 Terminal 显示只读查询超时后恢复、ndu 应用 1 次及全量审计数字；这步不用点击审批。\n3. Terminal 提示时按回车开启屏保，退出并正常解锁 Mac，再回同一 Terminal 按回车，看到 presence=present 算成功。\n4. 按 Control+Command+Q 锁屏，等 10 秒正常解锁，再回 Terminal 按回车。\n5. Terminal 显示已确认 present 后，再按同样步骤锁屏 10 秒、解锁并回车，看到在场信号诊断结束算完成。\n这段不发凭证请求，KeyValet Touch ID 请求为 0；系统解锁按你日常方式完成。sudo 缓存已失效，安装需要你在 Terminal 完成系统认证，真实锁屏/解锁也需要你在 Mac 前。现在开始吗？",
+  "expected_keyvalet_touch_id_count": 0,
+  "secret_values_in_evidence": false
+}

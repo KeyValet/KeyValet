@@ -1,0 +1,15 @@
+{
+  "rust/target-r2a/kv-server-linux": {
+    "sha256": "9ae13442823f6f273a57ce9ff460cba0f5828c3c69b986aea7825614513fb9b2",
+    "file": "rust/target-r2a/kv-server-linux: ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0, BuildID[sha1]=a8ca8c0e55d6e60047468800242de346f63635cc, stripped"
+  },
+  "rust/target-r2a/release/kv-server": {
+    "sha256": "21a10de9e24840eb5a553d4fce9f0697e7c7475a3b80d32e5fd71b2642d116a6",
+    "file": "rust/target-r2a/release/kv-server: Mach-O 64-bit executable arm64"
+  },
+  "rust/target-r2a/kv-server-linux-workspace": {
+    "sha256": "1eced902770d81e9933c204c8830ca7d2c7565e3fc0105e93aeeb44c45f9eab0",
+    "file": "/Users/guang/dev/keyvalet/rust/target-r2a/kv-server-linux-workspace: ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0, BuildID[sha1]=377161133268b13c5c5692824a785b1e19f14325, stripped",
+    "build": "source installer release workspace (native Linux)"
+  }
+}

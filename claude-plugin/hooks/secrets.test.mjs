@@ -32,3 +32,20 @@ test("recognized secrets still require confirmation without printing their full 
 test("harmless commands continue without a prompt", () => {
   assert.equal(handle("tool", { tool_name: "Bash", tool_input: { command: "cargo fmt --all -- --check" } }), null);
 });
+
+test("PowerShell commands require the same confirmation without printing the key", () => {
+  // A deterministic format fixture; not a service-issued credential.
+  const value = "ghp_" + "A1b2C3d4E5f6G7h8I9j0K1l2M3n4O5p6Q7r8";
+  const result = handle("tool", { tool_name: "PowerShell", tool_input: { command: `$env:API_TOKEN = '${value}'` } });
+  assert.equal(result?.hookSpecificOutput.permissionDecision, "ask");
+  assert.ok(result.hookSpecificOutput.permissionDecisionReason.includes("shell command"));
+  assert.ok(!JSON.stringify(result).includes(value));
+  assert.equal(handle("tool", { tool_name: "PowerShell", tool_input: { command: "Get-ChildItem" } }), null);
+});
+
+test("the plugin routes both shell tools to the detector", () => {
+  const config = JSON.parse(fs.readFileSync(new URL("./hooks.json", import.meta.url), "utf8"));
+  for (const tool of ["Bash", "PowerShell"]) {
+    assert.ok(config.hooks.PreToolUse.some((row) => new RegExp(`^(?:${row.matcher})$`).test(tool)));
+  }
+});

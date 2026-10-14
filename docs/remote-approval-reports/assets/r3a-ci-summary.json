@@ -1,0 +1,13 @@
+{
+  "verified_utc": "2026-10-13T02:30:41.195249+00:00",
+  "rust": "1.99.0",
+  "fmt": 0,
+  "clippy": 0,
+  "build": 0,
+  "test": 0,
+  "passed": 1341,
+  "failed": 0,
+  "ignored": 10,
+  "groups": 69,
+  "error_markers": false
+}

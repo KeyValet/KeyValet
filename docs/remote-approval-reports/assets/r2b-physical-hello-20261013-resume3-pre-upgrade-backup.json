@@ -1,0 +1,25 @@
+{
+    "access":  "SYSTEM/Administrators only",
+    "master_key_present":  false,
+    "owner":  "Administrators",
+    "vault_present":  false,
+    "inventory":  [
+                      {
+                          "existed":  true,
+                          "path":  "C:\\Program Files\\KeyValet",
+                          "backup_name":  "install"
+                      },
+                      {
+                          "existed":  true,
+                          "path":  "C:\\ProgramData\\KeyValet",
+                          "backup_name":  "data"
+                      },
+                      {
+                          "existed":  false,
+                          "path":  "C:\\Users\\11516\\.keyvalet",
+                          "backup_name":  "user-keyvalet"
+                      }
+                  ],
+    "utc":  "2026-10-13T09:27:52.5946300Z",
+    "backup":  "C:\\ProgramData\\KeyValet-Backups\\pre-upgrade-20261013T0935Z"
+}

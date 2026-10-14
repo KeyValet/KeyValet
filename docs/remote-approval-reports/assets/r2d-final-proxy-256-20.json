@@ -1,0 +1,29 @@
+{
+  "ulimit_n": 256,
+  "iterations": 20,
+  "binary": "/Users/guang/dev/keyvalet/rust/target-r2d/debug/deps/kv_proxy-c6aab852b201f3b1",
+  "filter": "bounded",
+  "exits": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "all_passed": true
+}

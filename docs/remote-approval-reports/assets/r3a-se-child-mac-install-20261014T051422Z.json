@@ -1,0 +1,133 @@
+{
+  "started_utc": "2026-10-14T05:14:19.057796+00:00",
+  "touch_id_requests": 0,
+  "before": {
+    "kv-helper": "abfcb9a65eba7e71fa1f5a2d8a1e2b7a599c7846e3f7d07389ec86e6df73486d",
+    "kv-cli": "6ae38019591ed7ab47c965ff1b1b7227080284251e58c64d422da11455a7cc6d",
+    "kv-touchid": "6aef100d94b2d9f3e5b16b02f99b8128adac5132e7382dc91f85987283ae9442",
+    "kv-relay-client": "accc5f6a0cff09b049a0697f4c048eeebd13f495749e6703b68926f18c4ab91c"
+  },
+  "after": {
+    "kv-helper": "abfcb9a65eba7e71fa1f5a2d8a1e2b7a599c7846e3f7d07389ec86e6df73486d",
+    "kv-cli": "6ae38019591ed7ab47c965ff1b1b7227080284251e58c64d422da11455a7cc6d",
+    "kv-touchid": "38ec772533f9a9efecd48fb7e033042ceecce9722eaae4c6f39c340e22d60a8b",
+    "kv-relay-client": "accc5f6a0cff09b049a0697f4c048eeebd13f495749e6703b68926f18c4ab91c"
+  },
+  "probes": [
+    {
+      "command": [
+        "devices",
+        "list"
+      ],
+      "exit": 0,
+      "elapsed_s": 0.022104,
+      "ok": true,
+      "error_code": null,
+      "device_count": 2,
+      "state": {}
+    },
+    {
+      "command": [
+        "devices",
+        "list"
+      ],
+      "exit": 0,
+      "elapsed_s": 0.01555,
+      "ok": true,
+      "error_code": null,
+      "device_count": 2,
+      "state": {}
+    },
+    {
+      "command": [
+        "devices",
+        "list"
+      ],
+      "exit": 0,
+      "elapsed_s": 0.014487,
+      "ok": true,
+      "error_code": null,
+      "device_count": 2,
+      "state": {}
+    },
+    {
+      "command": [
+        "devices",
+        "list"
+      ],
+      "exit": 0,
+      "elapsed_s": 0.013658,
+      "ok": true,
+      "error_code": null,
+      "device_count": 2,
+      "state": {}
+    },
+    {
+      "command": [
+        "devices",
+        "list"
+      ],
+      "exit": 0,
+      "elapsed_s": 0.013629,
+      "ok": true,
+      "error_code": null,
+      "device_count": 2,
+      "state": {}
+    },
+    {
+      "command": [
+        "status"
+      ],
+      "exit": 0,
+      "elapsed_s": 0.17654,
+      "ok": true,
+      "error_code": null,
+      "device_count": null,
+      "state": {}
+    }
+  ],
+  "ndu_before": {
+    "pending_n": 0,
+    "grants_n": 0,
+    "unattended": false
+  },
+  "mac_pending_before": 0,
+  "backup": "/private/var/backups/keyvalet-r3a-se-child-20261014T051419Z",
+  "backup_sha256": "60586fd28813508e04ebfa69f317166a49b4c471845c8f4f8a72ab9d0529ffee",
+  "services_before": {
+    "system/dev.keyvalet.helper": {
+      "exit": 0,
+      "pid": 33081,
+      "running": true
+    },
+    "gui/501/dev.keyvalet.agent": {
+      "exit": 0,
+      "pid": 33083,
+      "running": true
+    },
+    "gui/501/dev.keyvalet.relay": {
+      "exit": 0,
+      "pid": 33085,
+      "running": true
+    }
+  },
+  "services_after": {
+    "system/dev.keyvalet.helper": {
+      "exit": 0,
+      "pid": 70041,
+      "running": true
+    },
+    "gui/501/dev.keyvalet.agent": {
+      "exit": 0,
+      "pid": 70043,
+      "running": true
+    },
+    "gui/501/dev.keyvalet.relay": {
+      "exit": 0,
+      "pid": 70045,
+      "running": true
+    }
+  },
+  "finished_utc": "2026-10-14T05:14:22.666310+00:00",
+  "owner_ipc_ok": true
+}

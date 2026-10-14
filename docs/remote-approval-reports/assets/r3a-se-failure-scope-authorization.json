@@ -1,0 +1,15 @@
+{
+  "authorized_utc": "2026-10-14T00:13:01.059927+00:00",
+  "user_answer": "全都允许",
+  "scope": "Six proposed producer error-preservation files only; security/role/ACL constraints retained",
+  "files": [
+    "rust/crates/kv-touchid/src/enclave.swift",
+    "rust/crates/kv-touchid/src/device_key.rs",
+    "rust/crates/kv-platform/src/device_key/agent.rs",
+    "rust/crates/kv-ipc/src/remote.rs",
+    "rust/crates/kv-core/src/remote/error.rs",
+    "rust/crates/kv-core/src/remote/keys.rs"
+  ],
+  "proposal": "r3a-se-failure-proposed.patch",
+  "secret_values_in_evidence": false
+}

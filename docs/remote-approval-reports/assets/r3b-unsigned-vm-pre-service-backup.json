@@ -1,0 +1,9 @@
+{
+  "consistent": true,
+  "install_dacl": "O:BAG:S-1-5-21-3283475767-415700631-2745889461-513D:PAI(A;OICI;FA;;;SY)(A;OICI;FA;;;BA)(A;OICI;0x1200a9;;;BU)",
+  "vault_hashes": [],
+  "vault_dacl": "O:BAG:S-1-5-21-3283475767-415700631-2745889461-513D:PAI(A;OICI;FA;;;SY)(A;OICI;FA;;;BA)",
+  "utc": "2026-10-14T01:59:37.4466892Z",
+  "backup": "C:\\ProgramData\\KeyValet-Backups\\pre-r3b-unsigned-20261014T015936Z",
+  "ssh_exit": 0
+}

@@ -1,0 +1,13 @@
+{
+    "temporary_test_fixture_only":  true,
+    "passed":  true,
+    "thumbprint":  "76845B438EE1B3AAE570FD85D14943C6460FE583",
+    "utc":  "2026-10-13T15:12:02.0209786Z",
+    "not_after_utc":  "2026-10-13T17:11:58.0000000Z",
+    "private_key_exported":  false,
+    "signature_status":  "Valid",
+    "production_signing":  false,
+    "publisher":  "Simvito Limited",
+    "certificate_removed":  true,
+    "finished_utc":  "2026-10-13T15:12:28.1691460Z"
+}

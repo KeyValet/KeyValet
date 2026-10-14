@@ -1,0 +1,27 @@
+{
+  "observed_utc": "2026-10-13T22:29:18.087265+00:00",
+  "free_bytes": 14421278720,
+  "minimum_free_bytes": 15000000000,
+  "owner_response": "\u6211\u5148\u817e\u51fa\u81f3\u5c11 2 GB",
+  "additional_cache_deleted": false,
+  "release_build_started": false,
+  "new_agent_signed": false,
+  "new_agent_installed": false,
+  "native_presence_retest_requests": 0,
+  "keyvalet_touch_id_requests": 0,
+  "focused_regressions": {
+    "passed": 4,
+    "failed": 0,
+    "clippy_exit": 0
+  },
+  "latest_full_authenticated_audit": {
+    "matched": 52,
+    "findings": 1,
+    "unavailable": 0
+  },
+  "lid_physical_test_cancelled_by_owner": true,
+  "lid_review_path": "assets/r3a-lid-code-review-20261014.json",
+  "secret_values_in_evidence": false,
+  "free_gb_decimal": 14.421,
+  "build_paused_by_15_gb_rule": true
+}

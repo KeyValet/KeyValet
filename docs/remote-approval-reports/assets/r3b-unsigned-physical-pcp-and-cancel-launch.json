@@ -1,0 +1,35 @@
+{
+  "pcp_result": {
+    "sid": "S-1-5-18",
+    "tests": [
+      {
+        "passed": true,
+        "exit_code": 0,
+        "binary_sha256": "9a357acd27f214fff1b307bd2bbaf49de1b9a70a5b64a39a716693e9228cf0a9",
+        "binary": "C:\\KeyValet-R3B-Unsigned-20261014T052816Z\\native\\debug\\deps\\kv_platform-bbc1303a78ef43f1.exe",
+        "test": "device_key::windows::tests::pcp_identity_dual_key_roundtrip",
+        "seconds": 2.0329113999999997
+      },
+      {
+        "passed": true,
+        "exit_code": 0,
+        "binary_sha256": "9a357acd27f214fff1b307bd2bbaf49de1b9a70a5b64a39a716693e9228cf0a9",
+        "binary": "C:\\KeyValet-R3B-Unsigned-20261014T052816Z\\native\\debug\\deps\\kv_platform-bbc1303a78ef43f1.exe",
+        "test": "device_key::windows::tests::pcp_partial_creation_cleans_up_without_fallback",
+        "seconds": 0.34059809999999996
+      },
+      {
+        "passed": true,
+        "exit_code": 0,
+        "binary_sha256": "a68b6071b188e0f325539f73e62960686659ad69a446f52e6577cf91c31c2f7e",
+        "binary": "C:\\KeyValet-R3B-Unsigned-20261014T052816Z\\native\\debug\\deps\\kv_agent-d6155e4a924ef552.exe",
+        "test": "remote::windows::pcp_acceptance::windows_pcp_k1_native_acceptance",
+        "seconds": 2.2574145999999997
+      }
+    ],
+    "passed": true
+  },
+  "pcp_task": "Ready",
+  "cancel_launched": true,
+  "ssh_exit": 0
+}

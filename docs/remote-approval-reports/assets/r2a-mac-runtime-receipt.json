@@ -1,0 +1,54 @@
+{
+  "receipt": "/Users/guang/.keyvalet/remote-runtime-state.json",
+  "changed_files": [
+    {
+      "path": "/Users/guang/.claude.json",
+      "created": false,
+      "backup_exists": true,
+      "backup_path": "/Users/guang/.claude.json.bak-keyvalet-remote"
+    },
+    {
+      "path": "/Users/guang/.claude/settings.json",
+      "created": false,
+      "backup_exists": true,
+      "backup_path": "/Users/guang/.claude/settings.json.bak-keyvalet-remote"
+    },
+    {
+      "path": "/Users/guang/.codex/config.toml",
+      "created": false,
+      "backup_exists": true,
+      "backup_path": "/Users/guang/.codex/config.toml.bak-keyvalet-remote"
+    },
+    {
+      "path": "/Users/guang/.codex/hooks.json",
+      "created": false,
+      "backup_exists": true,
+      "backup_path": "/Users/guang/.codex/hooks.json.bak-keyvalet-remote"
+    },
+    {
+      "path": "/Users/guang/.grok/config.toml",
+      "created": true,
+      "backup_exists": true,
+      "backup_path": "/Users/guang/.grok/config.toml.bak-keyvalet-remote"
+    },
+    {
+      "path": "/Users/guang/.cursor/hooks.json",
+      "created": false,
+      "backup_exists": true,
+      "backup_path": "/Users/guang/.cursor/hooks.json.bak-keyvalet-remote"
+    },
+    {
+      "path": "/Users/guang/.gemini/settings.json",
+      "created": true,
+      "backup_exists": true,
+      "backup_path": "/Users/guang/.gemini/settings.json.bak-keyvalet-remote"
+    },
+    {
+      "path": "/Users/guang/.config/devin/config.json",
+      "created": false,
+      "backup_exists": true,
+      "backup_path": "/Users/guang/.config/devin/config.json.bak-keyvalet-remote"
+    }
+  ],
+  "backup_contents_copied_to_report": false
+}

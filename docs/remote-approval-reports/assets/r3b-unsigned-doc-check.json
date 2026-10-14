@@ -1,0 +1,22 @@
+{
+  "files": [
+    "docs/remote-approval-architecture-2026-10.zh-CN.md",
+    "docs/remote-approval-product-2026-10.zh-CN.md",
+    "docs/review-2026-10.zh-CN.md",
+    "docs/windows.md",
+    "docs/windows-native-acceptance-2026-10-12.zh-CN.md",
+    "docs/windows-signpath-setup.zh-CN.md",
+    "docs/remote-approval-reports/OPEN-QUESTIONS.md",
+    "docs/remote-approval-reports/R3-B-unsigned-acceptance.md"
+  ],
+  "table_groups": 67,
+  "table_errors": [],
+  "section_refs_missing": [],
+  "external_section_refs_verified": [
+    "10.3",
+    "10.4",
+    "11.4"
+  ],
+  "appendix_refs_missing": [],
+  "new_document_links_missing": []
+}

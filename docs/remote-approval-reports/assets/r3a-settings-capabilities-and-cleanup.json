@@ -1,0 +1,28 @@
+{
+  "observed_utc": "2026-10-13T14:04:12.405340+00:00",
+  "services": {
+    "keyvalet": {
+      "pid": 2073084,
+      "uid": "994\t994\t994\t994",
+      "cap_eff": "0000000000000000",
+      "cap_prm": "0000000000000000",
+      "cap_amb": "0000000000000000"
+    },
+    "keyvalet-peer": {
+      "pid": 2073083,
+      "uid": "0\t0\t0\t0",
+      "cap_eff": "0000000000080000",
+      "cap_prm": "0000000000080000",
+      "cap_amb": "0000000000080000"
+    },
+    "keyvalet-relay": {
+      "pid": 2073085,
+      "uid": "993\t993\t993\t993",
+      "cap_eff": "0000000000000000",
+      "cap_prm": "0000000000000000",
+      "cap_amb": "0000000000000000"
+    }
+  },
+  "new_capabilities": [],
+  "temporary_maintenance_binary_removed": true
+}

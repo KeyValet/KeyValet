@@ -1,0 +1,38 @@
+{
+  "started_utc": "2026-10-13T12:48:02.012091+00:00",
+  "commands": [
+    {
+      "case": "set_per_session",
+      "elapsed_s": 5.719533,
+      "exit": 0,
+      "public_result": {
+        "ok": true,
+        "command": "remote",
+        "results": [
+          {
+            "device_id": "01M4S8KJ48BSMNK1S4BEGT07FC",
+            "id": "01M4TMXC80N1QWHSE73M5QDPZV",
+            "ok": true,
+            "state": {
+              "mode": "per_session"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "secret_values_in_evidence": false,
+  "audit_before_controls": {
+    "fixed_error": "native_audit_timed_out",
+    "collection_timeout_s": 30
+  },
+  "native_local_mode_after_remote": "per_session",
+  "settings_mcp_process": {
+    "pid": 1949964,
+    "start_time": 55325164,
+    "uid": 1000,
+    "parent_pid": 1949962
+  },
+  "fixed_error": "mcp_tool_rejected",
+  "finished_utc": "2026-10-13T12:49:30.700332+00:00"
+}

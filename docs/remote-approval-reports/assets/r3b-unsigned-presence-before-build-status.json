@@ -1,0 +1,25 @@
+{
+  "tail": [
+    "",
+    "failures:",
+    "",
+    "---- existing::presence::windows_hello::tests::repeated_support_keeps_the_cached_sdk_factory_alive stdout ----",
+    "",
+    "thread 'existing::presence::windows_hello::tests::repeated_support_keeps_the_cached_sdk_factory_alive' (7308) panicked at crates\\kv-agent\\src\\presence\\windows_hello.rs:64:13:",
+    "assertion `left == right` failed",
+    "  left: None",
+    " right: Some(true)",
+    "note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace",
+    "",
+    "",
+    "failures:",
+    "    existing::presence::windows_hello::tests::repeated_support_keeps_the_cached_sdk_factory_alive",
+    "",
+    "test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 50 filtered out; finished in 0.00s",
+    "",
+    "error: test failed, to rerun pass `-p kv-agent --lib`"
+  ],
+  "task": 3,
+  "cargo_pids": [],
+  "ssh_exit": 0
+}

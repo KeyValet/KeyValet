@@ -2,6 +2,7 @@ use std::{env, path::PathBuf, process::Command};
 
 fn main() {
     println!("cargo:rerun-if-changed=src/enclave.swift");
+    println!("cargo:rerun-if-changed=src/approval_window.swift");
     println!("cargo:rerun-if-changed=Info.plist");
     println!("cargo:rerun-if-env-changed=MACOSX_DEPLOYMENT_TARGET");
     if env::var("CARGO_CFG_TARGET_OS").as_deref() != Ok("macos") {
@@ -28,11 +29,13 @@ fn main() {
         .args([
             "swiftc",
             "-parse-as-library",
+            "-whole-module-optimization",
             "-O",
             "-emit-object",
             "-target",
             &format!("{arch}-apple-macos{deployment_target}"),
             "src/enclave.swift",
+            "src/approval_window.swift",
             "-o"
         ])
         .arg(&object)
@@ -50,7 +53,29 @@ fn main() {
     println!("cargo:rustc-link-search=native=/usr/lib/swift");
     println!("cargo:rustc-link-lib=static=kv_enclave");
     println!("cargo:rustc-link-lib=dylib=swiftCore");
-    for framework in ["Foundation", "Security", "CryptoKit", "LocalAuthentication"] {
+    for framework in [
+        "Foundation",
+        "Security",
+        "CryptoKit",
+        "LocalAuthentication",
+        "AppKit",
+        "SwiftUI",
+    ] {
         println!("cargo:rustc-link-lib=framework={framework}");
+    }
+    if let Ok(output) = Command::new("xcrun")
+        .args(["clang", "-print-file-name=libclang_rt.osx.a"])
+        .output()
+    {
+        if output.status.success() {
+            let path_str = String::from_utf8_lossy(&output.stdout).trim().to_string();
+            let path = PathBuf::from(&path_str);
+            if path.exists() {
+                if let Some(parent) = path.parent() {
+                    println!("cargo:rustc-link-search=native={}", parent.display());
+                    println!("cargo:rustc-link-lib=static=clang_rt.osx");
+                }
+            }
+        }
     }
 }

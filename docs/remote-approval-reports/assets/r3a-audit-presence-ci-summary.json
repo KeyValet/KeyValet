@@ -1,0 +1,38 @@
+{
+  "started_utc": "2026-10-13T22:52:19.068688+00:00",
+  "rust": "1.99.0",
+  "checks": {
+    "fmt": 0,
+    "clippy": 0,
+    "build": 0,
+    "test": 0
+  },
+  "space_checks": [
+    {
+      "check": "fmt",
+      "free_bytes": 17310396416
+    },
+    {
+      "check": "clippy",
+      "free_bytes": 17310380032
+    },
+    {
+      "check": "build",
+      "free_bytes": 16324009984
+    },
+    {
+      "check": "test",
+      "free_bytes": 15972929536
+    }
+  ],
+  "source_files": 514,
+  "minimum_free_bytes": 15000000000,
+  "secret_values_in_evidence": false,
+  "source_unchanged_during_checks": true,
+  "changed_source_files": [],
+  "passed": 1398,
+  "failed": 0,
+  "ignored": 10,
+  "groups": 69,
+  "finished_utc": "2026-10-13T22:59:38.006697+00:00"
+}

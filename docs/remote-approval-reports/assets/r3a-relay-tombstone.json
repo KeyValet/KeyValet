@@ -1,0 +1,23 @@
+{
+  "observed_utc": "2026-10-13T02:54:38.786272+00:00",
+  "read_only": true,
+  "device_id": "01M4S8KQ0GQ0GAJS06ZC7A8H17",
+  "device_os": "macos",
+  "account_id": "acct_zeP4_V8iHJdLbzJrDU3rfQ",
+  "revoked_utc": "2026-10-13T00:04:43+00:00",
+  "r2a_public_dk_matches": true,
+  "old_pairings": [
+    {
+      "state": "expired",
+      "expires_utc": "2026-10-13T00:04:15+00:00"
+    },
+    {
+      "state": "expired",
+      "expires_utc": "2026-10-13T00:36:07+00:00"
+    },
+    {
+      "state": "expired",
+      "expires_utc": "2026-10-13T02:53:22+00:00"
+    }
+  ]
+}

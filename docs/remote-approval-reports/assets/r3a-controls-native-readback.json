@@ -1,0 +1,9 @@
+{
+  "observed_utc": "2026-10-13T15:31:44.801628+00:00",
+  "read_only": true,
+  "touch_id_requests": 0,
+  "password_prompts": 0,
+  "secret_values_in_evidence": false,
+  "exit": 1,
+  "fixed_error": "existing_admin_timestamp_unavailable"
+}

@@ -1,0 +1,31 @@
+{
+  "stdin_is_terminal": true,
+  "process_group": 70802,
+  "session_id": 70801,
+  "sigttin_disposition": "default",
+  "stdin_foreground_group": 70801,
+  "stdin_terminal": "/dev/ttys010",
+  "controlling_foreground_group": 70801,
+  "stdin_device_matches_controlling_alias": false,
+  "selected_terminal": "/dev/ttys010",
+  "io_counts": {
+    "child_canonical_input": true,
+    "child_cr_to_nl": true,
+    "owner_input_bytes": 4,
+    "owner_input_cr": 0,
+    "owner_input_nl": 1,
+    "label_prompt_detected": true
+  },
+  "fake_cli_exit": 0,
+  "fake_cli_result": {
+    "dummy_line_received": true,
+    "byte_count": 4,
+    "issued": 0
+  },
+  "selected_terminal_foreground_group_after_attempt": 70802,
+  "observed_utc": "2026-10-13T21:23:29.331790+00:00",
+  "read_only": true,
+  "keyvalet_calls": 0,
+  "touch_id_requests": 0,
+  "secret_values_in_evidence": false
+}

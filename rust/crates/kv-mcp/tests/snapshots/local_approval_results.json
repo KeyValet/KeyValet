@@ -1,0 +1,18 @@
+{
+  "dialog_denied": {
+    "status": "approval_denied",
+    "isError": false,
+    "next_steps": {
+      "zh": "用户拒绝了这次请求。不要重试或绕过审批，不要让用户粘贴密钥。将拒绝原因告诉用户。",
+      "en": "The user denied this request. Do not retry or bypass approval, and do not ask the user to paste a key. Tell the user the reason for the denial."
+    }
+  },
+  "request_expired": {
+    "status": "approval_expired",
+    "isError": false,
+    "next_steps": {
+      "zh": "这次请求已过期，没有收到决定。仍需结果时可重新发起，会产生新的审批提示；除非确有必要，不要自动重发。",
+      "en": "This request expired without a decision. You may start a new request if the result is still needed; this creates a new approval prompt. Do not resend automatically unless necessary."
+    }
+  }
+}

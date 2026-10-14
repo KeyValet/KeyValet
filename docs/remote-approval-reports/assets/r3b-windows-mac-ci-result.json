@@ -1,0 +1,35 @@
+{
+  "source_directory": "/Users/guang/dev/keyvalet/rust/target-r2b/r3b-windows-20261013/mac-frozen",
+  "source_fingerprint": "fbf22e994313d82d246b96ccc8e480441f4c048b4ad715f8f8c5bd828f87bf0b",
+  "platform": "macOS Apple Silicon",
+  "toolchain": "rustc 1.99.0 (b940084d7 2026-09-28)",
+  "started_utc": "2026-10-13T21:54:06.786961+00:00",
+  "commands": [
+    {
+      "command": "cargo +1.99.0 fmt --all -- --check",
+      "exit_code": 0,
+      "seconds": 1.0479805420036428,
+      "log": "mac-ci-1.log"
+    },
+    {
+      "command": "cargo +1.99.0 clippy --workspace --all-targets -- -D warnings",
+      "exit_code": 0,
+      "seconds": 2.9961147909925785,
+      "log": "mac-ci-2.log"
+    },
+    {
+      "command": "cargo +1.99.0 build --workspace --locked",
+      "exit_code": 0,
+      "seconds": 3.544968375004828,
+      "log": "mac-ci-3.log"
+    },
+    {
+      "command": "cargo +1.99.0 test --workspace --locked",
+      "exit_code": 0,
+      "seconds": 287.3064360000135,
+      "log": "mac-ci-4.log"
+    }
+  ],
+  "finished_utc": "2026-10-13T21:59:01.687447+00:00",
+  "passed": true
+}

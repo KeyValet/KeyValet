@@ -1,0 +1,202 @@
+{
+  "started_utc": "2026-10-14T01:03:00.680875+00:00",
+  "secret_values_in_evidence": false,
+  "cases": [
+    {
+      "case": "present_delivery_deny",
+      "result": {
+        "status": "approval_denied",
+        "approval_id": "01M4VZ136GB0YSA3WD9CGQM5B4",
+        "expires_at": 1791940474
+      },
+      "elapsed_s": 5.038746,
+      "before": {
+        "pending_n": 0,
+        "grants_n": 0,
+        "unattended": false,
+        "mode": "per_use",
+        "mac_presence": "present"
+      }
+    },
+    {
+      "case": "remote_escape",
+      "result": {
+        "status": "approval_pending",
+        "approval_id": "01M4VZ1PQGTTQZK6M6K5AWTJHY",
+        "expires_at": 1791940494
+      },
+      "state": {
+        "id": "01M4VZ1PQGTTQZK6M6K5AWTJHY",
+        "state": "waiting",
+        "agent_pid": 3845051,
+        "exp": 1791940494,
+        "min_level": "quick",
+        "tier": "T1",
+        "delivery_mode": "banner",
+        "execution_started_n": 0,
+        "execution_completed_n": 0
+      }
+    }
+  ],
+  "commands": [
+    {
+      "case": "strong_sign_cancelled",
+      "exit": 3,
+      "elapsed_s": 8.531664,
+      "result": {
+        "ok": false,
+        "error_code": "key_operation_failed"
+      }
+    }
+  ],
+  "revocation_started": false,
+  "credential": "api_key/r3a-graph-readonly",
+  "method": "GET",
+  "url": "https://graph.microsoft.com/v1.0/me",
+  "expected_successful_se_signatures": 2,
+  "before": {
+    "pending_n": 0,
+    "grants_n": 0,
+    "unattended": false,
+    "mode": "per_use",
+    "mac_presence": "away"
+  },
+  "presence_refresh": {
+    "real_screensaver_open_exit": 0,
+    "keyvalet_approval_requests": 0,
+    "keyvalet_touch_id_requests": 0
+  },
+  "presence_readiness": [
+    {
+      "phase": "after_real_saver_and_unlock",
+      "samples": [
+        {
+          "pending_n": 0,
+          "grants_n": 0,
+          "unattended": false,
+          "mode": "per_use",
+          "mac_presence": "away",
+          "elapsed_s": 0.595871
+        },
+        {
+          "pending_n": 0,
+          "grants_n": 0,
+          "unattended": false,
+          "mode": "per_use",
+          "mac_presence": "away",
+          "elapsed_s": 2.067492
+        },
+        {
+          "pending_n": 0,
+          "grants_n": 0,
+          "unattended": false,
+          "mode": "per_use",
+          "mac_presence": "away",
+          "elapsed_s": 3.431771
+        },
+        {
+          "pending_n": 0,
+          "grants_n": 0,
+          "unattended": false,
+          "mode": "per_use",
+          "mac_presence": "present",
+          "elapsed_s": 4.971034
+        }
+      ]
+    },
+    {
+      "phase": "before_delivery_request",
+      "samples": [
+        {
+          "pending_n": 0,
+          "grants_n": 0,
+          "unattended": false,
+          "mode": "per_use",
+          "mac_presence": "present",
+          "elapsed_s": 0.370118
+        }
+      ]
+    }
+  ],
+  "devices_before": {
+    "observed_utc": "2026-10-14T01:04:22.653150+00:00",
+    "device": {
+      "id": "01M4S8KJ48BSMNK1S4BEGT07FC",
+      "os": "linux",
+      "revoked_at": null
+    },
+    "grants": [
+      {
+        "jti": "approval:01M4SVNXC88217RE2V2HSTCXGS",
+        "iss": "01M4SM5QTRQKNQE1TD6FBJTG79",
+        "aud": "01M4S8KJ48BSMNK1S4BEGT07FC",
+        "exp": 1791912459,
+        "revoked_at": 1791902225
+      },
+      {
+        "jti": "approval:01M4SXBYW00A03JAPMA6ND3B5N",
+        "iss": "01M4SM5QTRQKNQE1TD6FBJTG79",
+        "aud": "01M4S8KJ48BSMNK1S4BEGT07FC",
+        "exp": 1791914229,
+        "revoked_at": 1791902225
+      },
+      {
+        "jti": "01M4TNJD387H1KZXETKHSYVGRK",
+        "iss": "01M4SM5QTRQKNQE1TD6FBJTG79",
+        "aud": "01M4S8KJ48BSMNK1S4BEGT07FC",
+        "exp": 1791900001,
+        "revoked_at": 1791902225
+      },
+      {
+        "jti": "01M4TV4S3G3V4JQJKS47GWPP8Y",
+        "iss": "01M4SM5QTRQKNQE1TD6FBJTG79",
+        "aud": "01M4S8KJ48BSMNK1S4BEGT07FC",
+        "exp": 1791905846,
+        "revoked_at": 1791902254
+      },
+      {
+        "jti": "01M4VJS388MBYCZG5PN1THWWX9",
+        "iss": "01M4SM5QTRQKNQE1TD6FBJTG79",
+        "aud": "01M4S8KJ48BSMNK1S4BEGT07FC",
+        "exp": 1791930629,
+        "revoked_at": 1791927054
+      }
+    ],
+    "approvals": [],
+    "events": [],
+    "active_phone_n": 0
+  },
+  "mac_escape_readback": {
+    "observed_utc": "2026-10-14T01:05:14.639907+00:00",
+    "device": {
+      "id": "01M4S8KJ48BSMNK1S4BEGT07FC",
+      "os": "linux",
+      "revoked_at": null
+    },
+    "grants": [],
+    "approvals": [],
+    "events": [
+      {
+        "op": "pair_completed",
+        "device_id": "01M4S8KJ48BSMNK1S4BEGT07FC"
+      },
+      {
+        "op": "remote_approval_issued",
+        "approval_id": "01M4VZ136GB0YSA3WD9CGQM5B4",
+        "decision": "deny",
+        "approval_level": "quick",
+        "peer": "01M4S8KJ48BSMNK1S4BEGT07FC",
+        "digest": "2ab778701221b68f90fb3c89272b3ba57faf5df2bf62849956a32e5f9bad6eda"
+      },
+      {
+        "op": "remote_ui_rejected",
+        "approval_id": "01M4VZ1PQGTTQZK6M6K5AWTJHY",
+        "reason": "user_cancelled"
+      }
+    ],
+    "active_phone_n": 0
+  },
+  "native_se_cancel_verified": false,
+  "fixed_error": "remaining_se_cancel_not_preserved_as_typed_result",
+  "finished_utc": "2026-10-14T01:05:32.493645+00:00"
+}

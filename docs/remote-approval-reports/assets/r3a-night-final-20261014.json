@@ -1,0 +1,69 @@
+{
+  "observed_utc": "2026-10-13T17:45:02.899129+00:00",
+  "source_matches_final_ci": true,
+  "changed_since_final_ci": [],
+  "ci_receipt": "r3a-executor-revocation-ci-final-summary.json",
+  "ndu": {
+    "device_id": "01M4S8KJ48BSMNK1S4BEGT07FC",
+    "account_id": "acct_zeP4_V8iHJdLbzJrDU3rfQ",
+    "relay": "connected",
+    "mode": "per_use",
+    "pending_n": 0,
+    "grants_n": 0,
+    "unattended": false,
+    "device_revocations_pending": 0
+  },
+  "ndu_services": {
+    "keyvalet.service": {
+      "pid": 2659143,
+      "active": "active",
+      "uid": [
+        "994",
+        "994",
+        "994",
+        "994"
+      ],
+      "groups": [
+        "108",
+        "986"
+      ],
+      "effective_capabilities": "0000000000000000"
+    },
+    "keyvalet-peer.service": {
+      "pid": 2659141,
+      "active": "active",
+      "uid": [
+        "0",
+        "0",
+        "0",
+        "0"
+      ],
+      "groups": [
+        "986"
+      ],
+      "effective_capabilities": "0000000000080000"
+    },
+    "keyvalet-relay.service": {
+      "pid": 2659144,
+      "active": "active",
+      "uid": [
+        "993",
+        "993",
+        "993",
+        "993"
+      ],
+      "groups": [
+        "985"
+      ],
+      "effective_capabilities": "0000000000000000"
+    }
+  },
+  "active_r3a_drivers": [],
+  "approval_requests_started_during_sleep": 0,
+  "user_authentication_prompts_started_during_sleep": 0,
+  "native_revocations_completed": 0,
+  "native_reverse_revocation_preflight_attempts": 1,
+  "lid_window_authorized": false,
+  "mac_package_signed": true,
+  "mac_package_installed": false
+}

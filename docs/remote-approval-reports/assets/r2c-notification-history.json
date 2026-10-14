@@ -1,0 +1,12 @@
+{
+  "at_unix_ms": 1791847159423,
+  "package": "dev.keyvalet.mobile",
+  "notifications": [],
+  "notification_history": [
+    "StatusBarNotification(pkg=dev.keyvalet.mobile user=UserHandle{0} id=1873140361 tag=01M4S6GENGB78WHAEQFE9EY0YE key=0|dev.keyvalet.mobile|1873140361|01M4S6GENGB78WHAEQFE9EY0YE|10315: Notification(channel=kv_banner shortcut=null contentView=null vibrate=null sound=null defaults=0 flags=ONLY_ALERT_ONCE|AUTO_CANCEL color=0x00000000 category=recommendation groupKey=01M4S6GENGB78WHAEQFE9EY0YE actions=2 vis=PRIVATE))",
+    "StatusBarNotification(pkg=dev.keyvalet.mobile user=UserHandle{0} id=1873140361 tag=01M4S6GENGB78WHAEQFE9EY0YE key=0|dev.keyvalet.mobile|1873140361|01M4S6GENGB78WHAEQFE9EY0YE|10315: Notification(channel=kv_silent shortcut=null contentView=null vibrate=null sound=null defaults=0 flags=ONLY_ALERT_ONCE|AUTO_CANCEL color=0x00000000 category=recommendation groupKey=01M4S6GENGB78WHAEQFE9EY0YE actions=2 vis=PRIVATE))",
+    "StatusBarNotification(pkg=dev.keyvalet.mobile user=UserHandle{0} id=-80063915 tag=01M4S6D848P648X8XEB1P4WA42 key=0|dev.keyvalet.mobile|-80063915|01M4S6D848P648X8XEB1P4WA42|10315: Notification(channel=kv_banner shortcut=null contentView=null vibrate=null sound=null defaults=0 flags=ONLY_ALERT_ONCE|AUTO_CANCEL color=0x00000000 category=recommendation groupKey=01M4S6D848P648X8XEB1P4WA42 actions=2 vis=PRIVATE))",
+    "StatusBarNotification(pkg=dev.keyvalet.mobile user=UserHandle{0} id=-1545570570 tag=01M4S66XZGMCFKF7FS5HDDT5ET key=0|dev.keyvalet.mobile|-1545570570|01M4S66XZGMCFKF7FS5HDDT5ET|10315: Notification(channel=kv_banner shortcut=null contentView=null vibrate=null sound=null defaults=0 flags=ONLY_ALERT_ONCE|AUTO_CANCEL color=0x00000000 category=recommendation groupKey=01M4S66XZGMCFKF7FS5HDDT5ET actions=1 vis=PRIVATE))",
+    "StatusBarNotification(pkg=dev.keyvalet.mobile user=UserHandle{0} id=1215169565 tag=01M4S6588RQA4RN4FHAA3AMXQ7 key=0|dev.keyvalet.mobile|1215169565|01M4S6588RQA4RN4FHAA3AMXQ7|10315: Notification(channel=kv_banner shortcut=null contentView=null vibrate=null sound=null defaults=0 flags=ONLY_ALERT_ONCE|AUTO_CANCEL color=0x00000000 category=recommendation groupKey=01M4S6588RQA4RN4FHAA3AMXQ7 actions=2 vis=PRIVATE))"
+  ]
+}

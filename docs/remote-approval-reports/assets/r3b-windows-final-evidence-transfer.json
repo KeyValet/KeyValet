@@ -1,0 +1,11 @@
+{
+  "utc": "2026-10-13T16:33:52.216614+00:00",
+  "failure": "SSH banner exchange timeout during optional evidence ZIP download",
+  "prior_cleanup_verified": true,
+  "pcp_fixture_keys": 0,
+  "hello_remote_strong_aliases": 0,
+  "temporary_hello_tasks_removed": true,
+  "formal_agent_preserved": true,
+  "vault_hash_unchanged": true,
+  "details": "No new interactive task or fingerprint prompt was launched after the operator left. Native receipts remain on Windows and partial/raw logs are preserved in assets."
+}

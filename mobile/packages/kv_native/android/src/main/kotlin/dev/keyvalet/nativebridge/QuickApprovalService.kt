@@ -23,6 +23,7 @@ class QuickApprovalService: Service() {
                 val id = intent?.getStringExtra("approval_id") ?: error("Missing approval")
                 NativeRuntime.call(this, JSONObject().put("op", "quick_decision").put("approval_id", id).put("allow", intent.getBooleanExtra("allow", false)))
                 manager.cancel(id, id.hashCode())
+                PushSyncJob.enqueue(this, false)
             } catch (_: Exception) { }
             finally { stopForeground(STOP_FOREGROUND_REMOVE); stopSelf(startId) }
         }

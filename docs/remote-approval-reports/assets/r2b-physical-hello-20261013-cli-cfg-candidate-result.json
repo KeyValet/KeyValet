@@ -1,0 +1,7 @@
+{
+  "finished_utc": "2026-10-13T06:43:47.5880267Z",
+  "main_source_changed": false,
+  "candidate": "One cfg(any(unix,test)) attribute on unavailable_at",
+  "native_source_restored": true,
+  "exit_code": 0
+}

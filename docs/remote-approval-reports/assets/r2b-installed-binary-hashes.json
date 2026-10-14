@@ -1,0 +1,30 @@
+[
+  {
+    "Path": "C:\\Program Files\\KeyValet\\bin\\kv-agent.exe",
+    "Hash": "CBA45A943936538A138EFA99D9FA9E7751BF98767DCDEAA5B9ABC1AD22F1B771"
+  },
+  {
+    "Path": "C:\\Program Files\\KeyValet\\bin\\kv-cli.exe",
+    "Hash": "923B3BFF7955456EF272F9378768B4A6D589D29203D57F7E39E143FDDEA194F4"
+  },
+  {
+    "Path": "C:\\Program Files\\KeyValet\\bin\\kv-helper.exe",
+    "Hash": "D30138BCA227F324940CAE622BC3DED6532A06AEA7AF811FD7C57148D6A81D49"
+  },
+  {
+    "Path": "C:\\Program Files\\KeyValet\\bin\\kv-hook.exe",
+    "Hash": "E315CBE30DC8F860063F34D3CFD6A9470EB890F428322DE74FF3FE4CD971411D"
+  },
+  {
+    "Path": "C:\\Program Files\\KeyValet\\bin\\kv-mcp.exe",
+    "Hash": "70E1EABA3D6969093266F6C0339CD382F89604369D5166838AD1564AEAE23047"
+  },
+  {
+    "Path": "C:\\Program Files\\KeyValet\\bin\\kv-relay-client.exe",
+    "Hash": "62AAF4CEE5348E8A630B565F77E2EFC3C493303E50B1C25186F0CE2039AAB247"
+  },
+  {
+    "Path": "C:\\Program Files\\KeyValet\\bin\\kv-server.exe",
+    "Hash": "4F17117D384825FFDEA748DFC96E674CCDE4624205A3ECC0D07877A9E0935BD6"
+  }
+]

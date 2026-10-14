@@ -1,0 +1,28 @@
+{
+  "observed_utc": "2026-10-13T03:26:07.776034+00:00",
+  "paths": {
+    "rust/crates/kv-agent/src/remote/agent.rs": "cb0e26468595bdc5aad189808975febcb587a22b279987ece4d201b226807d96",
+    "rust/crates/kv-agent/src/remote/tests.rs": "b2a7729772609c9e06b4d770d74e1598c46bd50c6af18004129a95b8666347ae",
+    "rust/crates/kv-platform/src/agent.rs": "f5761212c045f5b79643e548698b6f51cb6789184ca3de389fdff5c414cc84a7",
+    "rust/crates/kv-helper/src/remote/production.rs": "8f54545e720e17726c8ea188f0ef5ca5c68673f0ef43bc57e2f21e739c7895a1",
+    "rust/crates/kv-helper/src/remote/pipeline.rs": "6db050bdf8a7b0d277e853190c6e298c4fa928073dac60a726983da26c339be7",
+    "rust/crates/kv-helper/src/remote/owner.rs": "922ba96d3324d35ef72379a9b1afa00ad5b906163c746179ac3d99c6852afcc0",
+    "rust/crates/kv-helper/src/remote/engine.rs": "7dfe49b10c6ea4a09fcbe9d4be61733d79e7f05cfd6dfe35c193c63fc3ea3cbc",
+    "rust/crates/kv-helper/src/remote/tests/owner.rs": "a57ef7d432477be2170311c1145d75994c31e89b226fb61215bd943118d3585e",
+    "rust/crates/kv-helper/src/remote/tests/production.rs": "e1601c36daa4c6b00d9332e8b3bf5fc39bfec8609e526742feb969d61ca0752a",
+    "rust/crates/kv-cli/src/remote/transport.rs": "e1df053fe7cd0568139209a3ffd53e65dc39474445fedb9de430990b10dd11fe",
+    "rust/crates/kv-cli/src/remote/system.rs": "b9783a45b2d2b7a5d4ac05d9aac925354546e8fa646b606275b0ce803e2044f9",
+    "rust/crates/kv-cli/src/remote/review_tests.rs": "b538f0a95ef194cc8f093a5c8924f33d91cd60cb3d57308dc915f7ff4dc95854",
+    "rust/crates/kv-touchid/src/remote_main.rs": "a786456d9933a6c23eb23d2ef368f6b8c14391175c0f1470a0b7ba94921b2307",
+    "rust/crates/kv-touchid/src/remote_agent.rs": "b26db71b4002f5ba26c81a68335848778aa8bd80a547da2c37bdee55a83f0495",
+    "rust/crates/kv-touchid/src/remote_auth.rs": "b6214d11d378769b9641803d498190b348c35b745b9a2dbad445c4aff5a13531",
+    "rust/crates/kv-helper/src/remote/bootstrap.rs": "5ca336401165d24a709824a87779b86f2bf3d1a6dff5cbd5e8dd3c7557a90425",
+    "rust/crates/kv-helper/src/remote/server.rs": "f0543744cdede91a77bbca38a38454e6fba187b993a4230fe93b6fdb2e12048b",
+    "rust/crates/kv-helper/src/remote/relay_control.rs": "4bd36ea59a568a671da3741493cd35db9abe9195df80d551363a859fa392a704",
+    "rust/crates/kv-helper/src/remote/tests/transport_edges.rs": "38aa82a1b312e8530e0e7cef5ea2a70bafe5bf92ed6ca81441a6ddf6e366c66f",
+    "rust/crates/kv-cli/src/remote.rs": "81d0dcf5db44d72bdd52dca3a218bab187533b7df8484e02aeafa65e2f47840e",
+    "rust/crates/kv-cli/src/remote/args.rs": "dc8260737569361668018f8c916aae88a8b4de469a52a9c456020b8b9d77ebf3",
+    "rust/crates/kv-cli/src/remote/tests.rs": "aca333c96669f8acddff8e3477bf0e20900a8e2fa1dc9537d7380ff6196562a4"
+  },
+  "previous_snapshot_unchanged_except_new_cli_files": true
+}

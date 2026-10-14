@@ -1,0 +1,18 @@
+{
+  "observed_utc": "2026-10-13T22:16:57.932536+00:00",
+  "exit": 0,
+  "read_only": true,
+  "raw_output_retained": false,
+  "secret_values_in_evidence": false,
+  "files": [
+    {
+      "path": "/var/lib/keyvalet/audit.log",
+      "bytes": 19029
+    },
+    {
+      "path": "/var/lib/keyvalet/remote/audit.log",
+      "bytes": 1376490
+    }
+  ],
+  "matching_public_records": []
+}

@@ -7,7 +7,7 @@
 //!
 //!   kv-hook prompt         UserPromptSubmit: the user pasted a key -> tell the agent to store it
 //!                          in KeyValet.
-//!   kv-hook tool           PreToolUse (Write/Edit/MultiEdit/NotebookEdit/Bash): a literal key is
+//!   kv-hook tool           PreToolUse (file edits/Bash/PowerShell): a literal key is
 //!                          about to be written to a file or a command -> ask the user first and
 //!                          point the agent to KeyValet.
 //!   kv-hook cursor-shell   Cursor `beforeShellExecution`.
@@ -379,7 +379,7 @@ pub fn tool_text(tool_name: &str, input: &Value) -> String {
             })
             .unwrap_or_default(),
         "NotebookEdit" => s(obj.get("new_source")),
-        "Bash" => s(obj.get("command")),
+        "Bash" | "PowerShell" => s(obj.get("command")),
         _ => String::new(),
     }
 }
@@ -456,7 +456,7 @@ fn mcp_tool_text(input: &Value) -> String {
 /// Cursor's `preToolUse` reports the same PascalCase vocabulary).
 fn tool_where(tool_name: &str) -> &'static str {
     match tool_name {
-        "Bash" | "Shell" => "this shell command",
+        "Bash" | "PowerShell" | "Shell" => "this shell command",
         // `apply_patch` is Codex's file-edit tool (its patch text arrives in `command`).
         "Write" | "Edit" | "MultiEdit" | "NotebookEdit" | "apply_patch" => "this file",
         // An MCP tool call or an unrecognized name -- neither "file" nor "shell command"
@@ -964,6 +964,31 @@ mod tests {
         let input =
             serde_json::json!({"tool_name": "Write", "tool_input": {"content": "fn main() {}"}});
         assert!(handle("tool", &input).is_none());
+    }
+
+    #[test]
+    fn claude_powershell_requires_confirmation_without_echoing_the_key() {
+        // This deterministic format fixture is not issued by a service.
+        let value = format!("ghp_{}", "A1b2C3d4E5f6G7h8I9j0K1l2M3n4O5p6Q7r8");
+        let input = serde_json::json!({
+            "tool_name": "PowerShell",
+            "tool_input": {"command": format!("$env:API_TOKEN = '{value}'; Invoke-RestMethod https://api.github.com/user")},
+        });
+        let out =
+            handle("tool", &input).expect("PowerShell must scan the command before execution");
+        assert_eq!(out["hookSpecificOutput"]["permissionDecision"], "ask");
+        assert!(out["hookSpecificOutput"]["permissionDecisionReason"]
+            .as_str()
+            .unwrap()
+            .contains("shell command"));
+        assert!(!out.to_string().contains(&value));
+        assert!(handle(
+            "tool",
+            &serde_json::json!({
+                "tool_name": "PowerShell", "tool_input": {"command": "Get-ChildItem"},
+            })
+        )
+        .is_none());
     }
 
     #[test]

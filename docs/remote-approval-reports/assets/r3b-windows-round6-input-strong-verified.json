@@ -1,0 +1,1 @@
+{"accepted_nonces":1,"alg":"RS256","digest_tamper_rejected":true,"hpke_roundtrip":true,"milliseconds":223640.2759,"quick_t2_rejected":true,"replay_rejected":true,"signature_bytes":256,"status":"passed","tier":"T2","verification_ms":119.6296,"wrong_record_alg_rejected":true}

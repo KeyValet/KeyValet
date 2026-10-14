@@ -1,0 +1,8 @@
+{
+  "utc": "2026-10-13T21:25:51.409888+00:00",
+  "archive_sha256": "7b784e5287f43c5c19bd3856105405013fe5d67c39acfc26aabb5c483fee191e",
+  "retrieved": true,
+  "entries": 29,
+  "export_prefix": "r3b-windows-prior-physical-",
+  "prior_export_issue": "SSH banner exchange timeout; retried after owner restored power"
+}

@@ -1,0 +1,21 @@
+{
+  "started_utc": "2026-10-13T03:48:49.720112+00:00",
+  "rust": "1.99.0",
+  "environment": {
+    "CARGO_INCREMENTAL": "0",
+    "CARGO_PROFILE_DEV_DEBUG": "0",
+    "CARGO_PROFILE_TEST_DEBUG": "0",
+    "CARGO_TARGET_DIR": "/Users/guang/dev/keyvalet/rust/target-r2a"
+  },
+  "fmt": 0,
+  "clippy": 0,
+  "build": 0,
+  "test": 101,
+  "passed": 467,
+  "failed": 1,
+  "ignored": 0,
+  "groups": 10,
+  "source_unchanged_during_checks": true,
+  "source_paths": 24,
+  "finished_utc": "2026-10-13T03:49:30.621911+00:00"
+}

@@ -1,0 +1,11 @@
+{
+    "utc":  "2026-10-13T22:12:41.2513097Z",
+    "no_t2_or_repeat_retest":  true,
+    "output":  "C:\\Users\\11516\\KeyValet-Test-20261013\\r3b\\cancel-only-round1\\owner-output",
+    "task":  "KeyValetR3BCancelOnly-f68c5ee9381542019caf12565ea320a1",
+    "owner_sha256":  "1c54039a8a9506c564b39b4b47b438b0d0f38cd70f4a022061d8aa14af9a268c",
+    "runtime":  "C:\\ProgramData\\KeyValet-Backups\\r3b-cancel-only-f68c5ee9381542019caf12565ea320a1",
+    "base_tested_source":  "fbf22e994313d82d246b96ccc8e480441f4c048b4ad715f8f8c5bd828f87bf0b",
+    "production_sign_budget_unchanged":  true,
+    "uses_installed_worker":  false
+}

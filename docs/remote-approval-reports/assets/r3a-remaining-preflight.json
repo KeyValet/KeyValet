@@ -1,0 +1,17 @@
+{
+  "observed_utc": "2026-10-13T23:53:27.099748+00:00",
+  "read_only": true,
+  "secret_values_in_evidence": false,
+  "free_bytes": 17854189568,
+  "mac_owner_read_exit": 1,
+  "mac_owner_read_fixed_error": "admin_context_unavailable",
+  "ndu_status": {
+    "mode": "per_use",
+    "pending_n": 0,
+    "grants_n": 0,
+    "unattended": false
+  },
+  "mac_presence": [
+    "present"
+  ]
+}

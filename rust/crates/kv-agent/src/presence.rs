@@ -4,6 +4,9 @@ use std::io;
 
 #[cfg(windows)]
 pub mod windows;
+#[cfg(any(windows, test))]
+#[path = "presence/windows_hello.rs"]
+mod windows_hello;
 
 pub trait PresenceSink {
     /// Return success only after the authenticated helper accepts the update.

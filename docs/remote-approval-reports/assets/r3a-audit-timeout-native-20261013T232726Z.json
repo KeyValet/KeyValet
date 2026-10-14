@@ -1,0 +1,100 @@
+{
+  "started_utc": "2026-10-13T23:26:34.893919+00:00",
+  "credential_operations": 0,
+  "keyvalet_touch_id_requests": 0,
+  "query_attempts": 1,
+  "secret_values_in_evidence": false,
+  "relay_pause_exit": 0,
+  "query_wait_s": 10.181756,
+  "query_cli_exit": 4,
+  "query_error_code": "directive_result_timeout",
+  "relay_restore_exit": 0,
+  "directive_id": "01M4VSDN0GX3403TAK56V9KXYP",
+  "late_result_ok": true,
+  "late_result_elapsed_s": 15.759854,
+  "issuer_events": [
+    {
+      "op": "directive_issued",
+      "ts_unix": 1791933995,
+      "audit_seq": 6589,
+      "id": "01M4VSDN0GX3403TAK56V9KXYP",
+      "peer": "01M4S8KJ48BSMNK1S4BEGT07FC",
+      "directive_op": "query_grants",
+      "directive_hash": "cbaa51c1e32d49cc4ba7fe4d4b17edcab908c18305266ab21512df0f5237b939"
+    },
+    {
+      "op": "directive_wait_timeout",
+      "ts_unix": 1791934005,
+      "audit_seq": 6590,
+      "id": "01M4VSDN0GX3403TAK56V9KXYP",
+      "peer": "01M4S8KJ48BSMNK1S4BEGT07FC",
+      "directive_op": "query_grants",
+      "directive_hash": "cbaa51c1e32d49cc4ba7fe4d4b17edcab908c18305266ab21512df0f5237b939",
+      "state": "unconfirmed",
+      "reason": "directive_result_timeout"
+    },
+    {
+      "op": "directive_result",
+      "ts_unix": 1791934010,
+      "audit_seq": 6597,
+      "ok": true,
+      "id": "01M4VSDN0GX3403TAK56V9KXYP",
+      "peer": "01M4S8KJ48BSMNK1S4BEGT07FC"
+    }
+  ],
+  "receiver_counts": {
+    "directive_applied_rows": 1,
+    "directive_applied_events": 1
+  },
+  "audit_cli_exit": 3,
+  "audit": {
+    "matched": 53,
+    "consistent": false,
+    "findings_count": 1,
+    "unavailable_count": 0,
+    "endpoints": [
+      {
+        "device_id": "01M4SM5QTRQKNQE1TD6FBJTG79",
+        "checkpoint": "vault_authenticated_metadata",
+        "head": {
+          "seq": 6597,
+          "hash": "d9c008865323b1200838a38de3b49505418bb84aab5a3bb9872ccd3b6fd155eb"
+        },
+        "entries": 5907
+      },
+      {
+        "device_id": "01M4S8KJ48BSMNK1S4BEGT07FC",
+        "checkpoint": "vault_authenticated_metadata",
+        "head": {
+          "seq": 3297,
+          "hash": "aa156ff47cd24a5c74076cfdb04f36d6063e5f501fd02f24cae12e950e330073"
+        },
+        "entries": 2614
+      }
+    ],
+    "two_endpoint_snapshots": true
+  },
+  "findings": [
+    {
+      "kind": "directive",
+      "id": "01M4TNJG10T64E6D72NQ0VMM7A",
+      "issuer": "01M4SM5QTRQKNQE1TD6FBJTG79",
+      "receiver": "01M4S8KJ48BSMNK1S4BEGT07FC",
+      "problem": "missing_receiver_record",
+      "fields": []
+    }
+  ],
+  "legacy_directive_outcome": [
+    {
+      "id": "01M4TNJG10T64E6D72NQ0VMM7A",
+      "issuer": "01M4SM5QTRQKNQE1TD6FBJTG79",
+      "receiver": "01M4S8KJ48BSMNK1S4BEGT07FC",
+      "directive_op": "query_grants",
+      "wait_timeout_recorded": false,
+      "result_ok": null
+    }
+  ],
+  "native_timeout_case_passed": true,
+  "finished_utc": "2026-10-13T23:27:26.994749+00:00",
+  "elapsed_s": 52.100208
+}

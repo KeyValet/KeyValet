@@ -1,0 +1,30 @@
+{
+  "cleanup": true,
+  "context": "LocalSystem",
+  "hpke_roundtrip": true,
+  "identity_signature_bytes": 64,
+  "installed_summary": null,
+  "key_kind": "pcp_tpm",
+  "milliseconds": 71.657,
+  "pcp_ecdh": true,
+  "pcp_ecdsa": true,
+  "quick_fixture": {
+    "alg": "ES256",
+    "milliseconds": 11.4583,
+    "verified": true
+  },
+  "raw_secret_bytes": 32,
+  "raw_secret_matches_software": true,
+  "reopen": true,
+  "software_fallback": false,
+  "status": {
+    "evidence": "pcp_machine_key_inventory",
+    "pcp_ecdh": true,
+    "pcp_ecdsa": true,
+    "ready": true
+  },
+  "strong_fixture": {
+    "alg": "RS256",
+    "status": "not_requested"
+  }
+}

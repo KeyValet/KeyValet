@@ -828,6 +828,114 @@ async fn strong_device_revocation_deletes_relay_registration_and_invalidates_bot
     windows,
     ignore = "Requires privileged Windows vault ownership; run as LocalSystem with --ignored"
 )]
+async fn executor_revocation_delivers_strong_proof_before_closing_its_online_relay_session() {
+    let directory = tempfile::tempdir().unwrap();
+    let (url, server) = kv_server::spawn_test_relay();
+    let relay = RelayApi::new(url.as_str()).unwrap();
+    let registration = Arc::new(Registration {
+        relay: relay.clone(),
+        join_token: None,
+        joined: Mutex::new(None),
+        runtime: tokio::runtime::Handle::current(),
+    });
+    let (owner, _) = bootstrap(directory.path().join("owner"), registration, true).await;
+    owner
+        .helper
+        .lock()
+        .unwrap()
+        .store
+        .set_setting(
+            "relay_url",
+            &url.as_str(),
+            "local",
+            crate::remote::SystemClock.now(),
+        )
+        .unwrap();
+    let executor = add_executor(&owner, &relay, directory.path().join("executor"), false).await;
+    assert!(executor.helper.local.ak_s.is_none());
+    let owner_session = relay
+        .authenticate(&owner.helper.local, owner.helper.services.identity.clone())
+        .await
+        .unwrap();
+    let executor_session = relay
+        .authenticate(
+            &executor.helper.local,
+            executor.helper.services.identity.clone(),
+        )
+        .await
+        .unwrap();
+    let issued = rpc(&owner.helper, Op::GrantIssue, json!({"source":"settings","kind":"grant",
+        "aud":executor.helper.local.device_id,"scope":{"level":"device","max_tier":"T1"},
+        "nbf":owner.helper.services.clock.now(),"exp":owner.helper.services.clock.now()+3600,"origin":"settings"})).await;
+    assert_eq!(issued["ok"], true);
+    deliver(&owner.helper, &relay, &owner_session)
+        .await
+        .unwrap();
+    // This keeps the target's authenticated WebSocket open, matching an online ndu.
+    deliver(&executor.helper, &relay, &executor_session)
+        .await
+        .unwrap();
+    assert_eq!(
+        executor
+            .helper
+            .grant_list_locked(&executor.helper.lock().unwrap())
+            .unwrap()
+            .len(),
+        1
+    );
+
+    let revoked = rpc(
+        &owner.helper,
+        Op::DevicesRevoke,
+        json!({"device_id":executor.helper.local.device_id}),
+    )
+    .await;
+    assert_eq!(revoked["ok"], true);
+    assert!(server.inspect(|db| db
+        .query_row(
+            "SELECT revoked_at IS NOT NULL FROM devices WHERE id=?1",
+            [&executor.helper.local.device_id],
+            |row| row.get::<_, bool>(0)
+        )
+        .unwrap()));
+    let received = relay.pending(&executor_session).await;
+    assert!(
+        received.is_ok(),
+        "the online executor received no encrypted revocation before relay disconnect"
+    );
+    let received = received.unwrap();
+    assert!(received
+        .iter()
+        .any(|envelope| envelope.r#type == EnvelopeType::DeviceRevoke
+            && envelope.to == executor.helper.local.device_id));
+    for envelope in received {
+        deliver_inbound(&executor.helper, envelope).await.unwrap();
+    }
+    {
+        let state = executor.helper.lock().unwrap();
+        assert_eq!(
+            state
+                .store
+                .device(&executor.helper.local.device_id, &executor.helper.account)
+                .unwrap_err()
+                .code(),
+            "revoked_device"
+        );
+        assert!(executor
+            .helper
+            .grant_list_locked(&state)
+            .unwrap()
+            .iter()
+            .all(|grant| grant["revoked_at"].is_number()));
+    }
+    server.shutdown().await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+#[cfg_attr(
+    windows,
+    ignore = "Requires privileged Windows vault ownership; run as LocalSystem with --ignored"
+)]
 async fn pairing_exclusion_is_signed_and_blocks_existing_and_future_global_grants() {
     let directory = tempfile::tempdir().unwrap();
     let (url, server) = kv_server::spawn_test_relay();
@@ -872,6 +980,52 @@ async fn pairing_exclusion_is_signed_and_blocks_existing_and_future_global_grant
         .iter()
         .any(|envelope| envelope.to == executor.helper.local.device_id));
     server.shutdown().await;
+}
+
+async fn deliver_inbound(helper: &Arc<RemoteHelper>, envelope: Envelope) -> Result<()> {
+    let response = serde_json::to_value(
+        helper
+            .handle(
+                CallerContext::authenticated(Caller::RelayClient, 501, 4242, 210),
+                Request {
+                    op: Op::RelayInbound,
+                    params: json!({"envelope":envelope}),
+                    extra: Extra::new(),
+                },
+            )
+            .await,
+    )?;
+    if response["ok"] == true && response["result"]["ack"] == true {
+        Ok(())
+    } else {
+        Err(Error("test_relay_inbound_unacked"))
+    }
+}
+
+#[tokio::test]
+async fn r3a_late_pair_confirm_is_rejected_and_delivery_can_be_acknowledged() {
+    let h = Harness::new();
+    let before = directory(&h.helper.lock().unwrap().store).unwrap();
+    let envelope = h.envelope(EnvelopeType::PairConfirm, "completed-pair", &json!({}));
+    deliver_inbound(&h.helper, envelope).await.unwrap();
+    assert_eq!(directory(&h.helper.lock().unwrap().store).unwrap(), before);
+    assert!(h.helper.lock().unwrap().pairing.is_none());
+    assert!(h
+        .audit
+        .entries
+        .lock()
+        .unwrap()
+        .iter()
+        .any(
+            |entry| entry["op"] == "remote_message_rejected" && entry["reason"] == "unknown_token"
+        ));
+    h.audit.fail.store(true, Ordering::SeqCst);
+    let unavailable = h.envelope(
+        EnvelopeType::PairConfirm,
+        "audit-unavailable-pair",
+        &json!({}),
+    );
+    assert!(deliver_inbound(&h.helper, unavailable).await.is_err());
 }
 
 async fn deliver(helper: &Arc<RemoteHelper>, bridge: &RelayApi, _device: &str) -> Result<()> {
@@ -985,11 +1139,7 @@ async fn deliver(helper: &Arc<RemoteHelper>, bridge: &RelayApi, _device: &str) -
     {
         let id = envelope.id.clone();
         let kind = envelope.r#type.as_str().to_owned();
-        match helper.inbound(envelope).await {
-            Ok(()) => {}
-            Err(error) if error.code() == "already_consumed" => {}
-            Err(error) => return Err(error),
-        }
+        deliver_inbound(helper, envelope).await?;
         let _: OkResponse = relay
             .post(
                 "v1/messages/ack",

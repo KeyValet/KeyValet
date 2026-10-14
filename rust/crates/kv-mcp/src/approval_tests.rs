@@ -245,6 +245,7 @@ async fn every_terminal_approval_state_is_a_normal_tool_result() {
     for (scenario, status) in [
         (Scenario::Denied, "approval_denied"),
         (Scenario::Expired, "approval_expired"),
+        (Scenario::Cancelled, "approval_cancelled"),
         (Scenario::NoApprover, "no_approver"),
     ] {
         let mut client = Client::new("unknown", scenario, ApprovalConfig::default()).await;
@@ -255,6 +256,84 @@ async fn every_terminal_approval_state_is_a_normal_tool_result() {
         assert!(result["next_steps"].is_string());
         assert_eq!(client.helper.executions.load(Ordering::SeqCst), 0);
     }
+}
+
+#[tokio::test]
+async fn local_dialog_denial_and_request_expiry_match_their_distinct_result_snapshots() {
+    let snapshot: Value = serde_json::from_str(include_str!(
+        "../tests/snapshots/local_approval_results.json"
+    ))
+    .unwrap();
+    for (scenario, name) in [
+        (Scenario::LocalDenied, "dialog_denied"),
+        (Scenario::LocalExpired, "request_expired"),
+    ] {
+        let mut client = Client::new("unknown", scenario, ApprovalConfig::default()).await;
+        let id = client
+            .send(
+                "tools/call",
+                json!({"name":"credential_http_request","arguments":http_args()}),
+            )
+            .await;
+        let result = client.response(id).await;
+        assert_eq!(result["isError"], snapshot[name]["isError"]);
+        let value: Value =
+            serde_json::from_str(result["content"][0]["text"].as_str().unwrap()).unwrap();
+        let steps = &snapshot[name]["next_steps"];
+        assert_eq!(
+            value,
+            json!({"status":snapshot[name]["status"],"approval_id":APPROVAL_ID,
+            "next_steps":kv_i18n::t(steps["zh"].as_str().unwrap(),steps["en"].as_str().unwrap())})
+        );
+        assert_eq!(client.helper.executions.load(Ordering::SeqCst), 0);
+    }
+    assert!(approval::local_outcome(&json!({"code":"local_approval_timeout"})).is_none());
+    assert_eq!(
+        approval::local_outcome(
+            &json!({"code":"local_approval_timeout","approval_id":APPROVAL_ID,"expires_at":0})
+        )
+        .unwrap()["status"],
+        "approval_expired"
+    );
+    assert_eq!(approval::local_outcome(&json!({"code":"local_approval_timeout","approval_id":APPROVAL_ID,"expires_at":i64::MAX})).unwrap()["status"],"approval_pending");
+    assert!(approval::local_outcome(&json!({"message":"denied or timed out"})).is_none());
+}
+
+#[test]
+fn verified_client_budget_requires_the_measured_name_and_version_and_obeys_explicit_caps() {
+    let config = ApprovalConfig::default();
+    assert_eq!(
+        config
+            .client_budget("codex-mcp-client", "0.162.1")
+            .as_secs(),
+        180
+    );
+    for version in ["fixture", "0.161.0", "0.163.0", ""] {
+        assert_eq!(
+            config.client_budget("codex-mcp-client", version).as_secs(),
+            50
+        );
+    }
+    let capped = ApprovalConfig {
+        server_timeout_s: Some(60),
+        ..Default::default()
+    };
+    assert_eq!(
+        capped
+            .client_budget("codex-mcp-client", "0.162.1")
+            .as_secs(),
+        50
+    );
+    let explicit = ApprovalConfig {
+        runtime_overrides: [("codex-mcp-client".into(), 42)].into(),
+        ..Default::default()
+    };
+    assert_eq!(
+        explicit
+            .client_budget("codex-mcp-client", "0.162.1")
+            .as_secs(),
+        42
+    );
 }
 
 #[tokio::test(start_paused = true)]
@@ -469,7 +548,7 @@ async fn initialize_selects_the_table_and_status_includes_remote_approval() {
 
 #[test]
 fn configuration_overrides_are_explicit_and_unknown_clients_remain_conservative() {
-    assert_eq!(approval::runtime_budget("codex-mcp-client", None), 60);
+    assert_eq!(approval::runtime_budget("codex-mcp-client", None), 50);
     assert_eq!(approval::runtime_budget("codex-mcp-client", Some(900)), 180);
     assert_eq!(approval::runtime_budget("claude-code", Some(60)), 50);
     assert_eq!(approval::runtime_budget("unknown", Some(900)), 50);
@@ -560,6 +639,7 @@ fn every_a8_status_has_both_language_snapshots_and_normal_mcp_semantics() {
         "ok",
         "approval_pending",
         "approval_denied",
+        "approval_cancelled",
         "approval_expired",
         "no_approver",
         "approved_retry_required",

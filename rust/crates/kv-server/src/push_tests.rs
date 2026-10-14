@@ -69,7 +69,6 @@ impl Harness {
             os: Os::Linux,
             key_kind: kv_core::remote::KeyKind::Software,
             dk_pub: key.public_jwk().unwrap(),
-            dk_sig: None,
             dk_sig: kv_core::remote::Optional::Missing,
             ak_q: None,
             ak_s: None,
@@ -89,14 +88,8 @@ impl Harness {
             )
             .unwrap();
             for device in [&sender, &phone] {
-                crate::state::insert_device(
-                    db,
-                    "acct_r2c",
-                    device,
-                    None,
-                    relay.state.now(),
-                )
-                .unwrap();
+                crate::state::insert_device(db, "acct_r2c", device, None, relay.state.now())
+                    .unwrap();
             }
             db.execute(
                 "INSERT INTO sessions(token_hash,device_id,exp) VALUES(?1,?2,?3)",
@@ -186,17 +179,17 @@ impl Harness {
 async fn connectivity_does_not_override_signed_delivery_and_directives_wake_silently() {
     let h = Harness::new().await;
     for connected in [false, true] {
+        let (sender, _receiver) = tokio::sync::mpsc::channel(128);
         h.relay
             .state
             .with(|data, _| {
                 data.presence.clear();
                 if connected {
-                    let (sender, _) = tokio::sync::mpsc::channel(1);
                     data.presence.insert(
                         h.phone.device_id.clone(),
                         crate::state::Presence {
                             connection: "test".into(),
-                            sender,
+                            sender: sender.clone(),
                         },
                     );
                 }
@@ -210,15 +203,16 @@ async fn connectivity_does_not_override_signed_delivery_and_directives_wake_sile
             let stats = h.relay.flush_push().await.unwrap();
             assert_eq!(stats.sent, 1);
             assert_eq!(stats.ws_connected, usize::from(connected));
-            let records = h.fake.records.lock().unwrap();
-            let sent = records.last().unwrap();
-            assert_eq!(
-                sent["delivery"]["mode"],
-                json!(mode.unwrap_or(DeliveryMode::Banner))
-            );
-            assert_eq!(sent["to"], h.phone.device_id);
-            assert!(!sent.to_string().contains("r2c-opaque-content"));
-            drop(records);
+            {
+                let records = h.fake.records.lock().unwrap();
+                let sent = records.last().unwrap();
+                assert_eq!(
+                    sent["delivery"]["mode"],
+                    json!(mode.unwrap_or(DeliveryMode::Banner))
+                );
+                assert_eq!(sent["to"], h.phone.device_id);
+                assert!(!sent.to_string().contains("r2c-opaque-content"));
+            }
             h.submit(envelope).await;
             assert_eq!(h.relay.flush_push().await.unwrap().attempted, 0);
         }
@@ -320,10 +314,62 @@ fn expired_human_sessions_and_revoked_devices_remove_tokens_before_dispatch() {
             assert_eq!(cleanup_tokens(&data.db, now, false)?, 0);
             assert_eq!(cleanup_tokens(&data.db, now, true)?, 1);
             data.db.execute(
+                "INSERT INTO login_users(id,provider,subject,email,display_name,created_at)
+                 VALUES('usr_r2c','google','r2c-session-owner','','',?1)",
+                [now],
+            )?;
+            data.db.execute(
+                "INSERT INTO account_sessions(token_hash,user_id,device_id,exp,created_at)
+                 VALUES('r2c-expired','usr_r2c',?1,?2,?2)",
+                params![fixture.principal.device.device_id, now],
+            )?;
+            let set_token = || {
+                data.db.execute(
+                    "UPDATE devices SET push_token=?1 WHERE id=?2",
+                    params![b"test-token", fixture.principal.device.device_id],
+                )
+            };
+            set_token()?;
+            assert_eq!(cleanup_tokens(&data.db, now, true)?, 1);
+            data.db.execute(
+                "INSERT INTO account_sessions(token_hash,user_id,device_id,exp,created_at)
+                 VALUES('r2c-current','usr_r2c',?1,?2,?3)",
+                params![fixture.principal.device.device_id, now + 600, now],
+            )?;
+            set_token()?;
+            assert_eq!(cleanup_tokens(&data.db, now, true)?, 0);
+            let token = || {
+                data.db.query_row(
+                    "SELECT push_token FROM devices WHERE id=?1",
+                    [&fixture.principal.device.device_id],
+                    |row| row.get::<_, Option<Vec<u8>>>(0),
+                )
+            };
+            // Cleaning an old session cannot invalidate the current login's token.
+            data.db.execute(
+                "DELETE FROM account_sessions WHERE token_hash='r2c-expired'",
+                [],
+            )?;
+            assert!(token()?.is_some());
+            // Removal is atomic with deletion of the last human session, without a worker tick.
+            data.db.execute(
+                "DELETE FROM account_sessions WHERE token_hash='r2c-current'",
+                [],
+            )?;
+            assert!(token()?.is_none());
+            data.db.execute(
                 "UPDATE devices SET push_token=?1,revoked_at=?2 WHERE id=?3",
                 params![b"test-token", now, fixture.principal.device.device_id],
             )?;
-            assert_eq!(cleanup_tokens(&data.db, now, false)?, 1);
+            assert!(data
+                .db
+                .query_row(
+                    "SELECT push_token FROM devices WHERE id=?1",
+                    [&fixture.principal.device.device_id],
+                    |row| row.get::<_, Option<Vec<u8>>>(0)
+                )?
+                .is_none());
+            assert_eq!(cleanup_tokens(&data.db, now, false)?, 0);
             Ok(())
         })
         .unwrap();

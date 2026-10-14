@@ -1,0 +1,10 @@
+{
+  "owner": "春有约花不误\\11516",
+  "session_id": 13,
+  "initial_elevated": false,
+  "setup_skipped": true,
+  "package_sha256": "755ab56a79a4246ccd27ce541e9dc35a382a41573b195028d83e2acf04c145f0",
+  "started_utc": "2026-10-13T03:19:21.7804082Z",
+  "passed": true,
+  "finished_utc": "2026-10-13T03:19:54.3052132Z"
+}

@@ -191,11 +191,12 @@ pub fn verify_grant(
     {
         return Err(RemoteError::InsufficientLevel);
     }
-    // CONTRACT: A.4 overrides §7.6: finite T2 grants encode settings origin; standing also encodes label confirmation.
+    // K4: every T2 grant binds one current executor label, including finite grants.
     if grant.scope.max_tier == Tier::T2
         && (grant.origin != "settings"
-            || (grant.exp.is_none()
-                && grant.confirm.as_value().map(String::as_str) != Some(audience_label)))
+            || grant.aud == "*"
+            || grant.scope.level == GrantScopeLevel::Global
+            || grant.confirm.as_value().map(String::as_str) != Some(audience_label))
     {
         return Err(RemoteError::InvalidGrant);
     }

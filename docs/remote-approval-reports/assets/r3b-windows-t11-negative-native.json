@@ -1,0 +1,7 @@
+{
+    "absent_waits":  true,
+    "seconds":  7.1218217999999993,
+    "vault_dacl_unchanged":  true,
+    "existing_unreadable_fails_nonzero":  true,
+    "passed":  true
+}

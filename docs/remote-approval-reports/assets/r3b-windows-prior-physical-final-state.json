@@ -1,0 +1,12 @@
+{
+    "vault_sha256":  "9f163953f99bf1f31aa49e7a9744cf9e20a3b16e14ea8f3e4dc2b13286eeab7c",
+    "master_key_present":  false,
+    "utc":  "2026-10-13T16:29:21.5253113Z",
+    "formal_agent_task":  true,
+    "relay_state":  "Stopped",
+    "backup_preserved":  true,
+    "helper_state":  "Running",
+    "temporary_hello_tasks":  [
+
+                              ]
+}

@@ -5,6 +5,311 @@ use kv_core::remote::ipc::{GrantIntent, GrantSource};
 use rusqlite::OptionalExtension;
 
 #[tokio::test]
+async fn r3a_owner_control_confirmation_does_not_run_a_second_biometric_policy() {
+    use crate::remote::production::{OwnerUi, ProcessIdentity, Processes, ProductionRunner, Task};
+    struct NoProcesses;
+    impl Processes for NoProcesses {
+        fn inspect(&self, _: u32) -> Result<ProcessIdentity> {
+            Err(Error("process_unavailable"))
+        }
+    }
+    struct Ui;
+    impl OwnerUi for Ui {
+        fn request(&self, op: &'static str, fields: Value) -> Task<'_, Value> {
+            assert_eq!(
+                op, "confirm",
+                "confirmation precedes the separately required hardware signature"
+            );
+            let message = fields["message"].as_str().unwrap();
+            assert!(message.contains("dev_executor"));
+            assert!(!message.contains("private-test-nonce"));
+            Box::pin(async { Ok(json!({"confirmed":true})) })
+        }
+    }
+    for (reason, binding, required) in [
+        (
+            "issue_directive",
+            json!({"directive":{"aud":"dev_executor","op":"lock","nonce":"private-test-nonce"},"minimum_level":"quick"}),
+            ApprovalLevel::Quick,
+        ),
+        (
+            "issue_directive",
+            json!({"directive":{"aud":"dev_executor","op":"set_mode","args":{"mode":"per_session"},"nonce":"private-test-nonce"},"minimum_level":"strong"}),
+            ApprovalLevel::Strong,
+        ),
+        (
+            "issue_grant",
+            json!({"intent":{"aud":"dev_executor","scope":{"level":"credential","credential":"api_key/ci-readonly","max_tier":"T1"},"nbf":100,"exp":3700}}),
+            ApprovalLevel::Strong,
+        ),
+        (
+            "prepare_grant",
+            json!({"intent":{"aud":"dev_executor","scope":{"level":"device","max_tier":"T2"},"nbf":100,"exp":3700}}),
+            ApprovalLevel::Strong,
+        ),
+        (
+            "revoke_device_proof",
+            json!({"device_id":"dev_executor","label":"CI execution device","challenge":"private-test-nonce"}),
+            ApprovalLevel::Strong,
+        ),
+    ] {
+        let runner = ProductionRunner::new(Arc::new(NoProcesses));
+        runner.set_owner_ui(Some(Arc::new(Ui))).unwrap();
+        assert_eq!(
+            runner.local_authorize(reason, binding).await.unwrap(),
+            required
+        );
+    }
+}
+
+#[tokio::test]
+async fn r3a_owner_control_confirmation_requires_literal_true() {
+    use crate::remote::production::{OwnerUi, ProcessIdentity, Processes, ProductionRunner, Task};
+    struct NoProcesses;
+    impl Processes for NoProcesses {
+        fn inspect(&self, _: u32) -> Result<ProcessIdentity> {
+            Err(Error("process_unavailable"))
+        }
+    }
+    struct Ui(Value);
+    impl OwnerUi for Ui {
+        fn request(&self, op: &'static str, _: Value) -> Task<'_, Value> {
+            assert_eq!(op, "confirm");
+            let reply = self.0.clone();
+            Box::pin(async move { Ok(reply) })
+        }
+    }
+    for (reply, expected) in [
+        (json!({"confirmed":false}), "user_cancelled"),
+        (json!({"outcome":"approved"}), "invalid_remote_response"),
+        (json!({"confirmed":"true"}), "invalid_remote_response"),
+        (json!({"confirmed":null}), "invalid_remote_response"),
+    ] {
+        let runner = ProductionRunner::new(Arc::new(NoProcesses));
+        runner.set_owner_ui(Some(Arc::new(Ui(reply)))).unwrap();
+        let result = runner
+            .local_authorize(
+                "issue_directive",
+                json!({"directive":{"aud":"dev_executor","op":"lock"},"minimum_level":"quick"}),
+            )
+            .await;
+        assert_eq!(result.unwrap_err().code(), expected);
+    }
+}
+
+#[tokio::test]
+async fn r3a_owner_control_confirmation_cannot_issue_without_the_strong_key() {
+    use crate::remote::production::{OwnerUi, ProcessIdentity, Processes, ProductionRunner, Task};
+    struct NoProcesses;
+    impl Processes for NoProcesses {
+        fn inspect(&self, _: u32) -> Result<ProcessIdentity> {
+            Err(Error("process_unavailable"))
+        }
+    }
+    struct Ui;
+    impl OwnerUi for Ui {
+        fn request(&self, op: &'static str, _: Value) -> Task<'_, Value> {
+            assert_eq!(op, "confirm");
+            Box::pin(async { Ok(json!({"confirmed":true})) })
+        }
+    }
+    let mut h = signing_harness();
+    let runner = ProductionRunner::new(Arc::new(NoProcesses));
+    runner.set_owner_ui(Some(Arc::new(Ui))).unwrap();
+    let helper = Arc::get_mut(&mut h.helper).unwrap();
+    helper.services.runner = runner;
+    helper.services.strong = None;
+    let response = h
+        .exchange(
+            Caller::CliOwner,
+            Op::GrantIssue,
+            json!(intent(&h, Tier::T1)),
+        )
+        .await;
+    assert_eq!(response["ok"], false);
+    assert_eq!(response["error"]["code"], "key_unavailable");
+    assert_eq!(issued(&h), 0);
+}
+
+#[tokio::test]
+async fn r3a_owner_control_confirmation_preserves_legacy_raw_directive_authentication() {
+    use crate::remote::production::{OwnerUi, ProcessIdentity, Processes, ProductionRunner, Task};
+    struct NoProcesses;
+    impl Processes for NoProcesses {
+        fn inspect(&self, _: u32) -> Result<ProcessIdentity> {
+            Err(Error("process_unavailable"))
+        }
+    }
+    struct Ui;
+    impl OwnerUi for Ui {
+        fn request(&self, op: &'static str, _: Value) -> Task<'_, Value> {
+            assert_eq!(op, "authenticate");
+            Box::pin(async { Ok(json!({"outcome":"approved"})) })
+        }
+    }
+    let runner = ProductionRunner::new(Arc::new(NoProcesses));
+    runner.set_owner_ui(Some(Arc::new(Ui))).unwrap();
+    for (reason, binding) in [
+        (
+            "issue_directive",
+            json!({"aud":"dev_executor","op":"query_status"}),
+        ),
+        (
+            "revoke_device",
+            json!({"device_id":"dev_executor","label":"CI local-only target"}),
+        ),
+    ] {
+        let level = runner.local_authorize(reason, binding).await.unwrap();
+        assert_eq!(level, ApprovalLevel::Strong);
+    }
+}
+
+#[tokio::test]
+async fn r3a_owner_metadata_queries_do_not_prompt_but_still_require_the_quick_key() {
+    use crate::remote::production::{OwnerUi, ProcessIdentity, Processes, ProductionRunner, Task};
+    struct NoProcesses;
+    impl Processes for NoProcesses {
+        fn inspect(&self, _: u32) -> Result<ProcessIdentity> {
+            Err(Error("process_unavailable"))
+        }
+    }
+    struct NoPrompt;
+    impl OwnerUi for NoPrompt {
+        fn request(&self, _: &'static str, _: Value) -> Task<'_, Value> {
+            panic!("metadata queries from the authenticated owner must not open a dialog")
+        }
+    }
+    let runner = ProductionRunner::new(Arc::new(NoProcesses));
+    runner.set_owner_ui(Some(Arc::new(NoPrompt))).unwrap();
+    for op in [
+        "query_status",
+        "query_pending",
+        "query_grants",
+        "query_audit",
+    ] {
+        assert_eq!(
+            runner
+                .local_authorize(
+                    "issue_directive",
+                    json!({"directive":{"aud":"dev_executor","op":op},"minimum_level":"quick"})
+                )
+                .await
+                .unwrap(),
+            ApprovalLevel::Quick
+        );
+    }
+    let mut h = signing_harness();
+    let helper = Arc::get_mut(&mut h.helper).unwrap();
+    helper.services.runner = runner;
+    helper.services.quick = None;
+    let response = h
+        .exchange(
+            Caller::CliOwner,
+            Op::DirectiveIssue,
+            json!({"kind":"directive","aud":h.peer.device_id,"op":"query_status","args":{}}),
+        )
+        .await;
+    assert_eq!(response["ok"], false);
+    assert_eq!(response["error"]["code"], "key_unavailable");
+}
+
+#[tokio::test]
+async fn r3a_private_ui_protocol_failure_is_not_a_user_cancellation() {
+    use crate::remote::production::{OwnerUi, ProcessIdentity, Processes, ProductionRunner, Task};
+    struct NoProcesses;
+    impl Processes for NoProcesses {
+        fn inspect(&self, _: u32) -> Result<ProcessIdentity> {
+            Err(Error("process_unavailable"))
+        }
+    }
+    struct Ui(Value);
+    impl OwnerUi for Ui {
+        fn request(&self, _: &'static str, _: Value) -> Task<'_, Value> {
+            let reply = self.0.clone();
+            Box::pin(async move { Ok(reply) })
+        }
+    }
+    for (reply, code) in [
+        (
+            json!({"ok":false,"error":"invalid_remote_request"}),
+            "invalid_remote_request",
+        ),
+        (
+            json!({"ok":false,"error":"remote_action_cancelled"}),
+            "user_cancelled",
+        ),
+        (
+            json!({"ok":false,"error":"remote_request_expired"}),
+            "remote_request_expired",
+        ),
+        (
+            json!({"ok":false,"error":"remote_ui_unavailable"}),
+            "remote_ui_unavailable",
+        ),
+        (
+            json!({"ok":false,"error":"untrusted arbitrary text"}),
+            "remote_ui_unavailable",
+        ),
+        (json!({"ok":false}), "remote_ui_unavailable"),
+    ] {
+        let runner = ProductionRunner::new(Arc::new(NoProcesses));
+        runner.set_owner_ui(Some(Arc::new(Ui(reply)))).unwrap();
+        let error = runner
+            .local_authorize(
+                "remote_decide",
+                json!({
+                    "request":fixture("decision_valid.json")["request"],
+                    "decision":"allow", "scope":{"mode":"per_use","level":"credential","until":0},
+                    "scope_option":"per_use", "minimum_level":"strong",
+                }),
+            )
+            .await
+            .unwrap_err();
+        assert_eq!(error.code(), code);
+    }
+}
+
+#[tokio::test]
+async fn r3a_cli_decision_private_ui_uses_an_offered_scope_string_and_required_level() {
+    use crate::remote::production::{OwnerUi, ProcessIdentity, Processes, ProductionRunner, Task};
+    struct NoProcesses;
+    impl Processes for NoProcesses {
+        fn inspect(&self, _: u32) -> Result<ProcessIdentity> {
+            Err(Error("process_unavailable"))
+        }
+    }
+    struct Ui;
+    impl OwnerUi for Ui {
+        fn request(&self, op: &'static str, fields: Value) -> Task<'_, Value> {
+            assert_eq!(op, "remote_approval");
+            assert_eq!(fields["request"]["requested_scope"], "per_use");
+            assert_eq!(fields["request"]["min_level"], "strong");
+            assert_eq!(fields["request"]["scope_options"], json!(["per_use"]));
+            Box::pin(async move {
+                Ok(json!({"ok":true,"params":{
+                "approval_id":fields["request"]["approval_id"],"decision":"allow",
+                "scope":{"mode":"per_use","level":"credential","until":0}}}))
+            })
+        }
+    }
+    let runner = ProductionRunner::new(Arc::new(NoProcesses));
+    runner.set_owner_ui(Some(Arc::new(Ui))).unwrap();
+    let request = fixture("decision_valid.json")["request"].clone();
+    let level = runner
+        .local_authorize(
+            "remote_decide",
+            json!({
+                "request":request,"decision":"allow","scope_option":"per_use",
+                "scope":{"mode":"per_use","level":"credential","until":0},"minimum_level":"strong",
+                "unattended":false,
+            }),
+        )
+        .await
+        .unwrap();
+    assert_eq!(level, ApprovalLevel::Strong);
+}
+
+#[tokio::test]
 async fn the_private_approval_ui_uses_real_helper_signatures_and_cancel_keeps_it_pending() {
     use crate::remote::production::{OwnerUi, ProcessIdentity, Processes, ProductionRunner, Task};
     struct NoProcesses;
@@ -27,7 +332,7 @@ async fn the_private_approval_ui_uses_real_helper_signatures_and_cancel_keeps_it
             self.calls.lock().unwrap().push(fields.clone());
             Box::pin(async move {
                 if self.cancel {
-                    Ok(json!({"ok":false}))
+                    Ok(json!({"ok":false,"error":"remote_action_cancelled"}))
                 } else {
                     Ok(
                         json!({"ok":true,"params":{"approval_id":fields["request"]["approval_id"],
@@ -37,7 +342,7 @@ async fn the_private_approval_ui_uses_real_helper_signatures_and_cancel_keeps_it
             })
         }
     }
-    for cancel in [false, true] {
+    for (cancel, present_silent) in [(false, false), (true, false), (false, true)] {
         let h = signing_harness();
         let ui = Arc::new(Ui {
             cancel,
@@ -76,7 +381,20 @@ async fn the_private_approval_ui_uses_real_helper_signatures_and_cancel_keeps_it
         let mut request: ApprovalRequest =
             serde_json::from_value(fixture("decision_valid.json")["request"].clone()).unwrap();
         request.requester.device_id = h.peer.device_id.clone();
-        request.delivery.mode = DeliveryMode::Banner;
+        request.delivery.mode = if present_silent {
+            DeliveryMode::Silent
+        } else {
+            DeliveryMode::Banner
+        };
+        if present_silent {
+            let hint: PresenceHint = serde_json::from_value(json!({
+                "device_id":helper.local.device_id,"state":"present","since":h.clock.now(),"sent_at":h.clock.now(),
+            })).unwrap();
+            helper.lock().unwrap().local_hint = Some(crate::remote::engine::Hint {
+                hint,
+                received_at: h.clock.now(),
+            });
+        }
         helper
             .inbound(h.envelope(
                 EnvelopeType::ApprovalRequest,
@@ -282,6 +600,48 @@ async fn global_t1_reaches_a_future_paired_executor_and_pending_revokes_block_fa
 }
 
 #[tokio::test]
+async fn r3a_finite_t2_requires_two_tokens_and_preserves_the_first_deadline() {
+    let h = signing_harness();
+    let mut draft = intent(&h, Tier::T2);
+    let first = h
+        .exchange(Caller::CliOwner, Op::GrantIssue, json!(draft))
+        .await;
+    assert_eq!(first["result"]["confirmations_left"], 2);
+    assert_eq!(issued(&h), 0);
+    draft.confirm = Some(h.peer.label.clone());
+    draft.confirmation_token = first["result"]["confirmation_token"]
+        .as_str()
+        .map(str::to_owned);
+    let second = h
+        .exchange(Caller::CliOwner, Op::GrantIssue, json!(draft))
+        .await;
+    assert_eq!(second["result"]["confirmations_left"], 1);
+    assert_eq!(
+        second["result"]["expires_at"],
+        first["result"]["expires_at"]
+    );
+    assert_ne!(
+        second["result"]["confirmation_token"],
+        first["result"]["confirmation_token"]
+    );
+    assert_eq!(issued(&h), 0);
+    assert_eq!(
+        h.exchange(Caller::CliOwner, Op::GrantIssue, json!(draft))
+            .await["ok"],
+        false
+    );
+    draft.confirmation_token = second["result"]["confirmation_token"]
+        .as_str()
+        .map(str::to_owned);
+    let result = h
+        .exchange(Caller::CliOwner, Op::GrantIssue, json!(draft))
+        .await;
+    assert_eq!(result["ok"], true);
+    assert_eq!(result["result"]["grant"]["confirm"], h.peer.label);
+    assert_eq!(issued(&h), 1);
+}
+
+#[tokio::test]
 async fn standing_t2_consumes_two_distinct_confirmations_with_one_deadline() {
     let h = signing_harness();
     let mut draft = intent(&h, Tier::T2);
@@ -430,7 +790,16 @@ async fn t2_preparation_is_not_a_grant_and_final_confirmation_is_bound_and_once_
         .unwrap();
         if variant == 0 {
             assert_eq!(response["ok"], true, "helper operation rejected");
-            let grant: Grant = serde_json::from_value(response["result"]["grant"].clone()).unwrap();
+            assert_eq!(issued(&h), 0);
+            draft.confirmation_token = response["result"]["confirmation_token"]
+                .as_str()
+                .map(str::to_owned);
+            let final_response = h
+                .exchange(Caller::CliOwner, Op::GrantIssue, json!(draft))
+                .await;
+            assert_eq!(final_response["ok"], true);
+            let grant: Grant =
+                serde_json::from_value(final_response["result"]["grant"].clone()).unwrap();
             kv_core::remote::validation::verify_grant(
                 &grant,
                 &h.peer.device_id,

@@ -35,16 +35,21 @@ impl RemoteHelper {
             let Some(request) = state.inbound_requests.get(id).cloned() else {
                 return Ok(());
             };
-            if (!escalated && request.delivery.mode == DeliveryMode::Silent)
+            let escalated = escalated || state.inbound_escalated.contains(id);
+            if request.exp < self.services.clock.now()
+                || state.presenting.len() >= 5
+                || (!escalated
+                    && request.delivery.mode == DeliveryMode::Silent
+                    && self.presence(&state, self.services.clock.now()) != Presence::Present)
                 || !state.presenting.insert(id.into())
             {
                 return Ok(());
             }
             request
         };
-        if escalated {
-            request.delivery.mode = DeliveryMode::Banner;
-        }
+        // Silent suppresses the phone banner. A present desktop is still the primary UI.
+        // Change only the private presentation copy; signed request/digest/scope stay intact.
+        request.delivery.mode = DeliveryMode::Banner;
         let helper = self.clone();
         tokio::spawn(async move {
             let result = async {
@@ -61,7 +66,7 @@ impl RemoteHelper {
                     )
                     .await?;
                 if reply["ok"] != true {
-                    return Err(Error("user_cancelled"));
+                    return Err(super::production::private_ui_error(&reply));
                 }
                 let params: kv_core::remote::ipc::DecideIntent =
                     serde_json::from_value(reply["params"].clone())?;
@@ -346,7 +351,7 @@ impl RemoteHelper {
                         uid: context.uid(),
                         pid: context.agent_pid(),
                         role: context.role(),
-                        confirmations_left: if intent.exp.is_none() { 2 } else { 1 },
+                        confirmations_left: 2,
                         expires_at,
                     },
                 );
@@ -355,7 +360,7 @@ impl RemoteHelper {
                     expires_at,
                     device_id: peers[0].device_id.clone(),
                     label: peers[0].label.clone(),
-                    confirmations_left: if intent.exp.is_none() { 2 } else { 1 },
+                    confirmations_left: 2,
                 })?);
             }
         } else {

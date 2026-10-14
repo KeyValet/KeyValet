@@ -1,0 +1,208 @@
+{
+  "files": [
+    {
+      "file": "r2b-physical-hello-20261013-resume3-source-manifest.json",
+      "original_sha256": "3a9cbe5a480244aacba7aec67a8349e01b0e4bcc97846963289039260732649e",
+      "original_encoding": "utf-8-sig",
+      "evidence_sha256": "3a9cbe5a480244aacba7aec67a8349e01b0e4bcc97846963289039260732649e"
+    },
+    {
+      "file": "r2b-physical-hello-20261013-resume3-package-supplemental-source.json",
+      "original_sha256": "9f8a0b0589112e9fc6e3e7ea7b2192cd8cabd87c0a0bec276024869964bd581e",
+      "original_encoding": "utf-8-sig",
+      "evidence_sha256": "9f8a0b0589112e9fc6e3e7ea7b2192cd8cabd87c0a0bec276024869964bd581e"
+    },
+    {
+      "file": "r2b-physical-hello-20261013-resume3-package-result.json",
+      "original_sha256": "f23a1ec00a1cbf12d0bdcff43cf270a4d23ae5a4fe61102aee781f4e67f9bde9",
+      "original_encoding": "utf-8-sig",
+      "evidence_sha256": "4dce3d548481e66789c4cc6c4369b0d07795e0084effcf75ee9d87ef3c386e22"
+    },
+    {
+      "file": "r2b-physical-hello-20261013-resume3-pre-upgrade-backup.json",
+      "original_sha256": "48172d0c1b25c5cbcb6a9e19d42ab42856ccab092dcacad97f321f0ed3f66033",
+      "original_encoding": "utf-8-sig",
+      "evidence_sha256": "4aa9799ade450b43fc3c5c0119357eda0345ba24e3d3b9ea771189314a69e34f"
+    },
+    {
+      "file": "r2b-physical-hello-20261013-resume3-mac-ci-result.json",
+      "original_sha256": "f2c89af295775802d11181df88bceaa72571be2e1251ea0af1de283a35305f59",
+      "original_encoding": "utf-8-sig",
+      "evidence_sha256": "f2c89af295775802d11181df88bceaa72571be2e1251ea0af1de283a35305f59"
+    },
+    {
+      "file": "r2b-physical-hello-20261013-resume3-windows-ci-result.json",
+      "original_sha256": "2ede674b4e7756370338e98d8767a102f70f11f386dab96830ba302928ab32b2",
+      "original_encoding": "utf-8-sig",
+      "evidence_sha256": "c5a896aa00b7aa25aa433a084f7e699d2f20f28697b81c997f61fc64d5d0a606"
+    },
+    {
+      "file": "r2b-physical-hello-20261013-resume3-mac-ci-1.log",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_encoding": "utf-8-sig",
+      "evidence_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "r2b-physical-hello-20261013-resume3-mac-ci-2.log",
+      "original_sha256": "726b2bee4448412395d0ddd8825fa88cf8c5ab906f230bd6e746fb663ed62a4f",
+      "original_encoding": "utf-8-sig",
+      "evidence_sha256": "726b2bee4448412395d0ddd8825fa88cf8c5ab906f230bd6e746fb663ed62a4f"
+    },
+    {
+      "file": "r2b-physical-hello-20261013-resume3-mac-ci-3.log",
+      "original_sha256": "77c80d997bc2740b4b78ece3c8c0eac8f44d550ebe5bbd940252dc19e383a781",
+      "original_encoding": "utf-8-sig",
+      "evidence_sha256": "77c80d997bc2740b4b78ece3c8c0eac8f44d550ebe5bbd940252dc19e383a781"
+    },
+    {
+      "file": "r2b-physical-hello-20261013-resume3-mac-ci-4.log",
+      "original_sha256": "0494d098de20a5ccc081420d179a0478dc50f24688a1fc52e4b189d14a38bab2",
+      "original_encoding": "utf-8-sig",
+      "evidence_sha256": "064b4b81002f070977137d69bc03a66b47020af6fc06b6d8a822896b630c2304",
+      "redaction": "CI fixture pairing URI / bearer text removed; original remains in ignored build directory",
+      "redacted_occurrences": 1
+    },
+    {
+      "file": "r2b-physical-hello-20261013-resume3-windows-ci-1.log",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_encoding": "utf-8-sig",
+      "evidence_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "r2b-physical-hello-20261013-resume3-windows-ci-2.log",
+      "original_sha256": "6401bf0301933ea49fa977b4e69a4e2b5708d89abfd7854d2cc84c5868100b46",
+      "original_encoding": "utf-16",
+      "evidence_sha256": "461270b7ed7f367ff3f443d46fac7a5b4873bcc663af49cd59848cadb3f1587a"
+    },
+    {
+      "file": "r2b-physical-hello-20261013-resume3-windows-ci-3.log",
+      "original_sha256": "8f5d8289afed11ba3cd1ae6a883e82cd0f33fe24f9e4d91ff9309f64c4e497fb",
+      "original_encoding": "utf-16",
+      "evidence_sha256": "1a3889d756aac69a67b10bbddf35ec697f88663f7d67146912c724feb0f3f7ac"
+    },
+    {
+      "file": "r2b-physical-hello-20261013-resume3-windows-ci-4.log",
+      "original_sha256": "99304313950d727653c4683fb3336a091e9733babd265e18ac8e0ed31bd56ad5",
+      "original_encoding": "utf-16",
+      "evidence_sha256": "dd3fc8478baccbabaf76b472a20a145345b7fba27e8f1a581888e41ff120a597",
+      "redaction": "CI fixture pairing URI / bearer text removed; original remains in ignored build directory",
+      "redacted_occurrences": 1
+    },
+    {
+      "file": "r2b-physical-hello-20261013-resume3-startup-access-final-result.json",
+      "original_sha256": "f33b631fffef618f40c9bfac673b10f5264120da721d3b8bc98524be9f2ce588",
+      "original_encoding": "utf-8-sig",
+      "evidence_sha256": "34f150d19cc94a5706f3ae58a8ec75ba31785b4cd6a037d396092bf406a0114d"
+    },
+    {
+      "file": "r2b-physical-hello-20261013-resume3-installed-access-result.json",
+      "original_sha256": "3038a4d2b1612869c5de30a8569c8e4fea64b1044fbaaa9902d5c3ab71410842",
+      "original_encoding": "utf-8-sig",
+      "evidence_sha256": "1f58fd4f17aed57774bd2caaeb4f4ba8c889554139d5cfa4c3b5cacb7def3abc"
+    },
+    {
+      "file": "r2b-physical-hello-20261013-resume3-setup-current-result.json",
+      "original_sha256": "42929e747e51a00ccf3da044af1152ced5c8a3b0056809e445c0af574a48c5f3",
+      "original_encoding": "utf-8-sig",
+      "evidence_sha256": "cf02fb099d1a7f1fe22877cc7b08f90a737e2810bef54cd3025a345f8cb6afa4"
+    },
+    {
+      "file": "r2b-physical-hello-20261013-resume3-setup-current-visible.stdout.log",
+      "original_sha256": "b86547767e2adfd66a1dd71cc42439ffd0f52c8fe7389fc7b3af612aaf1d4bf9",
+      "original_encoding": "utf-8-sig",
+      "evidence_sha256": "fe94b39a380dad85af0b348f546652144390af9cbbc4359cd90ec00961a561a7"
+    },
+    {
+      "file": "r2b-physical-hello-20261013-resume3-setup-current-visible.stderr.log",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_encoding": "utf-8-sig",
+      "evidence_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "r2b-physical-hello-20261013-resume3-unlock-types.stdout.log",
+      "original_sha256": "a418a854998c55982fc8333723a8391643c8e97f8b22e7ba7d7589c93101b17e",
+      "original_encoding": "utf-8-sig",
+      "evidence_sha256": "a418a854998c55982fc8333723a8391643c8e97f8b22e7ba7d7589c93101b17e"
+    },
+    {
+      "file": "r2b-physical-hello-20261013-resume3-unlock-types.stderr.log",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_encoding": "utf-8-sig",
+      "evidence_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "r2b-physical-hello-20261013-resume3-unlock-current.stderr.log",
+      "original_sha256": "0fbe057bc99275fd9848d6238788f4b84708a80922f64078e8e0c49726726568",
+      "original_encoding": "utf-8-sig",
+      "evidence_sha256": "0fbe057bc99275fd9848d6238788f4b84708a80922f64078e8e0c49726726568"
+    },
+    {
+      "file": "r2b-physical-hello-20261013-resume3-upgrade-current-result.json",
+      "original_sha256": "4f9befb39089947f86f09e8dbede69fa97201c4fe3bd8345929ae8ef3dc52257",
+      "original_encoding": "utf-8-sig",
+      "evidence_sha256": "5de4226ba8e52a6dd80230c49e1c5dd222a46e1462472618b7841dbd46c3fae8"
+    },
+    {
+      "file": "r2b-physical-hello-20261013-resume3-agent-after-upgrade-result.json",
+      "original_sha256": "568a2b283d703a62624722baad6eec8e3b1e4f0f2ce4a52fc70671aed8eb7dae",
+      "original_encoding": "utf-8-sig",
+      "evidence_sha256": "5a03badfa69405f7af563a972f3064a552e5964374e3c0dd9f4e11675f9837d1"
+    },
+    {
+      "file": "r2b-physical-hello-20261013-resume3-status-after-setup.json",
+      "original_sha256": "8deb5852966e7928ff81fb2a56dc7c8600158bfd5f84d1f0457fcc59571cd93f",
+      "original_encoding": "utf-8-sig",
+      "evidence_sha256": "2717e5694b3dbf254298a25456894ca54bafa3224c0a2fc4219f29a2b5efc944"
+    },
+    {
+      "file": "r2b-physical-hello-20261013-resume3-status-summary-after-setup.log",
+      "original_sha256": "4e4d1f10e93c0a07bd8129b92017c74dad814fe90487b171a38a74af7d02e2db",
+      "original_encoding": "utf-8-sig",
+      "evidence_sha256": "4e4d1f10e93c0a07bd8129b92017c74dad814fe90487b171a38a74af7d02e2db"
+    },
+    {
+      "file": "r2b-physical-hello-20261013-resume3-setup-captured-result.json",
+      "origin": "captured remote tool output",
+      "evidence_sha256": "af29bba6cec580ae9ce00cd4e0f3e28dff18948d62daae347d933458adc12b82"
+    },
+    {
+      "file": "r2b-physical-hello-20261013-resume3-list-argument-error-captured-result.json",
+      "origin": "captured remote tool output",
+      "evidence_sha256": "77a0ee4d9d25dfdaf8db485b30b472a2d82927bb898d0de71a2da717b430adf1"
+    },
+    {
+      "file": "r2b-physical-hello-20261013-resume3-cleanup-result.json",
+      "original_sha256": "f610da74d2225ee7c044c660ff626842dd74a16b7d9e9a8a62c599a01982adfc",
+      "original_encoding": "utf-8-sig",
+      "evidence_sha256": "6c343b09eaec9007140933a122414171aa905c11207ad9885c97b5aeaf04c74d"
+    },
+    {
+      "file": "r2b-physical-hello-20261013-resume3-worker-claim-before.log",
+      "original_sha256": "d53d244fa9216613066f9437f9ca5cc44b1290bea037cea622a2db55bfa58c22",
+      "original_encoding": "utf-16",
+      "evidence_sha256": "f5f19a15cb6feefaa0d0b494d731a967b0c1d65a315e59435c46515a515c836e"
+    },
+    {
+      "file": "r2b-physical-hello-20261013-resume3-worker-claim-after.log",
+      "original_sha256": "d5ca09908429f44761cfc96f6483528f1630b4ef829847ec37cd295bfec84b2f",
+      "original_encoding": "utf-16",
+      "evidence_sha256": "5526b66f156cff687bef276c4cf0b504ce2b18599ae991e2224dae5b140ed130"
+    },
+    {
+      "file": "r2b-physical-hello-20261013-resume3-ci-summary.json",
+      "origin": "normalized diagnostic/captured result",
+      "evidence_sha256": "2e5191f3cd8cc8432b1b8d21e3bc13e6d5b1e820b5e6a17eb2fda9dba752b9d5"
+    },
+    {
+      "file": "r2b-physical-hello-20261013-resume3-installed-access-after-setup.json",
+      "origin": "normalized diagnostic/captured result",
+      "evidence_sha256": "5ccd2dcc6e77896fdad88925b92ba1d7f24a9180b793322e0f11569e197e8243"
+    },
+    {
+      "file": "r2b-physical-hello-20261013-resume3-status-after-cleanup.log",
+      "original_sha256": "781e9241064d13baf5ee19f58affaf6323bdc979c9d17c280153516377cc139c",
+      "original_encoding": "utf-8-sig",
+      "evidence_sha256": "72060f02549d5f33c5f5a95cae1446f4f0333c5625fafa258ad966d4e1ec0dcc"
+    }
+  ]
+}

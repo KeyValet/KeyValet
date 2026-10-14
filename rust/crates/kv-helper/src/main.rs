@@ -1913,6 +1913,7 @@ mod session_tests {
                 };
                 assert_eq!(id, 0);
                 assert_eq!(result["protocol"], PROTOCOL_VERSION);
+                assert!(result.get("ready").is_none(), "{output}");
                 assert_eq!(result["vault_protection"]["provider"], "secure_enclave");
                 assert_eq!(
                     result["vault_protection"]["key_protection"]["hardware"],
@@ -1922,7 +1923,6 @@ mod session_tests {
                 assert!(matches!(reply, Response::Err { id: 0, .. }));
             }
             for forbidden in [
-                "ready",
                 "key_blob",
                 "peer_public_key",
                 "private-name",

@@ -45,6 +45,91 @@ fn view(request: &Value) -> ApprovalView {
 }
 
 #[test]
+fn native_presentation_keeps_destination_identity_and_warnings_visible_in_both_languages() {
+    let mut request = per_use_strong_fixture(sample("ApprovalRequest"));
+    request["operation"]["summary"] = json!("Create an issue");
+    for translate in [en as fn(&str, &str) -> String, zh] {
+        for platform in [Platform::Macos, Platform::Windows] {
+            let view = ApprovalView::with_text(&request, context(), platform, translate).unwrap();
+            let target = view.request_target.as_ref().unwrap();
+            assert!(target.contains(request["operation"]["host"].as_str().unwrap()));
+            assert!(target.contains(request["operation"]["path"].as_str().unwrap()));
+            assert!(view
+                .rows
+                .iter()
+                .filter(|row| row.red)
+                .all(|row| !row.detail));
+            assert!(view.rows.iter().any(|row| row.secondary && !row.detail));
+            assert!(view.rows.iter().any(|row| row.detail));
+            assert_eq!(
+                view.payload()["details_label"],
+                translate("请求详情", "Request details")
+            );
+            assert_eq!(
+                view.payload()["reason_label"],
+                translate("添加拒绝原因", "Add a reason for denial")
+            );
+            assert_eq!(view.original, request);
+        }
+    }
+}
+
+pub(super) fn per_use_strong_fixture(mut request: Value) -> Value {
+    request["tier"] = json!("T2");
+    request["min_level"] = json!("strong");
+    request["scope_options"] = json!(["per_use"]);
+    request["requested_scope"] = json!("per_use");
+    request["requester"]["protection"]["kind"] = json!("software_key");
+    request
+}
+
+#[test]
+fn native_strong_fixture_reaches_the_strict_t2_per_use_view() {
+    let data: Value = serde_json::from_str(include_str!(
+        "../../../kv-core/testdata/remote/decision_valid.json"
+    ))
+    .unwrap();
+    let request = per_use_strong_fixture(data["request"].clone());
+    for platform in [Platform::Macos, Platform::Windows] {
+        let view = ApprovalView::with_text(&request, context(), platform, en).unwrap();
+        assert_eq!(view.scopes.len(), 1);
+        assert_eq!(view.scopes[0].level, Level::Strong);
+        assert_eq!(view.original["requested_scope"], "per_use");
+    }
+}
+
+#[test]
+fn r3a_non_http_credential_use_reaches_the_dialog_with_its_original_strong_scope() {
+    let mut request = sample("ApprovalRequest");
+    request["operation"] = Value::Null;
+    request["tier"] = json!("T2");
+    request["min_level"] = json!("strong");
+    request["scope_options"] = json!(["per_use"]);
+    request["requested_scope"] = json!("per_use");
+    request["delivery"]["mode"] = json!("banner");
+    let view = view(&request);
+    assert_eq!(view.original, request);
+    assert_eq!(view.scopes.len(), 1);
+    assert_eq!(view.scopes[0].level, Level::Strong);
+    assert!(!view.rows.iter().any(|row| row.label == "Method / host"));
+    assert!(!view
+        .payload()
+        .to_string()
+        .contains(request["nonce"].as_str().unwrap()));
+    let mut agent = agent::AgentSession::default();
+    assert!(matches!(
+        agent.route(
+            &json!({"op":"remote_approval","request":request,
+            "context":{"now":context().now}}),
+            context().now
+        ),
+        agent::Route::Dialog
+    ));
+    request["operation"] = json!({});
+    assert!(ApprovalView::new(&request, context(), Platform::Macos).is_err());
+}
+
+#[test]
 fn operation_is_primary_and_only_public_fields_reach_the_renderer() {
     let mut request = sample("ApprovalRequest");
     for key in ["secret", "headers", "body", "vault_path"] {
@@ -1322,7 +1407,7 @@ fn grant_preview_and_settings_validate_issuer_executor_and_expiry() {
     )
     .unwrap()
     .unwrap();
-    assert_eq!(preview["iss_alg"], "ES256");
+    assert_eq!(preview["iss_alg"], local["ak_s"]["alg"]);
     assert!(grant_for_scope(&json!({}), "per_session", &local, "preview", 100, 200).is_err());
     let mut incapable = executor();
     incapable["caps"] = json!([]);
@@ -1677,6 +1762,18 @@ fn agent_session_rejects_malformed_ui_output_and_preserves_routing() {
         ui_reply(u64::MAX, Ok(json!({"id":0,"ok":true,"confirmed":false}))),
         json!({"id":u64::MAX,"ok":true,"confirmed":false})
     );
+}
+
+#[test]
+fn r3a_private_dialog_preserves_cancel_and_expiry_without_an_approval() {
+    for (error, code) in [
+        (Error::Cancelled, "remote_action_cancelled"),
+        (Error::Expired, "remote_request_expired"),
+    ] {
+        let reply = agent::ui_reply(7, Err(error));
+        assert_eq!(reply, json!({"id":7,"ok":false,"error":code}));
+        assert!(reply.get("params").is_none());
+    }
 }
 
 #[test]

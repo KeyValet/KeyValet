@@ -1,0 +1,30 @@
+[
+  {
+    "name": "fmt",
+    "command": "cargo +1.99.0 fmt --all -- --check",
+    "exit_code": 0,
+    "passed": true,
+    "seconds": 0.9086776249896502
+  },
+  {
+    "name": "clippy",
+    "command": "cargo +1.99.0 clippy --workspace --all-targets -- -D warnings",
+    "exit_code": 0,
+    "passed": true,
+    "seconds": 8.049700875009876
+  },
+  {
+    "name": "build",
+    "command": "cargo +1.99.0 build --workspace --locked",
+    "exit_code": 0,
+    "passed": true,
+    "seconds": 9.510374499994214
+  },
+  {
+    "name": "test",
+    "command": "cargo +1.99.0 test --workspace --locked",
+    "exit_code": 0,
+    "passed": true,
+    "seconds": 319.2258376250102
+  }
+]

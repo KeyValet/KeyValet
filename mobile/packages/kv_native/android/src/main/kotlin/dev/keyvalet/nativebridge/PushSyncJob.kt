@@ -25,18 +25,25 @@ class PushSyncJob : JobService() {
                 val token = getSharedPreferences("kv_push", Context.MODE_PRIVATE).getString("token", null)
                 if (token != null) NativeRuntime.call(this,
                     JSONObject().put("op", "push_token").put("platform", "fcm").put("token", token))
-                val views = NativeRuntime.call(this, JSONObject().put("op", "sync")) as JSONArray
+                val response = NativeRuntime.call(this, JSONObject().put("op", "background_sync")) as JSONObject
+                val views = response.getJSONArray("notifications")
+                retry = response.getBoolean("retry")
                 if (!stopped.get()) {
                     for (index in 0 until views.length()) Notifications.show(this, views.getJSONObject(index))
                     Notifications.refresh(this)
-                    Log.i("KeyValetPush", "event=sync_complete plans=${views.length()}")
+                    Log.i("KeyValetPush", "event=sync_complete plans=${views.length()} retry=$retry")
                 }
             } catch (error: Exception) {
                 val signedOut = error is IllegalStateException && error.message == "login_required"
                 if (signedOut) Notifications.clear(this)
                 retry = !signedOut
-                // Never log exception messages, tokens, identifiers or notification bodies.
-                Log.i("KeyValetPush", if (signedOut) "event=signed_out" else "event=sync_retry")
+                // Only known static Rust error codes; never arbitrary exception messages.
+                val reason = (error as? IllegalStateException)?.message?.takeIf {
+                    it in setOf("login_required", "network_unavailable", "rate_limited", "relay_unavailable",
+                        "authentication_failed", "invalid_session", "invalid_challenge", "hardware_unavailable",
+                        "storage_busy", "storage_integrity", "relay_rejected", "relay_protocol")
+                } ?: "native_unavailable"
+                Log.i("KeyValetPush", "event=${if (signedOut) "signed_out" else "sync_retry"} reason=$reason")
             } finally {
                 if (!stopped.get()) jobFinished(params, retry)
             }

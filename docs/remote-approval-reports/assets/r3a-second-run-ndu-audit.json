@@ -1,0 +1,105 @@
+{
+  "agent_pid": 892698,
+  "approvals": [
+    {
+      "id": "01M4SXBS0GNKVXT24BXYNXNMVY",
+      "kind": "use",
+      "state": "executed",
+      "agent_pid": 892698,
+      "level": "strong",
+      "scope_mode": "per_use",
+      "tier": "T2",
+      "digest": "71c3b318afe75d38f53e9dcfcd02829320e5ab412f957b6c6d1df2c26b4216ba",
+      "delivery_mode": "banner",
+      "helper_request_to_decision_s": 5.712,
+      "execution_started_count": 1,
+      "execution_completed_count": 1,
+      "touch_id_user_time_s": null
+    },
+    {
+      "id": "01M4SXBYW00A03JAPMA6ND3B5N",
+      "kind": "use",
+      "state": "executed",
+      "agent_pid": 892698,
+      "level": "quick",
+      "scope_mode": "per_credential",
+      "tier": "T1",
+      "digest": "5572b20c01c80772bc00835f38a37de37ab78921a53f28a7c97bce684a0e076e",
+      "delivery_mode": "banner",
+      "helper_request_to_decision_s": 4.198,
+      "execution_started_count": 1,
+      "execution_completed_count": 1,
+      "touch_id_user_time_s": 0
+    }
+  ],
+  "events": [
+    {
+      "agent_pid": 892698,
+      "approval_id": "01M4SXBS0GNKVXT24BXYNXNMVY",
+      "digest": "71c3b318afe75d38f53e9dcfcd02829320e5ab412f957b6c6d1df2c26b4216ba",
+      "op": "approval_requested",
+      "ts": "2026-10-13T05:56:58.667Z"
+    },
+    {
+      "approval_id": "01M4SXBS0GNKVXT24BXYNXNMVY",
+      "approval_level": "strong",
+      "approver_device": "01M4SM5QTRQKNQE1TD6FBJTG79",
+      "decision": "allow",
+      "decision_hash": "d7adcdeb7ee985ed30f0a3ef5762f8ee3ee020f87d079c1623c495df6f594c1b",
+      "digest": "71c3b318afe75d38f53e9dcfcd02829320e5ab412f957b6c6d1df2c26b4216ba",
+      "op": "remote_approval_accepted",
+      "state": "approved",
+      "ts": "2026-10-13T05:57:04.379Z"
+    },
+    {
+      "approval_id": "01M4SXBS0GNKVXT24BXYNXNMVY",
+      "digest": "71c3b318afe75d38f53e9dcfcd02829320e5ab412f957b6c6d1df2c26b4216ba",
+      "op": "approval_execution_started",
+      "ts": "2026-10-13T05:57:04.853Z"
+    },
+    {
+      "approval_id": "01M4SXBS0GNKVXT24BXYNXNMVY",
+      "op": "approval_execution_completed",
+      "ts": "2026-10-13T05:57:04.884Z"
+    },
+    {
+      "agent_pid": 892698,
+      "approval_id": "01M4SXBYW00A03JAPMA6ND3B5N",
+      "digest": "5572b20c01c80772bc00835f38a37de37ab78921a53f28a7c97bce684a0e076e",
+      "op": "approval_requested",
+      "ts": "2026-10-13T05:57:05.369Z"
+    },
+    {
+      "approval_id": "01M4SXBYW00A03JAPMA6ND3B5N",
+      "op": "grant_installed",
+      "ts": "2026-10-13T05:57:09.555Z"
+    },
+    {
+      "approval_id": "01M4SXBYW00A03JAPMA6ND3B5N",
+      "approval_level": "quick",
+      "approver_device": "01M4SM5QTRQKNQE1TD6FBJTG79",
+      "decision": "allow",
+      "decision_hash": "a8785e0937693971f8db342c54cf3ffe06d9e64be1502029673dcf6305183333",
+      "digest": "5572b20c01c80772bc00835f38a37de37ab78921a53f28a7c97bce684a0e076e",
+      "op": "remote_approval_accepted",
+      "state": "approved",
+      "ts": "2026-10-13T05:57:09.567Z"
+    },
+    {
+      "approval_id": "01M4SXBYW00A03JAPMA6ND3B5N",
+      "digest": "5572b20c01c80772bc00835f38a37de37ab78921a53f28a7c97bce684a0e076e",
+      "op": "approval_execution_started",
+      "ts": "2026-10-13T05:57:09.967Z"
+    },
+    {
+      "approval_id": "01M4SXBYW00A03JAPMA6ND3B5N",
+      "op": "approval_execution_completed",
+      "ts": "2026-10-13T05:57:09.984Z"
+    }
+  ],
+  "measurement": "same helper millisecond audit ts: approval_requested to accepted/denied",
+  "observed_utc": "2026-10-13T06:07:17.492346+00:00",
+  "http_status": 403,
+  "upstream_status_confirmed": true,
+  "upstream_evidence": "Gateway audit status=403 with no reason; gateway.rs records reason on local rejections and omits it on forwarded responses."
+}

@@ -1,0 +1,6 @@
+{
+  "purpose": "release current owned deferred test profile",
+  "owner_sid_to_clean": "S-1-5-21-3283475767-415700631-2745889461-1019",
+  "reboot_scheduled": true,
+  "ssh_exit": 0
+}

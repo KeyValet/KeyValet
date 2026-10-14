@@ -1,0 +1,41 @@
+{
+  "prepared_utc": "2026-10-14T01:34:45.249824+00:00",
+  "ci_checks": {
+    "fmt": 0,
+    "clippy": 0,
+    "build": 0,
+    "test": 0
+  },
+  "ci_passed": 1416,
+  "ci_failed": 0,
+  "ci_ignored": 10,
+  "ci_source_files": 522,
+  "changed_source_files_since_ci": [],
+  "source_unchanged": true,
+  "strict_binaries": {
+    "kv-helper": {
+      "hash_matches_manifest": true,
+      "strict_requirement_exit": 0,
+      "reused_installed": true
+    },
+    "kv-cli": {
+      "hash_matches_manifest": true,
+      "strict_requirement_exit": 0,
+      "reused_installed": true
+    },
+    "kv-touchid": {
+      "hash_matches_manifest": true,
+      "strict_requirement_exit": 0,
+      "reused_installed": false
+    },
+    "kv-relay-client": {
+      "hash_matches_manifest": true,
+      "strict_requirement_exit": 0,
+      "reused_installed": true
+    }
+  },
+  "free_bytes": 16023814144,
+  "new_agent_installed": false,
+  "approval_requests_started": false,
+  "secret_values_in_evidence": false
+}

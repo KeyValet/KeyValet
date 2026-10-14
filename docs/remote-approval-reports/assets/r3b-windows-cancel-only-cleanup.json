@@ -1,0 +1,19 @@
+{
+    "formal_agent_preserved":  true,
+    "sign_ms":  2221.7225,
+    "passed":  true,
+    "open_async_not_found":  true,
+    "vault_hash_unchanged":  true,
+    "utc":  "2026-10-13T22:14:21.7570313Z",
+    "cancel_status":  3,
+    "backups_preserved":  [
+                              true,
+                              true
+                          ],
+    "master_key_present":  false,
+    "temporary_task_removed":  true,
+    "native_operator_started_signing":  true,
+    "production_budget_cap_seconds":  90,
+    "delete_async_succeeded":  true,
+    "uses_installed_worker":  false
+}

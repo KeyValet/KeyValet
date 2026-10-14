@@ -1,0 +1,46 @@
+{
+  "observed_utc": "2026-10-13T02:24:32.033457+00:00",
+  "installed_sha256": "007b61e83a3d2f1394a66c2b0b7528541530d8e6c5910193db7854d8cefb1a8b",
+  "reference_sha256": "0242912dc6bd5b60a244c276eed69763bf2db0dae4a00ff97e65735e6ac18d87",
+  "method": "Exact instruction-byte correspondence to a current-source unstripped release build; no claim of a matching dSYM. The lock prologue has two matches; stack callers and State layout resolve the helper lock.",
+  "frames": [
+    {
+      "installed_offset": "0x2a09fc",
+      "identical_instruction_bytes": 36,
+      "matches": [
+        {
+          "reference_offset": "0x1a5d08",
+          "symbol": "__RNvXNtNtCsjIpoRzUjyHQ_4core4iter8adaptersINtB2_12GenericShuntINtNtCsgvPYprIRvFO_8rusqlite3row10MappedRowsNCNCNvMNtNtCsjlzaqKmoclU_9kv_helper6remote11revocationsNtNtB1O_6engine12RemoteHelper19revoke_owner_device0s2_0EINtNtB6_6result6ResultNtNtB6_7convert10InfallibleNtNtB12_5error5ErrorEENtNtNtB4_6traits8iterator8Iterator4nextCsaj4hBpZQ2nG_9kv_helper",
+          "symbol_delta": "0x0"
+        },
+        {
+          "reference_offset": "0x2973fc",
+          "symbol": "__RNvMs3_NtNtCsjlzaqKmoclU_9kv_helper6remote6engineNtB5_12RemoteHelper4lock",
+          "symbol_delta": "0x0"
+        }
+      ]
+    },
+    {
+      "installed_offset": "0x29874c",
+      "identical_instruction_bytes": 36,
+      "matches": [
+        {
+          "reference_offset": "0x28f03c",
+          "symbol": "__RNvMNtNtCsjlzaqKmoclU_9kv_helper6remote7pairingNtNtB4_6engine12RemoteHelper15receive_pairing",
+          "symbol_delta": "0x288"
+        }
+      ]
+    },
+    {
+      "installed_offset": "0x371224",
+      "identical_instruction_bytes": 36,
+      "matches": [
+        {
+          "reference_offset": "0x34a948",
+          "symbol": "__RNvXNtNtCs9V9GMaNv4If_7kv_core6remote4keysINtNtNtCskMpbYuLomEU_11kv_platform10device_key5agent14AgentDeviceKeyNtBH_14AgentTransportENtB2_17DeviceKeyProvider4ecdhCsjlzaqKmoclU_9kv_helper",
+          "symbol_delta": "0x48"
+        }
+      ]
+    }
+  ]
+}

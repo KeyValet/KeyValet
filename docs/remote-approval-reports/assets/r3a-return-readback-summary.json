@@ -1,0 +1,18 @@
+{
+  "observed_utc": "2026-10-13T21:28:32.456603+00:00",
+  "installed_manifest_hashes_match": {
+    "kv-helper": true,
+    "kv-cli": true,
+    "kv-touchid": true,
+    "kv-relay-client": true
+  },
+  "owner_ipc_ok": true,
+  "native_input_diagnostic_ok": true,
+  "t2_succeeded": false,
+  "t2_result": "user_cancelled",
+  "t2_elapsed_s": 40.610067,
+  "t2_receipt": "r3a-controls-212642.json",
+  "diagnostic_receipt": "r3a-label-input-native-diagnostic.json",
+  "install_receipt": "r3a-revocations-mac-install-212600.json",
+  "secret_values_in_evidence": false
+}

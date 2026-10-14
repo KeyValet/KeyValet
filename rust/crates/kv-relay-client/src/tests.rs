@@ -1,5 +1,6 @@
 // Local fake helper and relay tests; no installed files, root, GUI or hardware are used.
 
+mod config_presence;
 #[cfg(unix)]
 mod control;
 mod coverage;

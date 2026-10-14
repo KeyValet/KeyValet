@@ -1,0 +1,16 @@
+[
+  {
+    "Name": "KeyValetHelper",
+    "State": "Running",
+    "StartMode": "Auto",
+    "StartName": "LocalSystem",
+    "PathName": "\"C:\\Program Files\\KeyValet\\bin\\kv-helper.exe\" --service"
+  },
+  {
+    "Name": "KeyValetRelay",
+    "State": "Stopped",
+    "StartMode": "Manual",
+    "StartName": "NT SERVICE\\KeyValetRelay",
+    "PathName": "\"C:\\Program Files\\KeyValet\\bin\\kv-relay-client.exe\" --service"
+  }
+]

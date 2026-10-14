@@ -1,0 +1,11 @@
+diff --git a/rust/crates/kv-cli/src/remote/transport.rs b/rust/crates/kv-cli/src/remote/transport.rs
+--- a/rust/crates/kv-cli/src/remote/transport.rs
++++ b/rust/crates/kv-cli/src/remote/transport.rs
+@@ -26,6 +26,7 @@ pub(super) fn unavailable(error: std::io::Error) -> Error {
+     }
+ }
+ 
++#[cfg(any(unix, test))]
+ pub(super) fn unavailable_at(request: &Request, stage: &str, error: std::io::Error) -> Error {
+     let kind = error.kind();
+     let mut result = unavailable(error);

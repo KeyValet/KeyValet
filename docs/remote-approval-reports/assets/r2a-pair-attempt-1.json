@@ -1,0 +1,18 @@
+{
+  "started_utc": "2026-10-12T23:54:11.390007+00:00",
+  "stage": "failed",
+  "recovery_code": "已向用户显示",
+  "errors": [],
+  "nodes": {
+    "ndu": {
+      "started": true,
+      "sas": "486472"
+    },
+    "mac": {
+      "started": true,
+      "sas": "486472"
+    }
+  },
+  "elapsed_s": 209.526,
+  "failure_code": "mac_cli_closed_before_pair"
+}

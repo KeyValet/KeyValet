@@ -1,0 +1,11 @@
+{
+    "vault_present":  true,
+    "credential_values_requested":  false,
+    "passed":  true,
+    "started_utc":  "2026-10-13T10:02:37.2964334Z",
+    "session_id":  13,
+    "finished_utc":  "2026-10-13T10:02:50.5023220Z",
+    "exit_code":  0,
+    "master_key_present":  false,
+    "operation":  "installed_cli_types_unlock"
+}

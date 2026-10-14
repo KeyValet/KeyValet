@@ -1,0 +1,14 @@
+{
+  "battery": [
+    {
+      "charge": 6,
+      "status": 1
+    }
+  ],
+  "helper_sha256": "a58901cd036353d0782d9928b67f98d1457a93e1721b80d433537f3c8725b77d",
+  "session": [
+    13
+  ],
+  "mcp_sha256": "f21b284a5512851744a80a2e0fb337dc207780b5d555cde0b2f5574554aa02b1",
+  "ssh_exit": 0
+}

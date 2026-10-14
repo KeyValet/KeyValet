@@ -1,0 +1,14 @@
+{
+  "observed_utc": "2026-10-14T08:29:47.879260+00:00",
+  "free_before": 12481265664,
+  "free_after": 18200113152,
+  "path": "/Users/guang/.gradle/caches/8.14/transforms",
+  "groups_removed": 11705,
+  "bytes_planned": 5538290620,
+  "cache_only": true,
+  "newest_file_older_than_hours": 48,
+  "currently_open_groups_skipped": 63,
+  "errors": [],
+  "original_dependency_archives_and_all_projects_preserved": true,
+  "installed_binaries_signed_stages_backup_evidence_and_user_data_preserved": true
+}

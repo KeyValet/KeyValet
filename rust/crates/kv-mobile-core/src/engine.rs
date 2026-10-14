@@ -1598,25 +1598,33 @@ fn cancel_notification(id: &str) -> NotificationView {
 
 fn notification(view: &ApprovalView, settings: &SettingsView) -> NotificationView {
     let zh = settings.locale == "zh";
+    let mut body = format!(
+        "{}\n{} ({}) · {}\n{} · {} · {}\n{} · {} · PID {}\n{}\n{} {}{} · {} bytes\n{}: {}\n{} · {} · {}: {}",
+        view.summary,view.credential_name,view.credential_ref,view.credential_kind,
+        view.requester_label,view.os,view.protection,view.runtime,view.user,view.agent_pid,view.cwd,
+        view.method,view.host,view.path,view.body_bytes,
+        if zh {"agent 自述"} else {"Agent stated purpose"},view.purpose,
+        view.tier,if view.strong {"Strong"} else {"Quick"},
+        if zh {"合并请求"} else {"Merged requests"},view.merged_count,
+    );
+    if view.proxy_only {
+        body.push_str(if zh {
+            "\n仅限代理使用"
+        } else {
+            "\nProxy only"
+        });
+    }
+    if view.clock_skew {
+        body.push_str(if zh {
+            "\n设备时钟可能存在偏差，请核对系统时间。"
+        } else {
+            "\nDevice clock differs; check system time."
+        });
+    }
     NotificationView {
         approval_id: view.id.clone(),
         title: format!("{} · {}", view.requester_label, view.runtime),
-        body: format!(
-            "{}\n{} {}{} · {} bytes\n{}: {}\n{} · {}",
-            view.summary,
-            view.method,
-            view.host,
-            view.path,
-            view.body_bytes,
-            if zh {
-                "agent 自述"
-            } else {
-                "Agent stated purpose"
-            },
-            view.purpose,
-            view.tier,
-            view.protection
-        ),
+        body,
         banner: view.banner,
         quick_allowed: !view.strong && view.scope_options.iter().any(|s| s == "per_use"),
         expires_at: view.expires_at,

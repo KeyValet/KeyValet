@@ -6,7 +6,7 @@
 
 [安装](#安装) · [官网](https://keyvalet.dev/zh-CN/) · [使用指南](https://keyvalet.dev/zh-CN/guide/) · [安全模型](SECURITY.md) · [English](README.md)
 
-支持 Claude Code、Codex、Cursor、Gemini CLI、Grok、Devin——任何 MCP 客户端或 HTTP SDK；macOS 和 Linux 已发布，Windows 11 预览中。
+支持 Claude Code、Codex、Cursor、Gemini CLI、Grok、Devin——任何 MCP 客户端或 HTTP SDK；支持 macOS、Linux 和 Windows 11。
 
 ## 为什么是 KeyValet
 
@@ -50,7 +50,7 @@ curl -fsSL https://keyvalet.dev/install.sh | sh
 | --- | --- | --- |
 | **macOS** | Apple Silicon，macOS 14+。已签名并公证。 | [使用指南](https://keyvalet.dev/zh-CN/guide/#安装) |
 | **Linux** | systemd、polkit、sudo；TPM 2.0 需要 `tpm2-tools`，无 TPM 须显式加 `--software`。x64 与 ARM64。 | [Linux](docs/linux.md) |
-| **Windows 11** | 开发预览：Hello、服务、安装器已实现，签名包待发布。 | [Windows](docs/windows.md) · [WSL](docs/wsl.md) |
+| **Windows 11** | 24H2+、Windows Hello。x64/ARM64 正式包没有代码签名；本地与远程功能不要求签名。 | [Windows](docs/windows.md) · [WSL](docs/wsl.md) |
 
 上面那条命令会选对平台的包，要你输一次密码，并配置好检测到的 agent（Claude Code、Codex、Cursor、Grok、Devin CLI）。卸载：`curl -fsSL https://keyvalet.dev/install.sh | sh -s -- --uninstall`。密钥保护、恢复与各平台边界：[保护矩阵](docs/key-protection.zh-CN.md)。
 

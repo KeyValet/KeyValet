@@ -1,0 +1,11 @@
+{
+  "at_unix_ms": 1791847266658,
+  "pid_before": "16454",
+  "pid_after": "",
+  "method": "am kill (no force-stop)",
+  "kill_attempts": 1,
+  "force_stop_used": false,
+  "pid_after_fcm": "16720",
+  "approval_id": "01M4S6QDAG740777TXRQCVYB8A",
+  "fcm_recreated_native_rust_approval_notification": true
+}

@@ -1,0 +1,27 @@
+{
+  "service-regression.json": {
+    "hello_tested": false,
+    "architecture": "x64",
+    "wsl_interop_tested": false,
+    "signing": "unsigned development",
+    "timestamp_utc": "2026-10-14T02:05:22.4739252Z",
+    "checks": [
+      "fresh install, SYSTEM identity and authenticated pipe control",
+      "complete remote binaries and unpaired relay virtual service account; signature policy preserved",
+      "complete WSL bridge assets installed from the tested package",
+      "cross-account remote status rejection for another administrator",
+      "real standard-owner authenticated public status without Hello; no fallback or binding keys",
+      "untrusted owner record, binary and WSL bridge DACL rejection before service stop",
+      "wrong-owner upgrade rejection",
+      "same-owner upgrade",
+      "SCM stop and restart",
+      "uninstall retains the vault by default",
+      "explicit removal and integration cleanup"
+    ],
+    "windows_build": "10.0.26200.0",
+    "error": " Test-user cleanup failed: Test-user profile did not unload.",
+    "profile_cleanup_pending_reboot": [],
+    "passed": false
+  },
+  "ssh_exit": 0
+}

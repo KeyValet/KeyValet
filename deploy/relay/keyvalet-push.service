@@ -1,0 +1,33 @@
+[Unit]
+Description=KeyValet metadata-only mobile push dispatcher
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=keyvalet-push
+Group=keyvalet-push
+ExecStart=/usr/local/lib/keyvalet/kv-push
+EnvironmentFile=/etc/keyvalet-push/provider.env
+LoadCredential=relay-bearer:/etc/keyvalet-push/relay-bearer
+Environment=KV_PUSH_RELAY_BEARER_FILE=%d/relay-bearer
+Restart=always
+RestartSec=3
+UMask=0077
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+CapabilityBoundingSet=
+AmbientCapabilities=
+TimeoutStopSec=15
+
+[Install]
+WantedBy=multi-user.target

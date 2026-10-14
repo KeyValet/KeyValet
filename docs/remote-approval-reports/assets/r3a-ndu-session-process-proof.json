@@ -1,0 +1,10 @@
+{
+  "mcp_pid": 495287,
+  "parent_pid": 495224,
+  "read_only": true,
+  "mcp_helper_uid_readlink_exit": 1,
+  "mcp_exe_as_root": "/usr/local/lib/keyvalet/bin/kv-mcp",
+  "parent_helper_uid_readlink_exit": 1,
+  "parent_exe_as_root": "/usr/sbin/sshd",
+  "observed_utc": "2026-10-13T03:57:25.876017+00:00"
+}

@@ -1,0 +1,8 @@
+{
+  "acceptance_passed": false,
+  "operator_observation": "no_prompt_seen",
+  "unlock_succeeded": false,
+  "session_remained_locked": true,
+  "raw_harness_claimed_pass": true,
+  "needs_explicit_cancel_evidence": true
+}

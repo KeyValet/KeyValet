@@ -1,4 +1,5 @@
 use super::*;
+use axum::http::HeaderMap;
 fn request(mode: Mode) -> PushRequest {
     PushRequest {
         device_push_token: PushToken::Apns {
@@ -87,6 +88,24 @@ async fn service_authentication_and_json_contract_are_enforced_over_http() {
     });
     let http = reqwest::Client::new();
     let url = format!("http://{address}/v1/push");
+    assert_eq!(
+        http.post(&url)
+            .json(&json!({}))
+            .send()
+            .await
+            .unwrap()
+            .status(),
+        401
+    );
+    assert_eq!(
+        http.post(&url)
+            .body("invalid json")
+            .send()
+            .await
+            .unwrap()
+            .status(),
+        401
+    );
     assert_eq!(
         http.post(&url)
             .json(&request(Mode::Silent))

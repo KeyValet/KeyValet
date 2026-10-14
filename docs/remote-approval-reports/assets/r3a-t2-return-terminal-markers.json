@@ -1,0 +1,9 @@
+{
+  "observed_utc": "2026-10-13T21:27:57.917603+00:00",
+  "window_available": true,
+  "first_label_prompt": true,
+  "second_label_prompt": true,
+  "unattended_exit_6": true,
+  "raw_terminal_contents_saved": false,
+  "secret_values_in_evidence": false
+}

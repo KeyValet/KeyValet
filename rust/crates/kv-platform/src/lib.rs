@@ -35,6 +35,8 @@ pub mod peer_broker;
 #[cfg(windows)]
 pub mod pipe;
 pub mod protection;
+#[cfg(windows)]
+pub mod relay_peer_access;
 pub mod trust;
 #[cfg(unix)]
 pub mod user;

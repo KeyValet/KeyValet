@@ -1,0 +1,26 @@
+{
+  "started_utc": "2026-10-13T04:24:33.260108+00:00",
+  "source_credential": "oauth2/outlook-hhstuhacker-graph",
+  "test_credential": "api_key/r3a-graph-readonly",
+  "method": "GET",
+  "url": "https://graph.microsoft.com/v1.0/me",
+  "credential_values_saved": false,
+  "refresh_token_transferred": false,
+  "native_tool_calls": [],
+  "http_statuses": [],
+  "mac_token_elapsed_s": 9.278527,
+  "mac_token_authorized": true,
+  "ndu_proxy_credential_created": true,
+  "proxy_only": true,
+  "allowed_hosts": [
+    "graph.microsoft.com"
+  ],
+  "claude_result_subtype": "success",
+  "claude_reported_error": true,
+  "claude_duration_ms": 186094,
+  "claude_exit": 1,
+  "claude_http_tool_calls": 0,
+  "successful_http_results": 0,
+  "finished_utc": "2026-10-13T04:27:56.400113+00:00",
+  "elapsed_s": 203.139753
+}

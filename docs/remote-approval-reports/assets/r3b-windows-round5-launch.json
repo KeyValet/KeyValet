@@ -1,0 +1,11 @@
+{
+    "input":  "C:\\ProgramData\\KeyValet-Backups\\r3b-hello-runtime-a6b1e26f06ee4bdbaf3d59d2d0abd077\\input",
+    "system_task":  "KeyValetR3BHelloSystem-a6b1e26f06ee4bdbaf3d59d2d0abd077",
+    "owner_task":  "KeyValetR3BHelloOwner-a6b1e26f06ee4bdbaf3d59d2d0abd077",
+    "owner_sid":  "S-1-5-21-3389053113-2113560702-4064643913-1001",
+    "utc":  "2026-10-13T21:40:56.2698344Z",
+    "system_sha256":  "2abff15abf0857f1cb512ee7361f47ab7a0c2db015cba5ae1eccb443558a2856",
+    "output":  "C:\\Users\\11516\\KeyValet-Test-20261013\\r3b\\hello-round5\\owner-output",
+    "owner_sha256":  "e08111f003f2f59cf36489a38585043743e827afb6a3c4e352731b4164509b76",
+    "runtime":  "C:\\ProgramData\\KeyValet-Backups\\r3b-hello-runtime-a6b1e26f06ee4bdbaf3d59d2d0abd077"
+}

@@ -241,7 +241,9 @@ impl Host for System {
         {
             let mut stream =
                 std::os::unix::net::UnixStream::connect(kv_platform::paths::HELPER_SOCKET)
-                    .map_err(unavailable)?;
+                    .map_err(|error| {
+                        super::transport::unavailable_at(&request, "connect", error)
+                    })?;
             verify_helper(&stream)?;
             stream
                 .set_read_timeout(Some(Duration::from_secs(140)))

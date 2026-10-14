@@ -1,0 +1,13 @@
+{
+  "observed_utc": "2026-10-13T21:36:39.404142+00:00",
+  "exit": 0,
+  "read_only": true,
+  "touch_id_requests": 0,
+  "secret_values_in_evidence": false,
+  "ndu": {
+    "directive_id": "01M4TNJG10T64E6D72NQ0VMM7A",
+    "issued": [],
+    "received": [],
+    "audit": []
+  }
+}

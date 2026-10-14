@@ -1,4 +1,7 @@
+include!("windows-version.rs");
+
 fn main() {
+    emit_windows_version();
     let manifest = std::path::PathBuf::from(std::env::var_os("CARGO_MANIFEST_DIR").unwrap())
         .join("../../windows.manifest");
     println!("cargo:rerun-if-changed={}", manifest.display());

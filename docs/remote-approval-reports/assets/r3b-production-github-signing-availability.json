@@ -1,0 +1,19 @@
+{
+  "windows_workflow": {
+    "total_count": 0,
+    "runs": []
+  },
+  "latest_release": {
+    "tag": "v0.3.0",
+    "html_url": "https://github.com/KeyValet/KeyValet/releases/tag/v0.3.0",
+    "assets": [
+      "keyvalet-v0.3.0-linux-arm64.sha256",
+      "keyvalet-v0.3.0-linux-arm64.tar.gz",
+      "keyvalet-v0.3.0-linux-x64.sha256",
+      "keyvalet-v0.3.0-linux-x64.tar.gz",
+      "keyvalet-v0.3.0-macos-arm64.tar.gz",
+      "SHA256SUMS"
+    ]
+  },
+  "utc": "2026-10-13T22:46:03.112843+00:00"
+}

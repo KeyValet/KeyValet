@@ -1,0 +1,31 @@
+{
+  "read_auth_files": false,
+  "backup": "C:\\ProgramData\\KeyValet-Backups\\pre-r3b-unsigned-20261014T052910Z\\runtime-configs",
+  "configs": [
+    {
+      "sha256": "2494ed0fea9729fea85f3ab21a95288e19bcde40d6a63584129473fcf8fe0714",
+      "relative": ".claude.json"
+    },
+    {
+      "sha256": "c0961825f72c754584435a2b6dd97905b366bbef3e2b51cdfcdc1d1ed17fe7b1",
+      "relative": ".claude\\settings.json"
+    },
+    {
+      "sha256": "215f5bb2247a86138ca636595bd2e4d509d2cce89740cbe48043a836aad555ad",
+      "relative": ".codex\\config.toml"
+    },
+    {
+      "sha256": "3a6606f74454029b64958a6b2128fd5bc1be6411623bdb9d7b885d8cbfc45d20",
+      "relative": ".codex\\hooks.json"
+    },
+    {
+      "sha256": "42d72131817124a02965e9bffb88c57262a020266168a438324107f2697d3aaa",
+      "relative": ".cursor\\mcp.json"
+    },
+    {
+      "sha256": "b589cbfb9f44ea8dab66a7be6227fa9d8ea028a3e93b770b8fb37e7b3d41a4ce",
+      "relative": ".cursor\\hooks.json"
+    }
+  ],
+  "ssh_exit": 0
+}

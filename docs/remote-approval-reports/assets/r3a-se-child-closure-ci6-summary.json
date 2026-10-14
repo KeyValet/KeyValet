@@ -1,0 +1,19 @@
+{
+  "started_utc": "2026-10-14T05:41:19.368490+00:00",
+  "rust": "1.99.0",
+  "checks": {
+    "fmt": 1
+  },
+  "space_checks": [
+    {
+      "check": "fmt",
+      "free_bytes": 15728545792
+    }
+  ],
+  "source_files": 525,
+  "minimum_free_bytes": 15000000000,
+  "secret_values_in_evidence": false,
+  "source_unchanged_during_checks": true,
+  "changed_source_files": [],
+  "finished_utc": "2026-10-14T05:41:20.594215+00:00"
+}

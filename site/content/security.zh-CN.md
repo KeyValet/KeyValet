@@ -21,7 +21,7 @@ Linux 的 polkit 批准本身不是 TPM PIN 或启动状态策略。三种系统
 
 ## 信任边界
 
-AI agent / MCP 客户端是*半可信*的：它可能被提示注入，可以调用 KeyValet 的 MCP 服务，也能以你的用户身份执行任意命令。KeyValet 的 MCP 服务只是便利层——**安全检查从不只依赖它**。每个安全决策都由特权 helper 做出——macOS 上是 root 的 launchd 守护进程 `dev.keyvalet.helper`，Linux 上是 `keyvalet` systemd 服务用户，Windows 预览版是 LocalSystem 服务——它在空闲时不持有凭证库密钥。Touch ID 和 Secure Enclave 的工作由每用户代理 `dev.keyvalet.agent` 完成，守护进程只有在校验了对端 uid 和代码签名（`dev.keyvalet.touchid`、team `PWCRJPY7YC`、精确安装路径）后才接受它——同用户的其他进程无法冒充它来替你批准。
+AI agent / MCP 客户端是*半可信*的：它可能被提示注入，可以调用 KeyValet 的 MCP 服务，也能以你的用户身份执行任意命令。KeyValet 的 MCP 服务只是便利层——**安全检查从不只依赖它**。每个安全决策都由特权 helper 做出——macOS 上是 root 的 launchd 守护进程 `dev.keyvalet.helper`，Linux 上是 `keyvalet` systemd 服务用户，Windows 上是 LocalSystem 服务——它在空闲时不持有凭证库密钥。Touch ID 和 Secure Enclave 的工作由每用户代理 `dev.keyvalet.agent` 完成，守护进程只有在校验了对端 uid 和代码签名（`dev.keyvalet.touchid`、team `PWCRJPY7YC`、精确安装路径）后才接受它——同用户的其他进程无法冒充它来替你批准。
 
 ## KeyValet 能保证什么
 
@@ -57,7 +57,7 @@ AI agent / MCP 客户端是*半可信*的：它可能被提示注入，可以调
 
 ## 发布完整性
 
-发布包由 GitHub Actions 从打 tag 的提交构建。工作流构建的包中每个二进制都用 Simvito Limited Developer ID 签名（team `PWCRJPY7YC`，hardened runtime，带时间戳）；安装器在启用守护进程模式前会校验签名——以及同一份发布里的 `SHA256SUMS`。源码构建路径（Intel Mac，或没有发布产物的版本）对下载的源码没有签名或校验——在意的话请自行审计发布或源码。
+公开的 macOS 与 Linux 发布归档由 GitHub Actions 从打 tag 的提交构建。macOS 工作流包使用 Simvito Limited Developer ID 签名（team `PWCRJPY7YC`，hardened runtime，带时间戳），并经 Apple 公证；macOS 安装器在启用守护进程模式前会校验发布者签名。Linux 归档提供 SHA256 校验值。Windows 正式包没有 Authenticode 签名；本地与远程功能按实际服务/owner SID、固定安装文件身份、特权属主/ACL 和服务创建的 worker 验证，不以代码签名作为功能条件。见[下载页](/zh-CN/download/)与 [Code signing policy](/zh-CN/code-signing/)。校验值证明文件完整性，不能证明发布者身份。源码构建路径对下载的源码没有发布者签名；在意的话请自行审计。
 
 ## 报告漏洞
 

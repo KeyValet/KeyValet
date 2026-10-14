@@ -1,0 +1,2449 @@
+{
+  "fingerprint": "fbf22e994313d82d246b96ccc8e480441f4c048b4ad715f8f8c5bd828f87bf0b",
+  "fingerprint_format": "SHA256 of ordered path+space+file_SHA256+LF",
+  "count": 610,
+  "archive_sha256": "00089bb4539cac9c6d43a5cc831f47a9c6484493fa78cfb45a0e586b3b3458ae",
+  "files": [
+    {
+      "path": ".github/ISSUE_TEMPLATE/bug_report.md",
+      "sha256": "f50af58e7005ec872ba6d4884d6c9d4de7dc59eb209772fde7d20c39196f1731"
+    },
+    {
+      "path": ".github/ISSUE_TEMPLATE/config.yml",
+      "sha256": "a7cc6b04bb275163b30241edae24ef61e663b05d60c519c9ff384943c5a545d2"
+    },
+    {
+      "path": ".github/ISSUE_TEMPLATE/feature_request.md",
+      "sha256": "bd9baea8ff93883a02447a4317766a0c0a756a62873b5e7706e393d050e4fdcb"
+    },
+    {
+      "path": ".github/ISSUE_TEMPLATE/template_request.md",
+      "sha256": "f3974baf1db950e51f8293f17c93ef00e9942a60c160e52866f0df740d5bc091"
+    },
+    {
+      "path": ".github/PULL_REQUEST_TEMPLATE.md",
+      "sha256": "55f554e969605ce3175be5949e83e01d5ccea5d28cc78194101c6d9d3225815b"
+    },
+    {
+      "path": ".github/release-notes/v0.1.0.md",
+      "sha256": "d4b27d1ce8b7f6b367c5ef7c60d67a0b673fffbac7e137a3c9fd9f6166a3bcb5"
+    },
+    {
+      "path": ".github/release-notes/v0.2.0.md",
+      "sha256": "75c73cf80d61ff861e6286f88807cbd491e5b45fcb00bdc7ade4f1b11d840816"
+    },
+    {
+      "path": ".github/release-notes/v0.2.1.md",
+      "sha256": "351aa918197f1be21d2aa950c32c0354e28b727d3d8dfdf40b02c767076eb399"
+    },
+    {
+      "path": ".github/release-notes/v0.3.0.md",
+      "sha256": "d35b7ce05071b716293a297bc31e698209cfaf28e7a405149aff65e4a8d7f07e"
+    },
+    {
+      "path": ".github/workflows/linux-package.yml",
+      "sha256": "435d11969a8fd88631216a694027bada26956ad2206d59c4ee8fede7353a6be4"
+    },
+    {
+      "path": ".github/workflows/pages.yml",
+      "sha256": "75864d2868efdb20ceb9f0606632d2d3bb955830d801a9c17ab9a30a1336217c"
+    },
+    {
+      "path": ".github/workflows/release.yml",
+      "sha256": "525bc02c1a053f374364b5c10bca54792d34f526546bc8b68833236dc276e1cb"
+    },
+    {
+      "path": ".github/workflows/test.yml",
+      "sha256": "ce0286b901411df4b4fc5d8e6e306205534eb8d18de69588a4b97140b8a216df"
+    },
+    {
+      "path": ".github/workflows/w9-install-tests.ps1",
+      "sha256": "63a2576af0e7ab5286e9c7232c7ec34d08cf264faca2f3d1137ed1bbfc1ac0f7"
+    },
+    {
+      "path": ".github/workflows/w9-install-tests.py",
+      "sha256": "d6b6dfb4676b75a0ea71cbc54027073bf04b8a2f6d4b2c90b0f06ccc772c6ed5"
+    },
+    {
+      "path": ".github/workflows/windows-package.yml",
+      "sha256": "003bcf1242b2ff160336284bfd75bcd5bf84b719fd047eb6a77405b754e5afc0"
+    },
+    {
+      "path": ".github/workflows/windows-wsl.yml",
+      "sha256": "967fc47f79f4106341e29b9642ce8a0928f2c42e117acddf96baa129e2bc336b"
+    },
+    {
+      "path": "AGENTS.md",
+      "sha256": "d538277734e20607975504549c8b72cec71b65031872b905cd255c7200da7995"
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "README.md",
+      "sha256": "445d59652a84092f3e90b048bbdfab43566b70809a4f7157c31a4850ec2a5b76"
+    },
+    {
+      "path": "SECURITY.md",
+      "sha256": "45ddaebff22e64360c052c38e9168ed0bcf3c92afa33ad18fecd74c92df16a80"
+    },
+    {
+      "path": "deploy/relay/Dockerfile",
+      "sha256": "986ab5fd56f29b3dee4227aec7b8983e79d3d8188037dc445dd93fa818c5469b"
+    },
+    {
+      "path": "deploy/relay/Dockerfile.dockerignore",
+      "sha256": "eeaeccb8e2f18b5a3825034b32fc074131df667df07e5847d1d3b14262ccf1e5"
+    },
+    {
+      "path": "deploy/relay/account.conf",
+      "sha256": "d1b9b5c20929e930956726f548e07a91c5d5879cc6852f18eab0126e024b032f"
+    },
+    {
+      "path": "deploy/relay/cloudflare-checklist.txt",
+      "sha256": "78307855af2fad89e80c3c1dabfe35af18b8b0f9a34e241cd974d7af7061aeed"
+    },
+    {
+      "path": "deploy/relay/keyvalet-push.service",
+      "sha256": "48017916974e2e8b2028048f6aee5843e63f8ded88abaf4e8dbb2af0c6384e0a"
+    },
+    {
+      "path": "deploy/relay/keyvalet-relay.service",
+      "sha256": "b406a224166b509667132996045ccc84f9948316d68f02eab7c27802590ee6df"
+    },
+    {
+      "path": "deploy/relay/nginx.conf.template",
+      "sha256": "64e87c9ae58f5fccce24a7878a91509924e97d297119fef342b858fbf0ce6be9"
+    },
+    {
+      "path": "deploy/relay/push-private.nginx.conf",
+      "sha256": "26c3ca10495c181638a5e15285804e462c92531b05dc4e42aff4741f8825f311"
+    },
+    {
+      "path": "deploy/relay/push.conf",
+      "sha256": "5c6a83c6989a780d56e766e97e662ec3a776edc41bc08dc7ce1524b6bd708587"
+    },
+    {
+      "path": "deploy/relay/push.env.example",
+      "sha256": "928f4ff2cec78c9017df85621a63d866b6f7b59f27a12541c52787af588cfe85"
+    },
+    {
+      "path": "docs/windows.md",
+      "sha256": "5976d4833ac0c11b8d814f0ecc6c2694909c53eadb2a64b89ad44f84862eee78"
+    },
+    {
+      "path": "docs/wsl.md",
+      "sha256": "274822038a0698416e571742eac60b3069c7e1a237710b3a8da36b588efe39b5"
+    },
+    {
+      "path": "rust/.cargo/config.toml",
+      "sha256": "22291f9a08bff4503ee169cd55ed0cfb79bb7106b46a81f8068ad2fc56c8cf1b"
+    },
+    {
+      "path": "rust/.gitignore",
+      "sha256": "306fd52e74fca6746e12acc750f232de15e71da917756a1270d74c91f5eb7368"
+    },
+    {
+      "path": "rust/Cargo.lock",
+      "sha256": "3bebc0e939c6eb671655eb16cf4515d361e5b5fe1617d48300f5e32a89bd4e75"
+    },
+    {
+      "path": "rust/Cargo.toml",
+      "sha256": "1d9a361c73ad36f6a771aeeb04ece25487f34a79aca91e309d9fadedc630e07d"
+    },
+    {
+      "path": "rust/crates/kv-agent/Cargo.toml",
+      "sha256": "352a2adac6bd70a2a38fc06dc264d224f17eb28447acac968e134fbd67289bbe"
+    },
+    {
+      "path": "rust/crates/kv-agent/build.rs",
+      "sha256": "0b8068314e15af594ea9d8275166f767fb3706fd60bb977d09bf200411ca8ea0"
+    },
+    {
+      "path": "rust/crates/kv-agent/src/hello.rs",
+      "sha256": "4f1310de5dd771d6dd6d855404989fea210ad138fbf797382ce50fc20c22a6c9"
+    },
+    {
+      "path": "rust/crates/kv-agent/src/hello/async_wait.rs",
+      "sha256": "e43411fc7cdb571d96e2ce04390391f4272bdaaa14c0c6d8648457a8368e13f5"
+    },
+    {
+      "path": "rust/crates/kv-agent/src/hello/remote_key.rs",
+      "sha256": "cfc197a267002a5e2843aedaf92e653fca0726f359214f8cc4e5d4ee75dee867"
+    },
+    {
+      "path": "rust/crates/kv-agent/src/hello_crypto.rs",
+      "sha256": "7aac92bc2bba49385def60089cf412d67fdf3a8c5505c5ce038ee3955393ce87"
+    },
+    {
+      "path": "rust/crates/kv-agent/src/hello_logic.rs",
+      "sha256": "60efe2e4ba1ef08c60afb8cb20068e6fedb791eb680b5400a07f0d5584f102c7"
+    },
+    {
+      "path": "rust/crates/kv-agent/src/lib.rs",
+      "sha256": "ac943768391fa69477243b3d361c20ac275cc2115bea27f64f63af5fa6c1d93a"
+    },
+    {
+      "path": "rust/crates/kv-agent/src/main.rs",
+      "sha256": "eda4e86f6477b874497482a2c3f7dc4d4a7ac16b8105ea3cb1647a70e167cf5c"
+    },
+    {
+      "path": "rust/crates/kv-agent/src/presence.rs",
+      "sha256": "c659b483117b6ee5171501dae3b3033d458dbdd6b1f85713d2b56c178c343bbd"
+    },
+    {
+      "path": "rust/crates/kv-agent/src/presence/windows.rs",
+      "sha256": "2fc71098a40d1c44021fa5bf154171b38788939c84b137727803378c9b65b77e"
+    },
+    {
+      "path": "rust/crates/kv-agent/src/remote/agent.rs",
+      "sha256": "cb0e26468595bdc5aad189808975febcb587a22b279987ece4d201b226807d96"
+    },
+    {
+      "path": "rust/crates/kv-agent/src/remote/flows.rs",
+      "sha256": "36a094721517ba17e5486aeb4eed79bc9acd058ed2a374439fac414eec30518e"
+    },
+    {
+      "path": "rust/crates/kv-agent/src/remote/mod.rs",
+      "sha256": "c1c334e27b261706151a1cd2af1d4cd4f1be4b128fae44c212083d6edbd24ea3"
+    },
+    {
+      "path": "rust/crates/kv-agent/src/remote/native.rs",
+      "sha256": "3b73500d9dd815b8cb4f68973a26f6c4b600c1a8db12f26f87779a42f13f3d85"
+    },
+    {
+      "path": "rust/crates/kv-agent/src/remote/pcp_acceptance.rs",
+      "sha256": "ac1aa80d04416e6035419bb6d3f8d865f8842e00ac8bc076169a9fc2fbeaa8bd"
+    },
+    {
+      "path": "rust/crates/kv-agent/src/remote/queue.rs",
+      "sha256": "f28df54439de557b8f63965a5a1680730adff59ae8b19c71b8d28bd1472b60a3"
+    },
+    {
+      "path": "rust/crates/kv-agent/src/remote/stdio.rs",
+      "sha256": "015da7f92b3d7f36a13cfd4b100bd6214f24a71c0fbc6f0784ef93e383f4bde9"
+    },
+    {
+      "path": "rust/crates/kv-agent/src/remote/tests.rs",
+      "sha256": "121e582c334bf0230052ddcaaca4646c2ff4a239e402a2467490fabee9dc0ec8"
+    },
+    {
+      "path": "rust/crates/kv-agent/src/remote/view.rs",
+      "sha256": "3834c538f959e62b794bce9a9da49f5febb4ffab65bc2f36c5d424845d568e8c"
+    },
+    {
+      "path": "rust/crates/kv-agent/src/remote/windows.rs",
+      "sha256": "fdb02767f5569b078fba2fc70afc256c2c42e30fc478b6bababb11161a9b2edb"
+    },
+    {
+      "path": "rust/crates/kv-agent/src/remote_agent.rs",
+      "sha256": "ca8bcd85e6d402df2afff272e32342e40d46465d9bf9c2285783bc08c3897b87"
+    },
+    {
+      "path": "rust/crates/kv-agent/src/remote_lib.rs",
+      "sha256": "a6b46fd85ecd3beebc2b9e7b1e186a8e8f05161fe0db10daf8ad1e1bb48103d7"
+    },
+    {
+      "path": "rust/crates/kv-agent/src/remote_main.rs",
+      "sha256": "eb9371393809df3f832817c9736da82ff89f255d3686e1383c7895a27c1a42ac"
+    },
+    {
+      "path": "rust/crates/kv-agent/tests/fixtures/hello-test-key.pem",
+      "sha256": "f41399fec3e74a6f45cd65d84ed6432dc7a8c1211cbedab088b06c20e34cd3cc"
+    },
+    {
+      "path": "rust/crates/kv-agent/tests/remote_agent_cli.rs",
+      "sha256": "20381871a3039a94e80578469c6679d27d6529ea5dc707fc5e1de966ecc039cc"
+    },
+    {
+      "path": "rust/crates/kv-agent/tests/remote_contracts.rs",
+      "sha256": "bacceef28b0d06e5914b611f70f8ae5bec82d04d8bbc48ff8cbac4e42b457d32"
+    },
+    {
+      "path": "rust/crates/kv-agent/tests/support/check_coverage_w6.py",
+      "sha256": "8247f4dfaff5d1922986d1158ff763bfe4704b2dab8d0478d6ace0596d4ff947"
+    },
+    {
+      "path": "rust/crates/kv-agent/tests/support/check_w0.py",
+      "sha256": "a704d2cdf35677c3f0dbf715d3cd3a138e8c87f0ddc1b55aa9641f10383ee84f"
+    },
+    {
+      "path": "rust/crates/kv-agent/tests/support/w0_flows.rs",
+      "sha256": "8c550c0da4c8fb2dc5a6d51d98c5ddc470a38c8c10341692575de55c749e8fef"
+    },
+    {
+      "path": "rust/crates/kv-cli/Cargo.toml",
+      "sha256": "6d756fea282c40883502899c9ddbca7ad5a3cd3f0dbb7416a384f133dad0015f"
+    },
+    {
+      "path": "rust/crates/kv-cli/build.rs",
+      "sha256": "0b8068314e15af594ea9d8275166f767fb3706fd60bb977d09bf200411ca8ea0"
+    },
+    {
+      "path": "rust/crates/kv-cli/scripts/check-w7-coverage.py",
+      "sha256": "8828169352180eba7106ca381ad9d4e6c83764ee153dedb394e28f504ee3b264"
+    },
+    {
+      "path": "rust/crates/kv-cli/scripts/coverage.sh",
+      "sha256": "98dd67f3301f2890a0ac1953360f505e322c29b16c175beb567ba04ba37fbff5"
+    },
+    {
+      "path": "rust/crates/kv-cli/src/linux_cli.rs",
+      "sha256": "88943d1e745ba33e8a35088a57ca8528fd0b13e896f5db83b59bbaf25b373cb9"
+    },
+    {
+      "path": "rust/crates/kv-cli/src/linux_cli/tests.rs",
+      "sha256": "8b6ad41609bfde415808103e25ac621e9ee85a7d2aacea819e4a00ec262b887f"
+    },
+    {
+      "path": "rust/crates/kv-cli/src/main.rs",
+      "sha256": "41c0481b62719190042188712758ff38a42d0e857da1144a7dd67d2f392440cf"
+    },
+    {
+      "path": "rust/crates/kv-cli/src/remote.rs",
+      "sha256": "264c1f756b3ef41c6f455634996a990c75e4b7699203441bb418da06445aa46b"
+    },
+    {
+      "path": "rust/crates/kv-cli/src/remote/args.rs",
+      "sha256": "7d8ecae3edbb4594a24c87dff21b249835653bfd6d4232dd0fa8f854a8e7c52c"
+    },
+    {
+      "path": "rust/crates/kv-cli/src/remote/audit.rs",
+      "sha256": "d9c48c8c3fcac8b7f581e49c502d24e7777f7971f801447f64af4fe720f2aaec"
+    },
+    {
+      "path": "rust/crates/kv-cli/src/remote/audit_tests.rs",
+      "sha256": "7fdacd0615defe57ff0e622a839491b0c996b557eb54e84e68c2f76ceeef8468"
+    },
+    {
+      "path": "rust/crates/kv-cli/src/remote/live_helper_tests.rs",
+      "sha256": "d38c37f9b01e74e9d8e2058290bc4c1bd7134d8b547332fd52cc0560b2227be7"
+    },
+    {
+      "path": "rust/crates/kv-cli/src/remote/output.rs",
+      "sha256": "3a2f01e85bb187e85fcf7e57c166891d34bf93c7a1c564f111353b9c037c31f9"
+    },
+    {
+      "path": "rust/crates/kv-cli/src/remote/relay.rs",
+      "sha256": "ec6ec12f83679d8158e347b91ebe67c89dbd4060a7c07a1902f584f4538e8dba"
+    },
+    {
+      "path": "rust/crates/kv-cli/src/remote/relay_tests.rs",
+      "sha256": "4ad40563f973cd8855bdc5938a670296d75abe7a8324e71e5b13c516667a8291"
+    },
+    {
+      "path": "rust/crates/kv-cli/src/remote/review_tests.rs",
+      "sha256": "733337616698a30cc66828a9cba62dd6d3d23e76220557737b00a73d12b6ffc3"
+    },
+    {
+      "path": "rust/crates/kv-cli/src/remote/system.rs",
+      "sha256": "b9783a45b2d2b7a5d4ac05d9aac925354546e8fa646b606275b0ce803e2044f9"
+    },
+    {
+      "path": "rust/crates/kv-cli/src/remote/tests.rs",
+      "sha256": "b706ac37749531e149de5c06cc10195366fd854191716ea965b582f809ac2d28"
+    },
+    {
+      "path": "rust/crates/kv-cli/src/remote/transport.rs",
+      "sha256": "e44c3ab2d1add28916de5e754a24ea6ce50ea3067360f3fe51f7baf3c155bdef"
+    },
+    {
+      "path": "rust/crates/kv-cli/src/run.rs",
+      "sha256": "8e3f09cf4eb46fd9e6c2b2d568b68d2b18dbf414bed1d8da16c21f8c13019885"
+    },
+    {
+      "path": "rust/crates/kv-cli/tests/remote_cli.rs",
+      "sha256": "7a40f06f321dc49f8b1f84c89112a783c8fec6a5f7ecf8828a10e42e43951220"
+    },
+    {
+      "path": "rust/crates/kv-cli/tests/snapshots/remote-invalid.json",
+      "sha256": "06be9de6429dd838c628588994131f51f6ec6314182ff5307db2dafdab737e9c"
+    },
+    {
+      "path": "rust/crates/kv-cli/tests/snapshots/remote-json-schema.json",
+      "sha256": "3cf40cb412217b7c1872d09b21c300a134f17132605b5bdabab95d1b859b8d73"
+    },
+    {
+      "path": "rust/crates/kv-cli/tests/snapshots/remote-parser.json",
+      "sha256": "b421676d066bf52c73500d21183b96b347b9c845ac6608bd8b1a8d9b3da6f56e"
+    },
+    {
+      "path": "rust/crates/kv-core/Cargo.toml",
+      "sha256": "d13adf21968110fe1745f16feff57d4462d93528b0095cf90d66eb43c300baa0"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/accepted_response.schema.json",
+      "sha256": "c434379e0c3c30f5ed6ede72b27310e782b5a9320a0352b2ebf7f9b78b10e386"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/ack_messages_request.schema.json",
+      "sha256": "c2372c47b0be34aa3cb17d5ea39378ccbe0ff3c8be122b443e442a8cc99225b3"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/agent.schema.json",
+      "sha256": "ebc6332fee3d620d7b4298eb2fdd7f22c1149a06453a7ffa0baaf0fd1d994e55"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/approval_cancel.schema.json",
+      "sha256": "bcafb1108667286cc291cca553808a82931e454bd5315fa71a93d766423ddfe0"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/approval_decision.schema.json",
+      "sha256": "3813bad930ce02802d8401868ea50ee3114ae117de873ad525705abf68c38e4b"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/approval_escalate.schema.json",
+      "sha256": "e53f834a8776d001e8391f2ae8e6c625fa77f35faaf124cdcd41d211b456d84d"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/approval_id_params.schema.json",
+      "sha256": "e783d6a8de16178620baf0c3ca9796c769a0a88f9c834e1255dcdbd3d70fd81f"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/approval_key.schema.json",
+      "sha256": "b1a36ae4e1e3b337c30058072307933173c113ad1a66d2fcf9836089afb08694"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/approval_request.schema.json",
+      "sha256": "6400a575a6f3ac6806dde9a271065a2dfea2ef5de59758f4c0551ba15325ebbe"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/attestation.schema.json",
+      "sha256": "571259a1354cdc2732b0a7dd7ea5313fcfb451dd316a1f3fbc1ca8a0237a7a65"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/auth_verify_request.schema.json",
+      "sha256": "24f55a93710e61a12ccb3aa9e7216173d6b3d43f9f8008357adcd93ea9d367a3"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/auth_verify_response.schema.json",
+      "sha256": "7fa53c7fbfec8c3a0711d2acca284b8bd63ba169861c4085e8e99958a38df3ef"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/budget.schema.json",
+      "sha256": "733ed9d55e49cb3ea0b19b414a81724195df48c149ad55979df4be1b3a3819ef"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/cancel_approval_args.schema.json",
+      "sha256": "d313419edb0b8d18e5e406fc948bc9748c1ae70dc6fe09c2dd957bf8adf11036"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/canonical_action.schema.json",
+      "sha256": "35f2087eabe8c0fe11c87d3fb8a46a27c9df4ff08a8479a3952899a5610116fa"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/canonical_agent.schema.json",
+      "sha256": "95528716d7d6c2dec014ad2a9b525114a44f396640eda1ffdfdfc0e77d372998"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/canonical_request.schema.json",
+      "sha256": "38da5a4185ebd20ad8dd740dadc101b60bd993d341ee1b145e898246a5473c66"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/challenge_request.schema.json",
+      "sha256": "4a23275bb955e049d0757124192f959cd8d397d17211d5251e33820b4e6d08d7"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/challenge_response.schema.json",
+      "sha256": "96246e0c9c127b340369e17b4e54b259bc2fe9236cc78347520c568ffdbfee7f"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/credential.schema.json",
+      "sha256": "90c752afaa229ce18838b7d02552269f9759b416674a9339af395783742c7139"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/decide_intent.schema.json",
+      "sha256": "2779b27059e4c51cf6b66d4657062adc9f9dce2cfd0138186246d620ec5c6b48"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/decide_params.schema.json",
+      "sha256": "f927bd45b876e827b6761fd4d881da1626683c0c22c65992af68eab236b8258d"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/decide_result.schema.json",
+      "sha256": "5160e17ef8f087adc636d8ff0938512cf094fc2c4540a1c02ec9702c834b279d"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/decision_scope.schema.json",
+      "sha256": "ac6b3d90d1064fd5a01644eab2d204e7ff4af17953f433789cda60ddc9f09dda"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/delete_device_request.schema.json",
+      "sha256": "3414afabad7619f66bc40384d0dc8a08cc6f06f8d96d51599815ac582244ca3d"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/delivery.schema.json",
+      "sha256": "7e0c006457db5c3be0bbdbb0c1425dc55cac1a027c432bd08bb81b50cd8eef43"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/device_delete_proof.schema.json",
+      "sha256": "de48779a5e7c00d3fe1c612797299d8fbb78eb0339b2bea6c74617bf58c871c9"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/device_id_params.schema.json",
+      "sha256": "f588bc836ecc266322dd9299cc47ba91a0e2d6e607d73bcec3846e1c90ca7977"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/device_record.schema.json",
+      "sha256": "86081f18644b66ab224652910e6667a61b6b2be099b80194229eb0106d29359a"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/device_rename_params.schema.json",
+      "sha256": "cc6b5b75ff7c3fdc08e9158006690f9bea5eb1313f778d9c31a882520df668bf"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/device_revoke.schema.json",
+      "sha256": "c3b5f0af82e28a00fff7d8992b95e287fc69ffd537968f015659b932ab729aae"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/devices_list_result.schema.json",
+      "sha256": "e3c8aea61cca0173fb8e421207227c844651c2217d4c15f8d8369cebd0ba58a3"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/directive.schema.json",
+      "sha256": "1fc9765383cba21273011c376a0a4d6d368637dffc0e430d886356ddb2c886e0"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/directive_intent.schema.json",
+      "sha256": "407b2d83527cfb834c23bc61ee59bb9b21f6577c026497d3bada207b4ef3adfa"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/directive_issue_result.schema.json",
+      "sha256": "9e22a2bf42b4cc3407dc90cf909793ba4de353a9936261a6e4e98da0e99121eb"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/directive_result.schema.json",
+      "sha256": "ae5c726691ae3f7e9cc6cd97956ea620d60c70117c1b6f682f93fbc25290a83a"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/empty_args.schema.json",
+      "sha256": "2ec5c7cbbed32aafe233f857fcb3b9fbf414f1e1af9906a2cd3bce8cbe4f2238"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/envelope.schema.json",
+      "sha256": "02a76c87d1ec0ae8eb3efabb2b1743e5afe1fbfa50cc110ae78952bc85d755f5"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/envelope_header.schema.json",
+      "sha256": "2fc37b09011101def2c77a0cf1080088293910d8b1028d26ae2ded8093fa2374"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/envelopes_response.schema.json",
+      "sha256": "9cd0ac49936578808d102201c7cc78e19ce823294394a60e0961403d251b6760"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/grant.schema.json",
+      "sha256": "1c0480c94090a4e390f56c1862d6dd770dbc5eb38fea0938a062ec083f269405"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/grant_confirmation.schema.json",
+      "sha256": "b5608f300d1e1d3cf12cff6bbbca6b80744d380bab9900d93b97df31ae65ea9e"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/grant_intent.schema.json",
+      "sha256": "7c7255ec305f239f23227c27d09f1bb007ab2988aed3ea4ebcc6a07034d914bb"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/grant_issue_result.schema.json",
+      "sha256": "4081df0efb7af7172a67c9dd222ab2faa09a10b1e1b155dd8a792634651bb85b"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/grant_list_result.schema.json",
+      "sha256": "ffe59ac615a36639ffb27bb223d6206423cd21b790370e1818b79ebdd6f95ee6"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/grant_revoke_params.schema.json",
+      "sha256": "2be08443691f9f19d976eff961bfc9c892604c7f37c152968e1b930a93966239"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/grant_scope.schema.json",
+      "sha256": "ab04a7e820f29d04c5113833d98bfe914445a3c249e1b84c35eee12425486cef"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/grant_source.schema.json",
+      "sha256": "0747a135a93a5d851c100a0bc5a97cee9459a52e75f3ec73b973347cc5466d9d"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/health_response.schema.json",
+      "sha256": "4fb2439380cd155a3a8ae86de7b24f77d1e1255582818650baff4d25a31f816e"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/ipc_empty.schema.json",
+      "sha256": "7e42ba37b90c2ec81430f25bbeaa88cb1329e00b7aedceacdbe540d9a5a67bc4"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/ipc_error.schema.json",
+      "sha256": "5b9e41ee3ffdc6a130d60a6ad6a6f3ab61157b030337ca8d01b22ef8babcfd5e"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/ipc_request.schema.json",
+      "sha256": "392186a3e61ad13c856f8a45d111778105766d839d1c750876e6378079d853d4"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/ipc_response.schema.json",
+      "sha256": "43fb2da6a6e20cd2243b71cf541620a2c5a7f8224d6460a0e3fe62c3a9f0ac2a"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/notify_args.schema.json",
+      "sha256": "1797fdf4d7a4e2bd81de7ab349d5646848eed3f018c70c458a5cf5aeddec8435"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/ok_response.schema.json",
+      "sha256": "fa5d74c76d8dfa3298d4877aaac958e4b56d102235f5f22f33c5c19a56ffdb76"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/operation.schema.json",
+      "sha256": "a163ef03686596ad1e693d0515865fc96ae34fce44e54fa58d72fac0d4cb4436"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/pair_accept.schema.json",
+      "sha256": "8e0749bb433e90cb3aa1fa732fcd743bcc9b2c9b9ddaa09035cb98072ddfeeac"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/pair_confirm.schema.json",
+      "sha256": "eb6c6d4d6e2f615dbd51f394a176805e32d12f501048b78c4fc51930da72f00e"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/pair_confirm_intent.schema.json",
+      "sha256": "e0edce06448e50534d120a2e232b11b4a5dd14202ae22d37e9176201aed98074"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/pair_finish_request.schema.json",
+      "sha256": "3ca94ed878033322a111988cb7c5612cf62e6c2502d407f7aa70c6a52c0ccbe6"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/pair_join_intent.schema.json",
+      "sha256": "c9c5cc0b577e7cf7724efcc768e77afc4debdb2d275b4fc83ac2d3fe3f77c514"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/pair_offer.schema.json",
+      "sha256": "a897b109bf6452bd0e053860bd3ba864097768d21f384a90feb4b47744fc011d"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/pair_sas_result.schema.json",
+      "sha256": "29e99254f2c8deb5983ca76626fd0f225acbc15d6a1434c0d27993ee49287b2c"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/pending_for_agent_entry.schema.json",
+      "sha256": "9860b261570202df1e3c62d1c6ca80af81cb452c2fe5e8aefc5791c0f02b3ce0"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/pending_for_agent_params.schema.json",
+      "sha256": "5298354905e4a91ee3f6d5b59bf9ae38d90120a160b82528a39d960a6f091499"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/pending_for_agent_result.schema.json",
+      "sha256": "c170b133b47a459193fcee525a6b883fc53342e86113a9df163a6bfff8389a73"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/pending_list_params.schema.json",
+      "sha256": "24f05b328d3cfdeee6f313cbf420ca01fdd16fd33dbc45ba41c23326e3eeebb2"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/pending_list_result.schema.json",
+      "sha256": "82c576a5249cedcae4f1c4a0dc40a147ed12e11c3c950ee694bdd2e0c8ec24a1"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/pending_stop_block_result.schema.json",
+      "sha256": "34e4902285adf8e598dbb19af15ae45c09dbb60ab3aedbc05b53152ed2220b03"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/presence_hint.schema.json",
+      "sha256": "2c91291cac27dd336c3e25861d9e4c70ca9f288e84902fc0f66f49c18ca90f3d"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/presence_signals.schema.json",
+      "sha256": "c7d93ea7ffea4ef7226ca36e59d5a45d749b79aacefc1d365df91a3ec22f0e8e"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/presence_state.schema.json",
+      "sha256": "713c3b17cab91218ebc91d257616e939a213d3d000b791e2309f6d0e1c199943"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/protection.schema.json",
+      "sha256": "a6265c1cf2596fb6abfec5355defa01be930a9c1161a77e02d12bdc3ccb717b1"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/public_jwk.schema.json",
+      "sha256": "ac2a810d15ba28b41398e09e0ce892784c8fbe38c786d2a2b124bf4814d1d2e4"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/query_audit_args.schema.json",
+      "sha256": "db6ca9919dadb8dd9a0cc13078c487c0acfa9c76581032f5282b04d087e8dfff"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/quorum.schema.json",
+      "sha256": "d5cdfb88389a3bd90aa338d4dd7b411d8a94f54f508bb8ac77340f0337164005"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/recover_account_request.schema.json",
+      "sha256": "5fe4d50702b8b522b9fb90c0e2db9b12f8525cf7bd3afc4439cd9e6266cd1a9f"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/recover_account_response.schema.json",
+      "sha256": "b2b438843f8dcf3581a5fadf57e6cb187e51fd74c85ac8e688cd221481f18c03"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/register_device_request.schema.json",
+      "sha256": "1fbc8c2816e6b141f6a4f24fa16af7d353232c5a3e4835c0200259c6691fcc7c"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/register_device_response.schema.json",
+      "sha256": "e0a1c79849673d141c0baa15af90b21792caeba7c321d9db237bfe20c7ec71cb"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/relay_binding.schema.json",
+      "sha256": "cc6da354d18548f8aa26ed57004e7cf74f2b21f0b282dd2687ad5918d2361429"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/relay_error.schema.json",
+      "sha256": "00738541b83a5fc6286aca7a0814ede2ead749e7fbf816082def29e4edfa754a"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/relay_error_response.schema.json",
+      "sha256": "91f33b136b9c9fc1aad49ab69dde3c600b88e6462ef2ea6bcf6f5bbb3daf8c0e"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/relay_inbound_params.schema.json",
+      "sha256": "3cb613f44c78580fb7cc18832d23a005634b4c6aafb138702bbd8e9fb426a761"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/relay_inbound_result.schema.json",
+      "sha256": "da0c8c8df4f855084503ed248d8bfca30ee4b72d330d7c7f798cadb0a595ebbf"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/relay_outbound_poll_params.schema.json",
+      "sha256": "aeccd0828008093d6336eb497394be8c6450fd6cced18f011d03d51e9bf74d96"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/relay_outbound_poll_result.schema.json",
+      "sha256": "d0f0057aa873384da3e25e8fe54db26b71bdcb96b0a5cfd9b8c9812224aa877f"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/relay_pair_complete_request.schema.json",
+      "sha256": "c85e399a2153273e7e373239528392a26f32df631fb7644c71466d1f4cea9ceb"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/relay_pair_complete_response.schema.json",
+      "sha256": "c4df09062e966e3b414794cad27338e3ff2a1b9167a3e2cd2efadf76c6f5118c"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/relay_pair_start_request.schema.json",
+      "sha256": "3fed65ecbec1dd7e7633d9e85fea0a56981670c863259782bfdd518f53e22537"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/relay_pair_start_response.schema.json",
+      "sha256": "5be41110d849174fc86d0004410258b88e7526f677a659d5d8f8dd5c34672654"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/relay_status_params.schema.json",
+      "sha256": "62f9e67f031476e01216bdae821a040660a3b1afcc29198dd674a14a527e939e"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/reply_approval_request.schema.json",
+      "sha256": "512e70e7ac53b8b6b8213bc84e31090df96656eb22154154bad763b83173eef4"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/requester.schema.json",
+      "sha256": "d21d246e694d61629941100c5385d93968d235a6306b3925d5dae70b85f2e75b"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/revoke_device_args.schema.json",
+      "sha256": "5ad47780c976ba8911eed5fdce0def038400d31b7926cb0c63db5e9315f7c34b"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/revoke_grant_args.schema.json",
+      "sha256": "6f0d000daec31481eef3b035ea0f9e7c4e531130da57957e8ce5984b2deb40a2"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/send_messages_request.schema.json",
+      "sha256": "bd749ea6774aeb91c251d44f3db073b16b0018cd6004ecb63d809eec16aa2aa6"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/set_class_args.schema.json",
+      "sha256": "e12a55a411be0aa2c6e6f2b7e108286a70023693d56a39045d57c759e594e66f"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/set_device_label_args.schema.json",
+      "sha256": "ed20a6aebedc99e2b1c9e42a5926212c65585d2335e7bbebe2e80a236eaffa58"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/set_mode_args.schema.json",
+      "sha256": "7948f3f68c9f7972f4cd519798b01e2ccf99a69b67e3af35b88924695cfafe65"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/set_unlock_ttl_args.schema.json",
+      "sha256": "9f5a3417732ef896ba27e89d860b1f073c68fd28ca9f781acaa94be4daf80ca4"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/sign_identity_params.schema.json",
+      "sha256": "9ae2b738e79108db277fa134212fda63553635f72aede84c09b919e3cefd255b"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/sign_identity_result.schema.json",
+      "sha256": "7ed39d3c2b3c016b9d6802f8308eecae9ae4ab66da885836aa197810d474ff12"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/status_approver.schema.json",
+      "sha256": "5e870c3e69418b80bb77e0757b9a0cd20deeb0e6928c29b60f4a85a43e877c20"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/status_result.schema.json",
+      "sha256": "c6d131abc2920d5c995f448395016e5ce4e6c0d66921d081336d81d632891b27"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/submit_approvals_request.schema.json",
+      "sha256": "bfea742462bcf48d02d9b504f1c199bd2cfa74ad60e0e6607b4005d3ea45ed86"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/tool_approver.schema.json",
+      "sha256": "09363edcb506c7553eb5bf78bf9215d5241557b34d074ede10f7659dc3f0e2e4"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/tool_result.schema.json",
+      "sha256": "daaa11ffdfc6579bc2a07add7451cf4f21d28722bd4817ffda5648a5540f8289"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/unsigned_directive.schema.json",
+      "sha256": "729cce00828ff8d68fa0d0fac678042133f67b43c116c0a8fcc662419ef5a409"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/unsigned_grant.schema.json",
+      "sha256": "aef58cc2bd2ea7e142d47eb7df13ac88539833dbd21c4baf303e55e673d4570c"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/wait_params.schema.json",
+      "sha256": "841baa2217361e2dddb4d14fbaf7795e9842607d8ffc99996187f092447d58a7"
+    },
+    {
+      "path": "rust/crates/kv-core/schemas/remote/ws_frame.schema.json",
+      "sha256": "f0b0f1b85a39aaf508630581585b4773e4dfddf03d1b16de20dc4149043aab2e"
+    },
+    {
+      "path": "rust/crates/kv-core/src/auth_gate.rs",
+      "sha256": "428c559bdee48ad25f8ba7af0b374d377617bc4fa91bc84c16ff097ebe73de58"
+    },
+    {
+      "path": "rust/crates/kv-core/src/dispatch.rs",
+      "sha256": "7a5124db85d292b30ed020b34cce2df1a7fe55b4ff0b997eb4d32803dbab867d"
+    },
+    {
+      "path": "rust/crates/kv-core/src/lib.rs",
+      "sha256": "aa7189edb15e7a72c6a3eb9b946b6c8be06d85acad8ceb0863ba27ceaa4c9981"
+    },
+    {
+      "path": "rust/crates/kv-core/src/prompt.rs",
+      "sha256": "22f64d8dd1b09ff0a1a9d8be8cd358bf84070978019b8ea6e44de6a164efee79"
+    },
+    {
+      "path": "rust/crates/kv-core/src/remote/audit.rs",
+      "sha256": "9c77a265ed92b4c7185d4eb443bbaf244d5eaf213a207817117d97eacb962557"
+    },
+    {
+      "path": "rust/crates/kv-core/src/remote/canonical.rs",
+      "sha256": "f3eba656204b6e9a6fbcd251eee8949f4e15c7469d725c297918ea44dc21cbe5"
+    },
+    {
+      "path": "rust/crates/kv-core/src/remote/envelope.rs",
+      "sha256": "35d8fc8853161f258a0fea55bec66ba7f61844cd8cda594ae69f13dd45fc4922"
+    },
+    {
+      "path": "rust/crates/kv-core/src/remote/error.rs",
+      "sha256": "f0bca4ea3917acbffa4686d19caea7e4d16799f939dc2019737fddee0c149307"
+    },
+    {
+      "path": "rust/crates/kv-core/src/remote/hpke.rs",
+      "sha256": "ba5e5f6746cd34df70cf68f9ed7d1335fe94019f055d0855bb44644ddeadb690"
+    },
+    {
+      "path": "rust/crates/kv-core/src/remote/ipc.rs",
+      "sha256": "34f9b9421ab18640269ec68d00782e20bf3bb6362f5fbbc2d3e6139f795497b2"
+    },
+    {
+      "path": "rust/crates/kv-core/src/remote/keys.rs",
+      "sha256": "e48348dcbc9f97b7ce9052e19b8b9ceb85d22cec9d9275fd4f42d91b15f0fb93"
+    },
+    {
+      "path": "rust/crates/kv-core/src/remote/mod.rs",
+      "sha256": "e61c5492879ee0e4b39971853c2545485f249986f9c64806d437ddef85ec4aa8"
+    },
+    {
+      "path": "rust/crates/kv-core/src/remote/pairing.rs",
+      "sha256": "c7d7d88da6ec201946d021016da267ab85df3cc30853b3a9d5b04ab7547111d9"
+    },
+    {
+      "path": "rust/crates/kv-core/src/remote/relay.rs",
+      "sha256": "586d325aeddc90d15b2e70a5a492a917366c147fa99217ecb57f62fba069d4c9"
+    },
+    {
+      "path": "rust/crates/kv-core/src/remote/relay_control.rs",
+      "sha256": "5a8822b10f3a5f37718a04a9f80a963e4c83a338fa7a294962f32cb639217a0d"
+    },
+    {
+      "path": "rust/crates/kv-core/src/remote/traits.rs",
+      "sha256": "da47f029089e8206ec9e541474db8ef075ba26934579929bde2170b30708158c"
+    },
+    {
+      "path": "rust/crates/kv-core/src/remote/types.rs",
+      "sha256": "a722a5436d35bb11c1ac3b4fc807c8170ed821a6d58cd00486d7a30c0f91a586"
+    },
+    {
+      "path": "rust/crates/kv-core/src/remote/validation.rs",
+      "sha256": "bf01aff726d71aa1aa9bf4981025372e76c784d5f07593791198152dfcd9880b"
+    },
+    {
+      "path": "rust/crates/kv-core/src/settings.rs",
+      "sha256": "73fee6a2296bddaa4db8c39a1b303da25585b3df39ea27dccfbde42b4c60f4ee"
+    },
+    {
+      "path": "rust/crates/kv-core/src/summarize.rs",
+      "sha256": "947c53f0fb7cd6d0b063f6195c1c770edc409da0625388cbc6c1685b6222cddf"
+    },
+    {
+      "path": "rust/crates/kv-core/testdata/remote/approval_request_digest.json",
+      "sha256": "30c540cdbfb5cbace03e5ec8a43d7a31635ef16e1bfbda16f7938097e361bf8b"
+    },
+    {
+      "path": "rust/crates/kv-core/testdata/remote/decision_replayed.json",
+      "sha256": "cf5fe50344fe5bd83e62fb1059c4c11eb4ad223cfa8587e1b7956a6194f04e5a"
+    },
+    {
+      "path": "rust/crates/kv-core/testdata/remote/decision_valid.json",
+      "sha256": "db5767ec815006ddfee517c74301f8c83fcdfc0088183dcf2659f31251fe3884"
+    },
+    {
+      "path": "rust/crates/kv-core/testdata/remote/decision_validation_cases.json",
+      "sha256": "7541abb7ce7fcef8ca5254b19a2b3f1fff1bba9cffdc59b46b991e98fdfe7db9"
+    },
+    {
+      "path": "rust/crates/kv-core/testdata/remote/decision_wrong_key.json",
+      "sha256": "115bcad66a7682d90cfda49220c917afb738f3f88b732db199616f5a2f0b1b5b"
+    },
+    {
+      "path": "rust/crates/kv-core/testdata/remote/device_record_with_dk_sig_envelope.json",
+      "sha256": "e315e931136e402f7ac82effb46c15b8d55e74da1c01659bac0eb7365f2b54ba"
+    },
+    {
+      "path": "rust/crates/kv-core/testdata/remote/device_record_with_dk_sig_legacy.json",
+      "sha256": "d8c9bdbec9202bc7004e9671a9d30fb5ab9468ff2a79aaf3e4cded3be4200d04"
+    },
+    {
+      "path": "rust/crates/kv-core/testdata/remote/device_record_with_dk_sig_pair_sas.json",
+      "sha256": "d9be999388b3da65c3a74ad94792734d38fe46b289bb243ddf9ae26035d4a74a"
+    },
+    {
+      "path": "rust/crates/kv-core/testdata/remote/device_record_with_dk_sig_tampered.json",
+      "sha256": "a765f3bbe400ad11328ef9b93de6f73f69b279ea743baf535acee9aad9acc40f"
+    },
+    {
+      "path": "rust/crates/kv-core/testdata/remote/device_record_with_dk_sig_valid.json",
+      "sha256": "f0535be16182e6daeefe6bd1f4eea1f68c2d4126b3fdeb4dbefaf3292170d6c4"
+    },
+    {
+      "path": "rust/crates/kv-core/testdata/remote/device_record_with_dk_sig_wrong_dk.json",
+      "sha256": "f4e797f6c9e3ec33611d4073a1064b18c1bdbf63d796c1bfa574cc0ac523808c"
+    },
+    {
+      "path": "rust/crates/kv-core/testdata/remote/directive_loosen_quick_rejected.json",
+      "sha256": "124f4e9f85cc4bfd2f8ec644b6ecef64cb7b08a1357cda17509cd314c4654e75"
+    },
+    {
+      "path": "rust/crates/kv-core/testdata/remote/directive_tighten_quick_ok.json",
+      "sha256": "bce177c3e7b4c95357541f934d199168791790e99863f7cace1f4153886b00a1"
+    },
+    {
+      "path": "rust/crates/kv-core/testdata/remote/envelope_rejections.json",
+      "sha256": "e98516a8c258f6834d94a00cd681fbeb01a74c4062dd3fe350840f958e63bf54"
+    },
+    {
+      "path": "rust/crates/kv-core/testdata/remote/envelope_roundtrip.json",
+      "sha256": "f0d7277fd4da6bb53646d130057e28c3c98292476867e56adae5e59b2e674214"
+    },
+    {
+      "path": "rust/crates/kv-core/testdata/remote/envelope_tampering.json",
+      "sha256": "47d569c27615cf713b9706a06b6ea1ed6b0a61c310cd0602952fccd8bbe63621"
+    },
+    {
+      "path": "rust/crates/kv-core/testdata/remote/generate.py",
+      "sha256": "f4155977cbb0c05d5f818030ac6c5afd5afec12636c8aa3be5a38d4e0146c6a5"
+    },
+    {
+      "path": "rust/crates/kv-core/testdata/remote/grant_standing_t1.json",
+      "sha256": "24e169dbafff1d7719597eda3cf5f7505be910da5b6a2f35f4e422674191bdf1"
+    },
+    {
+      "path": "rust/crates/kv-core/testdata/remote/grant_t2_requires_settings.json",
+      "sha256": "643b2168c7706f2d042a8ed6e7a8a31875db7cc3269f6ee1dab5247fc811f99d"
+    },
+    {
+      "path": "rust/crates/kv-core/testdata/remote/grant_validation_cases.json",
+      "sha256": "b294366c4075f801b5667f025df2c3fe067318fc01ba52ffe2e47284dd5403b4"
+    },
+    {
+      "path": "rust/crates/kv-core/testdata/remote/ipc_contracts.json",
+      "sha256": "cf4bebfd8d507355ba2aed117597d0da8386b113caf8404d396ff5df1618388e"
+    },
+    {
+      "path": "rust/crates/kv-core/testdata/remote/jcs.json",
+      "sha256": "b014fb5d76c2b2af3b17d97b19a2cb3ad629acb38e5fd03c4475e3369e3af86a"
+    },
+    {
+      "path": "rust/crates/kv-core/testdata/remote/jcs_numbers.json",
+      "sha256": "a226f1ac4abd82042f4c8d04c95bd720a84b5910ad90a0aee8bd7ef675f9be58"
+    },
+    {
+      "path": "rust/crates/kv-core/testdata/remote/owner_intent_contracts.json",
+      "sha256": "9c71e229377c1271f632d6f8f59673a2d5d0df236bda07f0ba22e3afb8c3b3ac"
+    },
+    {
+      "path": "rust/crates/kv-core/testdata/remote/pair_sas.json",
+      "sha256": "89050c23f47eab8c2602dd4b428d755128e37c5c175a25ed9c65978cce6396bb"
+    },
+    {
+      "path": "rust/crates/kv-core/testdata/remote/path_normalization.json",
+      "sha256": "53fd401b7be99d15698296b1cccb35aedfbec5d445dfcc971da4e6410b13144f"
+    },
+    {
+      "path": "rust/crates/kv-core/testdata/remote/provider_adapter.json",
+      "sha256": "60872ca6e98d7de079438d189ceb939c400aafc928a13bcfbd0ad16a5574796c"
+    },
+    {
+      "path": "rust/crates/kv-core/testdata/remote/relay_contract_extensions.json",
+      "sha256": "c1816d429b435f3f963fb3e43b2478b63ddd439fa44efa85496b3d3e93224b6d"
+    },
+    {
+      "path": "rust/crates/kv-core/testdata/remote/rfc9180_p256_base.json",
+      "sha256": "0f4496eee98c746af3e15b9ad6992ac728c317cdfa4b83b96ec7a47264ba21f0"
+    },
+    {
+      "path": "rust/crates/kv-core/testdata/remote/rs256_decision.json",
+      "sha256": "ccba33c81f53677fd67b1ea6d323536c4d132f5fa5a99ed490ee8ceb6c9b89d9"
+    },
+    {
+      "path": "rust/crates/kv-core/testdata/remote/schema_rejections.json",
+      "sha256": "3987144534941cd6763be9bd4e6a1623488c885f3aa6a0e563dcec15f0a73fdf"
+    },
+    {
+      "path": "rust/crates/kv-core/testdata/remote/schema_samples.json",
+      "sha256": "c824d30bb85167375d7b7e44b0c6c6c388515203d962a7d6128c683426f94d83"
+    },
+    {
+      "path": "rust/crates/kv-core/testdata/remote/test_keys.json",
+      "sha256": "eb7f0bf0290498518218ef15e89c55c497e0a674660a7f5c5850afc76c26a0a7"
+    },
+    {
+      "path": "rust/crates/kv-core/tests/dispatch.rs",
+      "sha256": "20bd5d1a7d4da88789e2188d311b4577b104432969ad7b98081e510959a77ca7"
+    },
+    {
+      "path": "rust/crates/kv-core/tests/remote.rs",
+      "sha256": "872338d7ab626529aa34026d89ffc103bef9da9e236b6b84f9dcac75ea5aeb7f"
+    },
+    {
+      "path": "rust/crates/kv-core/tests/remote_support/schemas.rs",
+      "sha256": "498cbea29bd383d816984f8b046b5e78cd75a975d32d5de9999ced3f379223d0"
+    },
+    {
+      "path": "rust/crates/kv-helper/Cargo.toml",
+      "sha256": "bfad81fe727a0e62087b0b7c4f4faaf6f192402f792b7d7693dbe38b3a9c86a3"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/daemon.rs",
+      "sha256": "a08a4c23366b5e37cb0a1b5a7c18b65298e11154d85cc1b234190163def769f2"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/daemon_linux.rs",
+      "sha256": "50de8239dc160c678e81afe932304b549eb39a1891d90494c68a6de768e76aa9"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/daemon_linux/tests.rs",
+      "sha256": "fb316fd5f5a57cd843ee6386ba8cc1cbe809fec478998e8644739c6035d0a79f"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/daemon_win.rs",
+      "sha256": "a4a820798ef153c80c289d36dd1467cacf0804d8f9cbc6a3406436f9ea7c294f"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/lib.rs",
+      "sha256": "66d70db7f9ded98b0c00d84bb8f4ea32d2376f8eb61ed63571aba951018b4298"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/main.rs",
+      "sha256": "8a87ef42768f391fa1f7e85eee5c0158094e7668a3c270e47ffca785cad6c2a2"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/mcp_win.rs",
+      "sha256": "3010968d2a83e028e90c4b43fc9f32e939fb99ef8e2b31e42923d80e021bb61d"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/peer_broker.rs",
+      "sha256": "b8a90a7eec3fd7a34a9f45ead3b2b4d84edbb19e1eed28ed577dc70ab304fcae"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/audit.rs",
+      "sha256": "19eaf335d9e23d7cf5727ebcb4482d3d41ec8832ecab2e0a2f036ebdfd434ec2"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/bootstrap.rs",
+      "sha256": "5ca336401165d24a709824a87779b86f2bf3d1a6dff5cbd5e8dd3c7557a90425"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/config.rs",
+      "sha256": "34c4e0ef4a2893e65f0c7b18fc05c2cbb0b47f4b0c168655ca544f24e12ab43f"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/directives.rs",
+      "sha256": "c00297737971bb0d4c3c461dbe8e7ed74211595d365dcca0e3904ee5772e1b6e"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/directory.rs",
+      "sha256": "0494dafecf7ecece9eb61c89c25bf3c7e3cd9a66c9cfc40f6951ab0589cba565"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/engine.rs",
+      "sha256": "7dfe49b10c6ea4a09fcbe9d4be61733d79e7f05cfd6dfe35c193c63fc3ea3cbc"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/gateway.rs",
+      "sha256": "d08b63d32fb1e087de661f158e3e277d822ef0f5d6e96d508385c7da6a34bca4"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/grants.rs",
+      "sha256": "2bb51473e937fb73b3e38e0265194283b921e448a9d1bde417def38c68bbd537"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/ipc.rs",
+      "sha256": "8dd4afa988069784bf103872c208813afdee809f0e76f463c10b02f2301f49ff"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/metadata_master.rs",
+      "sha256": "9c64f9173d6e4f56959de5c9826436190f4a100458acf44cbe0f3f94188b4f26"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/mod.rs",
+      "sha256": "12f5400690b4b9a6450130ed7c5875237fe04c5e48871322b3fef8e1c9dd8398"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/outbox.rs",
+      "sha256": "101ad4c00107118bc14b6968c874c83ef378b2012885cf7c97e025fa79d35100"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/owner.rs",
+      "sha256": "706789888349f651adc2fc8b23ea82bbc64b942c9cbb1e9ff0bf0376e0023e2f"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/pages.rs",
+      "sha256": "bddc62902e2376ebf6124611217968375cfb0a82c90931c85c98072bfdc8e670"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/pairing.rs",
+      "sha256": "206b48a63f80aab277cc69bd8156b2d80a68b6d2e81e062a36d9091bf16c845b"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/pairing_relay.rs",
+      "sha256": "e713c94a73d1233dfb80eeb9149ea261680d9a4fa5bd95793d4e3e9c411bfe2e"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/pipeline.rs",
+      "sha256": "6db050bdf8a7b0d277e853190c6e298c4fa928073dac60a726983da26c339be7"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/platform_keys.rs",
+      "sha256": "4a370f8d07cf37307d736d6e482742c02cd6b20941b721f2f518300c633f8a23"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/process.rs",
+      "sha256": "cf59db68a44bd71eafc55a16752c02051333062c696c49bc6ffbb9eaac61d2f5"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/process_observer.rs",
+      "sha256": "8dca66ae6ab4085e29b00dc7ba11d987c4e164da8bf926a26bd5475103cd9aca"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/production.rs",
+      "sha256": "69a0edec70f5fbd88a869ecade9da5d3f6812d943cb1f236b5cb6eb5fcacb416"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/recovery.rs",
+      "sha256": "a047e1080ffa38f6faf2c5c7773d9d1fa1df767491b7094749eee00620fe55d1"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/relay_config.rs",
+      "sha256": "bbb17b46d4c314329a63b496766dcd8d113d36577a42ea3e556f9ae0963322e5"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/relay_control.rs",
+      "sha256": "4bd36ea59a568a671da3741493cd35db9abe9195df80d551363a859fa392a704"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/revocations.rs",
+      "sha256": "b9ed436ddb7f45665e7faabc3b3e54ee6579586567b70d02a43c25fd63816bce"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/schema.sql",
+      "sha256": "f98e7eb38cee594b3d6745ad835c422d1bdf0a8b139bae0f903a41bf94bfa30b"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/server.rs",
+      "sha256": "e99d657acabdce9dda333a59c30959e4231629b06c61704fba51740ce4042609"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/settings.rs",
+      "sha256": "82edbaeeb482316f1da22e5f208e1ca79955ba6fc9f74c9d7feb378263925c18"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/startup.rs",
+      "sha256": "29d9dda4240d488776d6ab54d5da4d858dfd3d397d81e80be170e5ebf8290b43"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/store.rs",
+      "sha256": "de8277f76ea9b0df9d43874fd2bf0b973106777d386102bc7b9a2555d7864f1b"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/tests.rs",
+      "sha256": "14bbc1d08fbe9af2bf8e18ef8e7c1823c5e34381ad88e5ca9b87880f812c092e"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/tests/acceptance.rs",
+      "sha256": "e2fdab048b7ea15d6e677dacd789f320ea2ac57f7bcc51d476d9ea447b979d83"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/tests/audit.rs",
+      "sha256": "08f3255d8c13ac56c9c766072b1038a05d0d66039c023ecd241276e2d80b4179"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/tests/boundaries.rs",
+      "sha256": "b1bf8f180f8a2598f4be906e3788335d64395625076268152185392d4de4abc4"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/tests/control_transport.rs",
+      "sha256": "33eafd88dee350659c3b0a89f8f7b299d3a8b826cf97d8f8ae0fb3e30b011609"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/tests/integrity_paths.rs",
+      "sha256": "e1c4d53539598b64e30f5c96473eceb2531939b5eef3d9e1452bfd151287b961"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/tests/interfaces.rs",
+      "sha256": "e96645416c3454bd8c1d8ee95ca5ffdd6ade529f68c274cc43c0a832f2f5124e"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/tests/owner.rs",
+      "sha256": "eb6553bec6697e43e4bb14b8fb36ad745638683fc778fdd4cf5647a7dff2baaa"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/tests/owner_contracts.rs",
+      "sha256": "dcf652f75074bb638ae141da37c69393084331873cc7dd4a2e18fd10494db82f"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/tests/owner_workflow.rs",
+      "sha256": "8bf788731a20c49cd40ceaddd8c044f356f6f16e098e1dc090746db21f70709a"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/tests/production.rs",
+      "sha256": "e1601c36daa4c6b00d9332e8b3bf5fc39bfec8609e526742feb969d61ca0752a"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/tests/recovery.rs",
+      "sha256": "22e70e034472109b958e1a728176100dee21e5d0b6a23372e8c56f7e22a49f1e"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/tests/review.rs",
+      "sha256": "4070e42a5001bc7e050e1bdb602f662b99a5e1ab56ab272422a6ef1d36fb60c7"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/tests/security_edges.rs",
+      "sha256": "ca9198e542b4d5a1d8b9b968a02d46a8b0930f2981eae905fef03c54fcf23191"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/tests/six_fixes.rs",
+      "sha256": "e8d271132f4576d1f5bd212cc60492c51ac0622794c8bcef7194e7264379c24d"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/tests/sql_faults.rs",
+      "sha256": "e2c82bae51c8eef8ef791a494185c83e2bd5279a9f8568c5c729aca100beaf63"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/tests/transport_edges.rs",
+      "sha256": "38aa82a1b312e8530e0e7cef5ea2a70bafe5bf92ed6ca81441a6ddf6e366c66f"
+    },
+    {
+      "path": "rust/crates/kv-helper/src/remote/tests/workflow.rs",
+      "sha256": "d5b6d73616a2b8fe3a8a3de3ba77f760bd310eab1f12d7994963f3ae24950d4d"
+    },
+    {
+      "path": "rust/crates/kv-helper/tests/w4_coverage.py",
+      "sha256": "078bb20e7f0b5ca2278ae6dd7ae82a68201a0bdcf9d694bbb7a5c119b3b61c4b"
+    },
+    {
+      "path": "rust/crates/kv-hook/Cargo.toml",
+      "sha256": "0268203c6364239e899e619c416d695c44e17d91eb8180793e67841bf9af6318"
+    },
+    {
+      "path": "rust/crates/kv-hook/examples/stop_fixture.rs",
+      "sha256": "a372c7e3623bd027187ee5297dcef8a0f5f79c73e1fcc746489c341b4d30f99d"
+    },
+    {
+      "path": "rust/crates/kv-hook/src/lib.rs",
+      "sha256": "81d178884ec28410bb23df9d78b54d1dfda8fda28c44112d993c19ecdebe3d0e"
+    },
+    {
+      "path": "rust/crates/kv-hook/src/main.rs",
+      "sha256": "4faa91c7d25e11dffe3ccfde1e9c9505e973ad5183802354c5d7ba51495a601a"
+    },
+    {
+      "path": "rust/crates/kv-hook/src/stop.rs",
+      "sha256": "38ff701f475397aa2f496474b098b99664547edf0e22b383e945d1b6f501d3f7"
+    },
+    {
+      "path": "rust/crates/kv-hook/tests/snapshots/stop.json",
+      "sha256": "d1e4c31b7cc7f87091fa2d5e4f7293de4e42c818310ed85544fbaf4db7b43afb"
+    },
+    {
+      "path": "rust/crates/kv-hook/tests/stop.rs",
+      "sha256": "a1d178061233a06ca93d1db485c7898e47cb72df38bb5ec4130f87ab35897a23"
+    },
+    {
+      "path": "rust/crates/kv-i18n/Cargo.toml",
+      "sha256": "37047dc87e47c4839e0c5e896bdaed2866c3a672723070c229df6382f31a3ccb"
+    },
+    {
+      "path": "rust/crates/kv-i18n/src/lib.rs",
+      "sha256": "6cd1c05d384cecedb3e6cc2d7c131c1fb44a227dde45325cb483f77e2fa12120"
+    },
+    {
+      "path": "rust/crates/kv-ipc/Cargo.toml",
+      "sha256": "92f7bd8e020fdce0c9dcc61ad8c58533de2a665d277bf8a96802823073e5816b"
+    },
+    {
+      "path": "rust/crates/kv-ipc/src/agent.rs",
+      "sha256": "c65229a5d2779015f050bcc440a39c885d0401557a2dad26f37b6df48ac77d4b"
+    },
+    {
+      "path": "rust/crates/kv-ipc/src/continuation.rs",
+      "sha256": "94aa846c5199cf8a6712291c9eabe4c7da3dd6538de11a086e6c38a6b81b5bd8"
+    },
+    {
+      "path": "rust/crates/kv-ipc/src/lib.rs",
+      "sha256": "c89377f95dbd90ccabbd7e80421f49dfc9f45a12011dc5d6949a0995e79601ec"
+    },
+    {
+      "path": "rust/crates/kv-ipc/src/mcp_worker.rs",
+      "sha256": "03ec79fdae327b7f02e228f38ca05e3482da8ec63812c1a35dcd8416f83e91d1"
+    },
+    {
+      "path": "rust/crates/kv-ipc/src/remote.rs",
+      "sha256": "fadc310cdae12c7f47da6ca4b8cc0183bfab894c15c0ebf040342f316f9d73b0"
+    },
+    {
+      "path": "rust/crates/kv-ipc/src/request.rs",
+      "sha256": "be40a731ba08a165886bfe05a2008f2aec627e188d9335b1a09d8e7e10cc1d57"
+    },
+    {
+      "path": "rust/crates/kv-ipc/tests/fixtures/hello-protection.json",
+      "sha256": "baded88503895c102c6f3c5be3bd011a9ce7d15d1050bc852619d137452cba2b"
+    },
+    {
+      "path": "rust/crates/kv-ipc/tests/remote.rs",
+      "sha256": "dbf60eaee20658da7be18d2aeeb0d8f87aab30ef96bd87d41aa5542689b34375"
+    },
+    {
+      "path": "rust/crates/kv-mcp/Cargo.toml",
+      "sha256": "6156653fc5b6a4cbe7bf6c3fd40dbe743088e2ca9580dbf7e74970a9a98f09e1"
+    },
+    {
+      "path": "rust/crates/kv-mcp/build.rs",
+      "sha256": "0b8068314e15af594ea9d8275166f767fb3706fd60bb977d09bf200411ca8ea0"
+    },
+    {
+      "path": "rust/crates/kv-mcp/examples/approval_fixture.rs",
+      "sha256": "2ed6e33840d20b948d36d60fe3d46df01ff0aea2a6f484a79f395afef8f18a43"
+    },
+    {
+      "path": "rust/crates/kv-mcp/src/approval.rs",
+      "sha256": "eb36b99d1167ebfc01c4a4383230e679b505543d6350fe8f7c6c835fee7133d3"
+    },
+    {
+      "path": "rust/crates/kv-mcp/src/approval_tests.rs",
+      "sha256": "2d58e5a328da5d6a363c1b390e59d9d184208af0848630472fd5b454cc4fad22"
+    },
+    {
+      "path": "rust/crates/kv-mcp/src/continuation.rs",
+      "sha256": "d912f12f693633ae99d2ecd6acf9d88bb415fe2914b9ef76bfe71a022ca5fc40"
+    },
+    {
+      "path": "rust/crates/kv-mcp/src/dialog.rs",
+      "sha256": "45677272c5d65728bef30438c44f8bb983c1af9dbef5018f690d5b05ffdbe131"
+    },
+    {
+      "path": "rust/crates/kv-mcp/src/dialog_linux.rs",
+      "sha256": "ef05e40638132c3dfe7e772a25236d754742aef9e74b550a5df6750ff0bb7504"
+    },
+    {
+      "path": "rust/crates/kv-mcp/src/dialog_win.rs",
+      "sha256": "4586fbb9b1820682bdf2499f264d9046da7ed5c60e4d56a0008d9dc3fa122802"
+    },
+    {
+      "path": "rust/crates/kv-mcp/src/fake_helper.rs",
+      "sha256": "1cc57dfd2e981d4896290a3295f244d5ef0989c0c9816555b594ab0c9716c6e9"
+    },
+    {
+      "path": "rust/crates/kv-mcp/src/files.rs",
+      "sha256": "c7fe1001c27d0ded2114c49ed1f6bd1752183ecd07ec6275588eaf99c9512cd8"
+    },
+    {
+      "path": "rust/crates/kv-mcp/src/gateway_env.rs",
+      "sha256": "34ada1045bd906b281c555e6c89855348ea07ac67452fd0974490824c11576fc"
+    },
+    {
+      "path": "rust/crates/kv-mcp/src/gateway_env_win.rs",
+      "sha256": "27447e19f131e230987cad01bce450fa2f4d13ec942d84da51c4a8e89967237b"
+    },
+    {
+      "path": "rust/crates/kv-mcp/src/lib.rs",
+      "sha256": "d31c86847eafa513664b7a89904612da7b5f78a1d99a2b5ae389134ed44644e7"
+    },
+    {
+      "path": "rust/crates/kv-mcp/src/mail.rs",
+      "sha256": "f5fd0bcc3a938da17a840997b81b1dbf686f2258c0af1827b99bca1499e3e3fc"
+    },
+    {
+      "path": "rust/crates/kv-mcp/src/main.rs",
+      "sha256": "06b07c31adab497acd328f306f0c0f0f5bb15a03c4463ec9f002697c2b1e19ed"
+    },
+    {
+      "path": "rust/crates/kv-mcp/src/oauth_flow.rs",
+      "sha256": "5e9ad95090a0bcc657b6e08f054dafcedc6d2eb2b4efd3f3663b79ae16bc1862"
+    },
+    {
+      "path": "rust/crates/kv-mcp/src/oauth_presets.rs",
+      "sha256": "d2c13c57c2903f09af7cd790e65ba4fe7aec8ad9d75ba3f7deb740741d45734f"
+    },
+    {
+      "path": "rust/crates/kv-mcp/src/server.rs",
+      "sha256": "eb61cf8f74310c89c946ec4f63d8accd75cff23d10d9079f1a43ac126b74d45e"
+    },
+    {
+      "path": "rust/crates/kv-mcp/src/session.rs",
+      "sha256": "3fcc82eab1b15dcd6266f2c6409b916dbd097561e227f95ae2203bddccad4371"
+    },
+    {
+      "path": "rust/crates/kv-mcp/src/session_remote_tests.rs",
+      "sha256": "a6b336fe1aa8d569ab0b8c77c6b1a542d50408297092b08cc11b63c61e9797c0"
+    },
+    {
+      "path": "rust/crates/kv-mcp/src/templates.rs",
+      "sha256": "9328d6d43d04feec0194b3aaf78294624f4286a4cbf1a866e737eb45b7661eb2"
+    },
+    {
+      "path": "rust/crates/kv-mcp/src/tools/approval.rs",
+      "sha256": "97d30a832801190b4753abd244d4d8151f41e0f7dba013fc86dbf70e3e2ddbdc"
+    },
+    {
+      "path": "rust/crates/kv-mcp/src/tools/basic.rs",
+      "sha256": "2a19eb2c0c36e32d877e0d56fe400dd1254a6a4e039b21aa809eacc8bccf6549"
+    },
+    {
+      "path": "rust/crates/kv-mcp/src/tools/common.rs",
+      "sha256": "60ca0c786c0a98884d84bd0736eee6de1f4f90e3de463ce3cbb7972c2305168b"
+    },
+    {
+      "path": "rust/crates/kv-mcp/src/tools/http.rs",
+      "sha256": "8c78ca2ed1a70a8891cedb7418ca0d3d0ebb3af96a794503c7ae18555d659db8"
+    },
+    {
+      "path": "rust/crates/kv-mcp/src/tools/mail.rs",
+      "sha256": "b11ef89a6b56d172147969f5600dd320faef1c49c59f7d16b03405960e2109b8"
+    },
+    {
+      "path": "rust/crates/kv-mcp/src/tools/protocols.rs",
+      "sha256": "257dbeed9e3b87f9c5083c4a9264e2d4f6648e947140a772753dcef245212b52"
+    },
+    {
+      "path": "rust/crates/kv-mcp/src/windows_mcp.rs",
+      "sha256": "bcfb2fd1416f863243b67d3e00a74bc3d2e4df4ad3bb13fe96a6ab9c410797ad"
+    },
+    {
+      "path": "rust/crates/kv-mcp/src/windows_script.rs",
+      "sha256": "c974bfc0d5ae88ec634f5c41c7076401141384a1e3cdaba8b3a2c50b69dd1bd1"
+    },
+    {
+      "path": "rust/crates/kv-mcp/tests/r2d_codex_tui.py",
+      "sha256": "600bf0a227bef1a2c317466db5c1babd327d630d516e861e154cda7e667e4b3c"
+    },
+    {
+      "path": "rust/crates/kv-mcp/tests/r2d_runtime_lab.py",
+      "sha256": "fa34d657a7748707f28cce4236aec8b581f2fbcf77e81bb51e9c2974bd44598b"
+    },
+    {
+      "path": "rust/crates/kv-mcp/tests/runtime_hook_probe.py",
+      "sha256": "2a08fd75f303e1e706369e48f01206c5fc67dc5477a21757397fca02e885c7df"
+    },
+    {
+      "path": "rust/crates/kv-mcp/tests/runtime_model_probe.py",
+      "sha256": "52240d3e306f037d98647d83913660a8abfbbc18f0d1596eff3c016f2a9cedb5"
+    },
+    {
+      "path": "rust/crates/kv-mcp/tests/runtime_probe.py",
+      "sha256": "138a1edecb89417750466fa22ffa09828b49ab0ddd1a547f4c6d9aa166cc91a2"
+    },
+    {
+      "path": "rust/crates/kv-mcp/tests/snapshots/approval_results.json",
+      "sha256": "562ce4b82d443aeaf4a4a845ff5675a7fb6680b7993a36b653d1e6ece79c7e10"
+    },
+    {
+      "path": "rust/crates/kv-mcp/tests/snapshots/local_approval_results.json",
+      "sha256": "f59e4d45cf62de37ed70601592a5d487e2a0de6b15523d2e1d76e0ccb3b9597f"
+    },
+    {
+      "path": "rust/crates/kv-mcp/tests/w5_coverage.py",
+      "sha256": "c843ad4a4b925915bdf7b7a4ba528e9cfe0ac83a1c4237c9fb84fdce090c14be"
+    },
+    {
+      "path": "rust/crates/kv-mobile-core/Cargo.toml",
+      "sha256": "4be67973fced36fc544ecc0693f765ef6c103e5c67ab163036fec381aab1acc9"
+    },
+    {
+      "path": "rust/crates/kv-mobile-core/examples/r2c_phone_fixture.rs",
+      "sha256": "692b8638618a263869ae3456bdabeb5c64303fa099be0f98f2f92af4cba00479"
+    },
+    {
+      "path": "rust/crates/kv-mobile-core/src/account.rs",
+      "sha256": "3dd94e1b514168bd567003218d8c1de1dd9b334d1edc0612c3d76199cdc453dc"
+    },
+    {
+      "path": "rust/crates/kv-mobile-core/src/api.rs",
+      "sha256": "f07509852da8ee4a2f1a52ba56dfc56985edb86155d93af4a0b4c5ed92cb121d"
+    },
+    {
+      "path": "rust/crates/kv-mobile-core/src/audit.rs",
+      "sha256": "b2fd2a857414ca0f642d0012e81e3b843ccddaf543de88bc7ad01b73ace1e5fb"
+    },
+    {
+      "path": "rust/crates/kv-mobile-core/src/engine.rs",
+      "sha256": "439594010185173a97fc46457f1321f9c070d35e74b84e5f9aa5043bf5bbb3a1"
+    },
+    {
+      "path": "rust/crates/kv-mobile-core/src/ffi.rs",
+      "sha256": "571ba850dd017c114c4784df2d2ddd781cc7346b9bf87ab6bc5cf06669157656"
+    },
+    {
+      "path": "rust/crates/kv-mobile-core/src/frb_generated.rs",
+      "sha256": "720b44e70744502c2e0e1624cdf6eefa8665b015ebc39b3cd1895cfcb0fff13e"
+    },
+    {
+      "path": "rust/crates/kv-mobile-core/src/hardware.rs",
+      "sha256": "c9c6424c22c3db35f00c22c09dedb846019c9e48319a03ae77055ac742486e7e"
+    },
+    {
+      "path": "rust/crates/kv-mobile-core/src/lib.rs",
+      "sha256": "534245ce41f6ac80edc8008b954ff93cd3129e405483bd72c736545207e31000"
+    },
+    {
+      "path": "rust/crates/kv-mobile-core/src/relay.rs",
+      "sha256": "7d38ea3c8788715cb7ebf8614e73cb78e584b77a4f0a27f7d1c85555c908b27f"
+    },
+    {
+      "path": "rust/crates/kv-mobile-core/src/store.rs",
+      "sha256": "fea7db48a5b30d7874ebb67ce44c8234f08fbec9f6df3f6148bb7f812a234f6e"
+    },
+    {
+      "path": "rust/crates/kv-mobile-core/src/tests.rs",
+      "sha256": "73694024c039c708ae19da976e489114f7b85d1fefc540e32bdf581cbdb30db1"
+    },
+    {
+      "path": "rust/crates/kv-mobile-core/src/tests/account.rs",
+      "sha256": "7e60c931fb0bf744708cede74aad33950237a7f039d5c4613feee40f8c8e0eca"
+    },
+    {
+      "path": "rust/crates/kv-mobile-core/src/tests/audit.rs",
+      "sha256": "25281070250d2f08330b5fef6db0f425887e10861363524f27beaa91ce475958"
+    },
+    {
+      "path": "rust/crates/kv-mobile-core/src/tests/helper_pairing.rs",
+      "sha256": "5435d33f919a6370dd99d89b95b7244066fcbb40d5bed679ded6847704fa7302"
+    },
+    {
+      "path": "rust/crates/kv-mobile-core/src/tests/push.rs",
+      "sha256": "b18d08f318257d82d72ebb8ffa7e05fa77b88abc6247c3c14ede9f64248f8d4d"
+    },
+    {
+      "path": "rust/crates/kv-mobile-core/src/view.rs",
+      "sha256": "3a7f00c054ddfb1b1bc0a9217279a74d9752cda7cc844dc1375666e837d9dfc0"
+    },
+    {
+      "path": "rust/crates/kv-platform/Cargo.toml",
+      "sha256": "780e90adb5dc38cf4e8b96e39ac26c50abd17c2b65080eb4988a8655479181d5"
+    },
+    {
+      "path": "rust/crates/kv-platform/src/agent.rs",
+      "sha256": "f5761212c045f5b79643e548698b6f51cb6789184ca3de389fdff5c414cc84a7"
+    },
+    {
+      "path": "rust/crates/kv-platform/src/agent_process.rs",
+      "sha256": "6d4093446ac7af22b363bdf66b47c7e54318b4f281488c3fb7b0a4b072dc1591"
+    },
+    {
+      "path": "rust/crates/kv-platform/src/device_key.rs",
+      "sha256": "d0739f1f6e26e285b9dd0472c0caa8ec41e4aa423aadc9feddea02be6f602ac1"
+    },
+    {
+      "path": "rust/crates/kv-platform/src/device_key/agent.rs",
+      "sha256": "946c25bfc3dca7a3a33227cde8f52af39c8eda2b0397aaf2ad1e51cb32594a5c"
+    },
+    {
+      "path": "rust/crates/kv-platform/src/device_key/software.rs",
+      "sha256": "a5c387c904bc0fd1365b400e096b9ea82c8a6188e5301835ff58137a3007537e"
+    },
+    {
+      "path": "rust/crates/kv-platform/src/device_key/tpm.rs",
+      "sha256": "4ba5cce611b55f9aa24e7fc5c7b0406adbe6efa085add3e293da87564b1eaafa"
+    },
+    {
+      "path": "rust/crates/kv-platform/src/device_key/windows.rs",
+      "sha256": "7ab555102e6c81ed9dadb742b643cb5d5abe57580b8fc8e95fde3618bffd59bc"
+    },
+    {
+      "path": "rust/crates/kv-platform/src/enclave.rs",
+      "sha256": "ada4acdfdf8c2ec39337e0a51c8db8e9c08eb1888a9d1577613e3c75365e9bf6"
+    },
+    {
+      "path": "rust/crates/kv-platform/src/fs.rs",
+      "sha256": "2abaaa3b5c775e5907e0aae438f94d4764546c18e9e949380ebd8f7bf6b5bdbe"
+    },
+    {
+      "path": "rust/crates/kv-platform/src/lib.rs",
+      "sha256": "eb421bb47b8771ef4d238d0fb4d64bd734ecb8385fdb5115c216056524c27fd9"
+    },
+    {
+      "path": "rust/crates/kv-platform/src/linux.rs",
+      "sha256": "9231b719c5e506fb69dc19158ea67fba53e63d84b38f2cf57859c391bbc35e2a"
+    },
+    {
+      "path": "rust/crates/kv-platform/src/linux/tests.rs",
+      "sha256": "f235371ee1261ccbd61a794bd78a54a0e4fd05de43890aec483cf618b47d6e56"
+    },
+    {
+      "path": "rust/crates/kv-platform/src/macos.rs",
+      "sha256": "744d445c773adab46fa9960ccf12d787e0e7629bf59a9513edcece8be7d42681"
+    },
+    {
+      "path": "rust/crates/kv-platform/src/mem.rs",
+      "sha256": "bfb519516029a192cf0a44d8b4a63c96e03935e34004937ca4de576201ffbbcd"
+    },
+    {
+      "path": "rust/crates/kv-platform/src/paths.rs",
+      "sha256": "8e7f27b1b9590f695e326c1b944548d3c11e0927ffb5ce2c65b91cc293767a9c"
+    },
+    {
+      "path": "rust/crates/kv-platform/src/peer.rs",
+      "sha256": "10a004c9f002b9b19828e6dcaa851ebe27a876e2c250d283eabec52a65b4fd2a"
+    },
+    {
+      "path": "rust/crates/kv-platform/src/peer_broker.rs",
+      "sha256": "9e5af4631d55e1bce89988e5499b724e975fbd8fbdea9fb32b234436cb4a745d"
+    },
+    {
+      "path": "rust/crates/kv-platform/src/peer_linux.rs",
+      "sha256": "a9c2d91159927c46cbc8b215db0f6653048c4c4ab5fcb2f344c1db8c79a1c9ec"
+    },
+    {
+      "path": "rust/crates/kv-platform/src/peer_linux/tests.rs",
+      "sha256": "651f262956edc6e23680fb440727c3f8b9464f82c76bda535265b5ee1fc9be32"
+    },
+    {
+      "path": "rust/crates/kv-platform/src/peer_windows.rs",
+      "sha256": "bd5a04195ba7f7217d942ccbc70d99424754bbb71a69c43d77a6610dfae41266"
+    },
+    {
+      "path": "rust/crates/kv-platform/src/pipe.rs",
+      "sha256": "c2375984dbb2f572355bde6f498b573cee7bf7b51a11cc65d67c33ca995144e4"
+    },
+    {
+      "path": "rust/crates/kv-platform/src/presence.rs",
+      "sha256": "a2d142ccb602a54d3c6f35e24d5128be8028e0a6674492e37391b49cad2610aa"
+    },
+    {
+      "path": "rust/crates/kv-platform/src/presence/linux.rs",
+      "sha256": "978cc5a2c7e93820595955164f5c7b040d6fed048f2130f752cc425bbdb738a6"
+    },
+    {
+      "path": "rust/crates/kv-platform/src/presence/macos.rs",
+      "sha256": "781e082a1d77d8457ae8b4239852fa0567292856be8b2a8c45411edfe023324c"
+    },
+    {
+      "path": "rust/crates/kv-platform/src/presence/windows.rs",
+      "sha256": "b3ed7b8eda4533ff651fae2b486084072e68f7838b861c58e227ce74eec2b6bf"
+    },
+    {
+      "path": "rust/crates/kv-platform/src/presence/windows_logic.rs",
+      "sha256": "0bbc738c3239805adebb87e04f8ff5e30c556837d33a88d5ee79b4010ebed937"
+    },
+    {
+      "path": "rust/crates/kv-platform/src/protection.rs",
+      "sha256": "516211aaf6c216876ba52bd3b0786dad8457bd9b61be428f21d7d9db075c4a6c"
+    },
+    {
+      "path": "rust/crates/kv-platform/src/relay_peer_access.rs",
+      "sha256": "33cdd6fb956ec442850c3d4b75adee4c07e298a266a2120e910ffe8cd516fbc3"
+    },
+    {
+      "path": "rust/crates/kv-platform/src/remote_process.rs",
+      "sha256": "3ea040d4ecde845e44a80a8886d8d0268496b0a3d8875978b8574ff9ddb54ab8"
+    },
+    {
+      "path": "rust/crates/kv-platform/src/trust.rs",
+      "sha256": "891225978b11f8305c254142ec218da104cbf292b02082869cdca0333086e438"
+    },
+    {
+      "path": "rust/crates/kv-platform/src/user.rs",
+      "sha256": "4c912f7e7233c92c5c72195f39f05f8534d483fcb192dc2844526f4b392cfe33"
+    },
+    {
+      "path": "rust/crates/kv-platform/src/windows.rs",
+      "sha256": "c260dd59949934b3a89ec0cf267f2dcd35f2de07733299f5938060a7a9c25a12"
+    },
+    {
+      "path": "rust/crates/kv-platform/src/worker.rs",
+      "sha256": "4178f79f974afb879d3aeb0bcc232b18b2bcc2a89a2f5acfb236debfce6f9e71"
+    },
+    {
+      "path": "rust/crates/kv-platform/tests/linux_presence_logic.rs",
+      "sha256": "086a92b2dfd4c0c41fee05580429eaab1f17b9f4bfc89b36394d928ffd3f552a"
+    },
+    {
+      "path": "rust/crates/kv-platform/tests/protection_installers.rs",
+      "sha256": "daa126fdd7ce73fcd1802bb8d3f167d8302695a0d25586a936a98931082edef6"
+    },
+    {
+      "path": "rust/crates/kv-platform/tests/source_installers.rs",
+      "sha256": "1080f2e9f61e18fad8b33d532f43f5d9eb03e66c11d18e170271d9ae72aa6a60"
+    },
+    {
+      "path": "rust/crates/kv-platform/tests/support/check_coverage.py",
+      "sha256": "22e9b7a6e61d6e29f41bb5665ac3dd85d6eb7f0d56082207954ee4d37c8fc2c4"
+    },
+    {
+      "path": "rust/crates/kv-platform/tests/support/check_w0.py",
+      "sha256": "98ddff4216ac396b547a9987b086848d650da7d8d152364391b99b06add5bfcf"
+    },
+    {
+      "path": "rust/crates/kv-platform/tests/support/w0_compatibility.rs",
+      "sha256": "d5c2e9d28c677254616c2fe9df28c4912e5e721d0b4e300b54c12403b0e36b6e"
+    },
+    {
+      "path": "rust/crates/kv-protocols/Cargo.toml",
+      "sha256": "f2067f1f83006f842916f9cabe80e4e7d8de0b6078df7f33f984b14f8bfa3f5f"
+    },
+    {
+      "path": "rust/crates/kv-protocols/src/aws.rs",
+      "sha256": "9c71eb8f5e3a43b6b0d0d5a41f3fae15367e8bf7de128c51dc45189d26ca0540"
+    },
+    {
+      "path": "rust/crates/kv-protocols/src/check.rs",
+      "sha256": "2dafed2839e965f7f8fd1cb18d28a8599adb9637bafccfb2166e55c6abe507f8"
+    },
+    {
+      "path": "rust/crates/kv-protocols/src/expiry.rs",
+      "sha256": "a6707c92b03b780c630989d0f04e7ca25ed29420b1407d8cd5d57bbb2e2b0b2a"
+    },
+    {
+      "path": "rust/crates/kv-protocols/src/github_app.rs",
+      "sha256": "af5b5437418f3a1e5106404e19ce2058e0d8c168424df168ea3e240a78e3739d"
+    },
+    {
+      "path": "rust/crates/kv-protocols/src/google_sa.rs",
+      "sha256": "67458666dedf4aea229579e57f9560bd5c39d95a1497ef5e8118d4fa9a95860e"
+    },
+    {
+      "path": "rust/crates/kv-protocols/src/http.rs",
+      "sha256": "67670e474ded9ff5ffb8c9f12e1e2e957200020a22aae80d9165966e435b3f7e"
+    },
+    {
+      "path": "rust/crates/kv-protocols/src/index.rs",
+      "sha256": "54442072915af74d0f60cf40e468d4b48f19a0db8600cc70d7387ce67360ae6e"
+    },
+    {
+      "path": "rust/crates/kv-protocols/src/jwt.rs",
+      "sha256": "92e0dd6a3e66d95994d8618e005c4c8d02089f66acec84aeb7131596ffc72b5f"
+    },
+    {
+      "path": "rust/crates/kv-protocols/src/jwt_kind.rs",
+      "sha256": "dc4b18842f7375f6abbd505a8c15f46d4150ab17cc3420d0fda5dc6ffaf44c45"
+    },
+    {
+      "path": "rust/crates/kv-protocols/src/lib.rs",
+      "sha256": "efeb324dfb7b52d43db6485987846021e8c2358042da5defbce1b5205c8b65a5"
+    },
+    {
+      "path": "rust/crates/kv-protocols/src/oauth2.rs",
+      "sha256": "daad5f8e2069e38bc5ca28d12c2a896955dc64f34754d405e6c8821ec8c96ae4"
+    },
+    {
+      "path": "rust/crates/kv-protocols/src/template_timeout.rs",
+      "sha256": "f7e961e4f9e79ed8705b36f50666f943d62190e4ca13fefcb19d425f9278138d"
+    },
+    {
+      "path": "rust/crates/kv-protocols/src/totp.rs",
+      "sha256": "ab4fcc5927af72d475383ed5ae62e192b20d344cec0801538bac5da634de6a34"
+    },
+    {
+      "path": "rust/crates/kv-protocols/templates/client-timeouts.json",
+      "sha256": "12cb25913141f8aee4ec6783cfc70d147b593f27db2452738a5341a787cff3d3"
+    },
+    {
+      "path": "rust/crates/kv-protocols/tests/github_google_flow.rs",
+      "sha256": "c7a2dba73d8aa1ccfafe1056c4ae5ad3fbbc7aec8f81dc8502990647ef2f64dd"
+    },
+    {
+      "path": "rust/crates/kv-protocols/tests/oauth2_flow.rs",
+      "sha256": "2973c9c0aa9df71c791479c6d5ea2c821868e07bc3b445405c6328c52100f4f1"
+    },
+    {
+      "path": "rust/crates/kv-proxy/Cargo.toml",
+      "sha256": "83f6ef58b9d0d37b6ad83ccc3cca6fff8fca8bdd0a98821900fd9926b211324c"
+    },
+    {
+      "path": "rust/crates/kv-proxy/examples/sdk_fixture.rs",
+      "sha256": "71dc208c5c89c8924799378bbbb1d2b80e745a0fe5a08e6947c914f413272270"
+    },
+    {
+      "path": "rust/crates/kv-proxy/src/approval.rs",
+      "sha256": "826893c9043cb2a5dd2a36a97b0261dad36525de5a8ceeac7447dbcace34a406"
+    },
+    {
+      "path": "rust/crates/kv-proxy/src/certificates.rs",
+      "sha256": "bdc9ee8938c026b3e0eb907b6cfc2d255fb7a91843cac5dab6a2267a3bf20b11"
+    },
+    {
+      "path": "rust/crates/kv-proxy/src/config.rs",
+      "sha256": "2225ca6e4ea28781c1a1633c6a9b98f3bfbb7fec211bc92a7136bde20ec8153d"
+    },
+    {
+      "path": "rust/crates/kv-proxy/src/gateway.rs",
+      "sha256": "6688d63ee9b000398343984210eff82d9e5e3c911702d07068f7a29eb65cb75f"
+    },
+    {
+      "path": "rust/crates/kv-proxy/src/gateway/recovery.rs",
+      "sha256": "7bb579c93e7a5ad4d53cfc3692f355aa95016a65ded09ae9e097da8906fea273"
+    },
+    {
+      "path": "rust/crates/kv-proxy/src/lib.rs",
+      "sha256": "a0b14d576a6253b1c014ed97206b695b5c1ca01759943902a018cebb3149f797"
+    },
+    {
+      "path": "rust/crates/kv-proxy/src/manage.rs",
+      "sha256": "eee241fc272e1da31f9433e1c516fe06e150f7a5e56c61b96d56db3e1e257b19"
+    },
+    {
+      "path": "rust/crates/kv-proxy/src/proxy.rs",
+      "sha256": "e17099a7286edaae37e0db53e268416e04d8debbe9a8b6fe69176fb9fc0741cc"
+    },
+    {
+      "path": "rust/crates/kv-proxy/src/redact.rs",
+      "sha256": "19cb35f16ceff7c6bd6ad5b3f0764e9f505e03ece4c99b210fdefb8f0435b1ab"
+    },
+    {
+      "path": "rust/crates/kv-proxy/src/run.rs",
+      "sha256": "41152b302393324aedc0496c1b4cd8634e8beacf9ee51583064ed2fcae2421a7"
+    },
+    {
+      "path": "rust/crates/kv-proxy/src/transparent.rs",
+      "sha256": "a48cc735cdf838fa9fae8da91e6f9fe4b2678845b3bf7ba5abe6f2ebc87604f2"
+    },
+    {
+      "path": "rust/crates/kv-proxy/src/transparent/gateway.rs",
+      "sha256": "f439859955a3b00d80d2505bbcaed8c56ab1624aad981097a5ee62f1b014cc55"
+    },
+    {
+      "path": "rust/crates/kv-proxy/tests/approval.rs",
+      "sha256": "00942a66d5f6ad06ae5bf10b9f2bb52dfd42982eadca88bda92a309c67592ae8"
+    },
+    {
+      "path": "rust/crates/kv-proxy/tests/gateway_flow.rs",
+      "sha256": "dc5657d3eaf61d568230b38459b1f4fe3dcf468646ff701c370e3576040264ab"
+    },
+    {
+      "path": "rust/crates/kv-proxy/tests/gateway_shutdown.rs",
+      "sha256": "a8526b5bd2f7d97374656634abf125258d3a0dc01dc117ea2f799a6e39b0a9d6"
+    },
+    {
+      "path": "rust/crates/kv-proxy/tests/https.rs",
+      "sha256": "c7e889a5789a86b2de71f19a508c0621ac12522f7676f499a9c8e7130fee4545"
+    },
+    {
+      "path": "rust/crates/kv-proxy/tests/manage.rs",
+      "sha256": "03eee21263476003fb09851d2cba57fadcd32fcdd6d2cf084ca44e453575338e"
+    },
+    {
+      "path": "rust/crates/kv-proxy/tests/proxy_flow.rs",
+      "sha256": "a7cbed809342d62b929cdd158c6946426fd5fcb3721d584d380f79e9b8e001e4"
+    },
+    {
+      "path": "rust/crates/kv-proxy/tests/r2d_sdk_lab.py",
+      "sha256": "9ed53425048a10c11e3480881ef5fee2e13930dd83d8216002d2b26882252737"
+    },
+    {
+      "path": "rust/crates/kv-proxy/tests/recovery.rs",
+      "sha256": "0727a19d47fc9be9aa17081965b796f108babfa01a77099f418218d74937b3e8"
+    },
+    {
+      "path": "rust/crates/kv-proxy/tests/run_notice.rs",
+      "sha256": "15f49b6f4875a644ce521db8f344c7285ebab0cda7ab87df28214505a9eaded9"
+    },
+    {
+      "path": "rust/crates/kv-proxy/tests/windows_gateway.rs",
+      "sha256": "7fc987a232e84855839a590ccdd643aaa4b46668437365ccbbabc3677c2baa31"
+    },
+    {
+      "path": "rust/crates/kv-push/Cargo.toml",
+      "sha256": "09f106b0b64342a715b94a07c445d7c609ef8ca5eb04459f61a01c56ae52a99f"
+    },
+    {
+      "path": "rust/crates/kv-push/src/lib.rs",
+      "sha256": "6fc4f73ed041f8d877cc8dda65dd936b1f11bbc7f3bc0ccffb30c6696f85c1f0"
+    },
+    {
+      "path": "rust/crates/kv-push/src/main.rs",
+      "sha256": "bae8cc88b31323ee977b16b2a7213f04916dc503414b5cf6df2b88c41430eb2a"
+    },
+    {
+      "path": "rust/crates/kv-push/src/tests.rs",
+      "sha256": "617aba239eb8702797d5fd077fc69cae4476c611f40ac06702d00ed56f77537e"
+    },
+    {
+      "path": "rust/crates/kv-relay-client/Cargo.toml",
+      "sha256": "24be53bc75085b5045e98cecdee4cc5b10ae7cb4d51c200d48f0fc28d107c4e7"
+    },
+    {
+      "path": "rust/crates/kv-relay-client/README.md",
+      "sha256": "111230fb91835d5ac79f030b4c1d36e265be63d26a9ee13cf957c5ab5271d104"
+    },
+    {
+      "path": "rust/crates/kv-relay-client/coverage.sh",
+      "sha256": "fe5ab12cbeb58c47a17c080dee2189e052b06a088aebb381b885b2555374e2a8"
+    },
+    {
+      "path": "rust/crates/kv-relay-client/service/README.md",
+      "sha256": "a27c90256cad8ad76133388d65f2d0abf155e4e56aece7a2ed2099e9a0df5305"
+    },
+    {
+      "path": "rust/crates/kv-relay-client/service/dev.keyvalet.relay.plist",
+      "sha256": "49af2a019a21ec45a6062afc204f59a1f9fbfbddc0184f4fac44c1bc227933c8"
+    },
+    {
+      "path": "rust/crates/kv-relay-client/service/keyvalet-relay.service",
+      "sha256": "377e792992edff83c830708cd8545af4e81ebfedcf5a5f4400f6fdd575daf7a6"
+    },
+    {
+      "path": "rust/crates/kv-relay-client/service/relay-client.toml.example",
+      "sha256": "c3a6e245db16a3ca507dfe6e173fe83ff4c4fbcc0d09b8d5f8a05d72aff49976"
+    },
+    {
+      "path": "rust/crates/kv-relay-client/service/windows-service.ps1",
+      "sha256": "07f4685f776e23ffd1fec67bf469327986fc8295c483e654cdc89994ff8533c0"
+    },
+    {
+      "path": "rust/crates/kv-relay-client/src/app.rs",
+      "sha256": "ea589c4a443d52e11b99b1d071ac14a9f2159f9266f991338482a762b3eeb2ed"
+    },
+    {
+      "path": "rust/crates/kv-relay-client/src/backoff.rs",
+      "sha256": "686d91029b630773f34a2e38116ee20f7768d750d6a155b94e0f7fe8a9f983be"
+    },
+    {
+      "path": "rust/crates/kv-relay-client/src/client.rs",
+      "sha256": "93e672802aedb144d9a06d0fcd42e019447b02209533063ca338bbfe360b24bd"
+    },
+    {
+      "path": "rust/crates/kv-relay-client/src/config.rs",
+      "sha256": "424e3771ba77cb9f0090e0b6c91045f7dd56f14ca47f502f8eb7f6cb6ec30749"
+    },
+    {
+      "path": "rust/crates/kv-relay-client/src/control.rs",
+      "sha256": "ec75164a3c30d6f41d791029cda670cca4c9d995b14457919823d3f6d8d2772a"
+    },
+    {
+      "path": "rust/crates/kv-relay-client/src/control_transport.rs",
+      "sha256": "2537422dc76c580bf15134699f876c02e7f642a0dfe8c72a7422f3d54e59f0ab"
+    },
+    {
+      "path": "rust/crates/kv-relay-client/src/controls.rs",
+      "sha256": "ffa52ef95d3d7d44c0056f0145b5174ad3f1bf100d6807eb5c9befa3f5f2a83c"
+    },
+    {
+      "path": "rust/crates/kv-relay-client/src/envelope.rs",
+      "sha256": "8d9d270632f1d613a48bb5c10b433a781497998880cde242e3dc76700fec4654"
+    },
+    {
+      "path": "rust/crates/kv-relay-client/src/error.rs",
+      "sha256": "c8ca65ede3e8cc506d274bae23b74ffc0a5c7f6ddf8a08f71ef0e333ccc5e8b6"
+    },
+    {
+      "path": "rust/crates/kv-relay-client/src/helper.rs",
+      "sha256": "24e04545aac96ff95a011ee239c37e0a41e991a4d102ce3b6807bc3d92a8b3f2"
+    },
+    {
+      "path": "rust/crates/kv-relay-client/src/helper/native.rs",
+      "sha256": "85b0ab39349bdfaf84b31c5e66c345b0b91fb389ffd0c8938f3841a459877225"
+    },
+    {
+      "path": "rust/crates/kv-relay-client/src/lib.rs",
+      "sha256": "242774970f2e899730a01a2dd29d67cd160826b6b903f05e84e1c9f9894adc63"
+    },
+    {
+      "path": "rust/crates/kv-relay-client/src/main.rs",
+      "sha256": "abc944a8ce546353d6aedbe73d6bf743f0843b2f70e90bbc4f21e73b38e018e8"
+    },
+    {
+      "path": "rust/crates/kv-relay-client/src/platform.rs",
+      "sha256": "7b5a6f65a30fec285b8f10368d517fdf6511b84785da768bcab06fb73c9df06f"
+    },
+    {
+      "path": "rust/crates/kv-relay-client/src/platform/native.rs",
+      "sha256": "e8bae11418208505ae8a3a743a59a806191264404a75d5e4736b7c59755f98b6"
+    },
+    {
+      "path": "rust/crates/kv-relay-client/src/process.rs",
+      "sha256": "b5f9108fffe58f833a0140192e1ae892ae6b5a1809fdbe918d638522f46ad30a"
+    },
+    {
+      "path": "rust/crates/kv-relay-client/src/queue.rs",
+      "sha256": "2aafac074120ca7abe2e089c69f7031c3d9a55954ccce5160a9fd8387cc2383c"
+    },
+    {
+      "path": "rust/crates/kv-relay-client/src/queue/native.rs",
+      "sha256": "f5a16233645432e2ecf14896a6cc6e0f9edf1e72df6f96dd52679c3cc181700f"
+    },
+    {
+      "path": "rust/crates/kv-relay-client/src/tests.rs",
+      "sha256": "7bd5be3b32867d91a351c080d4be4af77c4d78e502a8a98f3c0ab0ebe019bd56"
+    },
+    {
+      "path": "rust/crates/kv-relay-client/src/tests/client.rs",
+      "sha256": "887a8469ae173c9685e42e03cacd07973e2003aba15bd229edde0f39c8a73f02"
+    },
+    {
+      "path": "rust/crates/kv-relay-client/src/tests/config_presence.rs",
+      "sha256": "8c8643f540ea5a1e0ec421354dfe20563bea375a1e630a3b49a5dbee7e2e25d6"
+    },
+    {
+      "path": "rust/crates/kv-relay-client/src/tests/control.rs",
+      "sha256": "ba6f7217c77338db3284bda809cf78d986ae1f821d80fe5f2636b4a0d94cdd2f"
+    },
+    {
+      "path": "rust/crates/kv-relay-client/src/tests/coverage.rs",
+      "sha256": "5a62ddd81257706c5485cadca539a4ba6c80c0ce7422650e8b7ff8434530ff8e"
+    },
+    {
+      "path": "rust/crates/kv-relay-client/src/tests/harness.rs",
+      "sha256": "579f263cb29c957b8b06db4d875bb5becfa1320acb7a94eeb73a121547ef9eda"
+    },
+    {
+      "path": "rust/crates/kv-relay-client/src/tests/helper.rs",
+      "sha256": "367025d5a35ef40b37cb114eb900a933df08db3097cb71566f227876dec28629"
+    },
+    {
+      "path": "rust/crates/kv-relay-client/src/tests/interfaces.rs",
+      "sha256": "ec021b31a8004948c82f37a26ffe6e983b9cb172c7e2ae0fc9c4e13fde53a16c"
+    },
+    {
+      "path": "rust/crates/kv-relay-client/src/tests/queue.rs",
+      "sha256": "accd209afacb1b1123b53e5128e8c7c9a5fc50131ec7e2c200ea117bb5ee5b30"
+    },
+    {
+      "path": "rust/crates/kv-relay-client/src/tests/recovery.rs",
+      "sha256": "512572e91aa44ed48b35302093bed4bf5deb47b213091458464b231773a66533"
+    },
+    {
+      "path": "rust/crates/kv-relay-client/src/tests/transport.rs",
+      "sha256": "0fa253a5ebac687bd16ceb73495fdf0f8a3b482fe6ffaee6adf07d12adaef01c"
+    },
+    {
+      "path": "rust/crates/kv-relay-client/src/transport.rs",
+      "sha256": "ce8aa90c5a899103df47ec1233f256a8b81888327e5e24c8fe9a9dc3a4a2dacd"
+    },
+    {
+      "path": "rust/crates/kv-relay-client/src/windows.rs",
+      "sha256": "fd1e846535709a67b622eaa571de9d3489f4f0c76d83667ab81856fd9174ee57"
+    },
+    {
+      "path": "rust/crates/kv-server/Cargo.toml",
+      "sha256": "7f1648b6673d8410857ab1403f7ed1708924d6af18af78933fa20a0780303bf9"
+    },
+    {
+      "path": "rust/crates/kv-server/account.env.example",
+      "sha256": "95fea7b98e63de878f6c670187894d9383b25da0e9c84209543d8e01c9db57e4"
+    },
+    {
+      "path": "rust/crates/kv-server/scripts/coverage.sh",
+      "sha256": "ff25c0dcd4181ec60f9cafa830d0d56c3e9684f3fdccaf58189c8909a3e6a4fc"
+    },
+    {
+      "path": "rust/crates/kv-server/src/account.rs",
+      "sha256": "40227c3c83ba716ed24082da649f93eb6722a93aebc1127a5d69bd1581138b0f"
+    },
+    {
+      "path": "rust/crates/kv-server/src/auth.rs",
+      "sha256": "97b6b5dabc1c4a855485c521d3da6e92302a5f02847f7de2229a560193002a8f"
+    },
+    {
+      "path": "rust/crates/kv-server/src/cleanup.rs",
+      "sha256": "b029667982d5dcfbf7689b4059fad60bd7029de3e968213840876d272a16f698"
+    },
+    {
+      "path": "rust/crates/kv-server/src/error.rs",
+      "sha256": "97a87b43adc96e741f66623b86f18b7b0b078c59b9c96004a55faf09b5c16a81"
+    },
+    {
+      "path": "rust/crates/kv-server/src/http.rs",
+      "sha256": "73581c122a412a419279038a53951dde83e6480b59b7f37bb39e178593f3a40b"
+    },
+    {
+      "path": "rust/crates/kv-server/src/lib.rs",
+      "sha256": "3d71b50cdb3829d60612658e7ce4d74a9353f5df29a6b05fb46cc30522b93e4a"
+    },
+    {
+      "path": "rust/crates/kv-server/src/main.rs",
+      "sha256": "3289f636c65b55cb9b8533416a1fdb687a52c7ae892d13ebfdfd0d5bc293654e"
+    },
+    {
+      "path": "rust/crates/kv-server/src/messages.rs",
+      "sha256": "4cd4f02e2f5907e87b08797685dbc09e69732f4fa920fd674a50641dd4f8c6d3"
+    },
+    {
+      "path": "rust/crates/kv-server/src/pairing.rs",
+      "sha256": "ba2c52107ba599e105429163ff16b8315ab2d5135ea4cbc75a9e6bff1682b06e"
+    },
+    {
+      "path": "rust/crates/kv-server/src/presence.rs",
+      "sha256": "3389e83cd58c6a229d3d7b0a0736bdfe7f9a8fc30ab15452cdf7eab6a9b10d3d"
+    },
+    {
+      "path": "rust/crates/kv-server/src/push.rs",
+      "sha256": "d374d454218e5a0e52add67bc49d52d410898f697b25826e17e84683aea2b9c6"
+    },
+    {
+      "path": "rust/crates/kv-server/src/push_tests.rs",
+      "sha256": "8d105bf77bbece22f6bc83785f53f6f730f37f1a87521bb1291f410953223a4c"
+    },
+    {
+      "path": "rust/crates/kv-server/src/schema.sql",
+      "sha256": "b367310a60ff9e914effc7d2812262625b8228f22646cd5a8a043fc8c9f94aa2"
+    },
+    {
+      "path": "rust/crates/kv-server/src/state.rs",
+      "sha256": "8359c3ec95c35ed7ee54eb3cc94869a7a57b626512f0d803c65bfcf34ff4c110"
+    },
+    {
+      "path": "rust/crates/kv-server/src/tests.rs",
+      "sha256": "3260181c4bdd828be18d508ff8a94752a2bd96f42ec27417d8bd38b338c249dc"
+    },
+    {
+      "path": "rust/crates/kv-server/src/tests/interfaces.rs",
+      "sha256": "9484d75c7ac6fb4870fc423b0f990d76802ddead6c93b32135f12ab969702a4f"
+    },
+    {
+      "path": "rust/crates/kv-server/src/tests/k1.rs",
+      "sha256": "5af286ffb8005edeae36b76a63669d86f3e3c89b1f4ffce0a1a76d83334734fa"
+    },
+    {
+      "path": "rust/crates/kv-server/src/tests/push.rs",
+      "sha256": "7a3fd1fc333d1ebd6f244773728fc560090416a5fcb8956b109997023f60c673"
+    },
+    {
+      "path": "rust/crates/kv-server/src/tests/recovery.rs",
+      "sha256": "3ea217a5d0b171db544480d18fd63c40ad32664d45bd51d15a8563005c1e6414"
+    },
+    {
+      "path": "rust/crates/kv-server/src/tests/regions.rs",
+      "sha256": "0a7ee7b4cd2290ebdceec951eda1b51578130e4206bbdf0a25344eafef6db0a7"
+    },
+    {
+      "path": "rust/crates/kv-server/src/tests/review.rs",
+      "sha256": "2f3d946049f485b1199e27c0bb6fbd62e56a63988f533b074a16f74d547600dd"
+    },
+    {
+      "path": "rust/crates/kv-server/src/unit_tests/account.rs",
+      "sha256": "eea9167a976dc889d1ee7c50390f8fc8cd438b6b61d398e0d527df98d31a191c"
+    },
+    {
+      "path": "rust/crates/kv-server/src/unit_tests/http.rs",
+      "sha256": "b7035baec573d9ba2a9fcb6da9addc64bc04e6c090bd46ade47b7a58c5c462b0"
+    },
+    {
+      "path": "rust/crates/kv-server/src/unit_tests/messages.rs",
+      "sha256": "d8257df363b25c4bbf71d3131be4913cc816e426f5d5d2845312812dc3f366fd"
+    },
+    {
+      "path": "rust/crates/kv-server/src/unit_tests/presence.rs",
+      "sha256": "acbcacb74ea3031f083f2b5b2f828c265f16a0a19b40821a6e338b0cd9dc0509"
+    },
+    {
+      "path": "rust/crates/kv-server/src/unit_tests/signals.rs",
+      "sha256": "926fff873e1c5d1ecdf1f26cb9ff286b29434d427c87a90737a7de441a565cd9"
+    },
+    {
+      "path": "rust/crates/kv-server/tests/cli.rs",
+      "sha256": "391a7d45c5745315d1b7a91d4c9b85e25474e6d0c940da818a7718ff0f0190d5"
+    },
+    {
+      "path": "rust/crates/kv-touchid/Cargo.toml",
+      "sha256": "f11fde53daefa7b25d8f0847cc69932de32673f4da2f042189fd8593d3891f36"
+    },
+    {
+      "path": "rust/crates/kv-touchid/Info.plist",
+      "sha256": "5ee086d164da9712f96f70f12fa67ea4171e7d8d4ab7029e2712b67b1d80514c"
+    },
+    {
+      "path": "rust/crates/kv-touchid/build.rs",
+      "sha256": "3e8cd7117d7e5fa59ef609bdb96b1029ce5c76f2349c50e8480eab373388bba2"
+    },
+    {
+      "path": "rust/crates/kv-touchid/src/agent.rs",
+      "sha256": "06168c51790cb004b8de24a598de5c6ff6fdfbb2ca048f005ad7ec809cbfa01f"
+    },
+    {
+      "path": "rust/crates/kv-touchid/src/device_key.rs",
+      "sha256": "fb1958c62aac9b11f9b89ab88d80742781ca5e4008872ea7edb56cac7164842b"
+    },
+    {
+      "path": "rust/crates/kv-touchid/src/enclave.rs",
+      "sha256": "b202dc49da9a9309613b50093d133ba9bedb73111644cc8edcfebee278da717a"
+    },
+    {
+      "path": "rust/crates/kv-touchid/src/enclave.swift",
+      "sha256": "53928f53f794b01a8fada5dee3576c14bc9a79f974bb18edacafddd398e1cb5b"
+    },
+    {
+      "path": "rust/crates/kv-touchid/src/lib.rs",
+      "sha256": "7bd114d1fe401f53136cab662c07c8f6c37caafbe20922d86c5feaaa8e01e18e"
+    },
+    {
+      "path": "rust/crates/kv-touchid/src/main.rs",
+      "sha256": "299f7ca330a36f7f1d4e1e810edf6ec9b10a265a8f81bf5071b0ca6fff0eb315"
+    },
+    {
+      "path": "rust/crates/kv-touchid/src/remote_agent.rs",
+      "sha256": "b26db71b4002f5ba26c81a68335848778aa8bd80a547da2c37bdee55a83f0495"
+    },
+    {
+      "path": "rust/crates/kv-touchid/src/remote_auth.rs",
+      "sha256": "b6214d11d378769b9641803d498190b348c35b745b9a2dbad445c4aff5a13531"
+    },
+    {
+      "path": "rust/crates/kv-touchid/src/remote_dialog.rs",
+      "sha256": "07f24937abdbfd16c51c4021e6bc7ca04a9b99b79f667941e41e5ab4d9c72040"
+    },
+    {
+      "path": "rust/crates/kv-touchid/src/remote_main.rs",
+      "sha256": "a786456d9933a6c23eb23d2ef368f6b8c14391175c0f1470a0b7ba94921b2307"
+    },
+    {
+      "path": "rust/crates/kv-touchid/tests/device_key_cli.rs",
+      "sha256": "0ce4b229a02c2b1fc15638799e9d507240d4474ed2319c061d899cf5ff5da7f6"
+    },
+    {
+      "path": "rust/crates/kv-touchid/tests/remote_dialog.rs",
+      "sha256": "13169ef1cf7dae21fca479c0a70034207c110d2a680d71c4d2a88b3af897bb43"
+    },
+    {
+      "path": "rust/crates/kv-touchid/tests/spikes/hpke.swift",
+      "sha256": "2836ad4f5b3253f3c842049ebd6bc1daa3e1d4da20d75cef01d1f4c3880212b8"
+    },
+    {
+      "path": "rust/crates/kv-vault/Cargo.toml",
+      "sha256": "bc4a4f63fdcddefc8c7f65e860416ac0019d35901328fa62ee38687d14d9ce65"
+    },
+    {
+      "path": "rust/crates/kv-vault/src/crypto.rs",
+      "sha256": "20c55ef9b1b05cc69cafa5a7c7c0545b1b6a299b410d1561fc92de6272245562"
+    },
+    {
+      "path": "rust/crates/kv-vault/src/error.rs",
+      "sha256": "38caaf8ef5f9377ec95f59b4bfc5d612c2c3047aa33fcdb8c3af6259f113f273"
+    },
+    {
+      "path": "rust/crates/kv-vault/src/lib.rs",
+      "sha256": "6a77c4e715344c3aa95dbfe92fd1299fa5c7758a23af6da26cde479c13a5cd5f"
+    },
+    {
+      "path": "rust/crates/kv-vault/src/master_key.rs",
+      "sha256": "4b68b3fab8d1512559b05422ac5368d86915d4a4e5983ab8e3357cd35b1ed5a9"
+    },
+    {
+      "path": "rust/crates/kv-vault/src/master_key/tests.rs",
+      "sha256": "bcbe8056a875742bbbbf2e26e4815a9963631f0941a5b0a10d20afc0e2063dd6"
+    },
+    {
+      "path": "rust/crates/kv-vault/src/types.rs",
+      "sha256": "bb15420452d849d6896665128a166f8714da6c53d7ba587c17a5e3e35718f856"
+    },
+    {
+      "path": "rust/crates/kv-vault/src/validate.rs",
+      "sha256": "fd2a503aa35958e4b2cea679312b2fe3aaa6b597afdd01119c8841a59183ce97"
+    },
+    {
+      "path": "rust/crates/kv-vault/src/vault.rs",
+      "sha256": "c57b976db1f693ba674f26875c9f9099f4779516bee0084c78b3a85fdd51572f"
+    },
+    {
+      "path": "rust/crates/kv-vault/src/winbuf.rs",
+      "sha256": "670f81bf5b8d5b3fb7ac310e98a4805c78f7b014c2adfb9bd0e783dc9f05a9cc"
+    },
+    {
+      "path": "rust/crates/kv-vault/tests/enclave.rs",
+      "sha256": "183bdf08281000794d4c9828705ac58672ad5987cc13f05eba4d95ad3495fe74"
+    },
+    {
+      "path": "rust/crates/kv-vault/tests/hello.rs",
+      "sha256": "feff1721d6b95af4b587d7ef9c3c607c4a7d5c03b31f09d3f37f97e1a888c57e"
+    },
+    {
+      "path": "rust/crates/kv-vault/tests/linux_metadata.rs",
+      "sha256": "5e274eac8ad021eecb82565fb065f024a5bb63cca7d73e98d886fa6bf1b2814b"
+    },
+    {
+      "path": "rust/crates/kv-vault/tests/vault.rs",
+      "sha256": "2dba8a29c90292740113d1ae6c03ab75f08f10e037700ced8e436a2b9b4e3d78"
+    },
+    {
+      "path": "rust/windows-build.rs",
+      "sha256": "bb48975ede01a66097f7db4c2ddc87b2657a5f0dcb61aa1c4b016883ef24f4fd"
+    },
+    {
+      "path": "rust/windows.manifest",
+      "sha256": "fc0d2ccfd870e3990b4fff6778b111023b8a314cb657ecb99e183760d22989b0"
+    },
+    {
+      "path": "scripts/build-catalog.mjs",
+      "sha256": "71a53c02f254771bda1abcdad4080445fd7a9d5d3bb1a1dd6d1da912d402aa85"
+    },
+    {
+      "path": "scripts/configure-runtimes.sh",
+      "sha256": "65ed93611616cc775bbf1e3dc6cc08a8153cd025ce949082c68ea0138ad7a0f4"
+    },
+    {
+      "path": "scripts/import-n8n-templates.mjs",
+      "sha256": "1d54e30d498780cab99350866fef00e808498101f37b709eebe058a15bbc74d5"
+    },
+    {
+      "path": "scripts/install-linux-root.sh",
+      "sha256": "86c11383b999ac22db88264b4494be0a7877673c420bffdb1cf17b71943de268"
+    },
+    {
+      "path": "scripts/install-linux.sh",
+      "sha256": "7ffeed846272abf7c3d68b296682971eb1be884aeaf6bdd075bf503883c788a3"
+    },
+    {
+      "path": "scripts/install.ps1",
+      "sha256": "bff4839470a6568cd98bb1a9d8ef7d1ee6029aef41abbd8a9cb322dbcf80c9d7"
+    },
+    {
+      "path": "scripts/install.sh",
+      "sha256": "0f0d47ee1cd5fd93309cff64252648ab472a072a91068accd9702dc2e2044650"
+    },
+    {
+      "path": "scripts/linux-coverage.py",
+      "sha256": "5c0cd4be75621de3681490db479c2944eab33af858da52580e45a3bfa38baf93"
+    },
+    {
+      "path": "scripts/linux/dev.keyvalet.policy",
+      "sha256": "9a2fa25b39dfe16147b9eb97f3635a6dc693cded0ad801549ef58643fece5c9f"
+    },
+    {
+      "path": "scripts/linux/keyvalet-peer.service",
+      "sha256": "d130061f67d6170a88e98f5adb708d23dd57022df0b544791126f3f70732c48a"
+    },
+    {
+      "path": "scripts/linux/keyvalet.service",
+      "sha256": "bf912f783c7211bf263f4ad8c0cffee691285c62e2a5150391ff1b4c0ed4f02d"
+    },
+    {
+      "path": "scripts/linux/r3a-settings-checkpoint.rs",
+      "sha256": "ec166973f170e03fc7d97ec6ed729c2fc45752e0212ef6ae0a27fa3f590897fa"
+    },
+    {
+      "path": "scripts/package-linux.sh",
+      "sha256": "41ce0f78cf648f98c0dafe0c43fb10c73b60c0b8d3e14faec1645ec378046b98"
+    },
+    {
+      "path": "scripts/package-release.sh",
+      "sha256": "d8604f4396b3ddf36e80210e611a00b5a266aa77ddcd0919c76ce93dace14855"
+    },
+    {
+      "path": "scripts/package-windows.ps1",
+      "sha256": "59bd55aaa7e5c22bd0b28f880db2e9f1aa8f381774e21fa28d71ac2027cff477"
+    },
+    {
+      "path": "scripts/test-linux-coverage.sh",
+      "sha256": "1e0d02b7c95959cd64478daab00bcf41a877707214a7e5c1334ca0bf7172c226"
+    },
+    {
+      "path": "scripts/test-windows-hello-fixture.ps1",
+      "sha256": "eb8b775b30b0bdd32159c52902f75eb1379d40b9cf617fdc9b95f5416e6d8b84"
+    },
+    {
+      "path": "scripts/test-windows-remote-keys.ps1",
+      "sha256": "872ee36d9886036b3e3da30674e04cedc1e2ab6a8e2c52fae607d6d4386cb56e"
+    },
+    {
+      "path": "scripts/test-windows-scripts.ps1",
+      "sha256": "18a02b8ed074855a1018814ba16ed72ebb822aebdb6ea8686819aba53e92fe54"
+    },
+    {
+      "path": "scripts/test-windows-service.ps1",
+      "sha256": "6e9a7156b42dec5bd897181fd9d1d61239ae2e8d5175f3330cc23989d15847aa"
+    },
+    {
+      "path": "scripts/test-wsl-live.py",
+      "sha256": "b31a976d350f3338366ef402af7ee3d35154c5457a293ad0d1a43df8cc3e9c44"
+    },
+    {
+      "path": "scripts/test-wsl.py",
+      "sha256": "e311d30070be6ced0407eefe5434cbe654638bea591f583d557ae026d6d699d8"
+    },
+    {
+      "path": "scripts/uninstall-linux.sh",
+      "sha256": "854b82a81b4ad19c8f6e479f0715e6333d0e92c269a309584318a3d794576691"
+    },
+    {
+      "path": "scripts/uninstall.ps1",
+      "sha256": "5b7977eb533ced2277227b301134cd891bd30f92cd8dc3b9e7dd2afc64d7e43e"
+    },
+    {
+      "path": "scripts/uninstall.sh",
+      "sha256": "ef86734f540fb6b4970ccf96d962532e2645be5f75862c2590a1a7cf283db5d8"
+    },
+    {
+      "path": "scripts/wsl/bridge.sh",
+      "sha256": "1dca21bd91c84e105738657bc8bb869665775ee9a8b56f349d58ddc6c2a17ba5"
+    },
+    {
+      "path": "scripts/wsl/configure.py",
+      "sha256": "cf5140a3842194e7a64b8e566d139058be72766f96e5e5853d44cc7bb6e7cc11"
+    },
+    {
+      "path": "scripts/wsl/install.sh",
+      "sha256": "ecefeb74a9e8d66202705332ec9669db482de8f8c00b9bb32c739c27135c76d5"
+    },
+    {
+      "path": "scripts/wsl/uninstall.sh",
+      "sha256": "c432f56d7a0bbca5b6d43fc2e0edead88f2a9ab5015ca3d73b6992cb6c36ede1"
+    },
+    {
+      "path": "scripts/wsl/verify.py",
+      "sha256": "d2dfdc8b5c11679e73921098c3c1ead1735a45d2553ad026312ec5d10c12964b"
+    },
+    {
+      "path": "site/static/install.ps1",
+      "sha256": "736325c0db7e57b4a9912b308c4eb00398ff6aa778f42d5a57bd0ab35aaed752"
+    },
+    {
+      "path": "templates/catalog.json",
+      "sha256": "d7b2dd788b7a0902aa1d3597867f9b82b96ea15db26360f097055c5cf1f8aa56"
+    }
+  ],
+  "archive_kind": "full frozen source: callback completion, independent Strong receipt, explicit cancellation retry, CLI execution barrier"
+}

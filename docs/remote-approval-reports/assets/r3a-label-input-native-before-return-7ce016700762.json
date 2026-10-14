@@ -1,0 +1,23 @@
+{
+  "stdin_is_terminal": true,
+  "process_group": 36587,
+  "stdin_foreground_group": 36586,
+  "stdin_terminal": "/dev/ttys009",
+  "controlling_foreground_group": 36586,
+  "stdin_device_matches_controlling_alias": false,
+  "selected_terminal": "/dev/ttys009",
+  "io_counts": {
+    "child_canonical_input": true,
+    "child_cr_to_nl": true,
+    "owner_input_bytes": 0,
+    "owner_input_cr": 0,
+    "owner_input_nl": 0,
+    "label_prompt_detected": true
+  },
+  "fixed_error": "label_command_timeout",
+  "observed_utc": "2026-10-13T16:00:23.435416+00:00",
+  "read_only": true,
+  "keyvalet_calls": 0,
+  "touch_id_requests": 0,
+  "secret_values_in_evidence": false
+}

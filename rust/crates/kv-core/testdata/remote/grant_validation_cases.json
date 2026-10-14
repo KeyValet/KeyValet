@@ -108,7 +108,543 @@
         "future_policy": {
           "version": 2
         },
+        "confirm": "srv",
+        "sig": "48M_APma8xQCrWA4USVyF_wWGI4lLas1GqTXal41QnhpQkR1Yd5NxO7nPjRcMJgnowhHBxMegqwj6JyFPxe-fA"
+      },
+      "device": {
+        "device_id": "dev_mac",
+        "label": "MacBook",
+        "os": "macos",
+        "key_kind": "software",
+        "dk_pub": {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "fPJ7GI0DT36KUjgDBLUaw8CJaeJ38hs1pgtI_EdmmXg",
+          "y": "B3dVENuO0EApPZrGn3Qw27p9reY86YIpngS3nSJ4c9E"
+        },
+        "ak_q": {
+          "pub": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "Xsvk0aYzCkTI9--VHUvxZebGtyHvramF-0FmG8bn_Ww",
+            "y": "hzRkDEmY_343SwbOGmSi7NgqsDY4T7g9mnmxJ6J9UDI"
+          },
+          "alg": "ES256"
+        },
+        "ak_s": {
+          "pub": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "4lNKNTLQj7ugLd5lnuYr0AMf4tt4VZbvUJMCRGsDCFI",
+            "y": "4PFXWkxjPMcZ3-5f2oYtdk78lsPzDuAFXELCPxhO2MY"
+          },
+          "alg": "ES256"
+        },
+        "caps": [
+          "approve_quick",
+          "approve_strong"
+        ],
+        "attestation": null
+      },
+      "level": "strong"
+    },
+    {
+      "name": "finite_t2_missing_confirm",
+      "grant": {
+        "kind": "grant",
+        "jti": "01J9W000000000000000000001",
+        "iss": "dev_mac",
+        "iss_alg": "ES256",
+        "iss_kind": "device",
+        "aud": "dev_srv",
+        "scope": {
+          "level": "credential",
+          "credential": "github/default",
+          "hosts": [
+            "api.github.com"
+          ],
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "max_tier": "T2"
+        },
+        "nbf": 1760200000,
+        "exp": 1760804812,
+        "origin": "settings",
+        "future_policy": {
+          "version": 2
+        },
         "sig": "cUTXz70Q76ETUJRzCIMO6tq8kfdzE3SwvB6uOUP2sntaT_q15peEx1F5KXit7gizz4JH95PxnnyqsgdR-THzUg"
+      },
+      "device": {
+        "device_id": "dev_mac",
+        "label": "MacBook",
+        "os": "macos",
+        "key_kind": "software",
+        "dk_pub": {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "fPJ7GI0DT36KUjgDBLUaw8CJaeJ38hs1pgtI_EdmmXg",
+          "y": "B3dVENuO0EApPZrGn3Qw27p9reY86YIpngS3nSJ4c9E"
+        },
+        "ak_q": {
+          "pub": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "Xsvk0aYzCkTI9--VHUvxZebGtyHvramF-0FmG8bn_Ww",
+            "y": "hzRkDEmY_343SwbOGmSi7NgqsDY4T7g9mnmxJ6J9UDI"
+          },
+          "alg": "ES256"
+        },
+        "ak_s": {
+          "pub": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "4lNKNTLQj7ugLd5lnuYr0AMf4tt4VZbvUJMCRGsDCFI",
+            "y": "4PFXWkxjPMcZ3-5f2oYtdk78lsPzDuAFXELCPxhO2MY"
+          },
+          "alg": "ES256"
+        },
+        "caps": [
+          "approve_quick",
+          "approve_strong"
+        ],
+        "attestation": null
+      },
+      "level": "strong"
+    },
+    {
+      "name": "finite_t2_null_confirm",
+      "grant": {
+        "kind": "grant",
+        "jti": "01J9W000000000000000000001",
+        "iss": "dev_mac",
+        "iss_alg": "ES256",
+        "iss_kind": "device",
+        "aud": "dev_srv",
+        "scope": {
+          "level": "credential",
+          "credential": "github/default",
+          "hosts": [
+            "api.github.com"
+          ],
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "max_tier": "T2"
+        },
+        "nbf": 1760200000,
+        "exp": 1760804812,
+        "origin": "settings",
+        "future_policy": {
+          "version": 2
+        },
+        "confirm": null,
+        "sig": "MRkSsJeMPFYfZ-QTt3_dPTc0iiI_5kzw229rXiP5JU33FmS9wL7-SLfuawOA4o0PlrWytpE1Yk7i1T7vEmAAjw"
+      },
+      "device": {
+        "device_id": "dev_mac",
+        "label": "MacBook",
+        "os": "macos",
+        "key_kind": "software",
+        "dk_pub": {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "fPJ7GI0DT36KUjgDBLUaw8CJaeJ38hs1pgtI_EdmmXg",
+          "y": "B3dVENuO0EApPZrGn3Qw27p9reY86YIpngS3nSJ4c9E"
+        },
+        "ak_q": {
+          "pub": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "Xsvk0aYzCkTI9--VHUvxZebGtyHvramF-0FmG8bn_Ww",
+            "y": "hzRkDEmY_343SwbOGmSi7NgqsDY4T7g9mnmxJ6J9UDI"
+          },
+          "alg": "ES256"
+        },
+        "ak_s": {
+          "pub": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "4lNKNTLQj7ugLd5lnuYr0AMf4tt4VZbvUJMCRGsDCFI",
+            "y": "4PFXWkxjPMcZ3-5f2oYtdk78lsPzDuAFXELCPxhO2MY"
+          },
+          "alg": "ES256"
+        },
+        "caps": [
+          "approve_quick",
+          "approve_strong"
+        ],
+        "attestation": null
+      },
+      "level": "strong"
+    },
+    {
+      "name": "finite_t2_wrong_confirm",
+      "grant": {
+        "kind": "grant",
+        "jti": "01J9W000000000000000000001",
+        "iss": "dev_mac",
+        "iss_alg": "ES256",
+        "iss_kind": "device",
+        "aud": "dev_srv",
+        "scope": {
+          "level": "credential",
+          "credential": "github/default",
+          "hosts": [
+            "api.github.com"
+          ],
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "max_tier": "T2"
+        },
+        "nbf": 1760200000,
+        "exp": 1760804812,
+        "origin": "settings",
+        "future_policy": {
+          "version": 2
+        },
+        "confirm": "another",
+        "sig": "ioF_0rcElXcdCJPu0HoFbF7t5Tkr5s6cbtEKylPloS5sZSFHrrL_FAsvw8edfKGXp3eUd_wOegZokSHs8gqVUA"
+      },
+      "device": {
+        "device_id": "dev_mac",
+        "label": "MacBook",
+        "os": "macos",
+        "key_kind": "software",
+        "dk_pub": {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "fPJ7GI0DT36KUjgDBLUaw8CJaeJ38hs1pgtI_EdmmXg",
+          "y": "B3dVENuO0EApPZrGn3Qw27p9reY86YIpngS3nSJ4c9E"
+        },
+        "ak_q": {
+          "pub": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "Xsvk0aYzCkTI9--VHUvxZebGtyHvramF-0FmG8bn_Ww",
+            "y": "hzRkDEmY_343SwbOGmSi7NgqsDY4T7g9mnmxJ6J9UDI"
+          },
+          "alg": "ES256"
+        },
+        "ak_s": {
+          "pub": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "4lNKNTLQj7ugLd5lnuYr0AMf4tt4VZbvUJMCRGsDCFI",
+            "y": "4PFXWkxjPMcZ3-5f2oYtdk78lsPzDuAFXELCPxhO2MY"
+          },
+          "alg": "ES256"
+        },
+        "caps": [
+          "approve_quick",
+          "approve_strong"
+        ],
+        "attestation": null
+      },
+      "level": "strong"
+    },
+    {
+      "name": "finite_t2_empty_confirm",
+      "grant": {
+        "kind": "grant",
+        "jti": "01J9W000000000000000000001",
+        "iss": "dev_mac",
+        "iss_alg": "ES256",
+        "iss_kind": "device",
+        "aud": "dev_srv",
+        "scope": {
+          "level": "credential",
+          "credential": "github/default",
+          "hosts": [
+            "api.github.com"
+          ],
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "max_tier": "T2"
+        },
+        "nbf": 1760200000,
+        "exp": 1760804812,
+        "origin": "settings",
+        "future_policy": {
+          "version": 2
+        },
+        "confirm": "",
+        "sig": "V8qSNBDjPMsq9V8Iyiu2eFrjPnYY8VrLj56hoCQXM372ink5cejUIfKGaihyzthF4LyD0sP_AFwnqsgurZt6QA"
+      },
+      "device": {
+        "device_id": "dev_mac",
+        "label": "MacBook",
+        "os": "macos",
+        "key_kind": "software",
+        "dk_pub": {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "fPJ7GI0DT36KUjgDBLUaw8CJaeJ38hs1pgtI_EdmmXg",
+          "y": "B3dVENuO0EApPZrGn3Qw27p9reY86YIpngS3nSJ4c9E"
+        },
+        "ak_q": {
+          "pub": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "Xsvk0aYzCkTI9--VHUvxZebGtyHvramF-0FmG8bn_Ww",
+            "y": "hzRkDEmY_343SwbOGmSi7NgqsDY4T7g9mnmxJ6J9UDI"
+          },
+          "alg": "ES256"
+        },
+        "ak_s": {
+          "pub": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "4lNKNTLQj7ugLd5lnuYr0AMf4tt4VZbvUJMCRGsDCFI",
+            "y": "4PFXWkxjPMcZ3-5f2oYtdk78lsPzDuAFXELCPxhO2MY"
+          },
+          "alg": "ES256"
+        },
+        "caps": [
+          "approve_quick",
+          "approve_strong"
+        ],
+        "attestation": null
+      },
+      "level": "strong"
+    },
+    {
+      "name": "finite_t2_global_star",
+      "grant": {
+        "kind": "grant",
+        "jti": "01J9W000000000000000000001",
+        "iss": "dev_mac",
+        "iss_alg": "ES256",
+        "iss_kind": "device",
+        "aud": "*",
+        "scope": {
+          "level": "global",
+          "credential": "github/default",
+          "hosts": [
+            "api.github.com"
+          ],
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "max_tier": "T2"
+        },
+        "nbf": 1760200000,
+        "exp": 1760804812,
+        "origin": "settings",
+        "future_policy": {
+          "version": 2
+        },
+        "confirm": "srv",
+        "sig": "2uSOI7R2ZH6W6dYHONU8FgsqtTbBb-YsPdV2A2WD6K2cJPzZrNGKEOMJbijc02Zby17GbMkP9hmoki0VyuOP-Q"
+      },
+      "device": {
+        "device_id": "dev_mac",
+        "label": "MacBook",
+        "os": "macos",
+        "key_kind": "software",
+        "dk_pub": {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "fPJ7GI0DT36KUjgDBLUaw8CJaeJ38hs1pgtI_EdmmXg",
+          "y": "B3dVENuO0EApPZrGn3Qw27p9reY86YIpngS3nSJ4c9E"
+        },
+        "ak_q": {
+          "pub": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "Xsvk0aYzCkTI9--VHUvxZebGtyHvramF-0FmG8bn_Ww",
+            "y": "hzRkDEmY_343SwbOGmSi7NgqsDY4T7g9mnmxJ6J9UDI"
+          },
+          "alg": "ES256"
+        },
+        "ak_s": {
+          "pub": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "4lNKNTLQj7ugLd5lnuYr0AMf4tt4VZbvUJMCRGsDCFI",
+            "y": "4PFXWkxjPMcZ3-5f2oYtdk78lsPzDuAFXELCPxhO2MY"
+          },
+          "alg": "ES256"
+        },
+        "caps": [
+          "approve_quick",
+          "approve_strong"
+        ],
+        "attestation": null
+      },
+      "level": "strong"
+    },
+    {
+      "name": "finite_t2_credential_star",
+      "grant": {
+        "kind": "grant",
+        "jti": "01J9W000000000000000000001",
+        "iss": "dev_mac",
+        "iss_alg": "ES256",
+        "iss_kind": "device",
+        "aud": "*",
+        "scope": {
+          "level": "credential",
+          "credential": "github/default",
+          "hosts": [
+            "api.github.com"
+          ],
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "max_tier": "T2"
+        },
+        "nbf": 1760200000,
+        "exp": 1760804812,
+        "origin": "settings",
+        "future_policy": {
+          "version": 2
+        },
+        "confirm": "srv",
+        "sig": "0CrVJCDm7Zv9p2vbm5Ge_Gu62Vw1EeQpTYDXi98dlZTy205ExCAOsnddZF8cHOXV2e24PoR9XnBnk4cCjsKd6w"
+      },
+      "device": {
+        "device_id": "dev_mac",
+        "label": "MacBook",
+        "os": "macos",
+        "key_kind": "software",
+        "dk_pub": {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "fPJ7GI0DT36KUjgDBLUaw8CJaeJ38hs1pgtI_EdmmXg",
+          "y": "B3dVENuO0EApPZrGn3Qw27p9reY86YIpngS3nSJ4c9E"
+        },
+        "ak_q": {
+          "pub": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "Xsvk0aYzCkTI9--VHUvxZebGtyHvramF-0FmG8bn_Ww",
+            "y": "hzRkDEmY_343SwbOGmSi7NgqsDY4T7g9mnmxJ6J9UDI"
+          },
+          "alg": "ES256"
+        },
+        "ak_s": {
+          "pub": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "4lNKNTLQj7ugLd5lnuYr0AMf4tt4VZbvUJMCRGsDCFI",
+            "y": "4PFXWkxjPMcZ3-5f2oYtdk78lsPzDuAFXELCPxhO2MY"
+          },
+          "alg": "ES256"
+        },
+        "caps": [
+          "approve_quick",
+          "approve_strong"
+        ],
+        "attestation": null
+      },
+      "level": "strong"
+    },
+    {
+      "name": "standing_t2_global_star",
+      "grant": {
+        "kind": "grant",
+        "jti": "01J9W000000000000000000001",
+        "iss": "dev_mac",
+        "iss_alg": "ES256",
+        "iss_kind": "device",
+        "aud": "*",
+        "scope": {
+          "level": "global",
+          "credential": "github/default",
+          "hosts": [
+            "api.github.com"
+          ],
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "max_tier": "T2"
+        },
+        "nbf": 1760200000,
+        "exp": null,
+        "origin": "settings",
+        "future_policy": {
+          "version": 2
+        },
+        "confirm": "srv",
+        "sig": "8MSatRxOLww1lRjM_WXWrPGMhVbpAZjAUU4ub81JUzhP-gasUkIe6Su_TFaV_5msCPoLdGVJCkMrnSQ16mA53A"
+      },
+      "device": {
+        "device_id": "dev_mac",
+        "label": "MacBook",
+        "os": "macos",
+        "key_kind": "software",
+        "dk_pub": {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "fPJ7GI0DT36KUjgDBLUaw8CJaeJ38hs1pgtI_EdmmXg",
+          "y": "B3dVENuO0EApPZrGn3Qw27p9reY86YIpngS3nSJ4c9E"
+        },
+        "ak_q": {
+          "pub": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "Xsvk0aYzCkTI9--VHUvxZebGtyHvramF-0FmG8bn_Ww",
+            "y": "hzRkDEmY_343SwbOGmSi7NgqsDY4T7g9mnmxJ6J9UDI"
+          },
+          "alg": "ES256"
+        },
+        "ak_s": {
+          "pub": {
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "4lNKNTLQj7ugLd5lnuYr0AMf4tt4VZbvUJMCRGsDCFI",
+            "y": "4PFXWkxjPMcZ3-5f2oYtdk78lsPzDuAFXELCPxhO2MY"
+          },
+          "alg": "ES256"
+        },
+        "caps": [
+          "approve_quick",
+          "approve_strong"
+        ],
+        "attestation": null
+      },
+      "level": "strong"
+    },
+    {
+      "name": "standing_t2_credential_star",
+      "grant": {
+        "kind": "grant",
+        "jti": "01J9W000000000000000000001",
+        "iss": "dev_mac",
+        "iss_alg": "ES256",
+        "iss_kind": "device",
+        "aud": "*",
+        "scope": {
+          "level": "credential",
+          "credential": "github/default",
+          "hosts": [
+            "api.github.com"
+          ],
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "max_tier": "T2"
+        },
+        "nbf": 1760200000,
+        "exp": null,
+        "origin": "settings",
+        "future_policy": {
+          "version": 2
+        },
+        "confirm": "srv",
+        "sig": "4QWgMMk_ACTgT-A28XG55-uHBQtWL0X6JsXlAsdpz0oe6CG7tWXY6PYPMRGYMwc4GT0t8gi4ZuJADRzXcS-qyw"
       },
       "device": {
         "device_id": "dev_mac",
@@ -862,6 +1398,30 @@
   "expect": [
     {
       "ok": true
+    },
+    {
+      "error": "invalid_grant"
+    },
+    {
+      "error": "invalid_grant"
+    },
+    {
+      "error": "invalid_grant"
+    },
+    {
+      "error": "invalid_grant"
+    },
+    {
+      "error": "invalid_grant"
+    },
+    {
+      "error": "invalid_grant"
+    },
+    {
+      "error": "invalid_grant"
+    },
+    {
+      "error": "invalid_grant"
     },
     {
       "ok": true

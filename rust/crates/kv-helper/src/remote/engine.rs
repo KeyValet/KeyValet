@@ -11,15 +11,34 @@ use serde_json::{json, Map, Value};
 use std::collections::{HashMap, HashSet};
 use std::future::Future;
 use std::pin::Pin;
-use std::sync::{Arc, Mutex, MutexGuard};
+use std::sync::{Arc, LockResult, Mutex, MutexGuard, TryLockError};
 use std::time::Duration;
 use tokio::sync::Notify;
 use zeroize::Zeroizing;
+
+/// Agent-backed keys may bridge to async I/O while holding a synchronous owner
+/// lock. A contending timer or IPC task must hand its runtime worker back before
+/// waiting, otherwise it can stop the reply pump that would release that lock.
+pub(crate) fn blocking_lock<T>(mutex: &Mutex<T>) -> LockResult<MutexGuard<'_, T>> {
+    match mutex.try_lock() {
+        Ok(guard) => return Ok(guard),
+        Err(TryLockError::Poisoned(error)) => return Err(error),
+        Err(TryLockError::WouldBlock) => {}
+    }
+    if tokio::runtime::Handle::try_current()
+        .is_ok_and(|runtime| runtime.runtime_flavor() == tokio::runtime::RuntimeFlavor::MultiThread)
+    {
+        tokio::task::block_in_place(|| mutex.lock())
+    } else {
+        mutex.lock()
+    }
+}
 
 struct WaitObservation {
     helper: Arc<RemoteHelper>,
     uid: u32,
     agent_pid: u32,
+    runtime_budget_s: u64,
     finished: bool,
 }
 impl Drop for WaitObservation {
@@ -31,7 +50,7 @@ impl Drop for WaitObservation {
                     "client_timeout_observed",
                     json!({
                         "agent_pid":self.agent_pid,"uid":self.uid,
-                        "reason":"client_disconnected_while_waiting","runtime_budget_s":50,
+                        "reason":"client_disconnected_while_waiting","runtime_budget_s":self.runtime_budget_s,
                     }),
                 );
             }
@@ -226,11 +245,14 @@ pub(crate) struct State {
     pub pairing: Option<Pairing>,
     pub relay_connected: bool,
     pub inbound_requests: HashMap<String, ApprovalRequest>,
+    pub inbound_escalated: HashSet<String>,
     pub directive_results: HashMap<String, (String, DirectiveResult)>,
     pub confirmations: HashMap<String, super::owner::Confirmation>,
     pub presenting: HashSet<String>,
     pub pair_result: Option<Value>,
     pub retired: bool,
+    pub archives: Vec<super::rejoin::Archive>,
+    pub management_only: bool,
 }
 
 impl Drop for State {
@@ -263,7 +285,8 @@ impl RemoteHelper {
         store.verify_audit()?;
         services.audit.verify_checkpoint(&store.audit_head()?)?;
         services.audit.verify_records(&store.audit_records()?)?;
-        kv_core::remote::keys::verify_identity_provider(&local, services.identity.as_ref())?;
+        kv_core::remote::keys::verify_identity_provider(&local, services.identity.as_ref())
+            .map_err(|_| Error("invalid_local_identity"))?;
         if account.is_empty()
             || local.device_id.is_empty()
             || services.identity.public_jwk()? != local.dk_pub
@@ -289,7 +312,9 @@ impl RemoteHelper {
         if store.setting::<u64>("epoch")?.is_none() {
             store.set_setting("epoch", &0u64, "local", services.clock.now())?;
         }
-        Ok(Arc::new(Self {
+        let (inbound_requests, inbound_escalated) =
+            store.restore_inbound(&local.device_id, &account, services.clock.now())?;
+        let helper = Arc::new(Self {
             state: Mutex::new(State {
                 store,
                 full: HashMap::new(),
@@ -299,23 +324,28 @@ impl RemoteHelper {
                 local_hint: None,
                 pairing: None,
                 relay_connected: false,
-                inbound_requests: HashMap::new(),
+                inbound_requests,
+                inbound_escalated,
                 directive_results: HashMap::new(),
                 confirmations: HashMap::new(),
                 presenting: HashSet::new(),
                 pair_result: None,
                 retired: false,
+                archives: Vec::new(),
+                management_only: false,
             }),
             local,
             account,
             config,
             services,
             changed: Notify::new(),
-        }))
+        });
+        helper.invalidate_legacy_t2()?;
+        Ok(helper)
     }
 
     pub(crate) fn lock(&self) -> Result<MutexGuard<'_, State>> {
-        match self.state.lock() {
+        match blocking_lock(&self.state) {
             Ok(state) if state.retired => Err(Error("remote_identity_changed")),
             Ok(state) => Ok(state),
             Err(poisoned) => {
@@ -424,6 +454,19 @@ impl RemoteHelper {
         result
     }
 
+    pub(crate) fn ensure_execution_device_active(&self, state: &State) -> Result<()> {
+        let revoked: bool = state.store.db.query_row(
+            "SELECT EXISTS(SELECT 1 FROM devices WHERE id=?1 AND account_id=?2
+             AND (revoked_at IS NOT NULL OR trust='revoked'))",
+            params![self.local.device_id, self.account],
+            |row| row.get(0),
+        )?;
+        if revoked {
+            return Err(Error("revoked_device"));
+        }
+        Ok(())
+    }
+
     fn submit_inner(self: &Arc<Self>, mut input: ApprovalInput) -> Result<ApprovalRequest> {
         let now = self.services.clock.now();
         self.tick()?;
@@ -457,6 +500,7 @@ impl RemoteHelper {
         let canonical: CanonicalRequest = from_json(&input.canonical.canonical_bytes()?)?;
         let options = scope_options(&input);
         let mut state = self.lock()?;
+        self.ensure_execution_device_active(&state)?;
         // Merge only requests with exactly the same execution and identity binding. A credential
         // alone is not an execution binding; differing operations must be independently approved.
         if input.tier <= Tier::T1 && canonical.kind == ApprovalKind::Use {
@@ -654,7 +698,7 @@ impl RemoteHelper {
             .max(1))
     }
 
-    fn presence(&self, state: &State, now: i64) -> Presence {
+    pub(crate) fn presence(&self, state: &State, now: i64) -> Presence {
         if let Some(hint) = &state.local_hint {
             if now.saturating_sub(hint.received_at) <= 120 {
                 return hint.hint.state;
@@ -818,9 +862,52 @@ impl RemoteHelper {
             .store
             .db
             .execute("DELETE FROM remote_outbox WHERE exp < ?1", [now])?;
+        let expired = {
+            let mut statement = state
+                .store
+                .db
+                .prepare("SELECT id FROM inbound_approvals WHERE state='waiting' AND exp<?1")?;
+            let rows = statement.query_map([now], |row| row.get::<_, String>(0))?;
+            rows.collect::<std::result::Result<Vec<_>, _>>()?
+        };
+        if !expired.is_empty() {
+            let transaction = state.store.transaction(self.services.audit.as_ref())?;
+            for id in &expired {
+                let (saved, _) = state
+                    .store
+                    .inbound_approval(id)?
+                    .ok_or(Error("inbound_state_mismatch"))?;
+                self.save_inbound_state(&state, &saved, "expired")?;
+            }
+            transaction.commit()?;
+            for id in expired {
+                state.inbound_requests.remove(&id);
+                state.inbound_escalated.remove(&id);
+            }
+            changed = true;
+        }
         state
             .inbound_requests
             .retain(|_, request| request.exp >= now);
+        {
+            let State {
+                inbound_requests,
+                inbound_escalated,
+                ..
+            } = &mut *state;
+            inbound_escalated.retain(|id| inbound_requests.contains_key(id));
+        }
+        let retired: bool = state.store.db.query_row(
+            "SELECT EXISTS(SELECT 1 FROM inbound_approvals WHERE state!='waiting' AND exp<?1)",
+            [now],
+            |row| row.get(0),
+        )?;
+        if retired {
+            state.store.db.execute(
+                "DELETE FROM inbound_approvals WHERE state!='waiting' AND exp<?1",
+                [now],
+            )?;
+        }
         drop(state);
         if changed {
             self.changed.notify_waiters();
@@ -1039,6 +1126,27 @@ impl RemoteHelper {
                 {
                     return Err(Error("invalid_approval_request"));
                 }
+                match state.store.inbound_approval(&request.approval_id)? {
+                    Some((saved, status)) => {
+                        if status != "waiting" {
+                            return Err(Error("already_consumed"));
+                        }
+                        if saved.request != request {
+                            return Err(Error("invalid_approval_request"));
+                        }
+                    }
+                    None => {
+                        let saved = super::inbound::InboundApproval {
+                            request: request.clone(),
+                            envelope: envelope.clone(),
+                            received_at: now,
+                            escalated: false,
+                        };
+                        let transaction = state.store.transaction(self.services.audit.as_ref())?;
+                        self.save_inbound_state(&state, &saved, "waiting")?;
+                        transaction.commit()?;
+                    }
+                }
                 state
                     .inbound_requests
                     .insert(request.approval_id.clone(), request);
@@ -1054,7 +1162,15 @@ impl RemoteHelper {
                     .get(&cancel.approval_id)
                     .is_some_and(|r| r.requester.device_id == device.device_id)
                 {
+                    let (saved, _) = state
+                        .store
+                        .inbound_approval(&cancel.approval_id)?
+                        .ok_or(Error("inbound_state_mismatch"))?;
+                    let transaction = state.store.transaction(self.services.audit.as_ref())?;
+                    self.save_inbound_state(&state, &saved, "cancelled")?;
+                    transaction.commit()?;
                     state.inbound_requests.remove(&cancel.approval_id);
+                    state.inbound_escalated.remove(&cancel.approval_id);
                 }
                 Ok(())
             }
@@ -1070,12 +1186,24 @@ impl RemoteHelper {
                 if request.requester.device_id != device.device_id {
                     return Err(Error("wrong_sender"));
                 }
+                let (mut saved, status) = state
+                    .store
+                    .inbound_approval(&escalate.approval_id)?
+                    .ok_or(Error("inbound_state_mismatch"))?;
+                if status != "waiting" {
+                    return Err(Error("not_waiting"));
+                }
+                saved.escalated = true;
+                let transaction = state.store.transaction(self.services.audit.as_ref())?;
+                self.save_inbound_state(&state, &saved, "waiting")?;
                 // The signed request remains immutable. Escalation is a separate delivery hint.
                 self.audit(
                     &state,
                     "approval_escalated",
                     json!({"approval_id":escalate.approval_id}),
                 )?;
+                transaction.commit()?;
+                state.inbound_escalated.insert(escalate.approval_id.clone());
                 Ok(())
             }
             EnvelopeType::DirectiveResult => {
@@ -1556,6 +1684,7 @@ impl RemoteHelper {
             helper: self.clone(),
             uid,
             agent_pid,
+            runtime_budget_s,
             finished: false,
         };
         let result = self

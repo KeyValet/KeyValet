@@ -140,18 +140,21 @@ impl Transport {
 
     pub(crate) async fn drain(&self, state: &State) -> Result<PushStats> {
         let (jobs, mut stats) = state.with(lease)?;
+        stats.attempted = jobs.len();
+        let mut pending = tokio::task::JoinSet::new();
         for job in jobs {
-            stats.attempted += 1;
-            let response = self
+            let request = self
                 .http
                 .post(self.url.clone())
                 .bearer_auth(self.bearer.as_str())
                 .json(
                     &json!({"device_push_token":job.token,"approval_id":job.id,"to":job.to,
                     "delivery":{"mode":job.mode}}),
-                )
-                .send()
-                .await;
+                );
+            pending.spawn(async move { (job, request.send().await) });
+        }
+        while let Some(result) = pending.join_next().await {
+            let (job, response) = result.map_err(|_| ApiError::conflict())?;
             let status = response.as_ref().ok().map(|response| response.status());
             let retry_after = response
                 .as_ref()
@@ -244,6 +247,7 @@ struct Job {
 /// Runs before expired account-session rows are deleted, and before every dispatch.
 /// Device sessions are renewable; only losing the human session removes a mobile token.
 pub(crate) fn cleanup_tokens(db: &Connection, now: i64, require_account: bool) -> Result<usize> {
+    install_lifecycle_triggers(db)?;
     Ok(db.execute(
         "UPDATE devices SET push_token=NULL WHERE push_token IS NOT NULL AND
         (revoked_at IS NOT NULL OR (?2 AND os IN ('ios','android') AND NOT EXISTS
@@ -252,12 +256,27 @@ pub(crate) fn cleanup_tokens(db: &Connection, now: i64, require_account: bool) -
     )?)
 }
 
+pub(crate) fn install_lifecycle_triggers(db: &Connection) -> Result<()> {
+    // Keep token removal atomic with the revocation transaction owned by auth.rs.
+    db.execute_batch(
+        "CREATE TRIGGER IF NOT EXISTS push_device_revoked
+        AFTER UPDATE OF revoked_at ON devices WHEN NEW.revoked_at IS NOT NULL
+        BEGIN UPDATE devices SET push_token=NULL WHERE id=NEW.id;
+              DELETE FROM push_jobs WHERE to_device=NEW.id; END;
+        CREATE TRIGGER IF NOT EXISTS push_session_removed AFTER DELETE ON account_sessions
+        WHEN NOT EXISTS(SELECT 1 FROM account_sessions WHERE device_id=OLD.device_id)
+        BEGIN UPDATE devices SET push_token=NULL WHERE id=OLD.device_id;
+              DELETE FROM push_jobs WHERE to_device=OLD.device_id; END;",
+    )?;
+    Ok(())
+}
+
 fn lease(data: &mut crate::state::Data, now: i64) -> Result<(Vec<Job>, PushStats)> {
     let mut stats = PushStats::default();
     let tx = data.db.transaction()?;
     stats.tokens_removed = cleanup_tokens(&tx, now, data.account_login_required)?;
     // Superseded requests must not wake a phone after the signed cancellation is queued.
-    tx.execute("DELETE FROM push_jobs WHERE expires_at<?1 OR NOT EXISTS
+    tx.execute("DELETE FROM push_jobs WHERE expires_at<=?1 OR attempts>=4 OR NOT EXISTS
         (SELECT 1 FROM devices d WHERE d.id=push_jobs.to_device AND d.revoked_at IS NULL)
         OR (type IN ('approval_request','approval_escalate') AND NOT EXISTS (SELECT 1 FROM approvals a
             WHERE a.account_id=push_jobs.account_id AND a.id=push_jobs.id AND a.state='waiting'))

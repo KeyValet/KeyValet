@@ -1,0 +1,542 @@
+{
+  "started_utc": "2026-10-13T21:46:35.329057+00:00",
+  "read_only_keyvalet": true,
+  "keyvalet_approval_requests": 0,
+  "keyvalet_touch_id_requests": 0,
+  "secret_values_in_evidence": false,
+  "samples": [
+    {
+      "observed_utc": "2026-10-13T21:46:35.331140+00:00",
+      "elapsed_s": 0.002174,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:46:36.969165+00:00",
+      "elapsed_s": 1.640207,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:46:38.358754+00:00",
+      "elapsed_s": 3.029781,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:46:39.646481+00:00",
+      "elapsed_s": 4.317497,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:46:41.103480+00:00",
+      "elapsed_s": 5.774546,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:46:42.486886+00:00",
+      "elapsed_s": 7.157857,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:46:43.848957+00:00",
+      "elapsed_s": 8.519933,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:46:45.066757+00:00",
+      "elapsed_s": 9.737719,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:46:46.361405+00:00",
+      "elapsed_s": 11.032347,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:46:47.739071+00:00",
+      "elapsed_s": 12.410003,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:46:49.083177+00:00",
+      "elapsed_s": 13.75411,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:46:50.309188+00:00",
+      "elapsed_s": 14.980091,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:46:51.651631+00:00",
+      "elapsed_s": 16.322525,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:46:53.015554+00:00",
+      "elapsed_s": 17.686431,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:46:54.456190+00:00",
+      "elapsed_s": 19.127073,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:46:55.787633+00:00",
+      "elapsed_s": 20.458482,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:46:57.040594+00:00",
+      "elapsed_s": 21.711448,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:46:58.260489+00:00",
+      "elapsed_s": 22.931318,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:46:59.695141+00:00",
+      "elapsed_s": 24.366805,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:47:01.100487+00:00",
+      "elapsed_s": 25.7715,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:47:02.680082+00:00",
+      "elapsed_s": 27.365632,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:47:04.242906+00:00",
+      "elapsed_s": 28.913761,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:47:05.604698+00:00",
+      "elapsed_s": 30.275452,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:47:07.130463+00:00",
+      "elapsed_s": 31.801207,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:47:08.574322+00:00",
+      "elapsed_s": 33.245055,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:47:09.809438+00:00",
+      "elapsed_s": 34.480151,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:47:11.144980+00:00",
+      "elapsed_s": 35.815679,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:47:12.624689+00:00",
+      "elapsed_s": 37.295361,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:47:13.988632+00:00",
+      "elapsed_s": 38.659341,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:47:15.400709+00:00",
+      "elapsed_s": 40.071368,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:47:16.815943+00:00",
+      "elapsed_s": 41.486711,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:47:18.336070+00:00",
+      "elapsed_s": 43.006693,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:47:19.698930+00:00",
+      "elapsed_s": 44.369547,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:47:21.055080+00:00",
+      "elapsed_s": 45.72569,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:47:22.829227+00:00",
+      "elapsed_s": 47.500427,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:47:24.275571+00:00",
+      "elapsed_s": 48.946136,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:47:25.618359+00:00",
+      "elapsed_s": 50.288909,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:47:27.069971+00:00",
+      "elapsed_s": 51.740507,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:47:28.336377+00:00",
+      "elapsed_s": 53.006912,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:47:29.763068+00:00",
+      "elapsed_s": 54.433575,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:47:31.118452+00:00",
+      "elapsed_s": 55.788945,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:47:32.531733+00:00",
+      "elapsed_s": 57.202217,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:47:33.785229+00:00",
+      "elapsed_s": 58.455697,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:47:34.976219+00:00",
+      "elapsed_s": 59.646678,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:47:36.176807+00:00",
+      "elapsed_s": 60.847246,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:47:37.730122+00:00",
+      "elapsed_s": 62.400711,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:47:39.750613+00:00",
+      "elapsed_s": 64.421089,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:47:41.158980+00:00",
+      "elapsed_s": 65.82937,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:47:42.560594+00:00",
+      "elapsed_s": 67.230973,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:47:44.229268+00:00",
+      "elapsed_s": 68.899647,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    },
+    {
+      "observed_utc": "2026-10-13T21:47:45.659802+00:00",
+      "elapsed_s": 70.330171,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false
+    }
+  ],
+  "os_events": [],
+  "phases": [
+    {
+      "phase": "baseline",
+      "observed_utc": "2026-10-13T21:46:41.332473+00:00",
+      "elapsed_s": 6.003481,
+      "mac_presence": "away"
+    },
+    {
+      "phase": "after_screensaver",
+      "observed_utc": "2026-10-13T21:47:12.452034+00:00",
+      "elapsed_s": 37.122741,
+      "mac_presence": "away"
+    },
+    {
+      "phase": "after_first_unlock",
+      "observed_utc": "2026-10-13T21:47:46.948214+00:00",
+      "elapsed_s": 71.618552,
+      "mac_presence": "away"
+    }
+  ],
+  "fixed_error": "installed_presence_remains_away_after_real_os_transitions",
+  "finished_utc": "2026-10-13T21:47:46.949738+00:00"
+}

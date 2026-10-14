@@ -1,0 +1,481 @@
+{
+  "started_utc": "2026-10-13T23:46:49.250355+00:00",
+  "read_only_keyvalet": true,
+  "keyvalet_approval_requests": 0,
+  "keyvalet_touch_id_requests": 0,
+  "secret_values_in_evidence": false,
+  "samples": [
+    {
+      "observed_utc": "2026-10-13T23:46:49.653595+00:00",
+      "elapsed_s": 0.40332,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 0.002926
+    },
+    {
+      "observed_utc": "2026-10-13T23:46:51.085327+00:00",
+      "elapsed_s": 1.835007,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 1.405654
+    },
+    {
+      "observed_utc": "2026-10-13T23:46:52.487635+00:00",
+      "elapsed_s": 3.237322,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 2.840231
+    },
+    {
+      "observed_utc": "2026-10-13T23:46:53.941144+00:00",
+      "elapsed_s": 4.690821,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 4.242514
+    },
+    {
+      "observed_utc": "2026-10-13T23:46:55.324272+00:00",
+      "elapsed_s": 6.073949,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 5.694331
+    },
+    {
+      "observed_utc": "2026-10-13T23:46:56.701222+00:00",
+      "elapsed_s": 7.450871,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 7.079138
+    },
+    {
+      "observed_utc": "2026-10-13T23:46:58.132697+00:00",
+      "elapsed_s": 8.882339,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 8.455737
+    },
+    {
+      "observed_utc": "2026-10-13T23:46:59.534829+00:00",
+      "elapsed_s": 10.28446,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 9.887551
+    },
+    {
+      "observed_utc": "2026-10-13T23:47:00.861128+00:00",
+      "elapsed_s": 11.610742,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 11.289597
+    },
+    {
+      "observed_utc": "2026-10-13T23:47:02.143012+00:00",
+      "elapsed_s": 12.892619,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 12.615889
+    },
+    {
+      "observed_utc": "2026-10-13T23:47:03.485922+00:00",
+      "elapsed_s": 14.235512,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 13.896248
+    },
+    {
+      "observed_utc": "2026-10-13T23:47:04.847188+00:00",
+      "elapsed_s": 15.59676,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 15.240176
+    },
+    {
+      "observed_utc": "2026-10-13T23:47:06.104419+00:00",
+      "elapsed_s": 16.85398,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 16.59924
+    },
+    {
+      "observed_utc": "2026-10-13T23:47:07.466390+00:00",
+      "elapsed_s": 18.215941,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 17.854446
+    },
+    {
+      "observed_utc": "2026-10-13T23:47:08.842890+00:00",
+      "elapsed_s": 19.592421,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 19.217787
+    },
+    {
+      "observed_utc": "2026-10-13T23:47:10.230294+00:00",
+      "elapsed_s": 20.97981,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 20.597597
+    },
+    {
+      "observed_utc": "2026-10-13T23:47:11.517355+00:00",
+      "elapsed_s": 22.266866,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 21.980206
+    },
+    {
+      "observed_utc": "2026-10-13T23:47:12.806561+00:00",
+      "elapsed_s": 23.556053,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 23.272081
+    },
+    {
+      "observed_utc": "2026-10-13T23:47:14.048873+00:00",
+      "elapsed_s": 24.798355,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 24.560409
+    },
+    {
+      "observed_utc": "2026-10-13T23:47:15.482339+00:00",
+      "elapsed_s": 26.231808,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 25.800861
+    },
+    {
+      "observed_utc": "2026-10-13T23:47:16.808835+00:00",
+      "elapsed_s": 27.55829,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 27.237032
+    },
+    {
+      "observed_utc": "2026-10-13T23:47:18.182070+00:00",
+      "elapsed_s": 28.931506,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 28.563522
+    },
+    {
+      "observed_utc": "2026-10-13T23:47:19.543761+00:00",
+      "elapsed_s": 30.293189,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 29.936747
+    },
+    {
+      "observed_utc": "2026-10-13T23:47:20.925192+00:00",
+      "elapsed_s": 31.674606,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 31.298412
+    },
+    {
+      "observed_utc": "2026-10-13T23:47:22.188518+00:00",
+      "elapsed_s": 32.937921,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 32.679806
+    },
+    {
+      "observed_utc": "2026-10-13T23:47:23.581846+00:00",
+      "elapsed_s": 34.33124,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 33.940954
+    },
+    {
+      "observed_utc": "2026-10-13T23:47:24.947167+00:00",
+      "elapsed_s": 35.696544,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 35.335492
+    },
+    {
+      "observed_utc": "2026-10-13T23:47:26.189241+00:00",
+      "elapsed_s": 36.938605,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 36.699705
+    },
+    {
+      "observed_utc": "2026-10-13T23:47:27.447275+00:00",
+      "elapsed_s": 38.196625,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 37.939015
+    },
+    {
+      "observed_utc": "2026-10-13T23:47:28.809915+00:00",
+      "elapsed_s": 39.559256,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 39.201266
+    },
+    {
+      "observed_utc": "2026-10-13T23:47:30.298506+00:00",
+      "elapsed_s": 41.047845,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 40.560596
+    },
+    {
+      "observed_utc": "2026-10-13T23:47:31.723007+00:00",
+      "elapsed_s": 42.472326,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 42.048006
+    },
+    {
+      "observed_utc": "2026-10-13T23:47:33.039279+00:00",
+      "elapsed_s": 43.788594,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 43.473789
+    },
+    {
+      "observed_utc": "2026-10-13T23:47:34.487824+00:00",
+      "elapsed_s": 45.237122,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "away",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 44.793725
+    },
+    {
+      "observed_utc": "2026-10-13T23:47:35.939304+00:00",
+      "elapsed_s": 46.688581,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 46.242303
+    },
+    {
+      "observed_utc": "2026-10-13T23:47:37.305140+00:00",
+      "elapsed_s": 48.0544,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 47.693769
+    },
+    {
+      "observed_utc": "2026-10-13T23:47:38.624790+00:00",
+      "elapsed_s": 49.374039,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 49.055069
+    },
+    {
+      "observed_utc": "2026-10-13T23:47:40.038914+00:00",
+      "elapsed_s": 50.788154,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 50.37602
+    },
+    {
+      "observed_utc": "2026-10-13T23:47:41.500246+00:00",
+      "elapsed_s": 52.249456,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 51.793311
+    }
+  ],
+  "os_events": [
+    {
+      "event": "locked",
+      "observed_utc": "2026-10-13T23:47:00.682563+00:00",
+      "elapsed_s": 11.432224,
+      "callback_on_main_thread": true
+    },
+    {
+      "event": "unlocked",
+      "observed_utc": "2026-10-13T23:47:29.155861+00:00",
+      "elapsed_s": 39.906166,
+      "callback_on_main_thread": true
+    }
+  ],
+  "phases": [
+    {
+      "phase": "baseline",
+      "observed_utc": "2026-10-13T23:46:55.257670+00:00",
+      "elapsed_s": 6.007385,
+      "mac_presence": "present"
+    },
+    {
+      "phase": "after_measured_unlock",
+      "observed_utc": "2026-10-13T23:47:41.949871+00:00",
+      "elapsed_s": 52.699138,
+      "mac_presence": "present"
+    }
+  ],
+  "observer_self_check_only": false,
+  "measurement_only": true,
+  "presence_transitions": [
+    {
+      "event": "locked",
+      "state": "away",
+      "elapsed_s": 8.160197
+    },
+    {
+      "event": "unlocked",
+      "state": "present",
+      "elapsed_s": 6.782415
+    }
+  ],
+  "finished_utc": "2026-10-13T23:47:42.180557+00:00"
+}

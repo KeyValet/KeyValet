@@ -1,0 +1,7 @@
+{
+  "reason": "shared target reused frozen source paths; preserve old workspace fingerprints to force current-source compilation",
+  "fingerprints_preserved": 347,
+  "backup": "/Users/guang/dev/keyvalet/rust/target-r2b/unsigned-preserved-fingerprints",
+  "compiled_artifacts_deleted": false,
+  "source_bytes_unchanged": true
+}

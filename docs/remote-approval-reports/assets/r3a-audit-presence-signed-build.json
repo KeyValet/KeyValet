@@ -1,0 +1,47 @@
+{
+  "built_utc": "2026-10-13T23:05:59.625419+00:00",
+  "release_exit": 0,
+  "ci_evidence": "r3a-audit-presence-ci-summary.json",
+  "source_unchanged_since_ci": true,
+  "new_agent_installed": false,
+  "touch_id_requests": 0,
+  "secret_values_in_evidence": false,
+  "binaries": {
+    "kv-helper": {
+      "sha256": "987cee3a47d9a52617c4157c2e85dd0dd07b924b96d4958c3952e2394372e96d",
+      "bytes": 12289664,
+      "identifier": "dev.keyvalet.helper",
+      "team": "PWCRJPY7YC",
+      "strict_requirement_exit": 0,
+      "timestamp": "Oct 14, 2026 at 07:06:00",
+      "reused_installed": false
+    },
+    "kv-cli": {
+      "sha256": "25e3c622cd242540fdd23e40e8212408dc248c50ebf7c90f175f47e20693dbfa",
+      "bytes": 6202704,
+      "identifier": "dev.keyvalet.cli",
+      "team": "PWCRJPY7YC",
+      "strict_requirement_exit": 0,
+      "timestamp": "Oct 14, 2026 at 07:06:00",
+      "reused_installed": false
+    },
+    "kv-touchid": {
+      "sha256": "d18066e8dc6259d41d42b21cb598aa596ee1bda937cd4a55ea97fb69f0d16951",
+      "bytes": 1025744,
+      "identifier": "dev.keyvalet.touchid",
+      "team": "PWCRJPY7YC",
+      "strict_requirement_exit": 0,
+      "timestamp": "Oct 14, 2026 at 07:06:01",
+      "reused_installed": false
+    },
+    "kv-relay-client": {
+      "sha256": "accc5f6a0cff09b049a0697f4c048eeebd13f495749e6703b68926f18c4ab91c",
+      "bytes": 4482256,
+      "identifier": "dev.keyvalet.relay-client",
+      "team": "PWCRJPY7YC",
+      "strict_requirement_exit": 0,
+      "timestamp": "Oct 13, 2026 at 10:33:10",
+      "reused_installed": true
+    }
+  }
+}

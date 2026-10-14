@@ -1,0 +1,9 @@
+{
+  "binary_sha256": "17095fde40591a44c5ef2589e97343bf4865ac3c50d297d5976cf3cbf81beb51",
+  "source_mtime": "1970-01-01T00:00:00.0000000Z",
+  "new_archive_test_in_source": true,
+  "binary_mtime": "2026-10-14T08:26:15.5520379Z",
+  "assessment": "epoch source timestamps allowed Cargo to reuse older artifacts; prior targeted result is withdrawn",
+  "source_sha256": "8022495747d8fc3d97ef5af3abcaa9e57dd3e8d331f59cc181a65892dde600e4",
+  "ssh_exit": 0
+}

@@ -25,6 +25,52 @@ pub struct Coverage {
 }
 
 impl RemoteHelper {
+    /// Upgrade only tightens authority: old K4-incompatible tickets cannot become active again.
+    pub(crate) fn invalidate_legacy_t2(&self) -> Result<()> {
+        let state = self.lock()?;
+        let label = self.label(&state)?;
+        let candidates = {
+            let mut statement = state.store.db.prepare(
+                "SELECT object_json FROM grants WHERE max_tier='T2' AND revoked_at IS NULL",
+            )?;
+            let rows = statement.query_map([], |row| row.get::<_, String>(0))?;
+            rows.collect::<std::result::Result<Vec<_>, _>>()?
+        };
+        let invalid = candidates
+            .iter()
+            .map(|object| decode::<Grant>(object))
+            .collect::<Result<Vec<_>>>()?
+            .into_iter()
+            .filter(|grant| {
+                grant.scope.max_tier == Tier::T2
+                    && (grant.aud == "*"
+                        || grant.scope.level == GrantScopeLevel::Global
+                        || grant.confirm.as_value() != Some(&label))
+            })
+            .collect::<Vec<_>>();
+        if invalid.is_empty() {
+            return Ok(());
+        }
+        let now = self.services.clock.now();
+        let transaction = state.store.transaction(self.services.audit.as_ref())?;
+        for grant in invalid {
+            transaction.execute(
+                "UPDATE grants SET revoked_at=?1 WHERE jti=?2",
+                params![now, grant.jti],
+            )?;
+            transaction.execute(
+                "INSERT OR IGNORE INTO revoked_jti(jti,revoked_at) VALUES(?1,?2)",
+                params![grant.jti, now],
+            )?;
+            self.audit(
+                &state,
+                "grant_invalidated",
+                json!({"jti":grant.jti,"reason":"k4_t2_binding_required"}),
+            )?;
+        }
+        transaction.commit()
+    }
+
     pub fn install_grant(&self, grant: &Grant, level: ApprovalLevel) -> Result<()> {
         let state = self.lock()?;
         let result = (|| {
@@ -174,6 +220,7 @@ impl RemoteHelper {
 
     fn cover_and_debit_inner(&self, usage: &GrantUse) -> Result<Coverage> {
         let state = self.lock()?;
+        self.ensure_execution_device_active(&state)?;
         let now = self.services.clock.now();
         let transaction = state.store.transaction(self.services.audit.as_ref())?;
         let rows = {

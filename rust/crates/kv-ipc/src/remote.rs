@@ -27,6 +27,8 @@ pub enum DeviceKeyError {
     Unavailable,
     UnsupportedAlgorithm,
     OperationFailed,
+    OperationCancelled,
+    AuthenticationFailed,
 }
 
 impl std::fmt::Display for DeviceKeyError {
@@ -36,6 +38,8 @@ impl std::fmt::Display for DeviceKeyError {
             Self::Unavailable => "key_unavailable",
             Self::UnsupportedAlgorithm => "unsupported_algorithm",
             Self::OperationFailed => "key_operation_failed",
+            Self::OperationCancelled => "key_operation_cancelled",
+            Self::AuthenticationFailed => "key_authentication_failed",
         })
     }
 }
@@ -121,6 +125,7 @@ operations! {
     Status, STATUS, "remote.status";
     AuditList, AUDIT_LIST, "remote.audit.list";
     RelayIdentity, RELAY_IDENTITY, "remote.relay.identity";
+    RelayConfigPresence, RELAY_CONFIG_PRESENCE, "remote.relay.config_presence";
     RelayOutboundAck, RELAY_OUTBOUND_ACK, "remote.relay.outbound.ack";
     RelayControlPoll, RELAY_CONTROL_POLL, "remote.relay.control.poll";
     RelayControlComplete, RELAY_CONTROL_COMPLETE, "remote.relay.control.complete";
@@ -146,6 +151,7 @@ pub const RELAY_OPS: &[Op] = &[
     Op::RelayStatus,
     Op::SignIdentity,
     Op::RelayIdentity,
+    Op::RelayConfigPresence,
     Op::RelayOutboundAck,
     Op::RelayControlPoll,
     Op::RelayControlComplete,
@@ -276,6 +282,13 @@ object!(RelayIdentityResult {
     device_id: String,
     account_id: String
 });
+
+/// Public, fixed-path metadata only. This operation never accepts a filesystem path.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct RelayConfigPresenceResult {
+    pub exists: bool,
+}
 object!(RelayOutboundAckResult {
     retired_count: usize
 });
@@ -458,6 +471,8 @@ pub struct DirectiveIntent<O = String, K = String> {
 #[serde(deny_unknown_fields)]
 pub struct PairJoinIntent {
     pub uri: String,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub rejoin: bool,
 }
 
 #[derive(Clone, PartialEq, Serialize, Deserialize)]

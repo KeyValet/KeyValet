@@ -1,0 +1,12 @@
+{
+  "observed_utc": "2026-10-13T21:27:58.139156+00:00",
+  "exit": 0,
+  "ok": true,
+  "secret_values_in_evidence": false,
+  "mode": "per_use",
+  "pending_n": 0,
+  "grants_n": 0,
+  "unattended": false,
+  "device_revocations_pending": 0,
+  "relay": "connected"
+}

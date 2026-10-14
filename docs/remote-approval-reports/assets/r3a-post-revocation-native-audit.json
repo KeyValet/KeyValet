@@ -1,0 +1,43 @@
+{
+  "started_utc": "2026-10-14T05:26:48.967027+00:00",
+  "secret_values_in_evidence": false,
+  "touch_id_requests": 0,
+  "since": "2026-10-13T05:26:00Z",
+  "post_revocation": true,
+  "sides": {
+    "mac": {
+      "exit": 1,
+      "elapsed_s": 0.025463,
+      "fixed_error": "native_audit_noninteractive_unavailable"
+    },
+    "ndu": {
+      "exit": 3,
+      "elapsed_s": 1.417263,
+      "native_report": {
+        "matched": 0,
+        "consistent": false,
+        "findings_count": 53,
+        "unavailable_count": 1,
+        "endpoints": [
+          {
+            "device_id": "01M4S8KJ48BSMNK1S4BEGT07FC",
+            "checkpoint": "vault_authenticated_metadata",
+            "head": {
+              "seq": 4090,
+              "hash": "a68a1f077d50bd604ec3efd2bccec6f98076b56dc71ed829ceb578df0f9af5f0"
+            },
+            "entries": 3407
+          }
+        ],
+        "two_endpoint_snapshots": false
+      },
+      "unavailable": [
+        {
+          "device_id": "01M4SM5QTRQKNQE1TD6FBJTG79",
+          "reason": "other_fixed_remote_failure"
+        }
+      ]
+    }
+  },
+  "finished_utc": "2026-10-14T05:26:50.408959+00:00"
+}

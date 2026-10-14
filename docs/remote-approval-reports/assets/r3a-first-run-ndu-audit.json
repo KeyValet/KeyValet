@@ -1,0 +1,149 @@
+{
+  "device_id": "01M4S8KJ48BSMNK1S4BEGT07FC",
+  "pending_public": [
+    {
+      "id": "01M4SVNQGRFDMGP1MDMYKC8G9N",
+      "kind": "use",
+      "state": "executed",
+      "created_at": 1791869247,
+      "resolved_at": 1791869253,
+      "exp": 1791869847,
+      "agent_pid": 816116,
+      "level": "strong",
+      "request_public": {
+        "tier": "T2",
+        "min_level": "strong",
+        "digest": "afcc252bef4a8b8eceb2f8e7ed91b0a2d00f61182e74fd4dd1bbca8c808f6bf3",
+        "delivery": {
+          "escalate_after_s": 30,
+          "mode": "banner"
+        }
+      },
+      "scope_public": {
+        "mode": "per_use",
+        "level": "credential",
+        "until": 0
+      }
+    },
+    {
+      "id": "01M4SVNXC88217RE2V2HSTCXGS",
+      "kind": "use",
+      "state": "executed",
+      "created_at": 1791869253,
+      "resolved_at": 1791869258,
+      "exp": 1791869853,
+      "agent_pid": 816116,
+      "level": "quick",
+      "request_public": {
+        "tier": "T1",
+        "min_level": "quick",
+        "digest": "1a3071dbef3049bb034b2bc85bc96ae015a1f6299dc2284b1a27c375e0530398",
+        "delivery": {
+          "escalate_after_s": 30,
+          "mode": "banner"
+        }
+      },
+      "scope_public": {
+        "mode": "per_credential",
+        "level": "credential",
+        "until": 0
+      }
+    }
+  ],
+  "audit_public": [
+    {
+      "agent_pid": 816116,
+      "approval_id": "01M4SVNQGRFDMGP1MDMYKC8G9N",
+      "digest": "afcc252bef4a8b8eceb2f8e7ed91b0a2d00f61182e74fd4dd1bbca8c808f6bf3",
+      "op": "approval_requested",
+      "ts": "2026-10-13T05:27:28.106Z"
+    },
+    {
+      "approval_id": "01M4SVNQGRFDMGP1MDMYKC8G9N",
+      "approval_latency_ms": 6000,
+      "approval_level": "strong",
+      "approver_device": "01M4SM5QTRQKNQE1TD6FBJTG79",
+      "decision": "allow",
+      "decision_hash": "abf9ce6b394a6f550884f4f3933e1810e6500511202a1a329ee5bf299507cd68",
+      "digest": "afcc252bef4a8b8eceb2f8e7ed91b0a2d00f61182e74fd4dd1bbca8c808f6bf3",
+      "op": "remote_approval_accepted",
+      "state": "approved",
+      "ts": "2026-10-13T05:27:33.426Z"
+    },
+    {
+      "approval_id": "01M4SVNQGRFDMGP1MDMYKC8G9N",
+      "digest": "afcc252bef4a8b8eceb2f8e7ed91b0a2d00f61182e74fd4dd1bbca8c808f6bf3",
+      "op": "approval_execution_started",
+      "ts": "2026-10-13T05:27:33.908Z"
+    },
+    {
+      "approval_id": "01M4SVNQGRFDMGP1MDMYKC8G9N",
+      "op": "approval_execution_completed",
+      "ts": "2026-10-13T05:27:33.933Z"
+    },
+    {
+      "agent_pid": 816116,
+      "approval_id": "01M4SVNXC88217RE2V2HSTCXGS",
+      "digest": "1a3071dbef3049bb034b2bc85bc96ae015a1f6299dc2284b1a27c375e0530398",
+      "op": "approval_requested",
+      "ts": "2026-10-13T05:27:34.406Z"
+    },
+    {
+      "approval_id": "01M4SVNXC88217RE2V2HSTCXGS",
+      "op": "grant_installed",
+      "ts": "2026-10-13T05:27:39.176Z"
+    },
+    {
+      "approval_id": "01M4SVNXC88217RE2V2HSTCXGS",
+      "approval_latency_ms": 5000,
+      "approval_level": "quick",
+      "approver_device": "01M4SM5QTRQKNQE1TD6FBJTG79",
+      "decision": "allow",
+      "decision_hash": "b4e40b5a689d1a6c7d643e4a7c3ae1ea66bde1b0bb9085b283849eedfb564484",
+      "digest": "1a3071dbef3049bb034b2bc85bc96ae015a1f6299dc2284b1a27c375e0530398",
+      "op": "remote_approval_accepted",
+      "state": "approved",
+      "ts": "2026-10-13T05:27:39.203Z"
+    },
+    {
+      "approval_id": "01M4SVNXC88217RE2V2HSTCXGS",
+      "digest": "1a3071dbef3049bb034b2bc85bc96ae015a1f6299dc2284b1a27c375e0530398",
+      "op": "approval_execution_started",
+      "ts": "2026-10-13T05:27:39.679Z"
+    },
+    {
+      "approval_id": "01M4SVNXC88217RE2V2HSTCXGS",
+      "op": "approval_execution_completed",
+      "ts": "2026-10-13T05:27:39.707Z"
+    }
+  ],
+  "observed_utc": "2026-10-13T05:34:43.019857+00:00",
+  "samples": [
+    {
+      "approval_id": "01M4SVNQGRFDMGP1MDMYKC8G9N",
+      "level": "strong",
+      "helper_request_to_decision_s": 5.32,
+      "request_ts": "2026-10-13T05:27:28.106Z",
+      "decision_ts": "2026-10-13T05:27:33.426Z",
+      "execution_started_count": 1,
+      "execution_completed_count": 1,
+      "scope_mode": "per_use",
+      "touch_id_user_time_s": null
+    },
+    {
+      "approval_id": "01M4SVNXC88217RE2V2HSTCXGS",
+      "level": "quick",
+      "helper_request_to_decision_s": 4.797,
+      "request_ts": "2026-10-13T05:27:34.406Z",
+      "decision_ts": "2026-10-13T05:27:39.203Z",
+      "execution_started_count": 1,
+      "execution_completed_count": 1,
+      "scope_mode": "per_credential",
+      "touch_id_user_time_s": 0
+    }
+  ],
+  "pair_command_to_first_remote_allow_s": 7873.538466,
+  "pair_command_to_first_get_allow_s": 7879.315466,
+  "get_http_status": 401,
+  "strong_user_time_independently_measured": false
+}

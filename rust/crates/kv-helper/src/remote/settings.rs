@@ -37,8 +37,7 @@ impl SettingsBackend for Backend {
         }
         let tx = state
             .store
-            .db
-            .unchecked_transaction()
+            .transaction(helper.services.audit.as_ref())
             .map_err(|_| unavailable())?;
         helper
             .write_settings_locked(&state, next, "local")
@@ -225,7 +224,7 @@ pub async fn control(
     if helper.settings_locked(&state)? != current {
         return Err(Error("settings_changed"));
     }
-    let tx = state.store.db.unchecked_transaction()?;
+    let tx = state.store.transaction(helper.services.audit.as_ref())?;
     helper.write_settings_locked(&state, &next, "local")?;
     tx.commit()?;
     Ok(next)

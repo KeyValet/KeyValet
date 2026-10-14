@@ -1,0 +1,674 @@
+{
+  "observed_utc": "2026-10-13T01:44:37.318973+00:00",
+  "uid": 0,
+  "touch_id_requests": 0,
+  "services": {
+    "helper": {
+      "exit": 0,
+      "elapsed_s": 0.007,
+      "fields": [
+        "state = running",
+        "program = /usr/local/lib/keyvalet/bin/kv-helper",
+        "runs = 1",
+        "pid = 89023",
+        "last exit code = (never exited)",
+        "state = active",
+        "state = active"
+      ],
+      "gui_session": null,
+      "stderr_path": null
+    },
+    "agent": {
+      "exit": 0,
+      "elapsed_s": 0.005,
+      "fields": [
+        "state = running",
+        "program = /usr/local/lib/keyvalet/bin/kv-touchid",
+        "runs = 1",
+        "pid = 89025",
+        "last exit code = (never exited)",
+        "state = active",
+        "state = active"
+      ],
+      "gui_session": "Aqua",
+      "stderr_path": null
+    },
+    "relay": {
+      "exit": 0,
+      "elapsed_s": 0.004,
+      "fields": [
+        "state = running",
+        "program = /usr/local/lib/keyvalet/bin/kv-relay-client",
+        "runs = 1",
+        "pid = 89031",
+        "last exit code = (never exited)",
+        "state = active",
+        "state = active"
+      ],
+      "gui_session": "Aqua",
+      "stderr_path": null
+    }
+  },
+  "signatures": {
+    "kv-cli": {
+      "exit": 0,
+      "sha256": "3a3943420470840d8330960477726e6e9cff81814084610d43e315d28a16ffa0",
+      "elapsed_s": 0.065
+    },
+    "kv-helper": {
+      "exit": 0,
+      "sha256": "007b61e83a3d2f1394a66c2b0b7528541530d8e6c5910193db7854d8cefb1a8b",
+      "elapsed_s": 0.095
+    },
+    "kv-touchid": {
+      "exit": 0,
+      "sha256": "5d733be9149d820f74879e9b4192a9fd04fceddb0946575d0fa3ae7857e7acea",
+      "elapsed_s": 0.018
+    },
+    "kv-relay-client": {
+      "exit": 0,
+      "sha256": "8e99fb2fde31a3ff1c4a0e0814ef6c3524f29347742d1c847a467d435c4cf86a",
+      "elapsed_s": 0.045
+    }
+  },
+  "audit": {
+    "/var/db/keyvalet/audit.log": {
+      "bytes": 244011,
+      "events": [
+        {
+          "ts": "2026-10-11T03:53:17.913Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T03:53:28.884Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T03:55:39.857Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T03:57:15.619Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T03:58:33.746Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T04:00:10.178Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T04:01:12.686Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T04:01:22.060Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T04:05:11.696Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T04:05:25.850Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T04:06:19.854Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T04:07:15.981Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T04:08:12.405Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T04:09:21.621Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T04:10:22.600Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T04:11:22.369Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T04:11:58.022Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T04:12:05.736Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T04:12:06.933Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T04:12:15.717Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T04:14:39.533Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T04:15:49.860Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T04:17:06.324Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T04:18:07.704Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T04:19:22.100Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T04:20:39.262Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T04:21:35.309Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T04:22:57.407Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T04:24:08.670Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T04:24:53.771Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T04:25:06.928Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T04:25:16.253Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T04:25:31.228Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T05:06:06.641Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T05:08:07.169Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T05:12:56.234Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T05:16:09.566Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T05:18:39.795Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T05:18:57.816Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T05:21:45.141Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T05:34:31.950Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T05:34:34.094Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T05:35:16.848Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T05:35:17.911Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T05:35:39.143Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T05:35:40.423Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T05:35:59.708Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T05:36:00.616Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T05:38:29.329Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T05:38:42.323Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T05:38:43.298Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T05:39:24.054Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T05:39:25.005Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T05:39:51.183Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T05:39:52.086Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T05:44:05.348Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T05:44:50.463Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T05:44:51.700Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T05:45:51.577Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T05:45:52.851Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T05:45:53.826Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T05:47:21.555Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T05:47:22.494Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T05:50:51.675Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T05:50:52.802Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T05:51:33.377Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T05:51:34.414Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T05:51:35.524Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T05:52:30.388Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T05:52:31.308Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T06:01:42.568Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T06:02:38.217Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T06:02:39.356Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T06:04:55.600Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T06:04:56.820Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T06:06:38.402Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T06:06:39.653Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T06:10:07.070Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T06:10:19.484Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T06:10:20.397Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T06:10:21.415Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T06:10:27.511Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T06:10:28.458Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T06:10:47.952Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-11T06:10:54.070Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-12T00:11:58.713Z",
+          "ok": true,
+          "op": "unlock"
+        },
+        {
+          "ts": "2026-10-12T00:11:58.717Z",
+          "ok": true,
+          "op": "list"
+        },
+        {
+          "ts": "2026-10-12T00:12:22.818Z",
+          "ok": false,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-12T00:12:25.073Z",
+          "ok": true,
+          "op": "grant"
+        },
+        {
+          "ts": "2026-10-12T00:12:25.934Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-12T00:12:55.961Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-12T00:12:56.856Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-12T00:13:47.129Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-12T00:13:48.504Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-12T00:14:04.451Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-12T00:16:43.914Z",
+          "ok": true,
+          "op": "httpRequest"
+        },
+        {
+          "ts": "2026-10-12T03:52:45.763Z",
+          "op": "session-end"
+        },
+        {
+          "ts": "2026-10-12T14:42:55.863Z",
+          "ok": false,
+          "op": "unlock"
+        },
+        {
+          "ts": "2026-10-12T14:43:25.525Z",
+          "ok": false,
+          "op": "unlock"
+        },
+        {
+          "ts": "2026-10-12T14:45:57.228Z",
+          "ok": false,
+          "op": "unlock"
+        }
+      ]
+    },
+    "/var/db/keyvalet/remote/audit.log": {
+      "bytes": 5890,
+      "events": [
+        {
+          "ts": "2026-10-12T23:54:19.115Z",
+          "ok": true,
+          "op": "remote_bootstrap"
+        },
+        {
+          "ts": "2026-10-12T23:54:19.190Z",
+          "op": "presence_updated"
+        },
+        {
+          "ts": "2026-10-12T23:54:19.861Z",
+          "op": "relay_disconnected"
+        },
+        {
+          "ts": "2026-10-12T23:54:21.209Z",
+          "op": "relay_connected"
+        },
+        {
+          "ts": "2026-10-12T23:54:21.323Z",
+          "op": "relay_disconnected"
+        },
+        {
+          "ts": "2026-10-12T23:54:23.114Z",
+          "op": "relay_connected"
+        },
+        {
+          "ts": "2026-10-12T23:54:23.305Z",
+          "op": "relay_disconnected"
+        },
+        {
+          "ts": "2026-10-12T23:54:26.174Z",
+          "op": "relay_connected"
+        },
+        {
+          "ts": "2026-10-12T23:54:26.292Z",
+          "op": "relay_disconnected"
+        },
+        {
+          "ts": "2026-10-12T23:54:31.166Z",
+          "op": "relay_connected"
+        },
+        {
+          "ts": "2026-10-12T23:54:31.287Z",
+          "op": "relay_disconnected"
+        },
+        {
+          "ts": "2026-10-12T23:54:40.109Z",
+          "op": "relay_connected"
+        },
+        {
+          "ts": "2026-10-12T23:54:40.224Z",
+          "op": "relay_disconnected"
+        },
+        {
+          "ts": "2026-10-12T23:54:49.844Z",
+          "op": "relay_disconnected"
+        },
+        {
+          "ts": "2026-10-12T23:54:57.186Z",
+          "op": "relay_disconnected"
+        },
+        {
+          "ts": "2026-10-12T23:55:19.511Z",
+          "op": "presence_updated"
+        },
+        {
+          "ts": "2026-10-12T23:55:19.853Z",
+          "op": "relay_disconnected"
+        }
+      ]
+    }
+  },
+  "cli": {
+    "status": {
+      "exit": 0,
+      "elapsed_s": 0.104,
+      "ok": true,
+      "output_kind": null,
+      "state": {}
+    },
+    "devices": {
+      "exit": 5,
+      "elapsed_s": 0.005,
+      "error_code": "ipc_unavailable"
+    }
+  },
+  "unified_log": {
+    "exit": 0,
+    "elapsed_s": 2.655,
+    "events_n": 0,
+    "lifecycle_events": []
+  }
+}

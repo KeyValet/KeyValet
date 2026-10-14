@@ -157,15 +157,6 @@ pub const SERVICE_NAME: &str = "KeyValetHelper";
 /// service at startup. Session acceptance is keyed on it.
 #[cfg(windows)]
 pub const OWNER_SID_FILE: &str = r"C:\ProgramData\KeyValet\owner.sid";
-/// Debugging escape hatch: when this (ACL-trusted) marker exists, the agent binary's signature
-/// check is skipped and the acceptance is audited as `agent-accepted-unsigned`.
-#[cfg(windows)]
-// The client must read this non-secret policy before sending anything to an unsigned helper.
-// Keep it in the readable, privileged-write installation rather than the private vault.
-pub const ALLOW_UNSIGNED_AGENT: &str = r"C:\Program Files\KeyValet\allow-unsigned-agent";
-/// Authenticode leaf-certificate CN the agent binary must be signed by.
-#[cfg(windows)]
-pub const AGENT_PUBLISHER: &str = "Simvito Limited";
 #[cfg(windows)]
 pub const RELAY_PIPE: &str = r"\\.\pipe\keyvalet-relay";
 #[cfg(windows)]

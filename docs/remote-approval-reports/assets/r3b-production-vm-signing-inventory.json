@@ -1,0 +1,15 @@
+{
+    "private_keys_exported":  false,
+    "code_signing_certificates":  [
+
+                                  ],
+    "utc":  "2026-10-13T22:43:48.8672832Z",
+    "signing_environment_names":  [
+
+                                  ],
+    "relay_signature":  "NotSigned",
+    "host":  "GUANG",
+    "relay":  "Stopped",
+    "helper":  "Running",
+    "free_bytes":  67555610624
+}

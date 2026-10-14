@@ -1,0 +1,1269 @@
+{
+  "observed_utc": "2026-10-13T03:39:20.894819+00:00",
+  "read_only": true,
+  "touch_id_requests": 0,
+  "cli": {
+    "status": {
+      "exit": 0,
+      "elapsed_s": 0.212709,
+      "ok": true,
+      "error_code": null,
+      "remote": {
+        "relay": "connected",
+        "approvers": [
+          {
+            "attestation": "unverified",
+            "device_id": "01M4SM5QTRQKNQE1TD6FBJTG79",
+            "label": "keyvalet",
+            "online": false
+          }
+        ],
+        "pending_n": 2,
+        "grants_n": 0,
+        "unattended": false,
+        "mode": "per_credential"
+      }
+    },
+    "devices": {
+      "exit": 0,
+      "elapsed_s": 0.012479,
+      "ok": true,
+      "error_code": null,
+      "devices": [
+        {
+          "device_id": "01M4S8KJ48BSMNK1S4BEGT07FC",
+          "label": "keyvalet",
+          "os": "linux",
+          "revoked": false,
+          "caps": [
+            "execute"
+          ]
+        },
+        {
+          "device_id": "01M4SM5QTRQKNQE1TD6FBJTG79",
+          "label": "keyvalet",
+          "os": "macos",
+          "revoked": false,
+          "caps": [
+            "execute",
+            "approve_quick",
+            "approve_strong"
+          ]
+        }
+      ]
+    },
+    "approvals": {
+      "exit": 0,
+      "elapsed_s": 0.013571,
+      "ok": true,
+      "error_code": null,
+      "pending": [
+        {
+          "approval_id": "01M4SN5Y3G9KMHTERT39MN6KFE",
+          "kind": "use",
+          "tier": "T2",
+          "min_level": "strong",
+          "exp": 1791863038,
+          "requested_scope": "per_use"
+        },
+        {
+          "approval_id": "01M4SN5Y3G9KMHTERT39MN6KFE",
+          "kind": "use",
+          "tier": "T2",
+          "min_level": "strong",
+          "exp": 1791863038,
+          "requested_scope": "per_use"
+        }
+      ]
+    }
+  },
+  "audit": {
+    "remote": [
+      {
+        "op": "presence_updated",
+        "ts_unix": 1791861384,
+        "state": "away",
+        "audit_seq": 1
+      },
+      {
+        "op": "relay_disconnected",
+        "ts_unix": 1791861386,
+        "audit_seq": 2
+      },
+      {
+        "op": "relay_disconnected",
+        "ts_unix": 1791861387,
+        "audit_seq": 3
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791861388,
+        "audit_seq": 4
+      },
+      {
+        "op": "relay_disconnected",
+        "ts_unix": 1791861388,
+        "audit_seq": 5
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791861390,
+        "audit_seq": 6
+      },
+      {
+        "op": "relay_disconnected",
+        "ts_unix": 1791861390,
+        "audit_seq": 7
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791861393,
+        "audit_seq": 8
+      },
+      {
+        "op": "relay_disconnected",
+        "ts_unix": 1791861393,
+        "audit_seq": 9
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791861398,
+        "audit_seq": 10
+      },
+      {
+        "op": "relay_disconnected",
+        "ts_unix": 1791861398,
+        "audit_seq": 11
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791861407,
+        "audit_seq": 12
+      },
+      {
+        "op": "relay_disconnected",
+        "ts_unix": 1791861407,
+        "audit_seq": 13
+      },
+      {
+        "op": "relay_disconnected",
+        "ts_unix": 1791861417,
+        "audit_seq": 14
+      },
+      {
+        "op": "relay_disconnected",
+        "ts_unix": 1791861424,
+        "audit_seq": 15
+      },
+      {
+        "op": "presence_updated",
+        "ts_unix": 1791861444,
+        "state": "away",
+        "audit_seq": 16
+      },
+      {
+        "op": "relay_disconnected",
+        "ts_unix": 1791861447,
+        "audit_seq": 17
+      },
+      {
+        "op": "relay_disconnected",
+        "ts_unix": 1791861477,
+        "audit_seq": 18
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791861485,
+        "audit_seq": 19
+      },
+      {
+        "op": "relay_disconnected",
+        "ts_unix": 1791861485,
+        "audit_seq": 20
+      },
+      {
+        "op": "presence_updated",
+        "ts_unix": 1791861504,
+        "state": "away",
+        "audit_seq": 21
+      },
+      {
+        "op": "relay_disconnected",
+        "ts_unix": 1791861507,
+        "audit_seq": 22
+      },
+      {
+        "op": "pair_completed",
+        "ts_unix": 1791861522,
+        "device_id": "01M4S8KJ48BSMNK1S4BEGT07FC",
+        "audit_seq": 23
+      },
+      {
+        "op": "relay_disconnected",
+        "ts_unix": 1791861537,
+        "audit_seq": 24
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791861546,
+        "audit_seq": 25
+      },
+      {
+        "op": "presence_updated",
+        "ts_unix": 1791861565,
+        "state": "away",
+        "audit_seq": 26
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791861565,
+        "audit_seq": 27
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791861565,
+        "audit_seq": 28
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791861567,
+        "audit_seq": 29
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791861597,
+        "audit_seq": 30
+      },
+      {
+        "op": "presence_updated",
+        "ts_unix": 1791861624,
+        "state": "away",
+        "audit_seq": 31
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791861624,
+        "audit_seq": 32
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791861624,
+        "audit_seq": 33
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791861627,
+        "audit_seq": 34
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791861657,
+        "audit_seq": 35
+      },
+      {
+        "op": "presence_updated",
+        "ts_unix": 1791861684,
+        "state": "away",
+        "audit_seq": 36
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791861684,
+        "audit_seq": 37
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791861685,
+        "audit_seq": 38
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791861687,
+        "audit_seq": 39
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791861717,
+        "audit_seq": 40
+      },
+      {
+        "op": "presence_updated",
+        "ts_unix": 1791861744,
+        "state": "away",
+        "audit_seq": 41
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791861744,
+        "audit_seq": 42
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791861744,
+        "audit_seq": 43
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791861747,
+        "audit_seq": 44
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791861777,
+        "audit_seq": 45
+      },
+      {
+        "op": "presence_updated",
+        "ts_unix": 1791861804,
+        "state": "away",
+        "audit_seq": 46
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791861805,
+        "audit_seq": 47
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791861805,
+        "audit_seq": 48
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791861807,
+        "audit_seq": 49
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791861837,
+        "audit_seq": 50
+      },
+      {
+        "op": "presence_updated",
+        "ts_unix": 1791861865,
+        "state": "away",
+        "audit_seq": 51
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791861865,
+        "audit_seq": 52
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791861865,
+        "audit_seq": 53
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791861867,
+        "audit_seq": 54
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791861897,
+        "audit_seq": 55
+      },
+      {
+        "op": "presence_updated",
+        "ts_unix": 1791861924,
+        "state": "away",
+        "audit_seq": 56
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791861924,
+        "audit_seq": 57
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791861924,
+        "audit_seq": 58
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791861927,
+        "audit_seq": 59
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791861957,
+        "audit_seq": 60
+      },
+      {
+        "op": "presence_updated",
+        "ts_unix": 1791861984,
+        "state": "away",
+        "audit_seq": 61
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791861985,
+        "audit_seq": 62
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791861985,
+        "audit_seq": 63
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791861987,
+        "audit_seq": 64
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791862017,
+        "audit_seq": 65
+      },
+      {
+        "op": "presence_updated",
+        "ts_unix": 1791862044,
+        "state": "away",
+        "audit_seq": 66
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791862044,
+        "audit_seq": 67
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791862044,
+        "audit_seq": 68
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791862047,
+        "audit_seq": 69
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791862077,
+        "audit_seq": 70
+      },
+      {
+        "op": "presence_updated",
+        "ts_unix": 1791862104,
+        "state": "away",
+        "audit_seq": 71
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791862104,
+        "audit_seq": 72
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791862104,
+        "audit_seq": 73
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791862107,
+        "audit_seq": 74
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791862137,
+        "audit_seq": 75
+      },
+      {
+        "op": "presence_updated",
+        "ts_unix": 1791862164,
+        "state": "away",
+        "audit_seq": 76
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791862164,
+        "audit_seq": 77
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791862164,
+        "audit_seq": 78
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791862167,
+        "audit_seq": 79
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791862197,
+        "audit_seq": 80
+      },
+      {
+        "op": "presence_updated",
+        "ts_unix": 1791862224,
+        "state": "away",
+        "audit_seq": 81
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791862224,
+        "audit_seq": 82
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791862224,
+        "audit_seq": 83
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791862227,
+        "audit_seq": 84
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791862257,
+        "audit_seq": 85
+      },
+      {
+        "op": "presence_updated",
+        "ts_unix": 1791862285,
+        "state": "away",
+        "audit_seq": 86
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791862285,
+        "audit_seq": 87
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791862285,
+        "audit_seq": 88
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791862287,
+        "audit_seq": 89
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791862317,
+        "audit_seq": 90
+      },
+      {
+        "op": "presence_updated",
+        "ts_unix": 1791862344,
+        "state": "away",
+        "audit_seq": 91
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791862344,
+        "audit_seq": 92
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791862344,
+        "audit_seq": 93
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791862347,
+        "audit_seq": 94
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791862377,
+        "audit_seq": 95
+      },
+      {
+        "op": "presence_updated",
+        "ts_unix": 1791862404,
+        "state": "away",
+        "audit_seq": 96
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791862405,
+        "audit_seq": 97
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791862405,
+        "audit_seq": 98
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791862407,
+        "audit_seq": 99
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791862437,
+        "audit_seq": 100
+      },
+      {
+        "op": "approval_requested",
+        "ts_unix": 1791862438,
+        "approval_id": "01M4SN5Y3G9KMHTERT39MN6KFE",
+        "kind": "use",
+        "tier": "T2",
+        "min_level": "strong",
+        "audit_seq": 101
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791862438,
+        "audit_seq": 102
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791862439,
+        "audit_seq": 103
+      },
+      {
+        "op": "remote_ui_rejected",
+        "ts_unix": 1791862439,
+        "ok": false,
+        "approval_id": "01M4SN5Y3G9KMHTERT39MN6KFE",
+        "reason": "user_cancelled",
+        "audit_seq": 104
+      },
+      {
+        "op": "presence_updated",
+        "ts_unix": 1791862464,
+        "state": "away",
+        "audit_seq": 105
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791862464,
+        "audit_seq": 106
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791862464,
+        "audit_seq": 107
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791862467,
+        "audit_seq": 108
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791862497,
+        "audit_seq": 109
+      },
+      {
+        "op": "presence_updated",
+        "ts_unix": 1791862524,
+        "state": "away",
+        "audit_seq": 110
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791862524,
+        "audit_seq": 111
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791862525,
+        "audit_seq": 112
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791862527,
+        "audit_seq": 113
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791862557,
+        "audit_seq": 114
+      },
+      {
+        "op": "presence_updated",
+        "ts_unix": 1791862584,
+        "state": "away",
+        "audit_seq": 115
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791862584,
+        "audit_seq": 116
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791862584,
+        "audit_seq": 117
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791862587,
+        "audit_seq": 118
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791862617,
+        "audit_seq": 119
+      },
+      {
+        "op": "presence_updated",
+        "ts_unix": 1791862644,
+        "state": "away",
+        "audit_seq": 120
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791862644,
+        "audit_seq": 121
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791862644,
+        "audit_seq": 122
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791862647,
+        "audit_seq": 123
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791862677,
+        "audit_seq": 124
+      },
+      {
+        "op": "presence_updated",
+        "ts_unix": 1791862705,
+        "state": "away",
+        "audit_seq": 125
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791862705,
+        "audit_seq": 126
+      },
+      {
+        "op": "relay_outbox_receipt",
+        "ts_unix": 1791862705,
+        "audit_seq": 127
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791862707,
+        "audit_seq": 128
+      },
+      {
+        "op": "relay_connected",
+        "ts_unix": 1791862737,
+        "audit_seq": 129
+      }
+    ],
+    "vault": [
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T03:57:15.619Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T03:58:33.746Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T04:00:10.178Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T04:01:12.686Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T04:01:22.060Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T04:05:11.696Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T04:05:25.850Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T04:06:19.854Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T04:07:15.981Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T04:08:12.405Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T04:09:21.621Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T04:10:22.600Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T04:11:22.369Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T04:11:58.022Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T04:12:05.736Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T04:12:06.933Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T04:12:15.717Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T04:14:39.533Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T04:15:49.860Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T04:17:06.324Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T04:18:07.704Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T04:19:22.100Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T04:20:39.262Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T04:21:35.309Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T04:22:57.407Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T04:24:08.670Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T04:24:53.771Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T04:25:06.928Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T04:25:16.253Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T04:25:31.228Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T05:06:06.641Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T05:08:07.169Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T05:12:56.234Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T05:16:09.566Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T05:18:39.795Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T05:18:57.816Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T05:21:45.141Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T05:34:31.950Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T05:34:34.094Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T05:35:16.848Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T05:35:17.911Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T05:35:39.143Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T05:35:40.423Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T05:35:59.708Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T05:36:00.616Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T05:38:29.329Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T05:38:42.323Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T05:38:43.298Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T05:39:24.054Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T05:39:25.005Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T05:39:51.183Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T05:39:52.086Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T05:44:05.348Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T05:44:50.463Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T05:44:51.700Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T05:45:51.577Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T05:45:52.851Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T05:45:53.826Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T05:47:21.555Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T05:47:22.494Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T05:50:51.675Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T05:50:52.802Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T05:51:33.377Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T05:51:34.414Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T05:51:35.524Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T05:52:30.388Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T05:52:31.308Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T06:01:42.568Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T06:02:38.217Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T06:02:39.356Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T06:04:55.600Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T06:04:56.820Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T06:06:38.402Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T06:06:39.653Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T06:10:07.070Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T06:10:19.484Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T06:10:20.397Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T06:10:21.415Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T06:10:27.511Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T06:10:28.458Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T06:10:47.952Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-11T06:10:54.070Z"
+      },
+      {
+        "op": "unlock",
+        "ok": true,
+        "ts": "2026-10-12T00:11:58.713Z"
+      },
+      {
+        "op": "list",
+        "ok": true,
+        "ts": "2026-10-12T00:11:58.717Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": false,
+        "ts": "2026-10-12T00:12:22.818Z"
+      },
+      {
+        "op": "grant",
+        "ok": true,
+        "ts": "2026-10-12T00:12:25.073Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-12T00:12:25.934Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-12T00:12:55.961Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-12T00:12:56.856Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-12T00:13:47.129Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-12T00:13:48.504Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-12T00:14:04.451Z"
+      },
+      {
+        "op": "httpRequest",
+        "ok": true,
+        "ts": "2026-10-12T00:16:43.914Z"
+      },
+      {
+        "op": "session-end",
+        "ts": "2026-10-12T03:52:45.763Z"
+      },
+      {
+        "op": "unlock",
+        "ok": false,
+        "ts": "2026-10-12T14:42:55.863Z"
+      },
+      {
+        "op": "unlock",
+        "ok": false,
+        "ts": "2026-10-12T14:43:25.525Z"
+      },
+      {
+        "op": "unlock",
+        "ok": false,
+        "ts": "2026-10-12T14:45:57.228Z"
+      },
+      {
+        "op": "list",
+        "ok": true,
+        "ts": "2026-10-13T03:18:46.952Z"
+      },
+      {
+        "op": "unlock",
+        "ok": true,
+        "ts": "2026-10-13T03:33:58.742Z"
+      },
+      {
+        "op": "session-end",
+        "ts": "2026-10-13T03:34:45.806Z"
+      }
+    ]
+  },
+  "pending_rows": [
+    {
+      "approval_id": "01M4SN5Y3G9KMHTERT39MN6KFE",
+      "kind": "use",
+      "state": "waiting",
+      "created_at": 1791862438,
+      "exp": 1791863038
+    }
+  ]
+}

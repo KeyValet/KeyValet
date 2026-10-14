@@ -1,0 +1,11 @@
+{
+  "system_sha256": "e1dfa3eac69c60d04154c19a65574726046158776f12340263b1190a9d0074e8",
+  "owner_sha256": "0488127a2bdade34312fa5d7525ac0323976a274281ad1933c20bea3f40c9d00",
+  "archive_sha256": "7dbfebbd04a50194fefe244411ed6b731d770ea76af603f2784d3941b21731a0",
+  "used_in": "physical hello round 3",
+  "changes_not_in_this_artifact": [
+    "hidden test console",
+    "public alias cleanup ledger"
+  ],
+  "source_note": "Native scope-corrected fixture before the later Mac-only shared-test compatibility change; actual EXE hashes are also in launch.json."
+}

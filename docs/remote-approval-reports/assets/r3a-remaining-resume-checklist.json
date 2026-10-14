@@ -1,0 +1,11 @@
+{
+  "prepared_utc": "2026-10-14T01:02:10.870599+00:00",
+  "checklist": "续测脚本已准备好，不再安装。接下来约 12–15 分钟你要做的事：\n1. 回复「开始续测」后，我在 Mac Terminal 运行续测；若要求管理员密码，只在那里输入。\n2. Terminal 提示“在场恢复”时按回车开启系统屏保，保持约 10 秒，再移动鼠标退出并正常解锁。\n3. 按 Control+Command+Q 锁屏，保持 10 秒后正常解锁，回同一 Terminal 按回车，等它显示 presence=present。\n4. Terminal 提示 ndu polkit 时输入 ndu 用户 guang 的密码；后续再次提示也在 Terminal 完成。\n5. Terminal 标明“在场投递／明确拒绝”时按回车，在随后 Mac GET 框点击 Deny。\n6. Terminal 标明“Esc 用例”时按回车，在随后 Mac GET 框按 Esc，再回 Terminal 按回车核对 waiting／执行 0。\n7. Terminal 标明“SE 取消用例”时按回车，确认普通授权框，在系统 Touch ID 窗口点击取消，看到 key_operation_cancelled 算成功。\n8. Terminal 标明“待用批准”时按回车，先不操作 Mac GET 框，等“执行进程已退出”后才点击 Allow／仅本次。\n9. Terminal 标明“签发一小时 T1 Grant”时按回车，在 Mac 确认并完成第一次 Touch ID。\n10. Terminal 标明“正向吊销”时按回车，核对目标为 ndu 后确认并完成第二次 Touch ID，看到待用批准取消、Grant 吊销及秒数。\nKeyValet 成功 Touch ID 签名共两次，另取消一次系统认证；屏保／锁屏按日常方式解锁。结束后 ndu 远程身份被吊销、历史保留；两小时合盖不测。现在开始续测吗？",
+  "entry": "r3a-resume-se-remaining.py",
+  "reinstall": false,
+  "expected_successful_se_signatures": 2,
+  "user_started": true,
+  "secret_values_in_evidence": false,
+  "user_started_utc": "2026-10-14T01:03:00.372474+00:00",
+  "user_start_reply": "开始续测"
+}

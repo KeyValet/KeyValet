@@ -1,0 +1,264 @@
+{
+  "test_binaries": [
+    {
+      "path": "rust/target-r2a/debug/deps/kv_helper-641b915866cd057a",
+      "bytes": 65367744,
+      "allocated_bytes": 65368064,
+      "modified": 1791910804.0427728
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_helper-2243a840ec7b78e8",
+      "bytes": 63985552,
+      "allocated_bytes": 63987712,
+      "modified": 1791910722.183819
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_relay_client-c32f5852d47292b7",
+      "bytes": 63546256,
+      "allocated_bytes": 63549440,
+      "modified": 1791910803.4978812
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_helper-7f446ac9671612ab",
+      "bytes": 58935536,
+      "allocated_bytes": 58937344,
+      "modified": 1791910802.3909833
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_helper-f3787d1be1fe895b",
+      "bytes": 57675424,
+      "allocated_bytes": 57675776,
+      "modified": 1791910721.574748
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_mobile_core-520030bad76cf400",
+      "bytes": 56170528,
+      "allocated_bytes": 56172544,
+      "modified": 1791910803.351394
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_mobile_core-c8c3f2e9f345b542",
+      "bytes": 54678288,
+      "allocated_bytes": 54681600,
+      "modified": 1791897770.3727615
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_mcp-dd20ef0b43855350",
+      "bytes": 47341904,
+      "allocated_bytes": 47345664,
+      "modified": 1791904047.5550597
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_server-0c627da3674521a6",
+      "bytes": 43697104,
+      "allocated_bytes": 43700224,
+      "modified": 1791904048.5331116
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_cli-3320dbf269f95133",
+      "bytes": 36989760,
+      "allocated_bytes": 36990976,
+      "modified": 1791910802.8259542
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_cli-ed4661ad6f94e7ed",
+      "bytes": 35879696,
+      "allocated_bytes": 35880960,
+      "modified": 1791886678.2305827
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_cli-052546cc18722cf3",
+      "bytes": 35359568,
+      "allocated_bytes": 35360768,
+      "modified": 1791855652.3004718
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_proxy-c6aab852b201f3b1",
+      "bytes": 33720800,
+      "allocated_bytes": 33722368,
+      "modified": 1791904040.8810172
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_push-4468495a4164381f",
+      "bytes": 22405344,
+      "allocated_bytes": 22409216,
+      "modified": 1791856372.3273735
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_platform-8275bd623c20453b",
+      "bytes": 19379760,
+      "allocated_bytes": 19382272,
+      "modified": 1791904040.8595226
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_platform-21c7c88b214e99ac",
+      "bytes": 19304944,
+      "allocated_bytes": 19308544,
+      "modified": 1791855484.3312821
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_platform-058be0fecc33232d",
+      "bytes": 19307520,
+      "allocated_bytes": 19308544,
+      "modified": 1791855646.6043217
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_core-63e03167f7046448",
+      "bytes": 16604512,
+      "allocated_bytes": 16605184,
+      "modified": 1791904043.1986086
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_protocols-d16e78faa7672075",
+      "bytes": 12671344,
+      "allocated_bytes": 12673024,
+      "modified": 1791904038.9436126
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_vault-af6828ddff4d589d",
+      "bytes": 8010288,
+      "allocated_bytes": 8011776,
+      "modified": 1791856366.9734898
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_hook-3233f120cd646b4f",
+      "bytes": 6596112,
+      "allocated_bytes": 6598656,
+      "modified": 1791856365.8378332
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_agent-f4699c0d6af13b1a",
+      "bytes": 4592736,
+      "allocated_bytes": 4595712,
+      "modified": 1791909749.37963
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_agent-9baa5fa3053023e3",
+      "bytes": 4546512,
+      "allocated_bytes": 4546560,
+      "modified": 1791863156.6217182
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_agent-41f4fac07f43f850",
+      "bytes": 4533024,
+      "allocated_bytes": 4534272,
+      "modified": 1791855649.0324142
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_agent-7fa7594152bc9578",
+      "bytes": 4529120,
+      "allocated_bytes": 4530176,
+      "modified": 1791855488.6576965
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_agent-6f80ecdfd25a16d4",
+      "bytes": 4017760,
+      "allocated_bytes": 4018176,
+      "modified": 1791927406.3116753
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_agent-d8742838729d5f39",
+      "bytes": 3888944,
+      "allocated_bytes": 3891200,
+      "modified": 1791855648.8382492
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_agent-e0f359a9938e26ba",
+      "bytes": 3884752,
+      "allocated_bytes": 3887104,
+      "modified": 1791855488.4711711
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_agent-ada2309e97177bb2",
+      "bytes": 3884832,
+      "allocated_bytes": 3887104,
+      "modified": 1791863088.896409
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_touchid-50c0558fff13dcb9",
+      "bytes": 3784320,
+      "allocated_bytes": 3784704,
+      "modified": 1791855648.3844764
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_touchid-bb1dec463dd2c400",
+      "bytes": 3766096,
+      "allocated_bytes": 3768320,
+      "modified": 1791904038.400444
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_touchid-4668240f2fe057d7",
+      "bytes": 3753728,
+      "allocated_bytes": 3756032,
+      "modified": 1791863156.8032062
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_touchid-1a7a71b70eb5593f",
+      "bytes": 3675680,
+      "allocated_bytes": 3678208,
+      "modified": 1791929252.6587434
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_touchid-682b28d2f0239d1b",
+      "bytes": 3337552,
+      "allocated_bytes": 3338240,
+      "modified": 1791909749.4540837
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_touchid-ef2fed64a69e3e21",
+      "bytes": 3294976,
+      "allocated_bytes": 3297280,
+      "modified": 1791863156.7539868
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_touchid-9b04aef9596e799a",
+      "bytes": 3294144,
+      "allocated_bytes": 3297280,
+      "modified": 1791855648.242324
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_server-b94fb4cf791e8361",
+      "bytes": 3269680,
+      "allocated_bytes": 3272704,
+      "modified": 1791904044.7633688
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_ipc-f98a637cbd7889bc",
+      "bytes": 2617760,
+      "allocated_bytes": 2621440,
+      "modified": 1791897253.4018323
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_i18n-c303c09bf611dd42",
+      "bytes": 1101008,
+      "allocated_bytes": 1101824,
+      "modified": 1791856365.439256
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_push-b1eebdf1b95ad5df",
+      "bytes": 946832,
+      "allocated_bytes": 950272,
+      "modified": 1791856370.383264
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_hook-2f2ebe29b93f2204",
+      "bytes": 946832,
+      "allocated_bytes": 950272,
+      "modified": 1791856364.9319701
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_relay_client-34d8770a615fed8b",
+      "bytes": 946912,
+      "allocated_bytes": 950272,
+      "modified": 1791910799.5755048
+    },
+    {
+      "path": "rust/target-r2a/debug/deps/kv_mcp-79b6feb9f397e6ac",
+      "bytes": 946816,
+      "allocated_bytes": 950272,
+      "modified": 1791904044.256115
+    }
+  ],
+  "allocated_bytes": 847278080,
+  "count": 43
+}

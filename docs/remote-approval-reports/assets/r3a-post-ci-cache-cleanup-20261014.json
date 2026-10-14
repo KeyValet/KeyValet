@@ -1,0 +1,22 @@
+{
+  "observed_utc": "2026-10-13T23:02:07.050407+00:00",
+  "owner_authorization": "\u4f60\u81ea\u5df1\u53bb\u817e\u7a7a\u95f4\u554a",
+  "after_completed_ci": "r3a-audit-presence-ci-summary.json",
+  "paths": [
+    "rust/target-r2a/debug/deps",
+    "rust/target-r2a/debug/build",
+    "rust/target-r2a/debug/examples",
+    "rust/target-r2a/debug/.fingerprint",
+    "rust/target-r2a/debug/incremental"
+  ],
+  "cargo_target_locks_held": [
+    "debug",
+    "release"
+  ],
+  "before_free_bytes": 13959663616,
+  "after_free_bytes": 16989667328,
+  "freed_bytes": 3030003712,
+  "after_free_gb_decimal": 16.99,
+  "signed_packages_installed_runtime_backups_and_evidence_preserved": true,
+  "secret_values_in_evidence": false
+}

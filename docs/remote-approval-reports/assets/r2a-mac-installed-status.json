@@ -1,0 +1,18 @@
+{
+  "command": "installed kv-cli --lang en status --summary (installer root step)",
+  "summary": [
+    "========== KeyValet key protection status ==========",
+    "Scheme: Secure Enclave (macOS)",
+    "Hardware protection: Hardware protection (Secure Enclave)",
+    "System TPM: Not applicable (macOS uses Secure Enclave)",
+    "Authorization: Touch ID or system password",
+    "Secure Enclave hardware protection; key use requires Touch ID or the system password.",
+    "Recovery passphrase: Configured (independent offline recovery path)",
+    "Derived keys and decrypted secrets still enter process memory.",
+    "========================================",
+    "",
+    "Relay: unknown (remote helper unavailable)",
+    "Remote status unavailable: The relay or helper is unreachable; check the service and relay URL"
+  ],
+  "logical_remote_se_keys": "not_yet_bootstrapped"
+}

@@ -1,0 +1,44 @@
+{
+  "started_utc": "2026-10-14T01:17:50.873610+00:00",
+  "rust": "1.99.0",
+  "checks": {
+    "fmt": 0,
+    "clippy": 0,
+    "build": 0,
+    "test": 0
+  },
+  "space_checks": [
+    {
+      "check": "fmt",
+      "free_bytes": 20718784512
+    },
+    {
+      "check": "clippy",
+      "free_bytes": 20788318208
+    },
+    {
+      "check": "build",
+      "free_bytes": 20754067456
+    },
+    {
+      "check": "test",
+      "free_bytes": 19955044352
+    }
+  ],
+  "source_files": 518,
+  "minimum_free_bytes": 15000000000,
+  "secret_values_in_evidence": false,
+  "source_unchanged_during_checks": false,
+  "changed_source_files": [
+    "rust/crates/kv-agent/src/presence/windows.rs",
+    "rust/crates/kv-helper/build.rs",
+    "rust/crates/kv-hook/build.rs",
+    "rust/crates/kv-relay-client/build.rs",
+    "rust/crates/kv-server/build.rs"
+  ],
+  "passed": 1416,
+  "failed": 0,
+  "ignored": 10,
+  "groups": 69,
+  "finished_utc": "2026-10-14T01:23:43.734318+00:00"
+}

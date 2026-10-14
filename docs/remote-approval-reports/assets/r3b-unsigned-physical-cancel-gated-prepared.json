@@ -1,0 +1,6 @@
+{
+  "runlevel": "Limited",
+  "prepared": true,
+  "starts_after_preparation_button": true,
+  "ssh_exit": 0
+}

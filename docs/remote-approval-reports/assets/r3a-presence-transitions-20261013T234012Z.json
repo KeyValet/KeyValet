@@ -1,0 +1,388 @@
+{
+  "started_utc": "2026-10-13T23:39:29.623784+00:00",
+  "read_only_keyvalet": true,
+  "keyvalet_approval_requests": 0,
+  "keyvalet_touch_id_requests": 0,
+  "secret_values_in_evidence": false,
+  "samples": [
+    {
+      "observed_utc": "2026-10-13T23:39:30.012585+00:00",
+      "elapsed_s": 0.38878,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 0.001816
+    },
+    {
+      "observed_utc": "2026-10-13T23:39:31.318871+00:00",
+      "elapsed_s": 1.695046,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 1.390974
+    },
+    {
+      "observed_utc": "2026-10-13T23:39:32.778504+00:00",
+      "elapsed_s": 3.154672,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 2.700269
+    },
+    {
+      "observed_utc": "2026-10-13T23:39:34.153773+00:00",
+      "elapsed_s": 4.529936,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 4.158507
+    },
+    {
+      "observed_utc": "2026-10-13T23:39:35.602264+00:00",
+      "elapsed_s": 5.978411,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 5.535113
+    },
+    {
+      "observed_utc": "2026-10-13T23:39:36.857671+00:00",
+      "elapsed_s": 7.233807,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 6.983569
+    },
+    {
+      "observed_utc": "2026-10-13T23:39:38.315620+00:00",
+      "elapsed_s": 8.691733,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 8.235114
+    },
+    {
+      "observed_utc": "2026-10-13T23:39:39.702120+00:00",
+      "elapsed_s": 10.078224,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 9.693878
+    },
+    {
+      "observed_utc": "2026-10-13T23:39:41.070644+00:00",
+      "elapsed_s": 11.446733,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 11.083363
+    },
+    {
+      "observed_utc": "2026-10-13T23:39:42.388265+00:00",
+      "elapsed_s": 12.764347,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 12.451849
+    },
+    {
+      "observed_utc": "2026-10-13T23:39:43.639361+00:00",
+      "elapsed_s": 14.015407,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 13.765947
+    },
+    {
+      "observed_utc": "2026-10-13T23:39:45.076060+00:00",
+      "elapsed_s": 15.452096,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 15.020532
+    },
+    {
+      "observed_utc": "2026-10-13T23:39:46.494826+00:00",
+      "elapsed_s": 16.870844,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 16.452809
+    },
+    {
+      "observed_utc": "2026-10-13T23:39:47.772375+00:00",
+      "elapsed_s": 18.148392,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 17.876072
+    },
+    {
+      "observed_utc": "2026-10-13T23:39:49.141866+00:00",
+      "elapsed_s": 19.517859,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 19.152978
+    },
+    {
+      "observed_utc": "2026-10-13T23:39:50.604552+00:00",
+      "elapsed_s": 20.980538,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 20.519684
+    },
+    {
+      "observed_utc": "2026-10-13T23:39:51.922080+00:00",
+      "elapsed_s": 22.298067,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 21.982645
+    },
+    {
+      "observed_utc": "2026-10-13T23:39:53.232146+00:00",
+      "elapsed_s": 23.608122,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 23.302361
+    },
+    {
+      "observed_utc": "2026-10-13T23:39:54.482755+00:00",
+      "elapsed_s": 24.858715,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 24.611666
+    },
+    {
+      "observed_utc": "2026-10-13T23:39:55.728659+00:00",
+      "elapsed_s": 26.10461,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 25.863932
+    },
+    {
+      "observed_utc": "2026-10-13T23:39:57.169174+00:00",
+      "elapsed_s": 27.545103,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 27.109827
+    },
+    {
+      "observed_utc": "2026-10-13T23:39:58.532524+00:00",
+      "elapsed_s": 28.908443,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 28.545843
+    },
+    {
+      "observed_utc": "2026-10-13T23:39:59.891188+00:00",
+      "elapsed_s": 30.267107,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 29.913712
+    },
+    {
+      "observed_utc": "2026-10-13T23:40:01.313966+00:00",
+      "elapsed_s": 31.689871,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 31.269478
+    },
+    {
+      "observed_utc": "2026-10-13T23:40:02.734075+00:00",
+      "elapsed_s": 33.109957,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 32.692208
+    },
+    {
+      "observed_utc": "2026-10-13T23:40:03.965268+00:00",
+      "elapsed_s": 34.341147,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 34.114279
+    },
+    {
+      "observed_utc": "2026-10-13T23:40:05.342878+00:00",
+      "elapsed_s": 35.71874,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 35.342151
+    },
+    {
+      "observed_utc": "2026-10-13T23:40:06.657802+00:00",
+      "elapsed_s": 37.033651,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 36.723954
+    },
+    {
+      "observed_utc": "2026-10-13T23:40:07.947667+00:00",
+      "elapsed_s": 38.323504,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 38.038506
+    },
+    {
+      "observed_utc": "2026-10-13T23:40:09.312914+00:00",
+      "elapsed_s": 39.688735,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 39.328116
+    },
+    {
+      "observed_utc": "2026-10-13T23:40:10.760934+00:00",
+      "elapsed_s": 41.136729,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 40.693889
+    },
+    {
+      "observed_utc": "2026-10-13T23:40:12.488503+00:00",
+      "elapsed_s": 42.864299,
+      "exit": 0,
+      "ok": true,
+      "mac_presence": "present",
+      "pending_n": 0,
+      "grants_n": 0,
+      "unattended": false,
+      "request_started_elapsed_s": 42.140264
+    }
+  ],
+  "os_events": [
+    {
+      "event": "locked",
+      "observed_utc": "2026-10-13T23:40:11.415107+00:00",
+      "elapsed_s": 41.790947,
+      "callback_on_main_thread": true
+    }
+  ],
+  "phases": [
+    {
+      "phase": "baseline",
+      "observed_utc": "2026-10-13T23:39:35.630758+00:00",
+      "elapsed_s": 6.006935,
+      "mac_presence": "present"
+    },
+    {
+      "phase": "after_measured_unlock",
+      "observed_utc": "2026-10-13T23:40:12.704499+00:00",
+      "elapsed_s": 43.08033,
+      "mac_presence": "present"
+    }
+  ],
+  "observer_self_check_only": false,
+  "measurement_only": true,
+  "presence_transitions": [],
+  "fixed_error": "authenticated_presence_transition_pair_not_observed",
+  "finished_utc": "2026-10-13T23:40:12.941399+00:00"
+}

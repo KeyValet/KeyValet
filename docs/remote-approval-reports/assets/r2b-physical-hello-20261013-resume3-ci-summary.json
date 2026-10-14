@@ -1,0 +1,67 @@
+{
+  "mac": {
+    "commands": [
+      {
+        "command": "cargo +1.99.0 fmt --all -- --check",
+        "exit_code": 0,
+        "seconds": 0.9429693749989383,
+        "log": "mac-ci-1.log"
+      },
+      {
+        "command": "cargo +1.99.0 clippy --workspace --all-targets -- -D warnings",
+        "exit_code": 0,
+        "seconds": 0.8990012080175802,
+        "log": "mac-ci-2.log"
+      },
+      {
+        "command": "cargo +1.99.0 build --workspace --locked",
+        "exit_code": 0,
+        "seconds": 4.385620749992086,
+        "log": "mac-ci-3.log"
+      },
+      {
+        "command": "cargo +1.99.0 test --workspace --locked",
+        "exit_code": 0,
+        "seconds": 281.95475462501054,
+        "log": "mac-ci-4.log"
+      }
+    ],
+    "passed": 1357,
+    "failed": 0,
+    "ignored": 10,
+    "four_commands_passed": true
+  },
+  "windows": {
+    "commands": [
+      {
+        "log": "windows-ci-1.log",
+        "command": "cargo fmt --all -- --check",
+        "seconds": 2.8701604,
+        "exit_code": 0
+      },
+      {
+        "log": "windows-ci-2.log",
+        "command": "cargo clippy --workspace --all-targets -- -D warnings",
+        "seconds": 15.6354262,
+        "exit_code": 0
+      },
+      {
+        "log": "windows-ci-3.log",
+        "command": "cargo build --workspace --locked",
+        "seconds": 21.064559799999998,
+        "exit_code": 0
+      },
+      {
+        "log": "windows-ci-4.log",
+        "command": "cargo test --workspace --locked",
+        "seconds": 337.8103453,
+        "exit_code": 0
+      }
+    ],
+    "passed": 1104,
+    "failed": 0,
+    "ignored": 25,
+    "four_commands_passed": true
+  },
+  "source_fingerprint": "9979a2242f1ceebf05c43d731427338be7d1ff93e2ec80170186cc2925a56edd"
+}

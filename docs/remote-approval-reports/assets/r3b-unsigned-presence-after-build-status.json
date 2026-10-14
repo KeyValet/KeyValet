@@ -1,0 +1,31 @@
+{
+  "build_tail": [],
+  "task": 4,
+  "after_tail": [
+    "   Compiling kv-agent v0.3.0 (C:\\kv-r3b-unsigned-20261014\\repo\\rust\\crates\\kv-agent)"
+  ],
+  "clippy_tail": [],
+  "cargo": [
+    {
+      "pid": 9564,
+      "cpu": 1.1875,
+      "process": "cargo"
+    },
+    {
+      "pid": 10520,
+      "cpu": 0.515625,
+      "process": "cargo"
+    },
+    {
+      "pid": 836,
+      "cpu": 1.3125,
+      "process": "rustc"
+    },
+    {
+      "pid": 10224,
+      "cpu": 1.53125,
+      "process": "rustc"
+    }
+  ],
+  "ssh_exit": 0
+}

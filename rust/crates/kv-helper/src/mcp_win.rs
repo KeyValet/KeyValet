@@ -1,9 +1,9 @@
 //! Stdio clients relay to a protected user worker created by SYSTEM. Native secret input
 //! never resides in the ordinary launcher, whose memory is readable by its parent account.
 use kv_platform::agent_process::{new_mcp_channel, ProtectedProcess};
-use kv_platform::paths::{AGENT_PUBLISHER, ALLOW_UNSIGNED_AGENT, MCP_BIN};
+use kv_platform::paths::MCP_BIN;
 use kv_platform::peer::{accept_client, sid_equal};
-use kv_platform::trust::{allow_unsigned_agent, same_file_path, trusted_path, verify_publisher};
+use kv_platform::trust::{same_file_path, trusted_path};
 use kv_platform::worker::{CONNECT_TIMEOUT, CREATE_TIMEOUT, VERIFY_TIMEOUT};
 use serde_json::json;
 use std::{io, path::Path, sync::Arc, time::Duration};
@@ -63,13 +63,9 @@ async fn run(
         ));
     }
     let path = Path::new(MCP_BIN);
-    // Certificate chain verification may block on network retrieval. Keep it off the async
-    // executor and never start a worker if verification is stopped or exceeds its deadline.
-    let verify = tokio::task::spawn_blocking(move || {
-        trusted_path(path)
-            && (verify_publisher(path, AGENT_PUBLISHER).is_ok()
-                || allow_unsigned_agent(Path::new(ALLOW_UNSIGNED_AGENT)))
-    });
+    // Validate the installed binary and every parent directory before starting a worker.
+    // Filesystem checks stay off the async executor and keep the cancellation deadline.
+    let verify = tokio::task::spawn_blocking(move || trusted_path(path));
     let trusted = tokio::select! {
         biased;
         _ = stop.changed() => return Ok(()),

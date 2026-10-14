@@ -1,0 +1,53 @@
+{
+  "started_utc": "2026-10-13T05:56:29.856699+00:00",
+  "source_credential": "oauth2/outlook-hhstuhacker-graph",
+  "test_credential": "api_key/r3a-graph-readonly",
+  "method": "GET",
+  "url": "https://graph.microsoft.com/v1.0/me",
+  "force_refresh": true,
+  "refresh_token_transferred": false,
+  "secret_values_in_evidence": false,
+  "audit_before_refresh": {
+    "matched": 3,
+    "consistent": true,
+    "findings_count": 0,
+    "unavailable_count": 0,
+    "endpoints": [
+      {
+        "device_id": "01M4SM5QTRQKNQE1TD6FBJTG79",
+        "checkpoint": "vault_authenticated_metadata",
+        "head": {
+          "seq": 865,
+          "hash": "7b823d7c14737d81d5abf9c57a2c4a54f264b25c79e52c5f19a03d65ef7873eb"
+        },
+        "entries": 175
+      },
+      {
+        "device_id": "01M4S8KJ48BSMNK1S4BEGT07FC",
+        "checkpoint": "vault_authenticated_metadata",
+        "head": {
+          "seq": 768,
+          "hash": "20a8d48560a027905adcf0bea39e78d2cf7d65dfcc51c190aa04c38141c4342e"
+        },
+        "entries": 85
+      }
+    ],
+    "two_endpoint_snapshots": true
+  },
+  "source_expires_at": "2026-10-13T06:56:45.885Z",
+  "source_refresh_elapsed_s": 9.968292,
+  "refresh_process": {
+    "pid": 892243,
+    "start_time": 52853954,
+    "uid": 1000
+  },
+  "proxy_updated": true,
+  "run_driver_exit": 0,
+  "run_receipt": "r3a-first-run-055710.json",
+  "http_statuses": [
+    403
+  ],
+  "run_exit": 0,
+  "elapsed_s": 40.275963,
+  "finished_utc": "2026-10-13T05:57:10.132308+00:00"
+}

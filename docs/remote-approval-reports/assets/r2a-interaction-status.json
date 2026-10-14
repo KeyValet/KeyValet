@@ -1,0 +1,21 @@
+{
+  "observed_utc": "2026-10-13T00:21:33.806210+00:00",
+  "pair_controller_started": true,
+  "pair_stage": "first_attempt_failed; second_terminal_waiting_for_password",
+  "pair_token_exchanged": true,
+  "recovery_code_displayed": true,
+  "real_remote_use_requests_n": 0,
+  "lid_test_started": false,
+  "ndu_credential_types_n": 0,
+  "claude_code_version": "2.1.220",
+  "claude_code_authenticated": true,
+  "catalog_and_interactive_questions": "pending_owner_response",
+  "credential_values_read": false,
+  "sas_match": true,
+  "first_attempt_elapsed_s": 209.526,
+  "first_attempt_failure_code": "mac_cli_closed_before_pair",
+  "retry_prepared": true,
+  "retry_controller_started": false,
+  "mac_catalog_query": "deferred_until_pairing_interaction_completes",
+  "ndu_credentials_n": 0
+}

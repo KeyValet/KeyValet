@@ -1,0 +1,27 @@
+{
+  "started_utc": "2026-10-14T01:16:10.743946+00:00",
+  "rust": "1.99.0",
+  "checks": {
+    "fmt": 0,
+    "clippy": 101
+  },
+  "space_checks": [
+    {
+      "check": "fmt",
+      "free_bytes": 20146954240
+    },
+    {
+      "check": "clippy",
+      "free_bytes": 20146933760
+    }
+  ],
+  "source_files": 518,
+  "minimum_free_bytes": 15000000000,
+  "secret_values_in_evidence": false,
+  "source_unchanged_during_checks": false,
+  "changed_source_files": [
+    "rust/crates/kv-helper/src/remote/engine.rs",
+    "rust/crates/kv-helper/src/remote/tests/transport_edges.rs"
+  ],
+  "finished_utc": "2026-10-14T01:16:54.579004+00:00"
+}

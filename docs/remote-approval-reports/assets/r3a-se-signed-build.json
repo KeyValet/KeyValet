@@ -1,0 +1,43 @@
+{
+  "built_utc": "2026-10-14T00:48:47.047024+00:00",
+  "release_exit": 0,
+  "ci_evidence": "r3a-se-closure-final-ci-summary.json",
+  "source_unchanged_since_ci": true,
+  "new_agent_installed": false,
+  "touch_id_requests": 0,
+  "secret_values_in_evidence": false,
+  "binaries": {
+    "kv-helper": {
+      "sha256": "abfcb9a65eba7e71fa1f5a2d8a1e2b7a599c7846e3f7d07389ec86e6df73486d",
+      "bytes": 12289664,
+      "identifier": "dev.keyvalet.helper",
+      "team": "PWCRJPY7YC",
+      "strict_requirement_exit": 0,
+      "reused_installed": false
+    },
+    "kv-cli": {
+      "sha256": "6ae38019591ed7ab47c965ff1b1b7227080284251e58c64d422da11455a7cc6d",
+      "bytes": 6202720,
+      "identifier": "dev.keyvalet.cli",
+      "team": "PWCRJPY7YC",
+      "strict_requirement_exit": 0,
+      "reused_installed": false
+    },
+    "kv-touchid": {
+      "sha256": "6aef100d94b2d9f3e5b16b02f99b8128adac5132e7382dc91f85987283ae9442",
+      "bytes": 1026176,
+      "identifier": "dev.keyvalet.touchid",
+      "team": "PWCRJPY7YC",
+      "strict_requirement_exit": 0,
+      "reused_installed": false
+    },
+    "kv-relay-client": {
+      "sha256": "accc5f6a0cff09b049a0697f4c048eeebd13f495749e6703b68926f18c4ab91c",
+      "bytes": 4482256,
+      "identifier": "dev.keyvalet.relay-client",
+      "team": "PWCRJPY7YC",
+      "strict_requirement_exit": 0,
+      "reused_installed": true
+    }
+  }
+}

@@ -26,6 +26,19 @@ pub(super) fn unavailable(error: std::io::Error) -> Error {
     }
 }
 
+#[cfg(any(unix, test))]
+pub(super) fn unavailable_at(request: &Request, stage: &str, error: std::io::Error) -> Error {
+    let kind = error.kind();
+    let mut result = unavailable(error);
+    // Only fixed transport metadata reaches the error. Pair URI and request fields stay private.
+    result.message = format!(
+        "{} ({} / {stage} / {kind:?})",
+        result.message,
+        request.op.as_str()
+    );
+    result
+}
+
 /// Bounded response-only framing shared with the in-process fake socket harness.
 #[cfg(any(unix, test))]
 pub(super) fn exchange_stream(
@@ -33,12 +46,21 @@ pub(super) fn exchange_stream(
     request: &Request,
 ) -> Result<Response> {
     let bytes = encode_request(request)?;
-    stream.write_all(&bytes).map_err(unavailable)?;
+    stream
+        .write_all(&bytes)
+        .map_err(|error| unavailable_at(request, "write_request", error))?;
     let mut reply = Vec::new();
     std::io::BufReader::new(stream)
         .take(FRAME_LIMIT + 1)
         .read_until(b'\n', &mut reply)
-        .map_err(unavailable)?;
+        .map_err(|error| unavailable_at(request, "read_response", error))?;
+    if reply.is_empty() {
+        return Err(unavailable_at(
+            request,
+            "read_response",
+            std::io::ErrorKind::UnexpectedEof.into(),
+        ));
+    }
     decode_response(&reply)
 }
 

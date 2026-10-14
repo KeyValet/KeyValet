@@ -1,0 +1,7 @@
+{
+  "launched": true,
+  "requires_hello": false,
+  "runlevel": "Limited",
+  "restoration_task_removed": true,
+  "ssh_exit": 0
+}

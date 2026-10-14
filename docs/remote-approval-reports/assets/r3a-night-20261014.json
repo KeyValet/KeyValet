@@ -1,0 +1,20 @@
+{
+  "observed_utc": "2026-10-13T16:38:49.598472+00:00",
+  "owner_asleep": true,
+  "approval_requests_started": 0,
+  "touch_id_requests_started": 0,
+  "admin_authentication_started": 0,
+  "lid_window_authorized": false,
+  "ndu_status_exit": 0,
+  "ndu": {
+    "device_id": "01M4S8KJ48BSMNK1S4BEGT07FC",
+    "account_id": "acct_zeP4_V8iHJdLbzJrDU3rfQ",
+    "relay": "connected",
+    "pending_n": 0,
+    "grants_n": 0,
+    "unattended": false,
+    "mode": "per_use",
+    "device_revocations_pending": 0
+  },
+  "active_r3a_drivers": []
+}

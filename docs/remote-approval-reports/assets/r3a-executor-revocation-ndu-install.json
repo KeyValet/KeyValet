@@ -1,0 +1,25 @@
+{
+  "started_utc": "2026-10-13T17:19:24.428268+00:00",
+  "backup": "/var/backups/keyvalet-r3a-revocations-20261013T171924Z",
+  "expected_sha256": "296ea14dcd320d96cbcb8a6936971d6086ce7613d10b7a77147dd0d8e53a685a",
+  "old_sha256": "737b598b31704dbc17a095d9049fe043070f322c0dd0c595c29dc3c65dfbb256",
+  "cli_sha256_before": "840fff5d4d0b551450aacf1dcdd309220dde2ce2d117478ea95581369337a4c6",
+  "vault_sha256_before": "5737b4e27e88d8041fac2f8a779197914c1efc294350c6e73ea5816c53a940d3",
+  "before": {
+    "device_id": "01M4S8KJ48BSMNK1S4BEGT07FC",
+    "account_id": "acct_zeP4_V8iHJdLbzJrDU3rfQ",
+    "mode": "per_use",
+    "pending_n": 0,
+    "grants_n": 0,
+    "unattended": false,
+    "relay": "connected"
+  },
+  "authentication_requests_started": 0,
+  "secret_values_in_evidence": false,
+  "backup_sha256": "d9d540aa416a85a08d1d04dc679799bc54cdac5a3bfafaa255361d3dae4266f3",
+  "fixed_error": "native_owner_status_unavailable",
+  "rolled_back": true,
+  "finished_utc": "2026-10-13T17:19:24.654737+00:00",
+  "install_exit": 1,
+  "observed_utc": "2026-10-13T17:19:24.541736+00:00"
+}

@@ -7,6 +7,9 @@ use serde_json::{json, Value};
 use std::io::{IsTerminal, Read, Write};
 use zeroize::Zeroizing;
 
+pub const CANCELLED_EXIT: i32 = 3;
+pub const AUTH_FAILED_EXIT: i32 = 4;
+
 extern "C" {
     fn kv_device_key(
         operation: i32,
@@ -90,7 +93,11 @@ impl EnclaveBridge for NativeBridge {
             )
         };
         if status != 0 {
-            return Err(DeviceKeyError::OperationFailed);
+            return Err(match status {
+                -100001 => DeviceKeyError::OperationCancelled,
+                -100002 => DeviceKeyError::AuthenticationFailed,
+                _ => DeviceKeyError::OperationFailed,
+            });
         }
         Ok(output)
     }
@@ -169,8 +176,13 @@ pub fn exit_code(result: Result<()>) -> i32 {
     match result {
         Ok(()) => 0,
         Err(error) => {
+            let code = match error {
+                DeviceKeyError::OperationCancelled => CANCELLED_EXIT,
+                DeviceKeyError::AuthenticationFailed => AUTH_FAILED_EXIT,
+                _ => 1,
+            };
             eprintln!("{error}");
-            1
+            code
         }
     }
 }
@@ -207,6 +219,63 @@ mod tests {
         assert_eq!(exit_code(Ok(())), 0);
         assert_eq!(exit_code(Err(DeviceKeyError::Unavailable)), 1);
         assert_eq!(exit_code(Err(DeviceKeyError::OperationFailed)), 1);
+    }
+
+    #[test]
+    fn r3a_se_child_exit_keeps_cancel_and_auth_failure_distinct() {
+        assert_eq!(
+            exit_code(Err(DeviceKeyError::OperationCancelled)),
+            CANCELLED_EXIT
+        );
+        assert_eq!(
+            exit_code(Err(DeviceKeyError::AuthenticationFailed)),
+            AUTH_FAILED_EXIT
+        );
+    }
+
+    unsafe extern "C" fn failing_enclave(
+        _: i32,
+        _: i32,
+        _: *const u8,
+        _: usize,
+        _: *const u8,
+        input_len: usize,
+        _: *mut u8,
+        _: *mut usize,
+        _: *mut u8,
+        _: *mut u8,
+        _: *mut usize,
+    ) -> i32 {
+        match input_len {
+            1 => -100001,
+            2 => -100002,
+            _ => -100003,
+        }
+    }
+
+    #[test]
+    fn r3a_se_failure_preserves_cancel_without_returning_signature_bytes() {
+        let bridge = NativeBridge(failing_enclave);
+        let Err(error) = bridge.operate(1, KeyRole::Strong, b"opaque fixture", b"x") else {
+            panic!("a cancelled key operation must not return signature material");
+        };
+        assert_eq!(error.to_string(), "key_operation_cancelled");
+    }
+
+    #[test]
+    fn r3a_se_failure_preserves_authentication_failure_without_granting_access() {
+        let bridge = NativeBridge(failing_enclave);
+        let Err(error) = bridge.operate(1, KeyRole::Strong, b"opaque fixture", b"xx") else {
+            panic!("failed authentication must not return signature material");
+        };
+        assert_eq!(error.to_string(), "key_authentication_failed");
+        assert_eq!(
+            bridge
+                .operate(1, KeyRole::Strong, b"opaque fixture", b"unknown")
+                .err()
+                .unwrap(),
+            DeviceKeyError::OperationFailed
+        );
     }
 
     struct FakeBridge<F>(F);

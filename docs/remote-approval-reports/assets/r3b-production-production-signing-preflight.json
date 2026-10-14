@@ -1,0 +1,38 @@
+{
+  "utc": "2026-10-13T22:55:34.856769+00:00",
+  "company": "Simvito Limited",
+  "company_jurisdiction": "Hong Kong",
+  "owner_confirmed_windows_certificate_not_applied": true,
+  "azure_account_exists": true,
+  "azure_public_trust_eligible": false,
+  "mac_free_bytes": 13475737600,
+  "mac_compilation_started": false,
+  "github_authenticated": false,
+  "public_relay_binary_sha256": "1eced902770d81e9933c204c8830ca7d2c7565e3fc0105e93aeeb44c45f9eab0",
+  "systemd_unit_sha256": "9f29f443292877982a6ba663f2f726df26df69cd718718ace0f0bae2cd240ede",
+  "nginx_config_sha256": "6cc6032ba75c020fac58150ceb7167bc4dfb7c338bd6772a8c3a91d289e869c4",
+  "online_service_active": true,
+  "server_or_proxy_configuration_changed": false,
+  "origin_ca_private_key_read": false,
+  "production_signing_completed": false,
+  "signed_windows_public_workflow_completed": false,
+  "proposed_route": {
+    "certificate": "SSL.com Organization Validation code signing",
+    "publisher_required": "Simvito Limited",
+    "key_storage": "eSigner Cloud HSM",
+    "certificate_usd_per_year": 129,
+    "cloud_signing_usd_per_year": 180,
+    "estimated_annual_total_usd": 309,
+    "taxes_not_included": true,
+    "purchased": false,
+    "identity_validation_completed": false,
+    "ca_identity_approval_still_required": true
+  },
+  "sources": {
+    "azure_geographic_eligibility": "https://learn.microsoft.com/en-us/azure/artifact-signing/quickstart",
+    "ssl_country_codes": "https://www.ssl.com/country-codes/",
+    "ssl_certificate_price": "https://www.ssl.com/products/software-integrity/signing-service/",
+    "ssl_cloud_price": "https://www.ssl.com/guide/esigner-pricing-for-code-signing/",
+    "cloud_cng_adapter": "https://www.ssl.com/downloads/"
+  }
+}

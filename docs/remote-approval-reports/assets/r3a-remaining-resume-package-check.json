@@ -1,0 +1,22 @@
+{
+  "observed_utc": "2026-10-14T01:03:00.637403+00:00",
+  "ci_evidence": "r3a-se-closure-final-ci-summary.json",
+  "native_package_matches_that_ci_build": true,
+  "current_tree_changes_since_that_ci": [
+    "rust/crates/kv-core/schemas/remote/grant.schema.json",
+    "rust/crates/kv-core/schemas/remote/grant_issue_result.schema.json",
+    "rust/crates/kv-core/schemas/remote/grant_list_result.schema.json",
+    "rust/crates/kv-core/schemas/remote/unsigned_grant.schema.json",
+    "rust/crates/kv-core/src/remote/validation.rs",
+    "rust/crates/kv-core/testdata/remote/grant_validation_cases.json",
+    "rust/crates/kv-core/testdata/remote/schema_samples.json",
+    "rust/crates/kv-core/tests/remote.rs",
+    "rust/crates/kv-helper/src/remote/mod.rs",
+    "rust/crates/kv-helper/src/remote/schema.sql",
+    "rust/crates/kv-helper/src/remote/tests.rs"
+  ],
+  "strict_installed_requirements_passed": 4,
+  "installation_requests": 0,
+  "approval_started": false,
+  "secret_values_in_evidence": false
+}

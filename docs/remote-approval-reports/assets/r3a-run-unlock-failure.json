@@ -1,0 +1,16 @@
+{
+  "attempt_utc": "2026-10-13T05:17:37.782568Z",
+  "elapsed_s": 0.826287,
+  "cli_exit": 1,
+  "http_requests": 0,
+  "remote_approval_requests": 0,
+  "unlock_audit_utc": "2026-10-13T05:17:38.789Z",
+  "unlock_ok": false,
+  "peer_uid": 1000,
+  "peer_pid": 791174,
+  "polkit_agent_registered_before_auth": false,
+  "fixed_error": "polkit authentication failed (denied, canceled, timed out, or no agent)",
+  "user_observation": "No unlock prompt appeared; user did not enter an ndu password in this attempt.",
+  "cause": "Acceptance driver started the run handshake before it registered a terminal agent.",
+  "secret_values_in_evidence": false
+}

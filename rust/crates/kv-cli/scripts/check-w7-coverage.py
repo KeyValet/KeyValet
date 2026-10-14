@@ -9,7 +9,7 @@ crate = Path(__file__).resolve().parent.parent
 scope = [
     crate / "src/remote.rs",
     *(crate / "src/remote" / name for name in (
-        "args.rs", "output.rs", "relay.rs", "transport.rs"
+        "args.rs", "audit.rs", "output.rs", "relay.rs", "transport.rs"
     )),
 ]
 report = json.loads(Path(sys.argv[1]).read_text())

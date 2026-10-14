@@ -1,0 +1,10 @@
+{
+  "utc": "2026-10-13T23:56:40.618595+00:00",
+  "project": "keyvalet",
+  "production_branch": "main",
+  "production_domain": "keyvalet.dev",
+  "prior_deployment_id": "6431b771-bdbc-452b-b134-1d8bdb3754ac",
+  "prior_deployment_url": "https://6431b771.keyvalet.pages.dev",
+  "prior_deployment_retained": true,
+  "restore_instructions": "Cloudflare dashboard > Workers & Pages > keyvalet > Deployments > prior deployment 6431b771-bdbc-452b-b134-1d8bdb3754ac > Rollback to this deployment. No DNS or service changes are needed."
+}

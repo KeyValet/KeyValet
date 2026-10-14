@@ -1,0 +1,1176 @@
+{
+  "r2d-runtime-before/codex-silent": {
+    "clientInfo": {
+      "name": "codex-mcp-client",
+      "title": "Codex",
+      "version": "0.162.1"
+    },
+    "agent_pid": null,
+    "tools_started": [
+      "r2d_block_silent"
+    ],
+    "progress_tokens": [
+      1
+    ],
+    "tools_completed": [
+      {
+        "tool": "r2d_block_silent",
+        "wait_s": 240.006
+      }
+    ],
+    "progress_notifications": 0,
+    "channels_sent": 1,
+    "helper": {
+      "executions": 0,
+      "operations": [
+        "remote.status",
+        "httpRequest",
+        "remote.wait"
+      ]
+    },
+    "run": {
+      "runtime": "codex",
+      "kind": "silent",
+      "command": [
+        "codex",
+        "exec",
+        "--ignore-user-config",
+        "--skip-git-repo-check",
+        "--ephemeral",
+        "--sandbox",
+        "read-only",
+        "--json",
+        "-c",
+        "mcp_servers.keyvalet.command=\"/opt/homebrew/opt/python@3.14/bin/python3.14\"",
+        "-c",
+        "mcp_servers.keyvalet.args=[\"/Users/guang/dev/keyvalet/rust/crates/kv-mcp/tests/r2d_runtime_lab.py\", \"relay\", \"--binary\", \"/Users/guang/dev/keyvalet/rust/target-r2d/debug/examples/approval_fixture-before\", \"--kind\", \"silent\", \"--log\", \"/Users/guang/dev/keyvalet/docs/remote-approval-reports/assets/r2d-runtime-before/codex-silent/wire.jsonl\", \"--delay\", \"240\", \"--budget\", \"300\", \"--socket\", \"/tmp/kv-r2d-n8_6faw3/h.sock\", \"--helper-log\", \"/Users/guang/dev/keyvalet/docs/remote-approval-reports/assets/r2d-runtime-before/codex-silent/helper.json\"]",
+        "-c",
+        "mcp_servers.keyvalet.default_tools_approval_mode=\"approve\"",
+        "-c",
+        "features.hooks=false",
+        "This is an isolated KeyValet runtime experiment with a fake helper and no real credentials. Use only the KeyValet MCP server; do not use built-in tools, edit files or run commands. Call r2d_block_silent exactly once with empty arguments, wait for its response, then report it and finish. Do not repeat it if it times out."
+      ],
+      "elapsed_s": 264.993,
+      "status": "exited",
+      "exit": 0,
+      "private_config_removed": true
+    }
+  },
+  "r2d-runtime-before/codex-timeout-small": {
+    "clientInfo": {
+      "name": "codex-mcp-client",
+      "title": "Codex",
+      "version": "0.162.1"
+    },
+    "agent_pid": null,
+    "tools_started": [
+      "r2d_block_progress"
+    ],
+    "progress_tokens": [
+      1
+    ],
+    "tools_completed": [],
+    "progress_notifications": 0,
+    "channels_sent": 0,
+    "helper": {
+      "executions": 0,
+      "operations": [
+        "remote.status",
+        "httpRequest",
+        "remote.wait"
+      ]
+    },
+    "run": {
+      "runtime": "codex",
+      "kind": "timeout-small",
+      "command": [
+        "codex",
+        "exec",
+        "--ignore-user-config",
+        "--skip-git-repo-check",
+        "--ephemeral",
+        "--sandbox",
+        "read-only",
+        "--json",
+        "-c",
+        "mcp_servers.keyvalet.command=\"/opt/homebrew/opt/python@3.14/bin/python3.14\"",
+        "-c",
+        "mcp_servers.keyvalet.args=[\"/Users/guang/dev/keyvalet/rust/crates/kv-mcp/tests/r2d_runtime_lab.py\", \"relay\", \"--binary\", \"/Users/guang/dev/keyvalet/rust/target-r2d/debug/examples/approval_fixture-before\", \"--kind\", \"timeout-small\", \"--log\", \"/Users/guang/dev/keyvalet/docs/remote-approval-reports/assets/r2d-runtime-before/codex-timeout-small/wire.jsonl\", \"--delay\", \"240\", \"--budget\", \"300\", \"--socket\", \"/tmp/kv-r2d-hicuc5ud/h.sock\", \"--helper-log\", \"/Users/guang/dev/keyvalet/docs/remote-approval-reports/assets/r2d-runtime-before/codex-timeout-small/helper.json\"]",
+        "-c",
+        "mcp_servers.keyvalet.default_tools_approval_mode=\"approve\"",
+        "-c",
+        "features.hooks=false",
+        "-c",
+        "mcp_servers.keyvalet.tool_timeout_sec=5",
+        "This is an isolated KeyValet runtime experiment with a fake helper and no real credentials. Use only the KeyValet MCP server; do not use built-in tools, edit files or run commands. Call r2d_block_progress exactly once with empty arguments, wait for its response, then report it and finish. Do not repeat it if it times out."
+      ],
+      "elapsed_s": 32.519,
+      "status": "exited",
+      "exit": 0,
+      "private_config_removed": true
+    }
+  },
+  "r2d-runtime-before/codex-stop": {
+    "clientInfo": {
+      "name": "codex-mcp-client",
+      "title": "Codex",
+      "version": "0.162.1"
+    },
+    "agent_pid": null,
+    "tools_started": [],
+    "progress_tokens": [],
+    "tools_completed": [],
+    "progress_notifications": 0,
+    "channels_sent": 0,
+    "helper": {
+      "executions": 0,
+      "operations": []
+    },
+    "run": {
+      "runtime": "codex",
+      "kind": "stop",
+      "command": [
+        "codex",
+        "exec",
+        "--ignore-user-config",
+        "--skip-git-repo-check",
+        "--ephemeral",
+        "--sandbox",
+        "read-only",
+        "--json",
+        "-c",
+        "mcp_servers.keyvalet.command=\"/opt/homebrew/opt/python@3.14/bin/python3.14\"",
+        "-c",
+        "mcp_servers.keyvalet.args=[\"/Users/guang/dev/keyvalet/rust/crates/kv-mcp/tests/r2d_runtime_lab.py\", \"relay\", \"--binary\", \"/Users/guang/dev/keyvalet/rust/target-r2d/debug/examples/approval_fixture-before\", \"--kind\", \"stop\", \"--log\", \"/Users/guang/dev/keyvalet/docs/remote-approval-reports/assets/r2d-runtime-before/codex-stop/wire.jsonl\", \"--delay\", \"35\", \"--budget\", \"10\", \"--socket\", \"/tmp/kv-r2d-8o_of8lw/h.sock\", \"--helper-log\", \"/Users/guang/dev/keyvalet/docs/remote-approval-reports/assets/r2d-runtime-before/codex-stop/helper.json\"]",
+        "-c",
+        "mcp_servers.keyvalet.default_tools_approval_mode=\"approve\"",
+        "-c",
+        "features.hooks=true",
+        "--dangerously-bypass-hook-trust",
+        "-c",
+        "hooks.Stop=[{hooks=[{type=\"command\",command=\"/Users/guang/dev/keyvalet/rust/target-r2d/debug/examples/stop_fixture codex-stop /tmp/kv-r2d-8o_of8lw/h.sock /Users/guang/dev/keyvalet/docs/remote-approval-reports/assets/r2d-runtime-before/codex-stop/hook.jsonl\",timeout=10}]}]",
+        "This is an isolated KeyValet runtime experiment with a fake helper and no real credentials. Use only the KeyValet MCP server; do not use built-in tools, edit files or run commands. Call credential_http_request once with type=api_key, name=fixture, method=POST, url=https://example.test/request, body={\"fixture\":true}, purpose=\"R2-D synthetic approval experiment\". After the first response, report its status and finish the turn."
+      ],
+      "elapsed_s": 180.046,
+      "status": "supervisor_deadline",
+      "exit": 0,
+      "private_config_removed": true
+    }
+  },
+  "r2d-runtime-before/codex-pending": {
+    "clientInfo": {
+      "name": "codex-mcp-client",
+      "title": "Codex",
+      "version": "0.162.1"
+    },
+    "agent_pid": null,
+    "tools_started": [
+      "credential_http_request",
+      "credential_wait_approval",
+      "credential_wait_approval"
+    ],
+    "progress_tokens": [
+      1,
+      2,
+      3
+    ],
+    "tools_completed": [
+      {
+        "tool": "credential_http_request",
+        "wait_s": 10.013
+      },
+      {
+        "tool": "credential_wait_approval",
+        "wait_s": 10.002
+      },
+      {
+        "tool": "credential_wait_approval",
+        "wait_s": 3.293
+      }
+    ],
+    "progress_notifications": 0,
+    "channels_sent": 1,
+    "helper": {
+      "executions": 0,
+      "operations": [
+        "remote.status",
+        "httpRequest",
+        "remote.wait",
+        "remote.wait",
+        "remote.wait"
+      ]
+    },
+    "run": {
+      "runtime": "codex",
+      "kind": "pending",
+      "command": [
+        "codex",
+        "exec",
+        "--ignore-user-config",
+        "--skip-git-repo-check",
+        "--ephemeral",
+        "--sandbox",
+        "read-only",
+        "--json",
+        "-c",
+        "mcp_servers.keyvalet.command=\"/opt/homebrew/opt/python@3.14/bin/python3.14\"",
+        "-c",
+        "mcp_servers.keyvalet.args=[\"/Users/guang/dev/keyvalet/rust/crates/kv-mcp/tests/r2d_runtime_lab.py\", \"relay\", \"--binary\", \"/Users/guang/dev/keyvalet/rust/target-r2d/debug/examples/approval_fixture-before\", \"--kind\", \"pending\", \"--log\", \"/Users/guang/dev/keyvalet/docs/remote-approval-reports/assets/r2d-runtime-before/codex-pending/wire.jsonl\", \"--delay\", \"35\", \"--budget\", \"10\", \"--socket\", \"/tmp/kv-r2d-jmcwouin/h.sock\", \"--helper-log\", \"/Users/guang/dev/keyvalet/docs/remote-approval-reports/assets/r2d-runtime-before/codex-pending/helper.json\"]",
+        "-c",
+        "mcp_servers.keyvalet.default_tools_approval_mode=\"approve\"",
+        "-c",
+        "features.hooks=false",
+        "This is an isolated KeyValet runtime experiment with a fake helper and no real credentials. Use only the KeyValet MCP server; do not use built-in tools, edit files or run commands. Call credential_http_request once with type=api_key, name=fixture, method=POST, url=https://example.test/request, body={\"fixture\":true}, purpose=\"R2-D synthetic approval experiment\". Complete this task using the next_steps in the tool result, then report the final result."
+      ],
+      "elapsed_s": 62.827,
+      "status": "exited",
+      "exit": 0,
+      "private_config_removed": true
+    }
+  },
+  "r2d-runtime-before/codex-progress": {
+    "clientInfo": {
+      "name": "codex-mcp-client",
+      "title": "Codex",
+      "version": "0.162.1"
+    },
+    "agent_pid": null,
+    "tools_started": [
+      "r2d_block_progress"
+    ],
+    "progress_tokens": [
+      1
+    ],
+    "tools_completed": [
+      {
+        "tool": "r2d_block_progress",
+        "wait_s": 240.015
+      }
+    ],
+    "progress_notifications": 16,
+    "channels_sent": 1,
+    "helper": {
+      "executions": 0,
+      "operations": [
+        "remote.status",
+        "httpRequest",
+        "remote.wait"
+      ]
+    },
+    "run": {
+      "runtime": "codex",
+      "kind": "progress",
+      "command": [
+        "codex",
+        "exec",
+        "--ignore-user-config",
+        "--skip-git-repo-check",
+        "--ephemeral",
+        "--sandbox",
+        "read-only",
+        "--json",
+        "-c",
+        "mcp_servers.keyvalet.command=\"/opt/homebrew/opt/python@3.14/bin/python3.14\"",
+        "-c",
+        "mcp_servers.keyvalet.args=[\"/Users/guang/dev/keyvalet/rust/crates/kv-mcp/tests/r2d_runtime_lab.py\", \"relay\", \"--binary\", \"/Users/guang/dev/keyvalet/rust/target-r2d/debug/examples/approval_fixture-before\", \"--kind\", \"progress\", \"--log\", \"/Users/guang/dev/keyvalet/docs/remote-approval-reports/assets/r2d-runtime-before/codex-progress/wire.jsonl\", \"--delay\", \"240\", \"--budget\", \"300\", \"--socket\", \"/tmp/kv-r2d-864ip2ov/h.sock\", \"--helper-log\", \"/Users/guang/dev/keyvalet/docs/remote-approval-reports/assets/r2d-runtime-before/codex-progress/helper.json\"]",
+        "-c",
+        "mcp_servers.keyvalet.default_tools_approval_mode=\"approve\"",
+        "-c",
+        "features.hooks=false",
+        "This is an isolated KeyValet runtime experiment with a fake helper and no real credentials. Use only the KeyValet MCP server; do not use built-in tools, edit files or run commands. Call r2d_block_progress exactly once with empty arguments, wait for its response, then report it and finish. Do not repeat it if it times out."
+      ],
+      "elapsed_s": 272.871,
+      "status": "exited",
+      "exit": 0,
+      "private_config_removed": true
+    }
+  },
+  "r2d-runtime-native-before/codex-timeout-small": {
+    "clientInfo": {
+      "name": "codex-mcp-client",
+      "title": "Codex",
+      "version": "0.162.1"
+    },
+    "agent_pid": 4876,
+    "tools_started": [
+      "r2d_block_progress"
+    ],
+    "progress_tokens": [
+      1
+    ],
+    "tools_completed": [],
+    "progress_notifications": 3,
+    "channels_sent": 0,
+    "helper": {
+      "executions": 0,
+      "operations": [
+        "remote.status",
+        "httpRequest",
+        "remote.wait"
+      ]
+    },
+    "run": {
+      "runtime": "codex",
+      "kind": "timeout-small",
+      "command": [
+        "codex",
+        "exec",
+        "--ignore-user-config",
+        "--skip-git-repo-check",
+        "--ephemeral",
+        "--sandbox",
+        "read-only",
+        "--json",
+        "-c",
+        "mcp_servers.keyvalet.command=\"/Users/guang/dev/keyvalet/rust/target-r2d/debug/examples/approval_fixture-before-native\"",
+        "-c",
+        "mcp_servers.keyvalet.args=[]",
+        "-c",
+        "mcp_servers.keyvalet.default_tools_approval_mode=\"approve\"",
+        "-c",
+        "features.hooks=false",
+        "-c",
+        "mcp_servers.keyvalet.env.W5_APPROVE_AFTER_S=\"240\"",
+        "-c",
+        "mcp_servers.keyvalet.env.KEYVALET_WAIT_IN_CALL_S=\"300\"",
+        "-c",
+        "mcp_servers.keyvalet.env.KEYVALET_RUNTIME_BUDGETS=\"{\\\"claude-code\\\": 300, \\\"codex-mcp-client\\\": 300, \\\"rmcp\\\": 300, \\\"Cursor\\\": 300, \\\"gemini-cli\\\": 300, \\\"grok\\\": 300}\"",
+        "-c",
+        "mcp_servers.keyvalet.env.R2D_HELPER_SOCKET=\"/tmp/kv-r2d-3y72_s6_/h.sock\"",
+        "-c",
+        "mcp_servers.keyvalet.env.R2D_HELPER_LOG=\"/Users/guang/dev/keyvalet/docs/remote-approval-reports/assets/r2d-runtime-native-before/codex-timeout-small/helper.json\"",
+        "-c",
+        "mcp_servers.keyvalet.env.R2D_WIRE_LOG=\"/Users/guang/dev/keyvalet/docs/remote-approval-reports/assets/r2d-runtime-native-before/codex-timeout-small/wire.jsonl\"",
+        "-c",
+        "mcp_servers.keyvalet.env.KEYVALET_LANG=\"en\"",
+        "-c",
+        "mcp_servers.keyvalet.tool_timeout_sec=5",
+        "This is an isolated KeyValet runtime experiment with a fake helper and no real credentials. Use only the KeyValet MCP server; do not use built-in tools, edit files or run commands. Call r2d_block_progress exactly once with empty arguments, wait for its response, then report it and finish. Do not repeat it if it times out."
+      ],
+      "elapsed_s": 82.218,
+      "status": "exited",
+      "exit": 0,
+      "private_config_removed": true
+    }
+  },
+  "r2d-runtime-native-before/codex-stop": {
+    "clientInfo": {
+      "name": "codex-mcp-client",
+      "title": "Codex",
+      "version": "0.162.1"
+    },
+    "agent_pid": 4875,
+    "tools_started": [
+      "credential_http_request",
+      "credential_wait_approval"
+    ],
+    "progress_tokens": [
+      1,
+      2
+    ],
+    "tools_completed": [
+      {
+        "tool": "credential_http_request",
+        "wait_s": 10.003884125
+      },
+      {
+        "tool": "credential_wait_approval",
+        "wait_s": 10.002180583
+      }
+    ],
+    "progress_notifications": 0,
+    "channels_sent": 0,
+    "hooks": [
+      {
+        "fields": [
+          "cwd",
+          "hook_event_name",
+          "last_assistant_message",
+          "model",
+          "permission_mode",
+          "session_id",
+          "stop_hook_active",
+          "transcript_path",
+          "turn_id"
+        ],
+        "loop_count": null,
+        "output": {
+          "decision": "block",
+          "reason": "Do not stop yet: KeyValet approval is pending, not denied. Call credential_wait_approval(\"01J00000000000000000000000\") (one approval at a time) to get the original request's result after approval. Do not repeat the original request or ask the user for a key."
+        },
+        "ppid": 4875,
+        "stop_hook_active": false
+      }
+    ],
+    "helper": {
+      "executions": 0,
+      "operations": [
+        "remote.status",
+        "httpRequest",
+        "remote.wait",
+        "remote.pending.for_agent",
+        "remote.pending.stop_block",
+        "remote.wait"
+      ]
+    },
+    "run": {
+      "runtime": "codex",
+      "kind": "stop",
+      "command": [
+        "codex",
+        "exec",
+        "--ignore-user-config",
+        "--skip-git-repo-check",
+        "--ephemeral",
+        "--sandbox",
+        "read-only",
+        "--json",
+        "-c",
+        "mcp_servers.keyvalet.command=\"/Users/guang/dev/keyvalet/rust/target-r2d/debug/examples/approval_fixture-before-native\"",
+        "-c",
+        "mcp_servers.keyvalet.args=[]",
+        "-c",
+        "mcp_servers.keyvalet.default_tools_approval_mode=\"approve\"",
+        "-c",
+        "features.hooks=true",
+        "-c",
+        "mcp_servers.keyvalet.env.W5_APPROVE_AFTER_S=\"35\"",
+        "-c",
+        "mcp_servers.keyvalet.env.KEYVALET_WAIT_IN_CALL_S=\"10\"",
+        "-c",
+        "mcp_servers.keyvalet.env.KEYVALET_RUNTIME_BUDGETS=\"{\\\"claude-code\\\": 10, \\\"codex-mcp-client\\\": 10, \\\"rmcp\\\": 10, \\\"Cursor\\\": 10, \\\"gemini-cli\\\": 10, \\\"grok\\\": 10}\"",
+        "-c",
+        "mcp_servers.keyvalet.env.R2D_HELPER_SOCKET=\"/tmp/kv-r2d-pcfbw_9s/h.sock\"",
+        "-c",
+        "mcp_servers.keyvalet.env.R2D_HELPER_LOG=\"/Users/guang/dev/keyvalet/docs/remote-approval-reports/assets/r2d-runtime-native-before/codex-stop/helper.json\"",
+        "-c",
+        "mcp_servers.keyvalet.env.R2D_WIRE_LOG=\"/Users/guang/dev/keyvalet/docs/remote-approval-reports/assets/r2d-runtime-native-before/codex-stop/wire.jsonl\"",
+        "-c",
+        "mcp_servers.keyvalet.env.KEYVALET_LANG=\"en\"",
+        "--dangerously-bypass-hook-trust",
+        "-c",
+        "hooks.Stop=[{hooks=[{type=\"command\",command=\"/Users/guang/dev/keyvalet/rust/target-r2d/debug/examples/stop_fixture codex-stop /tmp/kv-r2d-pcfbw_9s/h.sock /Users/guang/dev/keyvalet/docs/remote-approval-reports/assets/r2d-runtime-native-before/codex-stop/hook.jsonl\",timeout=10}]}]",
+        "This is an isolated KeyValet runtime experiment with a fake helper and no real credentials. Use only the KeyValet MCP server; do not use built-in tools, edit files or run commands. Call credential_http_request once with type=api_key, name=fixture, method=POST, url=https://example.test/request, body={\"fixture\":true}, purpose=\"R2-D synthetic approval experiment\". After the first response, report its status and finish the turn."
+      ],
+      "elapsed_s": 180.018,
+      "status": "supervisor_deadline",
+      "exit": 0,
+      "private_config_removed": true
+    }
+  },
+  "r2d-runtime-native-before/codex-pending": {
+    "clientInfo": {
+      "name": "codex-mcp-client",
+      "title": "Codex",
+      "version": "0.162.1"
+    },
+    "agent_pid": 4877,
+    "tools_started": [
+      "credential_http_request",
+      "credential_wait_approval",
+      "credential_wait_approval"
+    ],
+    "progress_tokens": [
+      1,
+      2,
+      3
+    ],
+    "tools_completed": [
+      {
+        "tool": "credential_http_request",
+        "wait_s": 10.003524042
+      },
+      {
+        "tool": "credential_wait_approval",
+        "wait_s": 10.003080542
+      },
+      {
+        "tool": "credential_wait_approval",
+        "wait_s": 7.507973792
+      }
+    ],
+    "progress_notifications": 0,
+    "channels_sent": 1,
+    "helper": {
+      "executions": 1,
+      "operations": [
+        "remote.status",
+        "httpRequest",
+        "remote.wait",
+        "remote.wait",
+        "remote.wait"
+      ]
+    },
+    "run": {
+      "runtime": "codex",
+      "kind": "pending",
+      "command": [
+        "codex",
+        "exec",
+        "--ignore-user-config",
+        "--skip-git-repo-check",
+        "--ephemeral",
+        "--sandbox",
+        "read-only",
+        "--json",
+        "-c",
+        "mcp_servers.keyvalet.command=\"/Users/guang/dev/keyvalet/rust/target-r2d/debug/examples/approval_fixture-before-native\"",
+        "-c",
+        "mcp_servers.keyvalet.args=[]",
+        "-c",
+        "mcp_servers.keyvalet.default_tools_approval_mode=\"approve\"",
+        "-c",
+        "features.hooks=false",
+        "-c",
+        "mcp_servers.keyvalet.env.W5_APPROVE_AFTER_S=\"35\"",
+        "-c",
+        "mcp_servers.keyvalet.env.KEYVALET_WAIT_IN_CALL_S=\"10\"",
+        "-c",
+        "mcp_servers.keyvalet.env.KEYVALET_RUNTIME_BUDGETS=\"{\\\"claude-code\\\": 10, \\\"codex-mcp-client\\\": 10, \\\"rmcp\\\": 10, \\\"Cursor\\\": 10, \\\"gemini-cli\\\": 10, \\\"grok\\\": 10}\"",
+        "-c",
+        "mcp_servers.keyvalet.env.R2D_HELPER_SOCKET=\"/tmp/kv-r2d-wzms3k12/h.sock\"",
+        "-c",
+        "mcp_servers.keyvalet.env.R2D_HELPER_LOG=\"/Users/guang/dev/keyvalet/docs/remote-approval-reports/assets/r2d-runtime-native-before/codex-pending/helper.json\"",
+        "-c",
+        "mcp_servers.keyvalet.env.R2D_WIRE_LOG=\"/Users/guang/dev/keyvalet/docs/remote-approval-reports/assets/r2d-runtime-native-before/codex-pending/wire.jsonl\"",
+        "-c",
+        "mcp_servers.keyvalet.env.KEYVALET_LANG=\"en\"",
+        "This is an isolated KeyValet runtime experiment with a fake helper and no real credentials. Use only the KeyValet MCP server; do not use built-in tools, edit files or run commands. Call credential_http_request once with type=api_key, name=fixture, method=POST, url=https://example.test/request, body={\"fixture\":true}, purpose=\"R2-D synthetic approval experiment\". Complete this task using the next_steps in the tool result, then report the final result."
+      ],
+      "elapsed_s": 63.374,
+      "status": "exited",
+      "exit": 0,
+      "private_config_removed": true
+    }
+  },
+  "r2d-runtime-native-before/codex-timeout-large": {
+    "clientInfo": {
+      "name": "codex-mcp-client",
+      "title": "Codex",
+      "version": "0.162.1"
+    },
+    "agent_pid": 9019,
+    "tools_started": [
+      "r2d_block_progress"
+    ],
+    "progress_tokens": [
+      1
+    ],
+    "tools_completed": [
+      {
+        "tool": "r2d_block_progress",
+        "wait_s": 240.004199208
+      }
+    ],
+    "progress_notifications": 16,
+    "channels_sent": 1,
+    "helper": {
+      "executions": 1,
+      "operations": [
+        "remote.status",
+        "httpRequest",
+        "remote.wait"
+      ]
+    },
+    "run": {
+      "runtime": "codex",
+      "kind": "timeout-large",
+      "command": [
+        "codex",
+        "exec",
+        "--ignore-user-config",
+        "--skip-git-repo-check",
+        "--ephemeral",
+        "--sandbox",
+        "read-only",
+        "--json",
+        "-c",
+        "mcp_servers.keyvalet.command=\"/Users/guang/dev/keyvalet/rust/target-r2d/debug/examples/approval_fixture-before-native\"",
+        "-c",
+        "mcp_servers.keyvalet.args=[]",
+        "-c",
+        "mcp_servers.keyvalet.default_tools_approval_mode=\"approve\"",
+        "-c",
+        "features.hooks=false",
+        "-c",
+        "mcp_servers.keyvalet.env.W5_APPROVE_AFTER_S=\"240\"",
+        "-c",
+        "mcp_servers.keyvalet.env.KEYVALET_WAIT_IN_CALL_S=\"300\"",
+        "-c",
+        "mcp_servers.keyvalet.env.KEYVALET_RUNTIME_BUDGETS=\"{\\\"claude-code\\\": 300, \\\"codex-mcp-client\\\": 300, \\\"rmcp\\\": 300, \\\"Cursor\\\": 300, \\\"gemini-cli\\\": 300, \\\"grok\\\": 300}\"",
+        "-c",
+        "mcp_servers.keyvalet.env.R2D_HELPER_SOCKET=\"/tmp/kv-r2d-yovtc0ts/h.sock\"",
+        "-c",
+        "mcp_servers.keyvalet.env.R2D_HELPER_LOG=\"/Users/guang/dev/keyvalet/docs/remote-approval-reports/assets/r2d-runtime-native-before/codex-timeout-large/helper.json\"",
+        "-c",
+        "mcp_servers.keyvalet.env.R2D_WIRE_LOG=\"/Users/guang/dev/keyvalet/docs/remote-approval-reports/assets/r2d-runtime-native-before/codex-timeout-large/wire.jsonl\"",
+        "-c",
+        "mcp_servers.keyvalet.env.KEYVALET_LANG=\"en\"",
+        "-c",
+        "mcp_servers.keyvalet.tool_timeout_sec=900",
+        "This is an isolated KeyValet runtime experiment with a fake helper and no real credentials. Use only the KeyValet MCP server; do not use built-in tools, edit files or run commands. Call r2d_block_progress exactly once with empty arguments, wait for its response, then report it and finish. Do not repeat it if it times out."
+      ],
+      "elapsed_s": 255.816,
+      "status": "exited",
+      "exit": 0,
+      "private_config_removed": true
+    }
+  },
+  "r2d-runtime-native-before/devin-stop": {
+    "clientInfo": {
+      "name": "rmcp",
+      "version": "3.1.0"
+    },
+    "agent_pid": 6850,
+    "tools_started": [
+      "credential_http_request",
+      "credential_wait_approval",
+      "credential_wait_approval"
+    ],
+    "progress_tokens": [
+      1,
+      2,
+      3
+    ],
+    "tools_completed": [
+      {
+        "tool": "credential_http_request",
+        "wait_s": 10.00442575
+      },
+      {
+        "tool": "credential_wait_approval",
+        "wait_s": 10.002610709
+      },
+      {
+        "tool": "credential_wait_approval",
+        "wait_s": 5.477362625
+      }
+    ],
+    "progress_notifications": 0,
+    "channels_sent": 1,
+    "hooks": [
+      {
+        "fields": [
+          "hook_event_name",
+          "last_assistant_message",
+          "prompt_id",
+          "session_id",
+          "stop_hook_active"
+        ],
+        "loop_count": null,
+        "output": {
+          "decision": "block",
+          "reason": "Do not stop yet: KeyValet approval is pending, not denied. Call credential_wait_approval(\"01J00000000000000000000000\") (one approval at a time) to get the original request's result after approval. Do not repeat the original request or ask the user for a key."
+        },
+        "ppid": 6850,
+        "stop_hook_active": false
+      },
+      {
+        "fields": [
+          "hook_event_name",
+          "last_assistant_message",
+          "prompt_id",
+          "session_id",
+          "stop_hook_active"
+        ],
+        "loop_count": null,
+        "output": {},
+        "ppid": 6850,
+        "stop_hook_active": true
+      }
+    ],
+    "helper": {
+      "executions": 1,
+      "operations": [
+        "remote.status",
+        "httpRequest",
+        "remote.wait",
+        "remote.pending.for_agent",
+        "remote.pending.stop_block",
+        "remote.wait",
+        "remote.wait"
+      ]
+    },
+    "run": {
+      "runtime": "devin",
+      "kind": "stop",
+      "command": [
+        "devin",
+        "--config",
+        "/tmp/kv-r2d-4yhtimed/devin.json",
+        "--respect-workspace-trust",
+        "false",
+        "--permission-mode",
+        "dangerous",
+        "-p",
+        "Use only MCP server r2dprobe, never server keyvalet. This is an isolated KeyValet runtime experiment with a fake helper and no real credentials. Use only the r2dprobe MCP server; do not use built-in tools, edit files or run commands. Call credential_http_request once with type=api_key, name=fixture, method=POST, url=https://example.test/request, body={\"fixture\":true}, purpose=\"R2-D synthetic approval experiment\". After the first response, report its status and finish the turn."
+      ],
+      "elapsed_s": 63.732,
+      "status": "exited",
+      "exit": 0,
+      "private_config_removed": true
+    }
+  },
+  "r2d-runtime-native-before/devin-silent": {
+    "clientInfo": {
+      "name": "rmcp",
+      "version": "3.1.0"
+    },
+    "agent_pid": 9368,
+    "tools_started": [
+      "r2d_block_silent"
+    ],
+    "progress_tokens": [
+      1
+    ],
+    "tools_completed": [
+      {
+        "tool": "r2d_block_silent",
+        "wait_s": 240.006702333
+      }
+    ],
+    "progress_notifications": 0,
+    "channels_sent": 1,
+    "helper": {
+      "executions": 1,
+      "operations": [
+        "remote.status",
+        "httpRequest",
+        "remote.wait"
+      ]
+    },
+    "run": {
+      "runtime": "devin",
+      "kind": "silent",
+      "command": [
+        "devin",
+        "--config",
+        "/tmp/kv-r2d-re8x6xt2/devin.json",
+        "--respect-workspace-trust",
+        "false",
+        "--permission-mode",
+        "dangerous",
+        "-p",
+        "Use only MCP server r2dprobe, never server keyvalet. This is an isolated KeyValet runtime experiment with a fake helper and no real credentials. Use only the r2dprobe MCP server; do not use built-in tools, edit files or run commands. Call r2d_block_silent exactly once with empty arguments, wait for its response, then report it and finish. Do not repeat it if it times out."
+      ],
+      "elapsed_s": 267.475,
+      "status": "exited",
+      "exit": 0,
+      "private_config_removed": true
+    }
+  },
+  "r2d-runtime-native-before/devin-progress": {
+    "clientInfo": {
+      "name": "rmcp",
+      "version": "3.1.0"
+    },
+    "agent_pid": 5984,
+    "tools_started": [
+      "r2d_block_progress"
+    ],
+    "progress_tokens": [
+      1
+    ],
+    "tools_completed": [
+      {
+        "tool": "r2d_block_progress",
+        "wait_s": 240.005515417
+      }
+    ],
+    "progress_notifications": 16,
+    "channels_sent": 1,
+    "helper": {
+      "executions": 1,
+      "operations": [
+        "remote.status",
+        "httpRequest",
+        "remote.wait"
+      ]
+    },
+    "run": {
+      "runtime": "devin",
+      "kind": "progress",
+      "command": [
+        "devin",
+        "--config",
+        "/tmp/kv-r2d-xsni3ng3/devin.json",
+        "--respect-workspace-trust",
+        "false",
+        "--permission-mode",
+        "dangerous",
+        "-p",
+        "Use only MCP server r2dprobe, never server keyvalet. This is an isolated KeyValet runtime experiment with a fake helper and no real credentials. Use only the r2dprobe MCP server; do not use built-in tools, edit files or run commands. Call r2d_block_progress exactly once with empty arguments, wait for its response, then report it and finish. Do not repeat it if it times out."
+      ],
+      "elapsed_s": 269.938,
+      "status": "exited",
+      "exit": 0,
+      "private_config_removed": true
+    }
+  },
+  "r2d-runtime-native-before/devin-pending": {
+    "clientInfo": {
+      "name": "rmcp",
+      "version": "3.1.0"
+    },
+    "agent_pid": 7703,
+    "tools_started": [
+      "credential_http_request",
+      "credential_wait_approval",
+      "credential_wait_approval"
+    ],
+    "progress_tokens": [
+      1,
+      2,
+      3
+    ],
+    "tools_completed": [
+      {
+        "tool": "credential_http_request",
+        "wait_s": 10.003421542
+      },
+      {
+        "tool": "credential_wait_approval",
+        "wait_s": 10.002607083
+      },
+      {
+        "tool": "credential_wait_approval",
+        "wait_s": 2.73572825
+      }
+    ],
+    "progress_notifications": 0,
+    "channels_sent": 1,
+    "helper": {
+      "executions": 1,
+      "operations": [
+        "remote.status",
+        "httpRequest",
+        "remote.wait",
+        "remote.wait",
+        "remote.wait"
+      ]
+    },
+    "run": {
+      "runtime": "devin",
+      "kind": "pending",
+      "command": [
+        "devin",
+        "--config",
+        "/tmp/kv-r2d-ot2pawf7/devin.json",
+        "--respect-workspace-trust",
+        "false",
+        "--permission-mode",
+        "dangerous",
+        "-p",
+        "Use only MCP server r2dprobe, never server keyvalet. This is an isolated KeyValet runtime experiment with a fake helper and no real credentials. Use only the r2dprobe MCP server; do not use built-in tools, edit files or run commands. Call credential_http_request once with type=api_key, name=fixture, method=POST, url=https://example.test/request, body={\"fixture\":true}, purpose=\"R2-D synthetic approval experiment\". Complete this task using the next_steps in the tool result, then report the final result."
+      ],
+      "elapsed_s": 63.216,
+      "status": "exited",
+      "exit": 0,
+      "private_config_removed": true
+    }
+  },
+  "r2d-runtime-after/codex-pending": {
+    "clientInfo": {
+      "name": "codex-mcp-client",
+      "title": "Codex",
+      "version": "0.162.1"
+    },
+    "agent_pid": 16983,
+    "tools_started": [
+      "credential_http_request",
+      "credential_wait_approval",
+      "credential_wait_approval"
+    ],
+    "progress_tokens": [
+      1,
+      2,
+      3
+    ],
+    "tools_completed": [
+      {
+        "tool": "credential_http_request",
+        "wait_s": 10.003036375
+      },
+      {
+        "tool": "credential_wait_approval",
+        "wait_s": 10.00656025
+      },
+      {
+        "tool": "credential_wait_approval",
+        "wait_s": 3.198226625
+      }
+    ],
+    "progress_notifications": 0,
+    "channels_sent": 1,
+    "helper": {
+      "executions": 1,
+      "operations": [
+        "remote.status",
+        "httpRequest",
+        "remote.wait",
+        "remote.wait",
+        "remote.wait"
+      ]
+    },
+    "run": {
+      "runtime": "codex",
+      "kind": "pending",
+      "command": [
+        "codex",
+        "exec",
+        "--ignore-user-config",
+        "--skip-git-repo-check",
+        "--ephemeral",
+        "--sandbox",
+        "read-only",
+        "--json",
+        "-c",
+        "mcp_servers.keyvalet.command=\"/Users/guang/dev/keyvalet/rust/target-r2d/debug/examples/approval_fixture\"",
+        "-c",
+        "mcp_servers.keyvalet.args=[]",
+        "-c",
+        "mcp_servers.keyvalet.default_tools_approval_mode=\"approve\"",
+        "-c",
+        "features.hooks=false",
+        "-c",
+        "mcp_servers.keyvalet.env.W5_APPROVE_AFTER_S=\"35\"",
+        "-c",
+        "mcp_servers.keyvalet.env.KEYVALET_WAIT_IN_CALL_S=\"10\"",
+        "-c",
+        "mcp_servers.keyvalet.env.KEYVALET_RUNTIME_BUDGETS=\"{\\\"claude-code\\\": 10, \\\"codex-mcp-client\\\": 10, \\\"rmcp\\\": 10, \\\"Cursor\\\": 10, \\\"gemini-cli\\\": 10, \\\"grok\\\": 10}\"",
+        "-c",
+        "mcp_servers.keyvalet.env.R2D_HELPER_SOCKET=\"/tmp/kv-r2d-1jtz4t6t/h.sock\"",
+        "-c",
+        "mcp_servers.keyvalet.env.R2D_HELPER_LOG=\"/Users/guang/dev/keyvalet/docs/remote-approval-reports/assets/r2d-runtime-after/codex-pending/helper.json\"",
+        "-c",
+        "mcp_servers.keyvalet.env.R2D_WIRE_LOG=\"/Users/guang/dev/keyvalet/docs/remote-approval-reports/assets/r2d-runtime-after/codex-pending/wire.jsonl\"",
+        "-c",
+        "mcp_servers.keyvalet.env.KEYVALET_LANG=\"en\"",
+        "This is an isolated KeyValet runtime experiment with a fake helper and no real credentials. Use only the KeyValet MCP server; do not use built-in tools, edit files or run commands. Call credential_http_request once with type=api_key, name=fixture, method=POST, url=https://example.test/request, body={\"fixture\":true}, purpose=\"R2-D synthetic approval experiment\". Complete this task using the next_steps in the tool result, then report the final result."
+      ],
+      "elapsed_s": 65.783,
+      "status": "exited",
+      "exit": 0,
+      "private_config_removed": true
+    }
+  },
+  "r2d-runtime-after/devin-pending": {
+    "clientInfo": {
+      "name": "rmcp",
+      "version": "3.1.0"
+    },
+    "agent_pid": 17771,
+    "tools_started": [
+      "credential_http_request",
+      "credential_wait_approval",
+      "credential_wait_approval",
+      "credential_wait_approval"
+    ],
+    "progress_tokens": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "tools_completed": [
+      {
+        "tool": "credential_http_request",
+        "wait_s": 10.0028025
+      },
+      {
+        "tool": "credential_wait_approval",
+        "wait_s": 10.002853375
+      },
+      {
+        "tool": "credential_wait_approval",
+        "wait_s": 10.003281333
+      },
+      {
+        "tool": "credential_wait_approval",
+        "wait_s": 0.000692292
+      }
+    ],
+    "progress_notifications": 0,
+    "channels_sent": 1,
+    "helper": {
+      "executions": 1,
+      "operations": [
+        "remote.status",
+        "httpRequest",
+        "remote.wait",
+        "remote.wait",
+        "remote.wait",
+        "remote.wait"
+      ]
+    },
+    "run": {
+      "runtime": "devin",
+      "kind": "pending",
+      "command": [
+        "devin",
+        "--config",
+        "/tmp/kv-r2d-exs006xa/devin.json",
+        "--respect-workspace-trust",
+        "false",
+        "--permission-mode",
+        "dangerous",
+        "-p",
+        "Use only MCP server r2dprobe, never server keyvalet. This is an isolated KeyValet runtime experiment with a fake helper and no real credentials. Use only the r2dprobe MCP server; do not use built-in tools, edit files or run commands. Call credential_http_request once with type=api_key, name=fixture, method=POST, url=https://example.test/request, body={\"fixture\":true}, purpose=\"R2-D synthetic approval experiment\". Complete this task using the next_steps in the tool result, then report the final result."
+      ],
+      "elapsed_s": 54.691,
+      "status": "exited",
+      "exit": 0,
+      "private_config_removed": true
+    }
+  },
+  "r2d-runtime-tui-final/codex-tui-silent": {
+    "clientInfo": {
+      "name": "codex-mcp-client",
+      "title": "Codex",
+      "version": "0.162.1"
+    },
+    "agent_pid": 20358,
+    "tools_started": [
+      "r2d_block_silent"
+    ],
+    "progress_tokens": [
+      1
+    ],
+    "tools_completed": [
+      {
+        "tool": "r2d_block_silent",
+        "wait_s": 240.011594125
+      }
+    ],
+    "progress_notifications": 0,
+    "channels_sent": 1,
+    "helper": {
+      "executions": 1,
+      "operations": [
+        "remote.status",
+        "httpRequest",
+        "remote.wait"
+      ]
+    },
+    "run": {
+      "command": [
+        "codex",
+        "--no-alt-screen",
+        "-a",
+        "never",
+        "-s",
+        "read-only",
+        "-c",
+        "features.hooks=false",
+        "-c",
+        "projects./tmp/kv-r2d-tui-3_8azhsi.trust_level=\"trusted\"",
+        "-c",
+        "mcp_servers.keyvalet.enabled=false",
+        "-c",
+        "plugins.computer-use@openai-bundled.enabled=false",
+        "-c",
+        "plugins.windsor-ai@openai-curated-remote.enabled=false",
+        "-c",
+        "mcp_servers.r2dprobe.command=\"/Users/guang/dev/keyvalet/rust/target-r2d/debug/examples/approval_fixture\"",
+        "-c",
+        "mcp_servers.r2dprobe.args=[]",
+        "-c",
+        "mcp_servers.r2dprobe.default_tools_approval_mode=\"approve\"",
+        "-c",
+        "mcp_servers.r2dprobe.env.W5_APPROVE_AFTER_S=\"240\"",
+        "-c",
+        "mcp_servers.r2dprobe.env.KEYVALET_WAIT_IN_CALL_S=\"300\"",
+        "-c",
+        "mcp_servers.r2dprobe.env.KEYVALET_RUNTIME_BUDGETS=\"{\\\"codex-mcp-client\\\":300}\"",
+        "-c",
+        "mcp_servers.r2dprobe.env.KEYVALET_LANG=\"en\"",
+        "-c",
+        "mcp_servers.r2dprobe.env.R2D_HELPER_SOCKET=\"/tmp/kv-r2d-tui-3_8azhsi/h.sock\"",
+        "-c",
+        "mcp_servers.r2dprobe.env.R2D_HELPER_LOG=\"/Users/guang/dev/keyvalet/docs/remote-approval-reports/assets/r2d-runtime-tui-final/codex-tui-silent/helper.json\"",
+        "-c",
+        "mcp_servers.r2dprobe.env.R2D_WIRE_LOG=\"/Users/guang/dev/keyvalet/docs/remote-approval-reports/assets/r2d-runtime-tui-final/codex-tui-silent/wire.jsonl\"",
+        "This is an isolated runtime experiment using only MCP server r2dprobe, a Rust KeyValet server with a fake helper and no real vault. Do not use built-in tools, edit files or run commands. Call r2d_block_silent exactly once with empty arguments. Wait for its response, report it, and finish. Never repeat it if it times out."
+      ],
+      "exit": 0,
+      "status": "completed_tool_then_supervised_exit",
+      "elapsed_s": 271.047,
+      "private_config_removed": true
+    }
+  },
+  "r2d-runtime-tui-final/codex-tui-progress": {
+    "clientInfo": {
+      "name": "codex-mcp-client",
+      "title": "Codex",
+      "version": "0.162.1"
+    },
+    "agent_pid": 20357,
+    "tools_started": [
+      "r2d_block_progress"
+    ],
+    "progress_tokens": [
+      1
+    ],
+    "tools_completed": [
+      {
+        "tool": "r2d_block_progress",
+        "wait_s": 240.006917375
+      }
+    ],
+    "progress_notifications": 15,
+    "channels_sent": 1,
+    "helper": {
+      "executions": 1,
+      "operations": [
+        "remote.status",
+        "httpRequest",
+        "remote.wait"
+      ]
+    },
+    "run": {
+      "command": [
+        "codex",
+        "--no-alt-screen",
+        "-a",
+        "never",
+        "-s",
+        "read-only",
+        "-c",
+        "features.hooks=false",
+        "-c",
+        "projects./tmp/kv-r2d-tui-hoxrwvn5.trust_level=\"trusted\"",
+        "-c",
+        "mcp_servers.keyvalet.enabled=false",
+        "-c",
+        "plugins.computer-use@openai-bundled.enabled=false",
+        "-c",
+        "plugins.windsor-ai@openai-curated-remote.enabled=false",
+        "-c",
+        "mcp_servers.r2dprobe.command=\"/Users/guang/dev/keyvalet/rust/target-r2d/debug/examples/approval_fixture\"",
+        "-c",
+        "mcp_servers.r2dprobe.args=[]",
+        "-c",
+        "mcp_servers.r2dprobe.default_tools_approval_mode=\"approve\"",
+        "-c",
+        "mcp_servers.r2dprobe.env.W5_APPROVE_AFTER_S=\"240\"",
+        "-c",
+        "mcp_servers.r2dprobe.env.KEYVALET_WAIT_IN_CALL_S=\"300\"",
+        "-c",
+        "mcp_servers.r2dprobe.env.KEYVALET_RUNTIME_BUDGETS=\"{\\\"codex-mcp-client\\\":300}\"",
+        "-c",
+        "mcp_servers.r2dprobe.env.KEYVALET_LANG=\"en\"",
+        "-c",
+        "mcp_servers.r2dprobe.env.R2D_HELPER_SOCKET=\"/tmp/kv-r2d-tui-hoxrwvn5/h.sock\"",
+        "-c",
+        "mcp_servers.r2dprobe.env.R2D_HELPER_LOG=\"/Users/guang/dev/keyvalet/docs/remote-approval-reports/assets/r2d-runtime-tui-final/codex-tui-progress/helper.json\"",
+        "-c",
+        "mcp_servers.r2dprobe.env.R2D_WIRE_LOG=\"/Users/guang/dev/keyvalet/docs/remote-approval-reports/assets/r2d-runtime-tui-final/codex-tui-progress/wire.jsonl\"",
+        "This is an isolated runtime experiment using only MCP server r2dprobe, a Rust KeyValet server with a fake helper and no real vault. Do not use built-in tools, edit files or run commands. Call r2d_block_progress exactly once with empty arguments. Wait for its response, report it, and finish. Never repeat it if it times out."
+      ],
+      "exit": 0,
+      "status": "completed_tool_then_supervised_exit",
+      "elapsed_s": 273.19,
+      "private_config_removed": true
+    }
+  }
+}

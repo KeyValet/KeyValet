@@ -55,7 +55,8 @@ class KvNativePlugin: FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAw
     }
     private fun saveToken(token: String) {
         context.getSharedPreferences("kv_push", Context.MODE_PRIVATE).edit().putString("token", token).apply()
-        try { NativeRuntime.call(context, JSONObject().put("op", "push_token").put("platform", "fcm").put("token", token)) } catch (_: Exception) { }
+        try { NativeRuntime.call(context, JSONObject().put("op", "push_token").put("platform", "fcm").put("token", token).put("force_upload", true)) } catch (_: Exception) { }
+        PushSyncJob.enqueue(context, false)
     }
     override fun onAttachedToActivity(binding: ActivityPluginBinding) { activity = binding.activity as? FragmentActivity; NativeRuntime.foreground(activity) }
     override fun onDetachedFromActivity() { activity = null; NativeRuntime.foreground(null) }

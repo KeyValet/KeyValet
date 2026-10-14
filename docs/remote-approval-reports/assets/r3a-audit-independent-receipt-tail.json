@@ -1,0 +1,9 @@
+{
+  "observed_utc": "2026-10-13T22:15:45.345117+00:00",
+  "exit": 0,
+  "read_only": true,
+  "source": "installed_legacy_audit_tail_up_to_4_mib",
+  "matching_public_records": [],
+  "raw_output_retained": false,
+  "secret_values_in_evidence": false
+}

@@ -1,0 +1,30 @@
+{
+  "built_utc": "2026-10-13T11:08:59.257916+00:00",
+  "binaries": {
+    "kv-helper": {
+      "sha256": "a9e3aed1d996db0a6a9349e1fbf2c510d8ab4c47f1bf75d18e6a32210e47c787",
+      "identifier": "dev.keyvalet.helper",
+      "strict_requirement_ok": true
+    },
+    "kv-cli": {
+      "sha256": "4549d43c8223a46ed7a9bc1309c2358a8e9984b8de7e796e710351b638806013",
+      "identifier": "dev.keyvalet.cli",
+      "strict_requirement_ok": true
+    },
+    "kv-touchid": {
+      "sha256": "559de7dd8419beecd98c0123b6dfe4a16b719755307374558e1f7a759c419e39",
+      "identifier": "dev.keyvalet.touchid",
+      "strict_requirement_ok": true
+    },
+    "kv-relay-client": {
+      "sha256": "accc5f6a0cff09b049a0697f4c048eeebd13f495749e6703b68926f18c4ab91c",
+      "identifier": "dev.keyvalet.relay-client",
+      "strict_requirement_ok": true
+    }
+  },
+  "changed_binaries": [
+    "kv-helper",
+    "kv-cli"
+  ],
+  "team": "PWCRJPY7YC"
+}

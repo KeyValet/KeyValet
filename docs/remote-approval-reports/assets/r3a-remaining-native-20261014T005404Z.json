@@ -1,0 +1,68 @@
+{
+  "started_utc": "2026-10-14T00:53:46.712591+00:00",
+  "secret_values_in_evidence": false,
+  "cases": [],
+  "commands": [],
+  "revocation_started": false,
+  "credential": "api_key/r3a-graph-readonly",
+  "method": "GET",
+  "url": "https://graph.microsoft.com/v1.0/me",
+  "expected_successful_se_signatures": 2,
+  "before": {
+    "pending_n": 0,
+    "grants_n": 0,
+    "unattended": false,
+    "mode": "per_use",
+    "mac_presence": "present"
+  },
+  "devices_before": {
+    "observed_utc": "2026-10-14T00:53:48.058551+00:00",
+    "device": {
+      "id": "01M4S8KJ48BSMNK1S4BEGT07FC",
+      "os": "linux",
+      "revoked_at": null
+    },
+    "grants": [
+      {
+        "jti": "approval:01M4SVNXC88217RE2V2HSTCXGS",
+        "iss": "01M4SM5QTRQKNQE1TD6FBJTG79",
+        "aud": "01M4S8KJ48BSMNK1S4BEGT07FC",
+        "exp": 1791912459,
+        "revoked_at": 1791902225
+      },
+      {
+        "jti": "approval:01M4SXBYW00A03JAPMA6ND3B5N",
+        "iss": "01M4SM5QTRQKNQE1TD6FBJTG79",
+        "aud": "01M4S8KJ48BSMNK1S4BEGT07FC",
+        "exp": 1791914229,
+        "revoked_at": 1791902225
+      },
+      {
+        "jti": "01M4TNJD387H1KZXETKHSYVGRK",
+        "iss": "01M4SM5QTRQKNQE1TD6FBJTG79",
+        "aud": "01M4S8KJ48BSMNK1S4BEGT07FC",
+        "exp": 1791900001,
+        "revoked_at": 1791902225
+      },
+      {
+        "jti": "01M4TV4S3G3V4JQJKS47GWPP8Y",
+        "iss": "01M4SM5QTRQKNQE1TD6FBJTG79",
+        "aud": "01M4S8KJ48BSMNK1S4BEGT07FC",
+        "exp": 1791905846,
+        "revoked_at": 1791902254
+      },
+      {
+        "jti": "01M4VJS388MBYCZG5PN1THWWX9",
+        "iss": "01M4SM5QTRQKNQE1TD6FBJTG79",
+        "aud": "01M4S8KJ48BSMNK1S4BEGT07FC",
+        "exp": 1791930629,
+        "revoked_at": 1791927054
+      }
+    ],
+    "approvals": [],
+    "events": [],
+    "active_phone_n": 0
+  },
+  "fixed_error": "remaining_desktop_not_present_before_request",
+  "finished_utc": "2026-10-14T00:54:04.035725+00:00"
+}

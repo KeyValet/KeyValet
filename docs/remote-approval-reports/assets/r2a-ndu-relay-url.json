@@ -1,0 +1,2 @@
+{"ok":true,"command":"relay_set_url","result":{"relay_url":"https://relay.keyvalet.dev","config":"/etc/keyvalet/relay-client.toml"}}
+

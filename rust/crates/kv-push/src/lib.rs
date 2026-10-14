@@ -1,7 +1,8 @@
 //! Metadata-only APNs/FCM dispatch. Approval bodies and envelopes are rejected.
 use axum::{
-    extract::{DefaultBodyLimit, State},
-    http::{HeaderMap, StatusCode},
+    extract::{DefaultBodyLimit, Request, State},
+    http::StatusCode,
+    middleware::{from_fn_with_state, Next},
     routing::post,
     Json, Router,
 };
@@ -286,10 +287,7 @@ async fn delivery_result(response: reqwest::Response, apns: bool) -> Result<(), 
     if matches!(status.as_u16(), 400 | 404 | 410) {
         let value = bounded_json(response).await?;
         let invalid = if apns {
-            matches!(
-                value["reason"].as_str(),
-                Some("BadDeviceToken" | "DeviceTokenNotForTopic" | "Unregistered")
-            )
+            status.as_u16() == 410 && value["reason"] == "Unregistered"
         } else {
             value["error"]["details"].as_array().is_some_and(|details| {
                 details.iter().any(|detail| {
@@ -322,21 +320,24 @@ pub fn router(dispatch: Dispatcher, bearer: String) -> Result<Router, Error> {
     if bearer.len() < 32 || bearer.len() > 256 || bearer.chars().any(char::is_control) {
         return Err(Error::Configuration);
     }
+    let state = Arc::new(Service {
+        dispatch,
+        bearer: Zeroizing::new(bearer),
+    });
     Ok(Router::new()
         .route("/v1/push", post(receive))
+        .route_layer(from_fn_with_state(state.clone(), authenticate))
         .layer(DefaultBodyLimit::max(8192))
-        .with_state(Arc::new(Service {
-            dispatch,
-            bearer: Zeroizing::new(bearer),
-        })))
+        .with_state(state))
 }
-async fn receive(
+async fn authenticate(
     State(state): State<Arc<Service>>,
-    headers: HeaderMap,
-    Json(request): Json<PushRequest>,
+    request: Request,
+    next: Next,
 ) -> axum::response::Response {
     use axum::response::IntoResponse;
-    let supplied = headers
+    let supplied = request
+        .headers()
         .get("authorization")
         .and_then(|v| v.to_str().ok())
         .and_then(|v| v.strip_prefix("Bearer "))
@@ -348,6 +349,13 @@ async fn receive(
     if supplied.len() != state.bearer.len() || mismatch != 0 {
         return StatusCode::UNAUTHORIZED.into_response();
     }
+    next.run(request).await
+}
+async fn receive(
+    State(state): State<Arc<Service>>,
+    Json(request): Json<PushRequest>,
+) -> axum::response::Response {
+    use axum::response::IntoResponse;
     let result = state.dispatch.send(&request).await;
     // Never print the request or provider body. Provider URLs contain full APNs tokens.
     // HTTP 410 is the authenticated synchronous callback to relay; its CAS cleanup

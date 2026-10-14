@@ -1,0 +1,13 @@
+{
+  "dispatched_utc": "2026-10-13T21:46:34.442612+00:00",
+  "window_id": 24246,
+  "tab_index": 1,
+  "terminal": "/dev/ttys008",
+  "command_dispatched": true,
+  "checklist": "在场信号脚本已准备好。接下来约 3–4 分钟你要做的事：\n1. 回复「开始在场」后，我打开 Mac Terminal；这段不发起 KeyValet 审批、不要求管理员密码。\n2. Terminal 提示准备好时按一次回车，系统会开启屏保；移动鼠标退出，并按系统提示正常解锁 Mac。\n3. 回到同一 Terminal 按回车，等待显示 ndu 看到的 Mac 在场状态。\n4. 按 Control+Command+Q 锁屏，等 10 秒后正常解锁，再回 Terminal 按回车。\n5. 如果 Terminal 显示已确认 present，再按同样步骤锁屏 10 秒并解锁，回 Terminal 按回车完成计时。\n脚本只观察真实 OS 通知和已安装程序的状态；若仍为 away，会停止并记录结果。现在开始吗？",
+  "user_start": "开始在场",
+  "keyvalet_touch_id_requests": 0,
+  "keyvalet_approval_requests": 0,
+  "observation_timeout_s": 300,
+  "secret_values_in_evidence": false
+}

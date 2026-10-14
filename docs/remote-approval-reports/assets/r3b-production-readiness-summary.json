@@ -1,0 +1,87 @@
+{
+  "production_signing_purchased": false,
+  "production_signature_verified": false,
+  "user_decision": "Do not buy paid code signing now; evaluate unsigned preview distribution",
+  "published": false,
+  "production_windows_public_workflow_passed": false,
+  "source_fingerprint": "fbf22e994313d82d246b96ccc8e480441f4c048b4ad715f8f8c5bd828f87bf0b",
+  "release_build_passed": true,
+  "preview_vm_installed": true,
+  "supported_cli_help_and_status_passed": true,
+  "windows_remote_approval_available": false,
+  "signing_validation_relaxed": false,
+  "metrics_expected_404_actual_401": true,
+  "provenance": [
+    {
+      "source": "production-release-ready.json",
+      "source_sha256": "a3b6c2c13cffd23a1b1dc7b7e80f56a8ad159a20d384ae7dcd9e863ecfae3c01",
+      "evidence": "r3b-production-production-release-ready.json",
+      "normalization": "UTF-8 JSON without BOM; field values retained"
+    },
+    {
+      "source": "production-release-verification.json",
+      "source_sha256": "633c4c6790e5c34d8b855db8591316d7d7b129e88815ecc83dc505e95abe2779",
+      "evidence": "r3b-production-production-release-verification.json",
+      "normalization": "UTF-8 JSON without BOM; field values retained"
+    },
+    {
+      "source": "unsigned-preview-package.json",
+      "source_sha256": "40fb39697f04f26abd96f5a9400b5fef4e29fc1bdff3506620c7a2b3eff56c3e",
+      "evidence": "r3b-production-unsigned-preview-package.json",
+      "normalization": "UTF-8 JSON without BOM; field values retained"
+    },
+    {
+      "source": "production-release-prepare.log",
+      "source_sha256": "14c5b9995aab3d9ca9acfdd423e4ab66ac99652c861bff902408b13f9e6e7727",
+      "evidence": "r3b-production-production-release-prepare.log",
+      "normalization": "utf-16 to UTF-8; text retained"
+    },
+    {
+      "source": "unsigned-preview-install.log",
+      "source_sha256": "7a43e1ae8e7b9c287913cf984e96f6094a7ebea4afe7896831a47bb3018e1ce8",
+      "evidence": "r3b-production-unsigned-preview-install.log",
+      "normalization": "utf-16 to UTF-8; text retained"
+    },
+    {
+      "source": "unsigned-preview-status.log",
+      "source_sha256": "cbdf4f55650afeba9bc945ed8f861c3f7fd6c828afe864a9766d3b4a9c5d530c",
+      "evidence": "r3b-production-unsigned-preview-status.log",
+      "normalization": "utf-8-sig to UTF-8; text retained"
+    },
+    {
+      "source": "unsigned-preview-help.log",
+      "source_sha256": "9c3f5c41ad63cb7d4677b62a47382f649e80388d30504db50e5f10ff1f8c9dd2",
+      "evidence": "r3b-production-unsigned-preview-help.log",
+      "normalization": "utf-8-sig to UTF-8; text retained; known ellipsis-only pairing-link usage placeholder replaced by pair-link; no live link was produced"
+    },
+    {
+      "source": "unsigned-preview-portable-status.log",
+      "source_sha256": "1b67fd4b7c4679dc2993769fca668695d7ea6e4c218efc641239274294800cd3",
+      "evidence": "r3b-production-unsigned-preview-portable-status.log",
+      "normalization": "utf-8-sig to UTF-8; text retained"
+    },
+    {
+      "source": "unsigned-preview-package-console.log",
+      "source_sha256": "d49ba547620891087082883669cce50fc1ddfc6319a22f5f37c4315dd591e846",
+      "evidence": "r3b-production-unsigned-preview-package-console.log",
+      "normalization": "utf-8-sig to UTF-8; text retained"
+    },
+    {
+      "source": "unsigned-preview-install-console.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "evidence": "r3b-production-unsigned-preview-install-console.log",
+      "normalization": "utf-8-sig to UTF-8; text retained"
+    }
+  ],
+  "local_archive_verified": true,
+  "physical_preview_download_verified": true,
+  "physical_machine_upgraded": false,
+  "physical_vault_unchanged": true,
+  "transfer_retries": {
+    "initial_scp_3": "connection closed; no physical file created",
+    "stdin_stream": "timed out; exact own PowerShell transfer process later stopped",
+    "final": "SCP from hash-verified local archive; physical hash matches"
+  },
+  "archive_receipt": "r3b-production-local-archive-verification.json",
+  "physical_download_receipt": "r3b-production-physical-preview-download.json"
+}

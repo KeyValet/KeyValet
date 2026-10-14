@@ -1,0 +1,31 @@
+{
+  "cli_exit": 0,
+  "native_report": {
+    "matched": 9,
+    "consistent": true,
+    "findings_count": 0,
+    "unavailable_count": 0,
+    "endpoints": [
+      {
+        "device_id": "01M4SM5QTRQKNQE1TD6FBJTG79",
+        "checkpoint": "vault_authenticated_metadata",
+        "head": {
+          "seq": 1828,
+          "hash": "901d07b2ed06a36095c3911aa0673309f78a2dd2a344e7bad14ac59e081735b7"
+        },
+        "entries": 1138
+      },
+      {
+        "device_id": "01M4S8KJ48BSMNK1S4BEGT07FC",
+        "checkpoint": "vault_authenticated_metadata",
+        "head": {
+          "seq": 1180,
+          "hash": "2f8370230883e8c9f6e3ffc4c6bb1ee80767b8e880bc68513aac112b2c9fa2da"
+        },
+        "entries": 497
+      }
+    ],
+    "two_endpoint_snapshots": true
+  },
+  "observed_utc": "2026-10-13T09:01:15.634711+00:00"
+}

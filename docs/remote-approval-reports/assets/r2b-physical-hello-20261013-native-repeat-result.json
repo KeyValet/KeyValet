@@ -1,0 +1,11 @@
+{
+  "elevated": false,
+  "seconds": 90.24043979999999,
+  "finished_utc": "2026-10-13T03:41:51.8129431Z",
+  "passed": false,
+  "started_utc": "2026-10-13T03:40:21.4077682Z",
+  "session_id": 13,
+  "test": "existing::hello::tests::hardware_roundtrip",
+  "uses_installed_worker": false,
+  "exit_code": 101
+}

@@ -14,6 +14,56 @@ pub struct Config {
 }
 
 impl Config {
+    #[cfg(any(windows, test))]
+    pub(crate) async fn load_with_presence_probe<F, P>(
+        path: &Path,
+        probe_path: &Path,
+        metadata: std::io::Result<()>,
+        probe: F,
+    ) -> Result<Option<Self>>
+    where
+        F: FnOnce() -> P,
+        P: std::future::Future<Output = Result<bool>>,
+    {
+        match metadata {
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(None),
+            Err(error) if error.kind() == std::io::ErrorKind::PermissionDenied => {
+                // The helper proves absence only for its fixed installed path.
+                if path != probe_path {
+                    return Err(Error::Config);
+                }
+                if probe().await? {
+                    Err(Error::Config)
+                } else {
+                    Ok(None)
+                }
+            }
+            Err(_) => Err(Error::Config),
+            Ok(()) => Self::load_optional(path),
+        }
+    }
+
+    pub(crate) async fn load_for_service(
+        path: &Path,
+        helper: &crate::helper::Helper,
+    ) -> Result<Option<Self>> {
+        #[cfg(windows)]
+        {
+            Self::load_with_presence_probe(
+                path,
+                Path::new(kv_platform::paths::RELAY_CONFIG),
+                std::fs::metadata(path).map(|_| ()),
+                || helper.config_exists(),
+            )
+            .await
+        }
+        #[cfg(not(windows))]
+        {
+            let _ = helper;
+            Self::load_optional(path)
+        }
+    }
+
     pub fn load_optional(path: &Path) -> Result<Option<Self>> {
         match std::fs::metadata(path) {
             Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(None),

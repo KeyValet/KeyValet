@@ -75,7 +75,11 @@ impl KeyTransport for AgentTransport {
                     .await
                     .map_err(|_| DeviceKeyError::Unavailable)?;
                 if header["ok"] != true {
-                    return Err(DeviceKeyError::OperationFailed);
+                    return Err(match header["error"].as_str() {
+                        Some("key_operation_cancelled") => DeviceKeyError::OperationCancelled,
+                        Some("key_authentication_failed") => DeviceKeyError::AuthenticationFailed,
+                        _ => DeviceKeyError::OperationFailed,
+                    });
                 }
                 let (bytes, len) = payload.ok_or(DeviceKeyError::OperationFailed)?;
                 Ok(Zeroizing::new(bytes[..len].to_vec()))
@@ -570,6 +574,42 @@ mod tests {
             transport().exchange(json!({"op":"device_key"})),
             Err(DeviceKeyError::Unavailable)
         );
+    }
+
+    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+    async fn r3a_se_failure_keeps_typed_facts_from_the_private_agent() {
+        use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
+        for (code, expected) in [
+            ("key_operation_cancelled", "key_operation_cancelled"),
+            ("key_authentication_failed", "key_authentication_failed"),
+            ("cancelled from arbitrary prose", "key_operation_failed"),
+            ("denied", "key_operation_failed"),
+        ] {
+            let transport = transport();
+            let (stream, peer) = tokio::io::duplex(1024);
+            #[allow(clippy::clone_on_copy)]
+            transport
+                .hub
+                .register(transport.owner.clone(), stream, "signed");
+            let agent = tokio::spawn(async move {
+                let mut peer = BufReader::new(peer);
+                let mut line = String::new();
+                peer.read_line(&mut line).await.unwrap();
+                let request: Value = serde_json::from_str(&line).unwrap();
+                peer.get_mut()
+                    .write_all(&kv_ipc::agent::encode_line(
+                        &json!({"id":request["id"],"ok":false,"error":code}),
+                    ))
+                    .await
+                    .unwrap();
+            });
+            let Err(error) = transport.exchange(json!({"op":"device_key","operation":"sign"}))
+            else {
+                panic!("failed agent replies must never return signature material");
+            };
+            assert_eq!(error.to_string(), expected);
+            agent.await.unwrap();
+        }
     }
 
     #[tokio::test(flavor = "multi_thread", worker_threads = 2)]

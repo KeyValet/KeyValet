@@ -1,0 +1,271 @@
+{
+  "date": "2026-10-13",
+  "provenance": "Actual Windows result/log files retrieved after charging; evidence manifests record original hashes and UTF-8 normalization. Native acceptance findings are distinct from installed application acceptance.",
+  "host": "192.168.1.182",
+  "machine": {
+    "manufacturer": "LENOVO",
+    "model": "21LD",
+    "os": "Microsoft Windows 11 家庭版 中文版",
+    "build": 26200,
+    "architecture": "x64",
+    "owner": "春有约花不误\\11516",
+    "owner_sid": "S-1-5-21-3389053113-2113560702-4064643913-1001",
+    "desktop_session": 13,
+    "tpm_present": true,
+    "tpm_ready": true,
+    "tpm_enabled": true,
+    "tpm_activated": true,
+    "tpm_manufacturer": "INTC",
+    "tpm_manufacturer_version": "700.19.5.2028"
+  },
+  "backup": "C:\\ProgramData\\KeyValet-Backups\\pre-install-20261013T031715Z",
+  "work": "C:\\Users\\11516\\KeyValet-Test-20261013",
+  "existing_installation": false,
+  "existing_vault": false,
+  "existing_managed_client_configs": false,
+  "installation": {
+    "version": "0.3.0",
+    "unsigned_development": true,
+    "package_sha256": "755ab56a79a4246ccd27ce541e9dc35a382a41573b195028d83e2acf04c145f0",
+    "started_utc": "2026-10-13T03:19:21.7804082Z",
+    "finished_utc": "2026-10-13T03:19:54.3052132Z",
+    "owner_desktop_session": 13,
+    "initial_elevated": false,
+    "setup_skipped": true,
+    "passed": true,
+    "helper": {
+      "account": "LocalSystem",
+      "start_mode": "Auto",
+      "state": "Running",
+      "pid": 19864
+    },
+    "relay": {
+      "account": "NT SERVICE\\KeyValetRelay",
+      "start_mode": "Manual",
+      "state": "Stopped"
+    },
+    "last_observed_provider": "uninitialized",
+    "last_observed_pcp_ecdh": false,
+    "last_observed_pcp_ecdsa": false
+  },
+  "hello_availability": {
+    "started_utc": "2026-10-13T03:17:35.2355152Z",
+    "finished_utc": "2026-10-13T03:17:35.5329067Z",
+    "supported": true,
+    "session_id": 13,
+    "elevated": false
+  },
+  "native_test_binary": {
+    "sha256": "297c1662b31fd696da5b970a9f4cc2f995f1a3c9a6d6258559a87221366eb4be",
+    "source_fingerprint": "df4d03aed184a45ba76b546049ab73fa04639f562287a155bb0155fae2d75aaf",
+    "size": 2947584,
+    "uses_installed_worker": false
+  },
+  "strong_creation_and_sign": {
+    "test": "existing::hello::remote_key::tests::remote_hello_roundtrip",
+    "started_utc": "2026-10-13T03:26:37.3533127Z",
+    "finished_utc": "2026-10-13T03:28:25.3544341Z",
+    "elapsed_seconds": 107.5917828,
+    "exit_code": 0,
+    "passed": true,
+    "algorithm": "RS256",
+    "signature_bytes": 256,
+    "payload": "KeyValet remote approval test",
+    "rsa_2048_and_signature_verified_by_production_hello_crypto": true,
+    "test_key_cleanup": "Existing native test invokes DeleteAsync in its cleanup guard; deletion status was not recorded",
+    "includes_human_interaction": true
+  },
+  "vault_roundtrip": {
+    "test": "existing::hello::tests::hardware_roundtrip",
+    "attempts": [
+      {
+        "started_utc": "2026-10-13T03:32:24.0071231Z",
+        "finished_utc": "2026-10-13T03:33:54.4783740Z",
+        "elapsed_seconds": 90.3305712,
+        "exit_code": 101,
+        "passed": false
+      },
+      {
+        "started_utc": "2026-10-13T03:40:21.4077682Z",
+        "finished_utc": "2026-10-13T03:41:51.8129431Z",
+        "elapsed_seconds": 90.2404398,
+        "exit_code": 101,
+        "passed": false
+      }
+    ],
+    "error": "Windows Hello failed: Windows Hello timed out (0x800705B4); no file-key fallback",
+    "failure_location": "kv-agent/src/hello.rs:249, create(&Budget::new()).unwrap()",
+    "failure_stage_within_create": "not yet isolated",
+    "repeat_signature_comparison_reached": false
+  },
+  "creation_cancellation": {
+    "started_utc": "2026-10-13T03:48:36.9835223Z",
+    "finished_utc": "2026-10-13T03:48:43.0139790Z",
+    "elapsed_seconds": 5.6623933,
+    "native_test_exit_code": 101,
+    "expected_negative_result": true,
+    "denied": true,
+    "failure_location": "kv-agent/src/hello/remote_key.rs:186, create(&Budget::new()).unwrap()",
+    "error": "OperationFailed",
+    "user_confirmed_cancel": true,
+    "signing_cancellation_tested": false
+  },
+  "installed_worker": {
+    "passed": false,
+    "exit_status": "0xc0000142",
+    "observed_exit_codes": [
+      0,
+      -1073741502,
+      -1073741502,
+      -1073741502
+    ],
+    "production_security_changed": false
+  },
+  "startup_controls": {
+    "application": "Windows cmd.exe /d /c exit 0",
+    "account_context": "SYSTEM creates a child in the owner's unelevated desktop token",
+    "same_process_token_descriptors_and_mitigations_as_current_launcher": true,
+    "job_list_attribute_in_control": false,
+    "restricted_default_dacl": "0x00120000 plus OWNER RIGHTS ReadControl",
+    "restricted_default_exit_status": "0xc0000142",
+    "initial_thread_query_control_exit_status": "0xc0000142",
+    "default_thread_query_control_exit_status": "0xc0000142",
+    "additional_default_masks": [
+      {
+        "mask": "0x00120004",
+        "exit_status": "0xc0000142"
+      },
+      {
+        "mask": "0x00120040",
+        "exit_status": "0xc0000142"
+      },
+      {
+        "mask": "0x00120044",
+        "exit_status": "0xc0000142"
+      },
+      {
+        "mask": "0x00120844",
+        "exit_status": "0xc0000142"
+      }
+    ],
+    "owner_full_access_control_exit_status": "0x00000000",
+    "owner_full_access_applied_to_keyvalet": false,
+    "diagnostic_psexec_publisher": "Microsoft Corporation, Authenticode Valid",
+    "diagnostic_service_removed": true
+  },
+  "unfinished": [
+    "Protected installed worker startup repair without weakening process/thread/token protection (P01; kv-platform/src/agent_process.rs is outside original R2-B ownership)",
+    "Final installed binary Hello setup/unlock, signing cancellation and actual Strong approval decision require another owner desktop session",
+    "Earlier intermittent vault create timeout cause remains unproven; later native roundtrip passed"
+  ],
+  "interruption": "Battery interruption resolved. User ended further interactive testing to sleep; logs and cleanup were completed and no further interactive task was scheduled.",
+  "resumed_after_charge": {
+    "vault_roundtrip": {
+      "native_harness_passed": true,
+      "native_harness_seconds": 23.67,
+      "wrapper_seconds": 25.0179039,
+      "wrapper_exit_code": null,
+      "wrapper_passed": false,
+      "wrapper_issue": "First Start-Process harness lost ExitCode; native stdout independently records 1 passed / 0 failed. Result fields preserved.",
+      "evidence": "r2b-physical-hello-20261013-diagnostic-vault.stdout.log",
+      "two_derived_keys_equal": true,
+      "attestation_api_completed_ms": 2353,
+      "attestation_status_not_recorded": true
+    },
+    "strong_repeat": {
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 28.2782662,
+      "signatures_verified": 2,
+      "signature_bytes": 256,
+      "same_key": true,
+      "request_sign_wait_ms": [
+        8437,
+        10630
+      ],
+      "user_reported_prompt_count": 2,
+      "deletion_verified": true,
+      "evidence": "r2b-physical-hello-20261013-diagnostic-repeat-result.json"
+    },
+    "sign_cancellation_before_callback": {
+      "passed": false,
+      "harness_exit_code": 0,
+      "wrapper_passed": false,
+      "reason": "RequestSignAsync remained pending for 90047 ms after the user reported cancellation; timed out and denied; no UserCanceled result observed. Harness only asserted a generic error, so wrapper correctly rejected it as cancellation acceptance.",
+      "key_deletion_verified": true,
+      "evidence": "r2b-physical-hello-20261013-diagnostic-cancel-result.json"
+    },
+    "sign_cancellation_callback_comparison": {
+      "passed": true,
+      "exit_code": 0,
+      "signature_request_wait_ms": 7861,
+      "status": "KeyCredentialStatus::UserCanceled (3)",
+      "includes_human_interaction": true,
+      "key_deletion_verified": true,
+      "user_confirmed_cancel": true,
+      "test_binary_sha256": "187a6ba395a039cc840ed42789fc4f19b4738b57788d2d2bced9163f329fecd5",
+      "final_installed_worker_tested": false,
+      "evidence": "r2b-physical-hello-20261013-diagnostic-callback-result.json"
+    },
+    "installed_worker_recheck": {
+      "passed": false,
+      "launcher_exit_code": 0,
+      "workers": [
+        {
+          "pid": 6520,
+          "exit_code": -1073741502
+        },
+        {
+          "pid": 16592,
+          "exit_code": -1073741502
+        }
+      ],
+      "production_permissions_changed": false
+    },
+    "cleanup": {
+      "finished_utc": "2026-10-13T06:17:18.5352834Z",
+      "remaining_temporary_tasks": 0,
+      "diagnostic_service_remaining": false,
+      "formal_agent_task_preserved": true,
+      "backups_preserved": true,
+      "master_key_present": false,
+      "vault_present": false,
+      "evidence": "r2b-physical-hello-20261013-cleanup-after-resume-result.json"
+    },
+    "production_source_fix": {
+      "files": [
+        "rust/crates/kv-agent/src/hello.rs",
+        "rust/crates/kv-agent/src/hello/async_wait.rs",
+        "rust/crates/kv-agent/src/hello_logic.rs"
+      ],
+      "description": "Register typed WinRT completion handlers before bounded polling; deny and cancel on subscription failure; include subscription time in the original cap. Portable fake OS regressions cover completion, denial and timeouts.",
+      "new_dependencies": false,
+      "budget_changed": false,
+      "signature_validation_changed": false,
+      "installed_binaries_updated": false
+    }
+  },
+  "automatic_checks": {
+    "mac": {
+      "four_commands_passed": true,
+      "rust": "1.99.0",
+      "test_passed": 1357,
+      "test_failed": 0,
+      "test_ignored": 10,
+      "evidence": "r2b-physical-hello-20261013-mac-ci-result.json"
+    },
+    "windows": {
+      "four_commands_passed": false,
+      "clippy_blocker": "kv-cli/src/remote/transport.rs:29 unavailable_at is unused on Windows production targets; outside original R2-B ownership",
+      "remaining_commands": "Completed; build and test passed",
+      "change_request_patch": "r2b-physical-hello-20261013-cli-cfg-request.patch",
+      "test_counts": {
+        "passed": 1102,
+        "failed": 0,
+        "ignored": 25
+      },
+      "evidence": "r2b-physical-hello-20261013-windows-ci-result.json",
+      "unapplied_cli_candidate_clippy_passed": true
+    }
+  }
+}

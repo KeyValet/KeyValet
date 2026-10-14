@@ -1,0 +1,61 @@
+{
+  "backup": "/var/backups/keyvalet-r3a-process-proof-20261013T041934Z",
+  "receipt_recovered_after_installed_readback": true,
+  "first_driver_exit": 1,
+  "runtime_config_changed": false,
+  "vault_changed": false,
+  "new_capabilities": false,
+  "services": {
+    "keyvalet.service": {
+      "MainPID": "638203",
+      "CapabilityBoundingSet": "",
+      "AmbientCapabilities": "",
+      "User": "keyvalet",
+      "ActiveState": "active"
+    },
+    "keyvalet-peer.service": {
+      "MainPID": "638200",
+      "CapabilityBoundingSet": "cap_sys_ptrace",
+      "AmbientCapabilities": "cap_sys_ptrace",
+      "User": "root",
+      "ActiveState": "active"
+    },
+    "keyvalet-relay.service": {
+      "MainPID": "638204",
+      "CapabilityBoundingSet": "",
+      "AmbientCapabilities": "",
+      "User": "keyvalet-relay",
+      "ActiveState": "active"
+    }
+  },
+  "owner_ipc_samples": [
+    {
+      "exit": 0,
+      "elapsed_s": 0.002005
+    },
+    {
+      "exit": 0,
+      "elapsed_s": 0.001947
+    },
+    {
+      "exit": 0,
+      "elapsed_s": 0.002303
+    },
+    {
+      "exit": 0,
+      "elapsed_s": 0.002461
+    },
+    {
+      "exit": 0,
+      "elapsed_s": 0.00276
+    }
+  ],
+  "installed_sha256": "72e5616ba8c52f3522437aaf08a53a43d57a2f37c180a805be5a553f5f7772b6",
+  "built_sha256": "72e5616ba8c52f3522437aaf08a53a43d57a2f37c180a805be5a553f5f7772b6",
+  "old_sha256": "208c7e77bf8398aa170ea161c0bc50c5aed002e756d9d7c59cbd334da90a9231",
+  "device_ids": [
+    "01M4S8KJ48BSMNK1S4BEGT07FC",
+    "01M4SM5QTRQKNQE1TD6FBJTG79"
+  ],
+  "observed_utc": "2026-10-13T04:20:28.239269+00:00"
+}

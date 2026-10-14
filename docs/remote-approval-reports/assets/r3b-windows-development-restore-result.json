@@ -1,0 +1,14 @@
+{
+    "vault_present":  false,
+    "archive_sha256":  "5d02bf3b726a6396bdc474ca64f35cb5fed773b0ac8124df979ff9aa24145e63",
+    "relay_signature":  "NotSigned",
+    "vault_dacl_preserved":  true,
+    "relay_start":  "Manual",
+    "relay_status":  "Stopped",
+    "utc":  "2026-10-13T15:16:37.8373555Z",
+    "passed":  true,
+    "helper_status":  "Running",
+    "source_fingerprint":  "11d76b93748a10dcabc2923caf3de7b82a68e489ea7b61d6d295ed398bb7ba8d",
+    "backup_preserved":  true,
+    "master_key_present":  false
+}
